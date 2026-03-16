@@ -126,10 +126,9 @@ private:
 
         boost::asio::async_connect(
              m_ws.next_layer().next_layer()
-            ,res.begin()
-            ,res.end()
+            ,res
             ,[this, cb=std::move(cb), holder=std::move(holder)]
-             (boost::system::error_code ec, boost::asio::ip::tcp::resolver::iterator) mutable {
+             (boost::system::error_code ec, const boost::asio::ip::tcp::endpoint&) mutable {
                 if ( ec ) {
                     if ( !m_stop_requested ) { __BINAPI_CB_ON_ERROR(cb, ec); }
                 } else {

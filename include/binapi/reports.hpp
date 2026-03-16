@@ -12,6 +12,7 @@
 #ifndef __binapi__reports_hpp
 #define __binapi__reports_hpp
 
+#include <cstdint>
 #include <iosfwd>
 #include <string>
 #include <vector>
