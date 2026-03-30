@@ -171,6 +171,28 @@ struct mark_price {
     std::uint64_t time{};
 };
 
+struct funding_rate_history_request {
+    std::optional<std::string> symbol{};
+    std::optional<std::uint64_t> startTime{};
+    std::optional<std::uint64_t> endTime{};
+    std::optional<int> limit{};
+};
+
+struct funding_rate_history_entry {
+    std::string symbol{};
+    std::string fundingRate{};
+    std::uint64_t fundingTime{};
+    std::string markPrice{};
+};
+
+struct funding_rate_info {
+    std::string symbol{};
+    std::string adjustedFundingRateCap{};
+    std::string adjustedFundingRateFloor{};
+    int fundingIntervalHours{};
+    bool disclaimer{};
+};
+
 struct open_interest_request {
     std::string symbol{};
 };
@@ -300,6 +322,29 @@ struct glz::meta<binapi2::umf::types::mark_price> {
         "lastFundingRate", &T::lastFundingRate,
         "nextFundingTime", &T::nextFundingTime,
         "time", &T::time
+    );
+};
+
+template <>
+struct glz::meta<binapi2::umf::types::funding_rate_history_entry> {
+    using T = binapi2::umf::types::funding_rate_history_entry;
+    static constexpr auto value = object(
+        "symbol", &T::symbol,
+        "fundingRate", &T::fundingRate,
+        "fundingTime", &T::fundingTime,
+        "markPrice", &T::markPrice
+    );
+};
+
+template <>
+struct glz::meta<binapi2::umf::types::funding_rate_info> {
+    using T = binapi2::umf::types::funding_rate_info;
+    static constexpr auto value = object(
+        "symbol", &T::symbol,
+        "adjustedFundingRateCap", &T::adjustedFundingRateCap,
+        "adjustedFundingRateFloor", &T::adjustedFundingRateFloor,
+        "fundingIntervalHours", &T::fundingIntervalHours,
+        "disclaimer", &T::disclaimer
     );
 };
 

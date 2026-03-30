@@ -93,6 +93,8 @@ template result<types::ticker_24hr> client::execute<types::ticker_24hr>(boost::b
 template result<std::vector<types::ticker_24hr>> client::execute<std::vector<types::ticker_24hr>>(boost::beast::http::verb, const std::string &, const query_map &, bool);
 template result<types::mark_price> client::execute<types::mark_price>(boost::beast::http::verb, const std::string &, const query_map &, bool);
 template result<std::vector<types::mark_price>> client::execute<std::vector<types::mark_price>>(boost::beast::http::verb, const std::string &, const query_map &, bool);
+template result<std::vector<types::funding_rate_history_entry>> client::execute<std::vector<types::funding_rate_history_entry>>(boost::beast::http::verb, const std::string &, const query_map &, bool);
+template result<std::vector<types::funding_rate_info>> client::execute<std::vector<types::funding_rate_info>>(boost::beast::http::verb, const std::string &, const query_map &, bool);
 template result<types::open_interest> client::execute<types::open_interest>(boost::beast::http::verb, const std::string &, const query_map &, bool);
 template result<types::account_information> client::execute<types::account_information>(boost::beast::http::verb, const std::string &, const query_map &, bool);
 template result<std::vector<types::futures_account_balance>> client::execute<std::vector<types::futures_account_balance>>(boost::beast::http::verb, const std::string &, const query_map &, bool);

@@ -33,6 +33,8 @@ inline constexpr endpoint_metadata book_ticker_endpoint{"book_ticker", boost::be
 inline constexpr endpoint_metadata price_ticker_endpoint{"price_ticker", boost::beast::http::verb::get, "/fapi/v1/ticker/price", types::security_type::none, false, false, false};
 inline constexpr endpoint_metadata ticker_24hr_endpoint{"ticker_24hr", boost::beast::http::verb::get, "/fapi/v1/ticker/24hr", types::security_type::none, false, false, false};
 inline constexpr endpoint_metadata mark_price_endpoint{"mark_price", boost::beast::http::verb::get, "/fapi/v1/premiumIndex", types::security_type::none, false, false, false};
+inline constexpr endpoint_metadata funding_rate_history_endpoint{"funding_rate_history", boost::beast::http::verb::get, "/fapi/v1/fundingRate", types::security_type::none, false, false, false};
+inline constexpr endpoint_metadata funding_rate_info_endpoint{"funding_rate_info", boost::beast::http::verb::get, "/fapi/v1/fundingInfo", types::security_type::none, false, false, false};
 inline constexpr endpoint_metadata open_interest_endpoint{"open_interest", boost::beast::http::verb::get, "/fapi/v1/openInterest", types::security_type::none, false, false, false};
 inline constexpr endpoint_metadata historical_trades_endpoint{"historical_trades", boost::beast::http::verb::get, "/fapi/v1/historicalTrades", types::security_type::market_data, false, false, false};
 inline constexpr endpoint_metadata account_information_endpoint{"account_information", boost::beast::http::verb::get, "/fapi/v3/account", types::security_type::user_data, true, true, true};

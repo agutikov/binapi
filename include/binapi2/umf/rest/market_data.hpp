@@ -34,6 +34,8 @@ class market_data_service {
     [[nodiscard]] result<std::vector<types::ticker_24hr>> ticker_24hrs();
     [[nodiscard]] result<types::mark_price> mark_price(const types::mark_price_request &request);
     [[nodiscard]] result<std::vector<types::mark_price>> mark_prices();
+    [[nodiscard]] result<std::vector<types::funding_rate_history_entry>> funding_rate_history(const types::funding_rate_history_request &request = {});
+    [[nodiscard]] result<std::vector<types::funding_rate_info>> funding_rate_info();
     [[nodiscard]] result<types::open_interest> open_interest(const types::open_interest_request &request);
     [[nodiscard]] result<std::vector<types::recent_trade>> historical_trades(const types::historical_trades_request &request);
 

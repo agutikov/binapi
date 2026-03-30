@@ -205,6 +205,29 @@ result<std::vector<types::mark_price>> market_data_service::mark_prices() {
     return owner_.execute<std::vector<types::mark_price>>(mark_price_endpoint.method, std::string{mark_price_endpoint.path}, {}, mark_price_endpoint.signed_request);
 }
 
+result<std::vector<types::funding_rate_history_entry>> market_data_service::funding_rate_history(const types::funding_rate_history_request &request) {
+    query_map query;
+    if (request.symbol) {
+        query["symbol"] = *request.symbol;
+    }
+    if (request.startTime) {
+        query["startTime"] = std::to_string(*request.startTime);
+    }
+    if (request.endTime) {
+        query["endTime"] = std::to_string(*request.endTime);
+    }
+    if (request.limit) {
+        query["limit"] = std::to_string(*request.limit);
+    }
+    return owner_.execute<std::vector<types::funding_rate_history_entry>>(
+        funding_rate_history_endpoint.method, std::string{funding_rate_history_endpoint.path}, query, funding_rate_history_endpoint.signed_request);
+}
+
+result<std::vector<types::funding_rate_info>> market_data_service::funding_rate_info() {
+    return owner_.execute<std::vector<types::funding_rate_info>>(
+        funding_rate_info_endpoint.method, std::string{funding_rate_info_endpoint.path}, {}, funding_rate_info_endpoint.signed_request);
+}
+
 result<types::open_interest> market_data_service::open_interest(const types::open_interest_request &request) {
     return owner_.execute<types::open_interest>(
         open_interest_endpoint.method, std::string{open_interest_endpoint.path}, {{"symbol", request.symbol}}, open_interest_endpoint.signed_request);
