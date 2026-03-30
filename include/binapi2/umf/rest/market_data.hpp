@@ -1,0 +1,37 @@
+#pragma once
+
+#include <binapi2/umf/result.hpp>
+#include <binapi2/umf/types/market_data.hpp>
+
+#include <vector>
+
+namespace binapi2::umf {
+class client;
+}
+
+namespace binapi2::umf::rest {
+
+class market_data_service {
+  public:
+    explicit market_data_service(client &owner) noexcept;
+
+    [[nodiscard]] result<types::empty_response> ping();
+    [[nodiscard]] result<types::server_time_response> server_time();
+    [[nodiscard]] result<types::exchange_info_response> exchange_info(const types::exchange_info_request &request = {});
+    [[nodiscard]] result<types::order_book_response> order_book(const types::order_book_request &request);
+    [[nodiscard]] result<std::vector<types::recent_trade>> recent_trades(const types::recent_trades_request &request);
+    [[nodiscard]] result<types::book_ticker> book_ticker(const types::book_ticker_request &request);
+    [[nodiscard]] result<std::vector<types::book_ticker>> book_tickers();
+    [[nodiscard]] result<types::price_ticker> price_ticker(const types::price_ticker_request &request);
+    [[nodiscard]] result<std::vector<types::price_ticker>> price_tickers();
+    [[nodiscard]] result<types::ticker_24hr> ticker_24hr(const types::ticker_24hr_request &request);
+    [[nodiscard]] result<std::vector<types::ticker_24hr>> ticker_24hrs();
+    [[nodiscard]] result<types::mark_price> mark_price(const types::mark_price_request &request);
+    [[nodiscard]] result<std::vector<types::mark_price>> mark_prices();
+    [[nodiscard]] result<types::open_interest> open_interest(const types::open_interest_request &request);
+
+  private:
+    client &owner_;
+};
+
+} // namespace binapi2::umf::rest
