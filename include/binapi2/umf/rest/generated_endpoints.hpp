@@ -36,6 +36,11 @@ inline constexpr endpoint_metadata mark_price_endpoint{"mark_price", boost::beas
 inline constexpr endpoint_metadata funding_rate_history_endpoint{"funding_rate_history", boost::beast::http::verb::get, "/fapi/v1/fundingRate", types::security_type::none, false, false, false};
 inline constexpr endpoint_metadata funding_rate_info_endpoint{"funding_rate_info", boost::beast::http::verb::get, "/fapi/v1/fundingInfo", types::security_type::none, false, false, false};
 inline constexpr endpoint_metadata open_interest_endpoint{"open_interest", boost::beast::http::verb::get, "/fapi/v1/openInterest", types::security_type::none, false, false, false};
+inline constexpr endpoint_metadata open_interest_statistics_endpoint{"open_interest_statistics", boost::beast::http::verb::get, "/futures/data/openInterestHist", types::security_type::none, false, false, false};
+inline constexpr endpoint_metadata top_long_short_account_ratio_endpoint{"top_long_short_account_ratio", boost::beast::http::verb::get, "/futures/data/topLongShortAccountRatio", types::security_type::none, false, false, false};
+inline constexpr endpoint_metadata top_trader_long_short_ratio_endpoint{"top_trader_long_short_ratio", boost::beast::http::verb::get, "/futures/data/topLongShortPositionRatio", types::security_type::none, false, false, false};
+inline constexpr endpoint_metadata long_short_ratio_endpoint{"long_short_ratio", boost::beast::http::verb::get, "/futures/data/globalLongShortAccountRatio", types::security_type::none, false, false, false};
+inline constexpr endpoint_metadata taker_buy_sell_volume_endpoint{"taker_buy_sell_volume", boost::beast::http::verb::get, "/futures/data/takerlongshortRatio", types::security_type::none, false, false, false};
 inline constexpr endpoint_metadata historical_trades_endpoint{"historical_trades", boost::beast::http::verb::get, "/fapi/v1/historicalTrades", types::security_type::market_data, false, false, false};
 inline constexpr endpoint_metadata account_information_endpoint{"account_information", boost::beast::http::verb::get, "/fapi/v3/account", types::security_type::user_data, true, true, true};
 inline constexpr endpoint_metadata account_balances_endpoint{"account_balances", boost::beast::http::verb::get, "/fapi/v3/balance", types::security_type::user_data, true, true, true};

@@ -8,6 +8,24 @@
 
 namespace binapi2::umf::rest {
 
+namespace {
+
+query_map make_futures_data_query(const types::futures_data_request &request) {
+    query_map query{{"symbol", request.symbol}, {"period", to_string(request.period)}};
+    if (request.limit) {
+        query["limit"] = std::to_string(*request.limit);
+    }
+    if (request.startTime) {
+        query["startTime"] = std::to_string(*request.startTime);
+    }
+    if (request.endTime) {
+        query["endTime"] = std::to_string(*request.endTime);
+    }
+    return query;
+}
+
+} // namespace
+
 account_service::account_service(binapi2::umf::client &owner) noexcept
     : owner_(owner) {}
 
@@ -231,6 +249,46 @@ result<std::vector<types::funding_rate_info>> market_data_service::funding_rate_
 result<types::open_interest> market_data_service::open_interest(const types::open_interest_request &request) {
     return owner_.execute<types::open_interest>(
         open_interest_endpoint.method, std::string{open_interest_endpoint.path}, {{"symbol", request.symbol}}, open_interest_endpoint.signed_request);
+}
+
+result<std::vector<types::open_interest_statistics_entry>> market_data_service::open_interest_statistics(const types::futures_data_request &request) {
+    return owner_.execute<std::vector<types::open_interest_statistics_entry>>(
+        open_interest_statistics_endpoint.method,
+        std::string{open_interest_statistics_endpoint.path},
+        make_futures_data_query(request),
+        open_interest_statistics_endpoint.signed_request);
+}
+
+result<std::vector<types::long_short_ratio_entry>> market_data_service::top_long_short_account_ratio(const types::futures_data_request &request) {
+    return owner_.execute<std::vector<types::long_short_ratio_entry>>(
+        top_long_short_account_ratio_endpoint.method,
+        std::string{top_long_short_account_ratio_endpoint.path},
+        make_futures_data_query(request),
+        top_long_short_account_ratio_endpoint.signed_request);
+}
+
+result<std::vector<types::long_short_ratio_entry>> market_data_service::top_trader_long_short_ratio(const types::futures_data_request &request) {
+    return owner_.execute<std::vector<types::long_short_ratio_entry>>(
+        top_trader_long_short_ratio_endpoint.method,
+        std::string{top_trader_long_short_ratio_endpoint.path},
+        make_futures_data_query(request),
+        top_trader_long_short_ratio_endpoint.signed_request);
+}
+
+result<std::vector<types::long_short_ratio_entry>> market_data_service::long_short_ratio(const types::futures_data_request &request) {
+    return owner_.execute<std::vector<types::long_short_ratio_entry>>(
+        long_short_ratio_endpoint.method,
+        std::string{long_short_ratio_endpoint.path},
+        make_futures_data_query(request),
+        long_short_ratio_endpoint.signed_request);
+}
+
+result<std::vector<types::taker_buy_sell_volume_entry>> market_data_service::taker_buy_sell_volume(const types::futures_data_request &request) {
+    return owner_.execute<std::vector<types::taker_buy_sell_volume_entry>>(
+        taker_buy_sell_volume_endpoint.method,
+        std::string{taker_buy_sell_volume_endpoint.path},
+        make_futures_data_query(request),
+        taker_buy_sell_volume_endpoint.signed_request);
 }
 
 result<std::vector<types::recent_trade>> market_data_service::historical_trades(const types::historical_trades_request &request) {

@@ -203,6 +203,37 @@ struct open_interest {
     std::uint64_t time{};
 };
 
+struct futures_data_request {
+    std::string symbol{};
+    futures_data_period period{futures_data_period::m5};
+    std::optional<int> limit{};
+    std::optional<std::uint64_t> startTime{};
+    std::optional<std::uint64_t> endTime{};
+};
+
+struct open_interest_statistics_entry {
+    std::string symbol{};
+    std::string sumOpenInterest{};
+    std::string sumOpenInterestValue{};
+    std::string CMCCirculatingSupply{};
+    std::uint64_t timestamp{};
+};
+
+struct long_short_ratio_entry {
+    std::string symbol{};
+    std::string longShortRatio{};
+    std::string longAccount{};
+    std::string shortAccount{};
+    std::uint64_t timestamp{};
+};
+
+struct taker_buy_sell_volume_entry {
+    std::string buySellRatio{};
+    std::string buyVol{};
+    std::string sellVol{};
+    std::uint64_t timestamp{};
+};
+
 } // namespace binapi2::umf::types
 
 template <>
@@ -355,5 +386,40 @@ struct glz::meta<binapi2::umf::types::open_interest> {
         "openInterest", &T::openInterest,
         "symbol", &T::symbol,
         "time", &T::time
+    );
+};
+
+template <>
+struct glz::meta<binapi2::umf::types::open_interest_statistics_entry> {
+    using T = binapi2::umf::types::open_interest_statistics_entry;
+    static constexpr auto value = object(
+        "symbol", &T::symbol,
+        "sumOpenInterest", &T::sumOpenInterest,
+        "sumOpenInterestValue", &T::sumOpenInterestValue,
+        "CMCCirculatingSupply", &T::CMCCirculatingSupply,
+        "timestamp", &T::timestamp
+    );
+};
+
+template <>
+struct glz::meta<binapi2::umf::types::long_short_ratio_entry> {
+    using T = binapi2::umf::types::long_short_ratio_entry;
+    static constexpr auto value = object(
+        "symbol", &T::symbol,
+        "longShortRatio", &T::longShortRatio,
+        "longAccount", &T::longAccount,
+        "shortAccount", &T::shortAccount,
+        "timestamp", &T::timestamp
+    );
+};
+
+template <>
+struct glz::meta<binapi2::umf::types::taker_buy_sell_volume_entry> {
+    using T = binapi2::umf::types::taker_buy_sell_volume_entry;
+    static constexpr auto value = object(
+        "buySellRatio", &T::buySellRatio,
+        "buyVol", &T::buyVol,
+        "sellVol", &T::sellVol,
+        "timestamp", &T::timestamp
     );
 };

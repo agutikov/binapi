@@ -37,6 +37,11 @@ class market_data_service {
     [[nodiscard]] result<std::vector<types::funding_rate_history_entry>> funding_rate_history(const types::funding_rate_history_request &request = {});
     [[nodiscard]] result<std::vector<types::funding_rate_info>> funding_rate_info();
     [[nodiscard]] result<types::open_interest> open_interest(const types::open_interest_request &request);
+    [[nodiscard]] result<std::vector<types::open_interest_statistics_entry>> open_interest_statistics(const types::futures_data_request &request);
+    [[nodiscard]] result<std::vector<types::long_short_ratio_entry>> top_long_short_account_ratio(const types::futures_data_request &request);
+    [[nodiscard]] result<std::vector<types::long_short_ratio_entry>> top_trader_long_short_ratio(const types::futures_data_request &request);
+    [[nodiscard]] result<std::vector<types::long_short_ratio_entry>> long_short_ratio(const types::futures_data_request &request);
+    [[nodiscard]] result<std::vector<types::taker_buy_sell_volume_entry>> taker_buy_sell_volume(const types::futures_data_request &request);
     [[nodiscard]] result<std::vector<types::recent_trade>> historical_trades(const types::historical_trades_request &request);
 
   private:

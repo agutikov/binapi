@@ -58,6 +58,18 @@ enum class contract_type {
     tradifi_perpetual,
 };
 
+enum class futures_data_period {
+    m5,
+    m15,
+    m30,
+    h1,
+    h2,
+    h4,
+    h6,
+    h12,
+    d1,
+};
+
 [[nodiscard]] inline std::string to_string(security_type value) {
     switch (value) {
         case security_type::none: return "none";
@@ -128,6 +140,21 @@ enum class contract_type {
         case contract_type::tradifi_perpetual: return "TRADIFI_PERPETUAL";
     }
     return "PERPETUAL";
+}
+
+[[nodiscard]] inline std::string to_string(futures_data_period value) {
+    switch (value) {
+        case futures_data_period::m5: return "5m";
+        case futures_data_period::m15: return "15m";
+        case futures_data_period::m30: return "30m";
+        case futures_data_period::h1: return "1h";
+        case futures_data_period::h2: return "2h";
+        case futures_data_period::h4: return "4h";
+        case futures_data_period::h6: return "6h";
+        case futures_data_period::h12: return "12h";
+        case futures_data_period::d1: return "1d";
+    }
+    return "5m";
 }
 
 } // namespace binapi2::umf::types
