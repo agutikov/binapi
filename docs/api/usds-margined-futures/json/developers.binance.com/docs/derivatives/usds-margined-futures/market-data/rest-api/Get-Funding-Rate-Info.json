@@ -1,0 +1,89 @@
+{
+  "title": "Get Funding Rate Info",
+  "meta_description": "API Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "API Description",
+      "level": 2,
+      "id": "api-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Query funding rate info for symbols that had FundingRateCap/ FundingRateFloor / fundingIntervalHours adjustment"
+        }
+      ]
+    },
+    {
+      "title": "HTTP Request",
+      "level": 2,
+      "id": "http-request",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "GET `/fapi/v1/fundingInfo`"
+        }
+      ]
+    },
+    {
+      "title": "Request Weight",
+      "level": 2,
+      "id": "request-weight",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "0"
+        },
+        {
+          "type": "paragraph",
+          "text": "share 500/5min/IP rate limit with `GET /fapi/v1/fundingRate`"
+        }
+      ]
+    },
+    {
+      "title": "Request Parameters",
+      "level": 2,
+      "id": "request-parameters",
+      "blocks": []
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "[\n{\n\"symbol\": \"BLZUSDT\",\n\"adjustedFundingRateCap\": \"0.02500000\",\n\"adjustedFundingRateFloor\": \"-0.02500000\",\n\"fundingIntervalHours\": 8,\n\"disclaimer\": false // ingore\n}\n]"
+        }
+      ]
+    }
+  ],
+  "protocol": "rest",
+  "category": "rest-api",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "market-data",
+    "rest-api",
+    "Get-Funding-Rate-Info.html"
+  ],
+  "api_summary": {
+    "description": "Query funding rate info for symbols that had FundingRateCap/ FundingRateFloor / fundingIntervalHours adjustment",
+    "http_method": "GET",
+    "path": "`/fapi/v1/fundingInfo`",
+    "http_request": "GET `/fapi/v1/fundingInfo`",
+    "request_weight": "0",
+    "request_parameters_tables": [],
+    "request_parameters_text": [],
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "[\n{\n\"symbol\": \"BLZUSDT\",\n\"adjustedFundingRateCap\": \"0.02500000\",\n\"adjustedFundingRateFloor\": \"-0.02500000\",\n\"fundingIntervalHours\": 8,\n\"disclaimer\": false // ingore\n}\n]"
+      }
+    ]
+  }
+}

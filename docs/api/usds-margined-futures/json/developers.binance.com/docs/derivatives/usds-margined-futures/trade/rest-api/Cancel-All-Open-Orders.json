@@ -1,0 +1,151 @@
+{
+  "title": "Cancel All Open Orders (TRADE)",
+  "meta_description": "API Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "API Description",
+      "level": 2,
+      "id": "api-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Cancel All Open Orders"
+        }
+      ]
+    },
+    {
+      "title": "HTTP Request",
+      "level": 2,
+      "id": "http-request",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "DELETE `/fapi/v1/allOpenOrders`"
+        }
+      ]
+    },
+    {
+      "title": "Request Weight",
+      "level": 2,
+      "id": "request-weight",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "1"
+        }
+      ]
+    },
+    {
+      "title": "Request Parameters",
+      "level": 2,
+      "id": "request-parameters",
+      "blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "Name",
+            "Type",
+            "Mandatory",
+            "Description"
+          ],
+          "rows": [
+            [
+              "symbol",
+              "STRING",
+              "YES",
+              ""
+            ],
+            [
+              "recvWindow",
+              "LONG",
+              "NO",
+              ""
+            ],
+            [
+              "timestamp",
+              "LONG",
+              "YES",
+              ""
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "json",
+          "json": {
+            "code": 200,
+            "msg": "The operation of cancel all open order is done."
+          }
+        }
+      ]
+    }
+  ],
+  "protocol": "rest",
+  "category": "rest-api",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "trade",
+    "rest-api",
+    "Cancel-All-Open-Orders.html"
+  ],
+  "api_summary": {
+    "description": "Cancel All Open Orders",
+    "http_method": "DELETE",
+    "path": "`/fapi/v1/allOpenOrders`",
+    "http_request": "DELETE `/fapi/v1/allOpenOrders`",
+    "request_weight": "1",
+    "request_parameters_tables": [
+      {
+        "type": "table",
+        "headers": [
+          "Name",
+          "Type",
+          "Mandatory",
+          "Description"
+        ],
+        "rows": [
+          [
+            "symbol",
+            "STRING",
+            "YES",
+            ""
+          ],
+          [
+            "recvWindow",
+            "LONG",
+            "NO",
+            ""
+          ],
+          [
+            "timestamp",
+            "LONG",
+            "YES",
+            ""
+          ]
+        ]
+      }
+    ],
+    "request_parameters_text": [],
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "json",
+        "json": {
+          "code": 200,
+          "msg": "The operation of cancel all open order is done."
+        }
+      }
+    ]
+  }
+}

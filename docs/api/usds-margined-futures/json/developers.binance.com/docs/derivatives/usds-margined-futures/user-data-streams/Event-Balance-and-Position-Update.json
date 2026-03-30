@@ -1,0 +1,205 @@
+{
+  "title": "Event: Balance and Position Update",
+  "meta_description": "Event Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "Event Description",
+      "level": 2,
+      "id": "event-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Event type is `ACCOUNT_UPDATE`."
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "When balance or position get updated, this event will be pushed.",
+              "blocks": [
+                {
+                  "type": "list",
+                  "ordered": false,
+                  "items": [
+                    {
+                      "text": "`ACCOUNT_UPDATE` will be pushed only when update happens on user's account, including changes on balances, positions, or margin type.",
+                      "blocks": []
+                    },
+                    {
+                      "text": "Unfilled orders or cancelled orders will not make the event `ACCOUNT_UPDATE` pushed, since there's no change on positions.",
+                      "blocks": []
+                    },
+                    {
+                      "text": "\"position\" in `ACCOUNT_UPDATE`: Only symbols of changed positions will be pushed.",
+                      "blocks": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "text": "When \"FUNDING FEE\" changes to the user's balance, the event will be pushed with the brief message:",
+              "blocks": [
+                {
+                  "type": "list",
+                  "ordered": false,
+                  "items": [
+                    {
+                      "text": "When \"FUNDING FEE\" occurs in a crossed position, `ACCOUNT_UPDATE` will be pushed with only the balance `B`(including the \"FUNDING FEE\" asset only), without any position `P` message.",
+                      "blocks": []
+                    },
+                    {
+                      "text": "When \"FUNDING FEE\" occurs in an isolated position, `ACCOUNT_UPDATE` will be pushed with only the balance `B`(including the \"FUNDING FEE\" asset only) and the relative position message `P`( including the isolated position on which the \"FUNDING FEE\" occurs only, without any other position message).",
+                      "blocks": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "text": "The field \"m\" represents the reason type for the event and may shows the following possible types:",
+              "blocks": [
+                {
+                  "type": "list",
+                  "ordered": false,
+                  "items": [
+                    {
+                      "text": "DEPOSIT",
+                      "blocks": []
+                    },
+                    {
+                      "text": "WITHDRAW",
+                      "blocks": []
+                    },
+                    {
+                      "text": "ORDER",
+                      "blocks": []
+                    },
+                    {
+                      "text": "FUNDING_FEE",
+                      "blocks": []
+                    },
+                    {
+                      "text": "WITHDRAW_REJECT",
+                      "blocks": []
+                    },
+                    {
+                      "text": "ADJUSTMENT",
+                      "blocks": []
+                    },
+                    {
+                      "text": "INSURANCE_CLEAR",
+                      "blocks": []
+                    },
+                    {
+                      "text": "ADMIN_DEPOSIT",
+                      "blocks": []
+                    },
+                    {
+                      "text": "ADMIN_WITHDRAW",
+                      "blocks": []
+                    },
+                    {
+                      "text": "MARGIN_TRANSFER",
+                      "blocks": []
+                    },
+                    {
+                      "text": "MARGIN_TYPE_CHANGE",
+                      "blocks": []
+                    },
+                    {
+                      "text": "ASSET_TRANSFER",
+                      "blocks": []
+                    },
+                    {
+                      "text": "OPTIONS_PREMIUM_FEE",
+                      "blocks": []
+                    },
+                    {
+                      "text": "OPTIONS_SETTLE_PROFIT",
+                      "blocks": []
+                    },
+                    {
+                      "text": "AUTO_EXCHANGE",
+                      "blocks": []
+                    },
+                    {
+                      "text": "COIN_SWAP_DEPOSIT",
+                      "blocks": []
+                    },
+                    {
+                      "text": "COIN_SWAP_WITHDRAW",
+                      "blocks": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "text": "The field \"bc\" represents the balance change except for PnL and commission.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "URL PATH",
+      "level": 2,
+      "id": "url-path",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`/private`"
+        }
+      ]
+    },
+    {
+      "title": "Event Name",
+      "level": 2,
+      "id": "event-name",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`ACCOUNT_UPDATE`"
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "{\n\"e\": \"ACCOUNT_UPDATE\", // Event Type\n\"E\": 1564745798939, // Event Time\n\"T\": 1564745798938 , // Transaction\n\"a\": // Update Data\n{\n\"m\":\"ORDER\", // Event reason type\n\"B\":[ // Balances\n{\n\"a\":\"USDT\", // Asset\n\"wb\":\"122624.12345678\", // Wallet Balance\n\"cw\":\"100.12345678\", // Cross Wallet Balance\n\"bc\":\"50.12345678\" // Balance Change except PnL and Commission\n},\n{\n\"a\":\"BUSD\",\n\"wb\":\"1.00000000\",\n\"cw\":\"0.00000000\",\n\"bc\":\"-49.12345678\"\n}\n],\n\"P\":[\n{\n\"s\":\"BTCUSDT\", // Symbol\n\"pa\":\"0\", // Position Amount\n\"ep\":\"0.00000\", // Entry Price\n\"bep\":\"0\", // breakeven price\n\"cr\":\"200\", // (Pre-fee) Accumulated Realized\n\"up\":\"0\", // Unrealized PnL\n\"mt\":\"isolated\", // Margin Type\n\"iw\":\"0.00000000\", // Isolated Wallet (if isolated position)\n\"ps\":\"BOTH\" // Position Side\n}，\n{\n\"s\":\"BTCUSDT\",\n\"pa\":\"20\",\n\"ep\":\"6563.66500\",\n\"bep\":\"0\", // breakeven price\n\"cr\":\"0\",\n\"up\":\"2850.21200\",\n\"mt\":\"isolated\",\n\"iw\":\"13200.70726908\",\n\"ps\":\"LONG\"\n},\n{\n\"s\":\"BTCUSDT\",\n\"pa\":\"-10\",\n\"ep\":\"6563.86000\",\n\"bep\":\"6563.6\", // breakeven price\n\"cr\":\"-45.04000000\",\n\"up\":\"-1423.15600\",\n\"mt\":\"isolated\",\n\"iw\":\"6570.42511771\",\n\"ps\":\"SHORT\"\n}\n]\n}\n}"
+        }
+      ]
+    }
+  ],
+  "protocol": "user_data_stream",
+  "category": "user-data-streams",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "user-data-streams",
+    "Event-Balance-and-Position-Update.html"
+  ],
+  "api_summary": {
+    "description": "Event type is `ACCOUNT_UPDATE`.",
+    "url_path": "`/private`",
+    "event_name": "`ACCOUNT_UPDATE`",
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "{\n\"e\": \"ACCOUNT_UPDATE\", // Event Type\n\"E\": 1564745798939, // Event Time\n\"T\": 1564745798938 , // Transaction\n\"a\": // Update Data\n{\n\"m\":\"ORDER\", // Event reason type\n\"B\":[ // Balances\n{\n\"a\":\"USDT\", // Asset\n\"wb\":\"122624.12345678\", // Wallet Balance\n\"cw\":\"100.12345678\", // Cross Wallet Balance\n\"bc\":\"50.12345678\" // Balance Change except PnL and Commission\n},\n{\n\"a\":\"BUSD\",\n\"wb\":\"1.00000000\",\n\"cw\":\"0.00000000\",\n\"bc\":\"-49.12345678\"\n}\n],\n\"P\":[\n{\n\"s\":\"BTCUSDT\", // Symbol\n\"pa\":\"0\", // Position Amount\n\"ep\":\"0.00000\", // Entry Price\n\"bep\":\"0\", // breakeven price\n\"cr\":\"200\", // (Pre-fee) Accumulated Realized\n\"up\":\"0\", // Unrealized PnL\n\"mt\":\"isolated\", // Margin Type\n\"iw\":\"0.00000000\", // Isolated Wallet (if isolated position)\n\"ps\":\"BOTH\" // Position Side\n}，\n{\n\"s\":\"BTCUSDT\",\n\"pa\":\"20\",\n\"ep\":\"6563.66500\",\n\"bep\":\"0\", // breakeven price\n\"cr\":\"0\",\n\"up\":\"2850.21200\",\n\"mt\":\"isolated\",\n\"iw\":\"13200.70726908\",\n\"ps\":\"LONG\"\n},\n{\n\"s\":\"BTCUSDT\",\n\"pa\":\"-10\",\n\"ep\":\"6563.86000\",\n\"bep\":\"6563.6\", // breakeven price\n\"cr\":\"-45.04000000\",\n\"up\":\"-1423.15600\",\n\"mt\":\"isolated\",\n\"iw\":\"6570.42511771\",\n\"ps\":\"SHORT\"\n}\n]\n}\n}"
+      }
+    ]
+  }
+}

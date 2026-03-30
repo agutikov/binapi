@@ -1,0 +1,242 @@
+{
+  "title": "Query Order (USER_DATA)",
+  "meta_description": "API Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "API Description",
+      "level": 2,
+      "id": "api-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Check an order's status."
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "These orders will not be found: order status is `CANCELED` or `EXPIRED` AND order has NO filled trade AND created time + 3 days < current time order create time + 90 days < current time",
+              "blocks": [
+                {
+                  "type": "list",
+                  "ordered": false,
+                  "items": [
+                    {
+                      "text": "order status is `CANCELED` or `EXPIRED` AND order has NO filled trade AND created time + 3 days < current time",
+                      "blocks": []
+                    },
+                    {
+                      "text": "order create time + 90 days < current time",
+                      "blocks": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Method",
+      "level": 2,
+      "id": "method",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`order.status`"
+        }
+      ]
+    },
+    {
+      "title": "Request",
+      "level": 2,
+      "id": "request",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "json",
+          "json": {
+            "id": "0ce5d070-a5e5-4ff2-b57f-1556741a4204",
+            "method": "order.status",
+            "params": {
+              "apiKey": "HMOchcfii9ZRZnhjp2XjGXhsOBd6msAhKz9joQaWwZ7arcJTlD2hGPHQj1lGdTjR",
+              "orderId": 328999071,
+              "symbol": "BTCUSDT",
+              "timestamp": 1703441060152,
+              "signature": "ba48184fc38a71d03d2b5435bd67c1206e3191e989fe99bda1bc643a880dfdbf"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "title": "Request Weight",
+      "level": 2,
+      "id": "request-weight",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "1"
+        }
+      ]
+    },
+    {
+      "title": "Request Parameters",
+      "level": 2,
+      "id": "request-parameters",
+      "blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "Name",
+            "Type",
+            "Mandatory",
+            "Description"
+          ],
+          "rows": [
+            [
+              "symbol",
+              "STRING",
+              "YES",
+              ""
+            ],
+            [
+              "orderId",
+              "LONG",
+              "NO",
+              ""
+            ],
+            [
+              "origClientOrderId",
+              "STRING",
+              "NO",
+              ""
+            ],
+            [
+              "recvWindow",
+              "LONG",
+              "NO",
+              ""
+            ],
+            [
+              "timestamp",
+              "LONG",
+              "YES",
+              ""
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Notes:"
+        },
+        {
+          "type": "blockquote",
+          "text": "Either `orderId` or `origClientOrderId` must be sent. `orderId` is self-increment for each specific `symbol`"
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "{\n\"id\": \"605a6d20-6588-4cb9-afa0-b0ab087507ba\",\n\"status\": 200,\n\"result\": {\n\"avgPrice\": \"0.00000\",\n\"clientOrderId\": \"abc\",\n\"cumQuote\": \"0\",\n\"executedQty\": \"0\",\n\"orderId\": 1917641,\n\"origQty\": \"0.40\",\n\"origType\": \"TRAILING_STOP_MARKET\",\n\"price\": \"0\",\n\"reduceOnly\": false,\n\"side\": \"BUY\",\n\"positionSide\": \"SHORT\",\n\"status\": \"NEW\",\n\"stopPrice\": \"9300\", // please ignore when order type is TRAILING_STOP_MARKET\n\"closePosition\": false, // if Close-All\n\"symbol\": \"BTCUSDT\",\n\"time\": 1579276756075, // order time\n\"timeInForce\": \"GTC\",\n\"type\": \"TRAILING_STOP_MARKET\",\n\"activatePrice\": \"9020\", // activation price, only return with TRAILING_STOP_MARKET order\n\"priceRate\": \"0.3\", // callback rate, only return with TRAILING_STOP_MARKET order\n\"updateTime\": 1579276756075, // update time\n\"workingType\": \"CONTRACT_PRICE\",\n\"priceProtect\": false // if conditional order trigger is protected\n}\n}"
+        }
+      ]
+    }
+  ],
+  "protocol": "websocket_api",
+  "category": "websocket-api",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "trade",
+    "websocket-api",
+    "Query-Order.html"
+  ],
+  "api_summary": {
+    "description": "Check an order's status.",
+    "method": "`order.status`",
+    "request_weight": "1",
+    "request_parameters_tables": [
+      {
+        "type": "table",
+        "headers": [
+          "Name",
+          "Type",
+          "Mandatory",
+          "Description"
+        ],
+        "rows": [
+          [
+            "symbol",
+            "STRING",
+            "YES",
+            ""
+          ],
+          [
+            "orderId",
+            "LONG",
+            "NO",
+            ""
+          ],
+          [
+            "origClientOrderId",
+            "STRING",
+            "NO",
+            ""
+          ],
+          [
+            "recvWindow",
+            "LONG",
+            "NO",
+            ""
+          ],
+          [
+            "timestamp",
+            "LONG",
+            "YES",
+            ""
+          ]
+        ]
+      }
+    ],
+    "request_parameters_text": [
+      "Notes:",
+      "Either `orderId` or `origClientOrderId` must be sent. `orderId` is self-increment for each specific `symbol`"
+    ],
+    "request_code_blocks": [
+      {
+        "type": "code",
+        "language": "json",
+        "json": {
+          "id": "0ce5d070-a5e5-4ff2-b57f-1556741a4204",
+          "method": "order.status",
+          "params": {
+            "apiKey": "HMOchcfii9ZRZnhjp2XjGXhsOBd6msAhKz9joQaWwZ7arcJTlD2hGPHQj1lGdTjR",
+            "orderId": 328999071,
+            "symbol": "BTCUSDT",
+            "timestamp": 1703441060152,
+            "signature": "ba48184fc38a71d03d2b5435bd67c1206e3191e989fe99bda1bc643a880dfdbf"
+          }
+        }
+      }
+    ],
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "{\n\"id\": \"605a6d20-6588-4cb9-afa0-b0ab087507ba\",\n\"status\": 200,\n\"result\": {\n\"avgPrice\": \"0.00000\",\n\"clientOrderId\": \"abc\",\n\"cumQuote\": \"0\",\n\"executedQty\": \"0\",\n\"orderId\": 1917641,\n\"origQty\": \"0.40\",\n\"origType\": \"TRAILING_STOP_MARKET\",\n\"price\": \"0\",\n\"reduceOnly\": false,\n\"side\": \"BUY\",\n\"positionSide\": \"SHORT\",\n\"status\": \"NEW\",\n\"stopPrice\": \"9300\", // please ignore when order type is TRAILING_STOP_MARKET\n\"closePosition\": false, // if Close-All\n\"symbol\": \"BTCUSDT\",\n\"time\": 1579276756075, // order time\n\"timeInForce\": \"GTC\",\n\"type\": \"TRAILING_STOP_MARKET\",\n\"activatePrice\": \"9020\", // activation price, only return with TRAILING_STOP_MARKET order\n\"priceRate\": \"0.3\", // callback rate, only return with TRAILING_STOP_MARKET order\n\"updateTime\": 1579276756075, // update time\n\"workingType\": \"CONTRACT_PRICE\",\n\"priceProtect\": false // if conditional order trigger is protected\n}\n}"
+      }
+    ]
+  }
+}

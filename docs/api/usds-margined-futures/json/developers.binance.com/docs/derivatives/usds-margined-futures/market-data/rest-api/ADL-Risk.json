@@ -1,0 +1,139 @@
+{
+  "title": "ADL Risk",
+  "meta_description": "API Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "API Description",
+      "level": 2,
+      "id": "api-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Query the symbol-level ADL risk rating. The ADL risk rating measures the likelihood of ADL during liquidation, and the rating takes into account the insurance fund balance, position concentration on the symbol, order book depth, price volatility, average leverage, unrealized PnL, and margin utilization at the symbol level. The rating can be high, medium and low, and is updated every 30 minutes."
+        }
+      ]
+    },
+    {
+      "title": "HTTP Request",
+      "level": 2,
+      "id": "http-request",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "GET `/fapi/v1/symbolAdlRisk`"
+        }
+      ]
+    },
+    {
+      "title": "Request Weight",
+      "level": 2,
+      "id": "request-weight",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "1"
+        }
+      ]
+    },
+    {
+      "title": "Request Parameters",
+      "level": 2,
+      "id": "request-parameters",
+      "blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "Name",
+            "Type",
+            "Mandatory",
+            "Description"
+          ],
+          "rows": [
+            [
+              "symbol",
+              "STRING",
+              "NO",
+              ""
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "blockquote",
+          "text": "Response:"
+        },
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "{\n\"symbol\": \"BTCUSDT\",\n\"adlRisk\": \"low\", // ADL Risk rating\n\"updateTime\": 1597370495002\n}"
+        },
+        {
+          "type": "blockquote",
+          "text": "OR (when symbol not sent)"
+        },
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "[\n{\n\"symbol\": \"BTCUSDT\",\n\"adlRisk\": \"low\", // ADL Risk rating\n\"updateTime\": 1597370495002\n},\n{\n\"symbol\": \"ETHUSDT\",\n\"adlRisk\": \"high\", // ADL Risk rating\n\"updateTime\": 1597370495004\n}\n]"
+        }
+      ]
+    }
+  ],
+  "protocol": "rest",
+  "category": "rest-api",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "market-data",
+    "rest-api",
+    "ADL-Risk.html"
+  ],
+  "api_summary": {
+    "description": "Query the symbol-level ADL risk rating. The ADL risk rating measures the likelihood of ADL during liquidation, and the rating takes into account the insurance fund balance, position concentration on the symbol, order book depth, price volatility, average leverage, unrealized PnL, and margin utilization at the symbol level. The rating can be high, medium and low, and is updated every 30 minutes.",
+    "http_method": "GET",
+    "path": "`/fapi/v1/symbolAdlRisk`",
+    "http_request": "GET `/fapi/v1/symbolAdlRisk`",
+    "request_weight": "1",
+    "request_parameters_tables": [
+      {
+        "type": "table",
+        "headers": [
+          "Name",
+          "Type",
+          "Mandatory",
+          "Description"
+        ],
+        "rows": [
+          [
+            "symbol",
+            "STRING",
+            "NO",
+            ""
+          ]
+        ]
+      }
+    ],
+    "request_parameters_text": [],
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "{\n\"symbol\": \"BTCUSDT\",\n\"adlRisk\": \"low\", // ADL Risk rating\n\"updateTime\": 1597370495002\n}"
+      },
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "[\n{\n\"symbol\": \"BTCUSDT\",\n\"adlRisk\": \"low\", // ADL Risk rating\n\"updateTime\": 1597370495002\n},\n{\n\"symbol\": \"ETHUSDT\",\n\"adlRisk\": \"high\", // ADL Risk rating\n\"updateTime\": 1597370495004\n}\n]"
+      }
+    ]
+  }
+}

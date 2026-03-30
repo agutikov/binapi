@@ -1,0 +1,848 @@
+{
+  "title": "Public Endpoints Info",
+  "meta_description": "Terminology",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "Terminology",
+      "level": 2,
+      "id": "terminology",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "`base asset` refers to the asset that is the `quantity` of a symbol.",
+              "blocks": []
+            },
+            {
+              "text": "`quote asset` refers to the asset that is the `price` of a symbol.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "ENUM definitions",
+      "level": 2,
+      "id": "enum-definitions",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Symbol type:"
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "FUTURE",
+              "blocks": []
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Contract type (contractType):"
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "PERPETUAL",
+              "blocks": []
+            },
+            {
+              "text": "CURRENT_MONTH",
+              "blocks": []
+            },
+            {
+              "text": "NEXT_MONTH",
+              "blocks": []
+            },
+            {
+              "text": "CURRENT_QUARTER",
+              "blocks": []
+            },
+            {
+              "text": "NEXT_QUARTER",
+              "blocks": []
+            },
+            {
+              "text": "PERPETUAL_DELIVERING",
+              "blocks": []
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Contract status (contractStatus, status):"
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "PENDING_TRADING",
+              "blocks": []
+            },
+            {
+              "text": "TRADING",
+              "blocks": []
+            },
+            {
+              "text": "PRE_DELIVERING",
+              "blocks": []
+            },
+            {
+              "text": "DELIVERING",
+              "blocks": []
+            },
+            {
+              "text": "DELIVERED",
+              "blocks": []
+            },
+            {
+              "text": "PRE_SETTLE",
+              "blocks": []
+            },
+            {
+              "text": "SETTLING",
+              "blocks": []
+            },
+            {
+              "text": "CLOSE",
+              "blocks": []
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Order status (status):"
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "NEW",
+              "blocks": []
+            },
+            {
+              "text": "PARTIALLY_FILLED",
+              "blocks": []
+            },
+            {
+              "text": "FILLED",
+              "blocks": []
+            },
+            {
+              "text": "CANCELED",
+              "blocks": []
+            },
+            {
+              "text": "REJECTED",
+              "blocks": []
+            },
+            {
+              "text": "EXPIRED",
+              "blocks": []
+            },
+            {
+              "text": "EXPIRED_IN_MATCH",
+              "blocks": []
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Order types (orderTypes, type):"
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "LIMIT",
+              "blocks": []
+            },
+            {
+              "text": "MARKET",
+              "blocks": []
+            },
+            {
+              "text": "STOP",
+              "blocks": []
+            },
+            {
+              "text": "STOP_MARKET",
+              "blocks": []
+            },
+            {
+              "text": "TAKE_PROFIT",
+              "blocks": []
+            },
+            {
+              "text": "TAKE_PROFIT_MARKET",
+              "blocks": []
+            },
+            {
+              "text": "TRAILING_STOP_MARKET",
+              "blocks": []
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Order side (side):"
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "BUY",
+              "blocks": []
+            },
+            {
+              "text": "SELL",
+              "blocks": []
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Position side (positionSide):"
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "BOTH",
+              "blocks": []
+            },
+            {
+              "text": "LONG",
+              "blocks": []
+            },
+            {
+              "text": "SHORT",
+              "blocks": []
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Time in force (timeInForce):"
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "GTC - Good Till Cancel(GTC order valitidy is 1 year from placement)",
+              "blocks": []
+            },
+            {
+              "text": "IOC - Immediate or Cancel",
+              "blocks": []
+            },
+            {
+              "text": "FOK - Fill or Kill",
+              "blocks": []
+            },
+            {
+              "text": "GTX - Good Till Crossing (Post Only)",
+              "blocks": []
+            },
+            {
+              "text": "GTD - Good Till Date",
+              "blocks": []
+            },
+            {
+              "text": "RPI - Retail Price Improvement(RPI order is post only and only be matched with the order from APP or Web)",
+              "blocks": []
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Working Type (workingType)"
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "MARK_PRICE",
+              "blocks": []
+            },
+            {
+              "text": "CONTRACT_PRICE",
+              "blocks": []
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Response Type (newOrderRespType)"
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "ACK",
+              "blocks": []
+            },
+            {
+              "text": "RESULT",
+              "blocks": []
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Kline/Candlestick chart intervals:"
+        },
+        {
+          "type": "paragraph",
+          "text": "m -> minutes; h -> hours; d -> days; w -> weeks; M -> months"
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "1m",
+              "blocks": []
+            },
+            {
+              "text": "3m",
+              "blocks": []
+            },
+            {
+              "text": "5m",
+              "blocks": []
+            },
+            {
+              "text": "15m",
+              "blocks": []
+            },
+            {
+              "text": "30m",
+              "blocks": []
+            },
+            {
+              "text": "1h",
+              "blocks": []
+            },
+            {
+              "text": "2h",
+              "blocks": []
+            },
+            {
+              "text": "4h",
+              "blocks": []
+            },
+            {
+              "text": "6h",
+              "blocks": []
+            },
+            {
+              "text": "8h",
+              "blocks": []
+            },
+            {
+              "text": "12h",
+              "blocks": []
+            },
+            {
+              "text": "1d",
+              "blocks": []
+            },
+            {
+              "text": "3d",
+              "blocks": []
+            },
+            {
+              "text": "1w",
+              "blocks": []
+            },
+            {
+              "text": "1M",
+              "blocks": []
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "STP MODE (selfTradePreventionMode):"
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "EXPIRE_TAKER",
+              "blocks": []
+            },
+            {
+              "text": "EXPIRE_BOTH",
+              "blocks": []
+            },
+            {
+              "text": "EXPIRE_MAKER",
+              "blocks": []
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Price Match (priceMatch)"
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "NONE (No price match)",
+              "blocks": []
+            },
+            {
+              "text": "OPPONENT (counterparty best price)",
+              "blocks": []
+            },
+            {
+              "text": "OPPONENT_5 (the 5th best price from the counterparty)",
+              "blocks": []
+            },
+            {
+              "text": "OPPONENT_10 (the 10th best price from the counterparty)",
+              "blocks": []
+            },
+            {
+              "text": "OPPONENT_20 (the 20th best price from the counterparty)",
+              "blocks": []
+            },
+            {
+              "text": "QUEUE (the best price on the same side of the order book)",
+              "blocks": []
+            },
+            {
+              "text": "QUEUE_5 (the 5th best price on the same side of the order book)",
+              "blocks": []
+            },
+            {
+              "text": "QUEUE_10 (the 10th best price on the same side of the order book)",
+              "blocks": []
+            },
+            {
+              "text": "QUEUE_20 (the 20th best price on the same side of the order book)",
+              "blocks": []
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Rate limiters (rateLimitType)"
+        },
+        {
+          "type": "blockquote",
+          "text": "REQUEST_WEIGHT"
+        },
+        {
+          "type": "code",
+          "language": "json",
+          "json": {
+            "rateLimitType": "REQUEST_WEIGHT",
+            "interval": "MINUTE",
+            "intervalNum": 1,
+            "limit": 2400
+          }
+        },
+        {
+          "type": "blockquote",
+          "text": "ORDERS"
+        },
+        {
+          "type": "code",
+          "language": "json",
+          "json": {
+            "rateLimitType": "ORDERS",
+            "interval": "MINUTE",
+            "intervalNum": 1,
+            "limit": 1200
+          }
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "REQUEST_WEIGHT",
+              "blocks": []
+            },
+            {
+              "text": "ORDERS",
+              "blocks": []
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Rate limit intervals (interval)"
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "MINUTE",
+              "blocks": []
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Filters define trading rules on a symbol or an exchange."
+        }
+      ]
+    },
+    {
+      "title": "Symbol filters",
+      "level": 2,
+      "id": "symbol-filters",
+      "blocks": []
+    },
+    {
+      "title": "PRICE_FILTER",
+      "level": 3,
+      "id": "price_filter",
+      "blocks": [
+        {
+          "type": "blockquote",
+          "text": "`/exchangeInfo format:`"
+        },
+        {
+          "type": "code",
+          "language": "json",
+          "json": {
+            "filterType": "PRICE_FILTER",
+            "minPrice": "0.00000100",
+            "maxPrice": "100000.00000000",
+            "tickSize": "0.00000100"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": "The `PRICE_FILTER` defines the `price` rules for a symbol. There are 3 parts:"
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "`minPrice` defines the minimum `price`/`stopPrice` allowed; disabled on `minPrice` == 0.",
+              "blocks": []
+            },
+            {
+              "text": "`maxPrice` defines the maximum `price`/`stopPrice` allowed; disabled on `maxPrice` == 0.",
+              "blocks": []
+            },
+            {
+              "text": "`tickSize` defines the intervals that a `price`/`stopPrice` can be increased/decreased by; disabled on `tickSize` == 0.",
+              "blocks": []
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Any of the above variables can be set to 0, which disables that rule in the `price filter`. In order to pass the `price filter`, the following must be true for `price`/`stopPrice` of the enabled rules:"
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "`price` >= `minPrice`",
+              "blocks": []
+            },
+            {
+              "text": "`price` <= `maxPrice`",
+              "blocks": []
+            },
+            {
+              "text": "(`price`-`minPrice`) % `tickSize` == 0",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "LOT_SIZE",
+      "level": 3,
+      "id": "lot_size",
+      "blocks": [
+        {
+          "type": "blockquote",
+          "text": "`/exchangeInfo format:`"
+        },
+        {
+          "type": "code",
+          "language": "json",
+          "json": {
+            "filterType": "LOT_SIZE",
+            "minQty": "0.00100000",
+            "maxQty": "100000.00000000",
+            "stepSize": "0.00100000"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": "The `LOT_SIZE` filter defines the `quantity` (aka \"lots\" in auction terms) rules for a symbol. There are 3 parts:"
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "`minQty` defines the minimum `quantity` allowed.",
+              "blocks": []
+            },
+            {
+              "text": "`maxQty` defines the maximum `quantity` allowed.",
+              "blocks": []
+            },
+            {
+              "text": "`stepSize` defines the intervals that a `quantity` can be increased/decreased by.",
+              "blocks": []
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "In order to pass the `lot size`, the following must be true for `quantity`:"
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "`quantity` >= `minQty`",
+              "blocks": []
+            },
+            {
+              "text": "`quantity` <= `maxQty`",
+              "blocks": []
+            },
+            {
+              "text": "(`quantity`-`minQty`) % `stepSize` == 0",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "MARKET_LOT_SIZE",
+      "level": 3,
+      "id": "market_lot_size",
+      "blocks": [
+        {
+          "type": "blockquote",
+          "text": "`/exchangeInfo format:`"
+        },
+        {
+          "type": "code",
+          "language": "json",
+          "json": {
+            "filterType": "MARKET_LOT_SIZE",
+            "minQty": "0.00100000",
+            "maxQty": "100000.00000000",
+            "stepSize": "0.00100000"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": "The `MARKET_LOT_SIZE` filter defines the `quantity` (aka \"lots\" in auction terms) rules for `MARKET` orders on a symbol. There are 3 parts:"
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "`minQty` defines the minimum `quantity` allowed.",
+              "blocks": []
+            },
+            {
+              "text": "`maxQty` defines the maximum `quantity` allowed.",
+              "blocks": []
+            },
+            {
+              "text": "`stepSize` defines the intervals that a `quantity` can be increased/decreased by.",
+              "blocks": []
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "In order to pass the `market lot size`, the following must be true for `quantity`:"
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "`quantity` >= `minQty`",
+              "blocks": []
+            },
+            {
+              "text": "`quantity` <= `maxQty`",
+              "blocks": []
+            },
+            {
+              "text": "(`quantity`-`minQty`) % `stepSize` == 0",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "MAX_NUM_ORDERS",
+      "level": 3,
+      "id": "max_num_orders",
+      "blocks": [
+        {
+          "type": "blockquote",
+          "text": "`/exchangeInfo format:`"
+        },
+        {
+          "type": "code",
+          "language": "json",
+          "json": {
+            "filterType": "MAX_NUM_ORDERS",
+            "limit": 200
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": "The `MAX_NUM_ORDERS` filter defines the maximum number of orders an account is allowed to have open on a symbol."
+        },
+        {
+          "type": "paragraph",
+          "text": "Note that both \"algo\" orders and normal orders are counted for this filter."
+        }
+      ]
+    },
+    {
+      "title": "MAX_NUM_ALGO_ORDERS",
+      "level": 3,
+      "id": "max_num_algo_orders",
+      "blocks": [
+        {
+          "type": "blockquote",
+          "text": "`/exchangeInfo format:`"
+        },
+        {
+          "type": "code",
+          "language": "json",
+          "json": {
+            "filterType": "MAX_NUM_ALGO_ORDERS",
+            "limit": 100
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": "The `MAX_NUM_ALGO_ORDERS` filter defines the maximum number of all kinds of algo orders an account is allowed to have open on a symbol."
+        },
+        {
+          "type": "paragraph",
+          "text": "The algo orders include `STOP`, `STOP_MARKET`, `TAKE_PROFIT`, `TAKE_PROFIT_MARKET`, and `TRAILING_STOP_MARKET` orders."
+        }
+      ]
+    },
+    {
+      "title": "PERCENT_PRICE",
+      "level": 3,
+      "id": "percent_price",
+      "blocks": [
+        {
+          "type": "blockquote",
+          "text": "`/exchangeInfo format:`"
+        },
+        {
+          "type": "code",
+          "language": "json",
+          "json": {
+            "filterType": "PERCENT_PRICE",
+            "multiplierUp": "1.1500",
+            "multiplierDown": "0.8500",
+            "multiplierDecimal": 4
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": "The `PERCENT_PRICE` filter defines valid range for a price based on the mark price."
+        },
+        {
+          "type": "paragraph",
+          "text": "In order to pass the `percent price`, the following must be true for `price`:"
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "BUY: `price` <= `markPrice` * `multiplierUp`",
+              "blocks": []
+            },
+            {
+              "text": "SELL: `price` >= `markPrice` * `multiplierDown`",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "MIN_NOTIONAL",
+      "level": 3,
+      "id": "min_notional",
+      "blocks": [
+        {
+          "type": "blockquote",
+          "text": "`/exchangeInfo format:`"
+        },
+        {
+          "type": "code",
+          "language": "json",
+          "json": {
+            "filterType": "MIN_NOTIONAL",
+            "notional": "5.0"
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": "The `MIN_NOTIONAL` filter defines the minimum notional value allowed for an order on a symbol. An order's notional value is the `price` * `quantity`. Since `MARKET` orders have no price, the mark price is used."
+        }
+      ]
+    }
+  ],
+  "protocol": "reference",
+  "category": "usds-margined-futures",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "common-definition.html"
+  ],
+  "api_summary": {}
+}

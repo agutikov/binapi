@@ -1,0 +1,23 @@
+{
+  "title": "Get Future Account Transaction History List(USER_DATA)",
+  "meta_description": "Please find details from here.",
+  "intro_blocks": [
+    {
+      "type": "paragraph",
+      "text": "Please find details from here."
+    }
+  ],
+  "sections": [],
+  "protocol": "rest",
+  "category": "rest-api",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "account",
+    "rest-api",
+    "Get-Future-Account-Transaction-History-List.html"
+  ],
+  "api_summary": {}
+}

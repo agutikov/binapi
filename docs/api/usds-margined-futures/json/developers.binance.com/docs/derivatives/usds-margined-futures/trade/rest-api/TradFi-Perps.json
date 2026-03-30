@@ -1,0 +1,138 @@
+{
+  "title": "Futures TradFi Perps Contract(USER_DATA)",
+  "meta_description": "API Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "API Description",
+      "level": 2,
+      "id": "api-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Sign TradFi-Perps agreement contract"
+        }
+      ]
+    },
+    {
+      "title": "HTTP Request",
+      "level": 2,
+      "id": "http-request",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "POST `/fapi/v1/stock/contract`"
+        }
+      ]
+    },
+    {
+      "title": "Request Weigh",
+      "level": 2,
+      "id": "request-weigh",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "50"
+        }
+      ]
+    },
+    {
+      "title": "Request Parameters",
+      "level": 2,
+      "id": "request-parameters",
+      "blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "Name",
+            "Type",
+            "Mandatory",
+            "Description"
+          ],
+          "rows": [
+            [
+              "recvWindow",
+              "LONG",
+              "NO",
+              ""
+            ],
+            [
+              "timestamp",
+              "LONG",
+              "YES",
+              ""
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "json",
+          "json": {
+            "code": 200,
+            "msg": "success"
+          }
+        }
+      ]
+    }
+  ],
+  "protocol": "rest",
+  "category": "rest-api",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "trade",
+    "rest-api",
+    "TradFi-Perps.html"
+  ],
+  "api_summary": {
+    "description": "Sign TradFi-Perps agreement contract",
+    "http_method": "POST",
+    "path": "`/fapi/v1/stock/contract`",
+    "http_request": "POST `/fapi/v1/stock/contract`",
+    "request_parameters_tables": [
+      {
+        "type": "table",
+        "headers": [
+          "Name",
+          "Type",
+          "Mandatory",
+          "Description"
+        ],
+        "rows": [
+          [
+            "recvWindow",
+            "LONG",
+            "NO",
+            ""
+          ],
+          [
+            "timestamp",
+            "LONG",
+            "YES",
+            ""
+          ]
+        ]
+      }
+    ],
+    "request_parameters_text": [],
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "json",
+        "json": {
+          "code": 200,
+          "msg": "success"
+        }
+      }
+    ]
+  }
+}

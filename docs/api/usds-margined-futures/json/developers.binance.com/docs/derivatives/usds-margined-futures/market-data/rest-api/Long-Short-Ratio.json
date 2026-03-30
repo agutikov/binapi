@@ -1,0 +1,175 @@
+{
+  "title": "Long/Short Ratio",
+  "meta_description": "API Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "API Description",
+      "level": 2,
+      "id": "api-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Query symbol Long/Short Ratio"
+        }
+      ]
+    },
+    {
+      "title": "HTTP Request",
+      "level": 2,
+      "id": "http-request",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "GET `/futures/data/globalLongShortAccountRatio`"
+        }
+      ]
+    },
+    {
+      "title": "Request Weight",
+      "level": 2,
+      "id": "request-weight",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "0"
+        }
+      ]
+    },
+    {
+      "title": "Request Parameters",
+      "level": 2,
+      "id": "request-parameters",
+      "blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "Name",
+            "Type",
+            "Mandatory",
+            "Description"
+          ],
+          "rows": [
+            [
+              "symbol",
+              "STRING",
+              "YES",
+              ""
+            ],
+            [
+              "period",
+              "ENUM",
+              "YES",
+              "\"5m\",\"15m\",\"30m\",\"1h\",\"2h\",\"4h\",\"6h\",\"12h\",\"1d\""
+            ],
+            [
+              "limit",
+              "LONG",
+              "NO",
+              "default 30, max 500"
+            ],
+            [
+              "startTime",
+              "LONG",
+              "NO",
+              ""
+            ],
+            [
+              "endTime",
+              "LONG",
+              "NO",
+              ""
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "text": "If startTime and endTime are not sent, the most recent data is returned. Only the data of the latest 30 days is available. IP rate limit 1000 requests/5min"
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "[\n{\n\"symbol\":\"BTCUSDT\", // long/short account num ratio of all traders\n\"longShortRatio\":\"0.1960\", //long account num ratio of all traders\n\"longAccount\": \"0.6622\", // short account num ratio of all traders\n\"shortAccount\":\"0.3378\",\n\"timestamp\":\"1583139600000\"\n\n},\n\n{\n\n\"symbol\":\"BTCUSDT\",\n\"longShortRatio\":\"1.9559\",\n\"longAccount\": \"0.6617\",\n\"shortAccount\":\"0.3382\",\n\"timestamp\":\"1583139900000\"\n\n},\n\n]"
+        }
+      ]
+    }
+  ],
+  "protocol": "rest",
+  "category": "rest-api",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "market-data",
+    "rest-api",
+    "Long-Short-Ratio.html"
+  ],
+  "api_summary": {
+    "description": "Query symbol Long/Short Ratio",
+    "http_method": "GET",
+    "path": "`/futures/data/globalLongShortAccountRatio`",
+    "http_request": "GET `/futures/data/globalLongShortAccountRatio`",
+    "request_weight": "0",
+    "request_parameters_tables": [
+      {
+        "type": "table",
+        "headers": [
+          "Name",
+          "Type",
+          "Mandatory",
+          "Description"
+        ],
+        "rows": [
+          [
+            "symbol",
+            "STRING",
+            "YES",
+            ""
+          ],
+          [
+            "period",
+            "ENUM",
+            "YES",
+            "\"5m\",\"15m\",\"30m\",\"1h\",\"2h\",\"4h\",\"6h\",\"12h\",\"1d\""
+          ],
+          [
+            "limit",
+            "LONG",
+            "NO",
+            "default 30, max 500"
+          ],
+          [
+            "startTime",
+            "LONG",
+            "NO",
+            ""
+          ],
+          [
+            "endTime",
+            "LONG",
+            "NO",
+            ""
+          ]
+        ]
+      }
+    ],
+    "request_parameters_text": [
+      "If startTime and endTime are not sent, the most recent data is returned. Only the data of the latest 30 days is available. IP rate limit 1000 requests/5min"
+    ],
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "[\n{\n\"symbol\":\"BTCUSDT\", // long/short account num ratio of all traders\n\"longShortRatio\":\"0.1960\", //long account num ratio of all traders\n\"longAccount\": \"0.6622\", // short account num ratio of all traders\n\"shortAccount\":\"0.3378\",\n\"timestamp\":\"1583139600000\"\n\n},\n\n{\n\n\"symbol\":\"BTCUSDT\",\n\"longShortRatio\":\"1.9559\",\n\"longAccount\": \"0.6617\",\n\"shortAccount\":\"0.3382\",\n\"timestamp\":\"1583139900000\"\n\n},\n\n]"
+      }
+    ]
+  }
+}

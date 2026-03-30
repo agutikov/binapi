@@ -1,0 +1,94 @@
+{
+  "title": "Aggregate Trade Streams",
+  "meta_description": "Stream Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "Stream Description",
+      "level": 2,
+      "id": "stream-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "The Aggregate Trade Streams push market trade information that is aggregated for fills with same price and taking side every 100 milliseconds. Only market trades will be aggregated, which means the insurance fund trades and ADL trades won't be aggregated."
+        }
+      ]
+    },
+    {
+      "title": "URL PATH",
+      "level": 2,
+      "id": "url-path",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`/market`"
+        }
+      ]
+    },
+    {
+      "title": "Stream Name",
+      "level": 2,
+      "id": "stream-name",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`<symbol>@aggTrade`"
+        },
+        {
+          "type": "paragraph",
+          "text": "Note:"
+        },
+        {
+          "type": "blockquote",
+          "text": "Retail Price Improvement(RPI) orders are aggregated into field `q` and without special tags to be distinguished."
+        }
+      ]
+    },
+    {
+      "title": "Update Speed",
+      "level": 2,
+      "id": "update-speed",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "100ms"
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "{\n\"e\": \"aggTrade\", // Event type\n\"E\": 123456789, // Event time\n\"s\": \"BTCUSDT\", // Symbol\n\"a\": 5933014, // Aggregate trade ID\n\"p\": \"0.001\", // Price\n\"q\": \"100\", // Quantity with all the market trades\n\"nq\": \"100\", // Normal quantity without the trades involving RPI orders\n\"f\": 100, // First trade ID\n\"l\": 105, // Last trade ID\n\"T\": 123456785, // Trade time\n\"m\": true, // Is the buyer the market maker?\n}"
+        }
+      ]
+    }
+  ],
+  "protocol": "websocket_stream",
+  "category": "websocket-market-streams",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "websocket-market-streams",
+    "Aggregate-Trade-Streams.html"
+  ],
+  "api_summary": {
+    "description": "The Aggregate Trade Streams push market trade information that is aggregated for fills with same price and taking side every 100 milliseconds. Only market trades will be aggregated, which means the insurance fund trades and ADL trades won't be aggregated.",
+    "url_path": "`/market`",
+    "stream_name": "`<symbol>@aggTrade`",
+    "update_speed": "100ms",
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "{\n\"e\": \"aggTrade\", // Event type\n\"E\": 123456789, // Event time\n\"s\": \"BTCUSDT\", // Symbol\n\"a\": 5933014, // Aggregate trade ID\n\"p\": \"0.001\", // Price\n\"q\": \"100\", // Quantity with all the market trades\n\"nq\": \"100\", // Normal quantity without the trades involving RPI orders\n\"f\": 100, // First trade ID\n\"l\": 105, // Last trade ID\n\"T\": 123456785, // Trade time\n\"m\": true, // Is the buyer the market maker?\n}"
+      }
+    ]
+  }
+}

@@ -1,0 +1,121 @@
+{
+  "title": "Open Interest",
+  "meta_description": "API Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "API Description",
+      "level": 2,
+      "id": "api-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Get present open interest of a specific symbol."
+        }
+      ]
+    },
+    {
+      "title": "HTTP Request",
+      "level": 2,
+      "id": "http-request",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "GET `/fapi/v1/openInterest`"
+        }
+      ]
+    },
+    {
+      "title": "Request Weight",
+      "level": 2,
+      "id": "request-weight",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "1"
+        }
+      ]
+    },
+    {
+      "title": "Request Parameters",
+      "level": 2,
+      "id": "request-parameters",
+      "blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "Name",
+            "Type",
+            "Mandatory",
+            "Description"
+          ],
+          "rows": [
+            [
+              "symbol",
+              "STRING",
+              "YES",
+              ""
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "{\n\"openInterest\": \"10659.509\",\n\"symbol\": \"BTCUSDT\",\n\"time\": 1589437530011 // Transaction time\n}"
+        }
+      ]
+    }
+  ],
+  "protocol": "rest",
+  "category": "rest-api",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "market-data",
+    "rest-api",
+    "Open-Interest.html"
+  ],
+  "api_summary": {
+    "description": "Get present open interest of a specific symbol.",
+    "http_method": "GET",
+    "path": "`/fapi/v1/openInterest`",
+    "http_request": "GET `/fapi/v1/openInterest`",
+    "request_weight": "1",
+    "request_parameters_tables": [
+      {
+        "type": "table",
+        "headers": [
+          "Name",
+          "Type",
+          "Mandatory",
+          "Description"
+        ],
+        "rows": [
+          [
+            "symbol",
+            "STRING",
+            "YES",
+            ""
+          ]
+        ]
+      }
+    ],
+    "request_parameters_text": [],
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "{\n\"openInterest\": \"10659.509\",\n\"symbol\": \"BTCUSDT\",\n\"time\": 1589437530011 // Transaction time\n}"
+      }
+    ]
+  }
+}

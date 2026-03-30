@@ -1,0 +1,255 @@
+{
+  "title": "Query Algo Order (USER_DATA)",
+  "meta_description": "API Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "API Description",
+      "level": 2,
+      "id": "api-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Check an algo order's status."
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "These orders will not be found: order status is `CANCELED` or `EXPIRED` AND order has NO filled trade AND created time + 3 days < current time order create time + 90 days < current time",
+              "blocks": [
+                {
+                  "type": "list",
+                  "ordered": false,
+                  "items": [
+                    {
+                      "text": "order status is `CANCELED` or `EXPIRED` AND order has NO filled trade AND created time + 3 days < current time",
+                      "blocks": []
+                    },
+                    {
+                      "text": "order create time + 90 days < current time",
+                      "blocks": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "HTTP Request",
+      "level": 2,
+      "id": "http-request",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "GET `/fapi/v1/algoOrder`"
+        }
+      ]
+    },
+    {
+      "title": "Request Weight",
+      "level": 2,
+      "id": "request-weight",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "1"
+        }
+      ]
+    },
+    {
+      "title": "Request Parameters",
+      "level": 2,
+      "id": "request-parameters",
+      "blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "Name",
+            "Type",
+            "Mandatory",
+            "Description"
+          ],
+          "rows": [
+            [
+              "algoId",
+              "LONG",
+              "NO",
+              ""
+            ],
+            [
+              "clientAlgoId",
+              "STRING",
+              "NO",
+              ""
+            ],
+            [
+              "recvWindow",
+              "LONG",
+              "NO",
+              ""
+            ],
+            [
+              "timestamp",
+              "LONG",
+              "YES",
+              ""
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Notes:"
+        },
+        {
+          "type": "blockquote",
+          "text": "Either `algoId` or `clientAlgoId` must be sent. `algoId` is self-increment for each specific `symbol`"
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "json",
+          "json": {
+            "algoId": 2146760,
+            "clientAlgoId": "6B2I9XVcJpCjqPAJ4YoFX7",
+            "algoType": "CONDITIONAL",
+            "orderType": "TAKE_PROFIT",
+            "symbol": "BNBUSDT",
+            "side": "SELL",
+            "positionSide": "BOTH",
+            "timeInForce": "GTC",
+            "quantity": "0.01",
+            "algoStatus": "CANCELED",
+            "actualOrderId": "",
+            "actualPrice": "0.00000",
+            "triggerPrice": "750.000",
+            "price": "750.000",
+            "icebergQuantity": null,
+            "tpTriggerPrice": "0.000",
+            "tpPrice": "0.000",
+            "slTriggerPrice": "0.000",
+            "slPrice": "0.000",
+            "tpOrderType": "",
+            "selfTradePreventionMode": "EXPIRE_MAKER",
+            "workingType": "CONTRACT_PRICE",
+            "priceMatch": "NONE",
+            "closePosition": false,
+            "priceProtect": false,
+            "reduceOnly": false,
+            "createTime": 1750485492076,
+            "updateTime": 1750514545091,
+            "triggerTime": 0,
+            "goodTillDate": 0
+          }
+        }
+      ]
+    }
+  ],
+  "protocol": "rest",
+  "category": "rest-api",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "trade",
+    "rest-api",
+    "Query-Algo-Order.html"
+  ],
+  "api_summary": {
+    "description": "Check an algo order's status.",
+    "http_method": "GET",
+    "path": "`/fapi/v1/algoOrder`",
+    "http_request": "GET `/fapi/v1/algoOrder`",
+    "request_weight": "1",
+    "request_parameters_tables": [
+      {
+        "type": "table",
+        "headers": [
+          "Name",
+          "Type",
+          "Mandatory",
+          "Description"
+        ],
+        "rows": [
+          [
+            "algoId",
+            "LONG",
+            "NO",
+            ""
+          ],
+          [
+            "clientAlgoId",
+            "STRING",
+            "NO",
+            ""
+          ],
+          [
+            "recvWindow",
+            "LONG",
+            "NO",
+            ""
+          ],
+          [
+            "timestamp",
+            "LONG",
+            "YES",
+            ""
+          ]
+        ]
+      }
+    ],
+    "request_parameters_text": [
+      "Notes:",
+      "Either `algoId` or `clientAlgoId` must be sent. `algoId` is self-increment for each specific `symbol`"
+    ],
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "json",
+        "json": {
+          "algoId": 2146760,
+          "clientAlgoId": "6B2I9XVcJpCjqPAJ4YoFX7",
+          "algoType": "CONDITIONAL",
+          "orderType": "TAKE_PROFIT",
+          "symbol": "BNBUSDT",
+          "side": "SELL",
+          "positionSide": "BOTH",
+          "timeInForce": "GTC",
+          "quantity": "0.01",
+          "algoStatus": "CANCELED",
+          "actualOrderId": "",
+          "actualPrice": "0.00000",
+          "triggerPrice": "750.000",
+          "price": "750.000",
+          "icebergQuantity": null,
+          "tpTriggerPrice": "0.000",
+          "tpPrice": "0.000",
+          "slTriggerPrice": "0.000",
+          "slPrice": "0.000",
+          "tpOrderType": "",
+          "selfTradePreventionMode": "EXPIRE_MAKER",
+          "workingType": "CONTRACT_PRICE",
+          "priceMatch": "NONE",
+          "closePosition": false,
+          "priceProtect": false,
+          "reduceOnly": false,
+          "createTime": 1750485492076,
+          "updateTime": 1750514545091,
+          "triggerTime": 0,
+          "goodTillDate": 0
+        }
+      }
+    ]
+  }
+}

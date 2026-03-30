@@ -1,0 +1,86 @@
+{
+  "title": "Contract Info Stream",
+  "meta_description": "Stream Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "Stream Description",
+      "level": 2,
+      "id": "stream-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "ContractInfo stream pushes when contract info updates(listing/settlement/contract bracket update). `bks` field only shows up when bracket gets updated."
+        }
+      ]
+    },
+    {
+      "title": "URL PATH",
+      "level": 2,
+      "id": "url-path",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`/market`"
+        }
+      ]
+    },
+    {
+      "title": "Stream Name",
+      "level": 2,
+      "id": "stream-name",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`!contractInfo`"
+        }
+      ]
+    },
+    {
+      "title": "Update Speed",
+      "level": 2,
+      "id": "update-speed",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Real-time"
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "{\n\"e\":\"contractInfo\", // Event Type\n\"E\":1669356423908, // Event Time\n\"s\":\"IOTAUSDT\", // Symbol\n\"ps\":\"IOTAUSDT\", // Pair\n\"ct\":\"PERPETUAL\", // Contract type\n\"dt\":4133404800000, // Delivery date time\n\"ot\":1569398400000, // onboard date time\n\"cs\":\"TRADING\", // Contract status\n\"bks\":[\n{\n\"bs\":1, // Notional bracket\n\"bnf\":0, // Floor notional of this bracket\n\"bnc\":5000, // Cap notional of this bracket\n\"mmr\":0.01, // Maintenance ratio for this bracket\n\"cf\":0, // Auxiliary number for quick calculation\n\"mi\":21, // Min leverage for this bracket\n\"ma\":50 // Max leverage for this bracket\n},\n{\n\"bs\":2,\n\"bnf\":5000,\n\"bnc\":25000,\n\"mmr\":0.025,\n\"cf\":75,\n\"mi\":11,\n\"ma\":20\n}\n]\n}"
+        }
+      ]
+    }
+  ],
+  "protocol": "websocket_stream",
+  "category": "websocket-market-streams",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "websocket-market-streams",
+    "Contract-Info-Stream.html"
+  ],
+  "api_summary": {
+    "description": "ContractInfo stream pushes when contract info updates(listing/settlement/contract bracket update). `bks` field only shows up when bracket gets updated.",
+    "url_path": "`/market`",
+    "stream_name": "`!contractInfo`",
+    "update_speed": "Real-time",
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "{\n\"e\":\"contractInfo\", // Event Type\n\"E\":1669356423908, // Event Time\n\"s\":\"IOTAUSDT\", // Symbol\n\"ps\":\"IOTAUSDT\", // Pair\n\"ct\":\"PERPETUAL\", // Contract type\n\"dt\":4133404800000, // Delivery date time\n\"ot\":1569398400000, // onboard date time\n\"cs\":\"TRADING\", // Contract status\n\"bks\":[\n{\n\"bs\":1, // Notional bracket\n\"bnf\":0, // Floor notional of this bracket\n\"bnc\":5000, // Cap notional of this bracket\n\"mmr\":0.01, // Maintenance ratio for this bracket\n\"cf\":0, // Auxiliary number for quick calculation\n\"mi\":21, // Min leverage for this bracket\n\"ma\":50 // Max leverage for this bracket\n},\n{\n\"bs\":2,\n\"bnf\":5000,\n\"bnc\":25000,\n\"mmr\":0.025,\n\"cf\":75,\n\"mi\":11,\n\"ma\":20\n}\n]\n}"
+      }
+    ]
+  }
+}

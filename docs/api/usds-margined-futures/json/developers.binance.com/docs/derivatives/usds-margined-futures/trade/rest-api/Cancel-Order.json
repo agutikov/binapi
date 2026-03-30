@@ -1,0 +1,175 @@
+{
+  "title": "Cancel Order (TRADE)",
+  "meta_description": "API Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "API Description",
+      "level": 2,
+      "id": "api-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Cancel an active order."
+        }
+      ]
+    },
+    {
+      "title": "HTTP Request",
+      "level": 2,
+      "id": "http-request",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "DELETE `/fapi/v1/order`"
+        }
+      ]
+    },
+    {
+      "title": "Request Weight",
+      "level": 2,
+      "id": "request-weight",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "1"
+        }
+      ]
+    },
+    {
+      "title": "Request Parameters",
+      "level": 2,
+      "id": "request-parameters",
+      "blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "Name",
+            "Type",
+            "Mandatory",
+            "Description"
+          ],
+          "rows": [
+            [
+              "symbol",
+              "STRING",
+              "YES",
+              ""
+            ],
+            [
+              "orderId",
+              "LONG",
+              "NO",
+              ""
+            ],
+            [
+              "origClientOrderId",
+              "STRING",
+              "NO",
+              ""
+            ],
+            [
+              "recvWindow",
+              "LONG",
+              "NO",
+              ""
+            ],
+            [
+              "timestamp",
+              "LONG",
+              "YES",
+              ""
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "text": "Either `orderId` or `origClientOrderId` must be sent."
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "{\n\"clientOrderId\": \"myOrder1\",\n\"cumQty\": \"0\",\n\"cumQuote\": \"0\",\n\"executedQty\": \"0\",\n\"orderId\": 283194212,\n\"origQty\": \"11\",\n\"origType\": \"TRAILING_STOP_MARKET\",\n\"price\": \"0\",\n\"avgPrice\": \"0.00\",\n\"reduceOnly\": false,\n\"side\": \"BUY\",\n\"positionSide\": \"SHORT\",\n\"status\": \"CANCELED\",\n\"stopPrice\": \"9300\", // please ignore when order type is TRAILING_STOP_MARKET\n\"closePosition\": false, // if Close-All\n\"symbol\": \"BTCUSDT\",\n\"timeInForce\": \"GTC\",\n\"type\": \"TRAILING_STOP_MARKET\",\n\"activatePrice\": \"9020\", // activation price, only return with TRAILING_STOP_MARKET order\n\"priceRate\": \"0.3\", // callback rate, only return with TRAILING_STOP_MARKET order\n\"updateTime\": 1571110484038,\n\"workingType\": \"CONTRACT_PRICE\",\n\"priceProtect\": false, // if conditional order trigger is protected\n\"priceMatch\": \"NONE\", //price match mode\n\"selfTradePreventionMode\": \"NONE\", //self trading preventation mode\n\"goodTillDate\": 1693207680000 //order pre-set auot cancel time for TIF GTD order\n}"
+        }
+      ]
+    }
+  ],
+  "protocol": "rest",
+  "category": "rest-api",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "trade",
+    "rest-api",
+    "Cancel-Order.html"
+  ],
+  "api_summary": {
+    "description": "Cancel an active order.",
+    "http_method": "DELETE",
+    "path": "`/fapi/v1/order`",
+    "http_request": "DELETE `/fapi/v1/order`",
+    "request_weight": "1",
+    "request_parameters_tables": [
+      {
+        "type": "table",
+        "headers": [
+          "Name",
+          "Type",
+          "Mandatory",
+          "Description"
+        ],
+        "rows": [
+          [
+            "symbol",
+            "STRING",
+            "YES",
+            ""
+          ],
+          [
+            "orderId",
+            "LONG",
+            "NO",
+            ""
+          ],
+          [
+            "origClientOrderId",
+            "STRING",
+            "NO",
+            ""
+          ],
+          [
+            "recvWindow",
+            "LONG",
+            "NO",
+            ""
+          ],
+          [
+            "timestamp",
+            "LONG",
+            "YES",
+            ""
+          ]
+        ]
+      }
+    ],
+    "request_parameters_text": [
+      "Either `orderId` or `origClientOrderId` must be sent."
+    ],
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "{\n\"clientOrderId\": \"myOrder1\",\n\"cumQty\": \"0\",\n\"cumQuote\": \"0\",\n\"executedQty\": \"0\",\n\"orderId\": 283194212,\n\"origQty\": \"11\",\n\"origType\": \"TRAILING_STOP_MARKET\",\n\"price\": \"0\",\n\"avgPrice\": \"0.00\",\n\"reduceOnly\": false,\n\"side\": \"BUY\",\n\"positionSide\": \"SHORT\",\n\"status\": \"CANCELED\",\n\"stopPrice\": \"9300\", // please ignore when order type is TRAILING_STOP_MARKET\n\"closePosition\": false, // if Close-All\n\"symbol\": \"BTCUSDT\",\n\"timeInForce\": \"GTC\",\n\"type\": \"TRAILING_STOP_MARKET\",\n\"activatePrice\": \"9020\", // activation price, only return with TRAILING_STOP_MARKET order\n\"priceRate\": \"0.3\", // callback rate, only return with TRAILING_STOP_MARKET order\n\"updateTime\": 1571110484038,\n\"workingType\": \"CONTRACT_PRICE\",\n\"priceProtect\": false, // if conditional order trigger is protected\n\"priceMatch\": \"NONE\", //price match mode\n\"selfTradePreventionMode\": \"NONE\", //self trading preventation mode\n\"goodTillDate\": 1693207680000 //order pre-set auot cancel time for TIF GTD order\n}"
+      }
+    ]
+  }
+}

@@ -1,0 +1,169 @@
+{
+  "title": "Get Futures Trade Download Link by Id(USER_DATA)",
+  "meta_description": "API Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "API Description",
+      "level": 2,
+      "id": "api-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Get futures trade download link by Id"
+        }
+      ]
+    },
+    {
+      "title": "HTTP Request",
+      "level": 2,
+      "id": "http-request",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "GET `/fapi/v1/trade/asyn/id`"
+        }
+      ]
+    },
+    {
+      "title": "Request Weight",
+      "level": 2,
+      "id": "request-weight",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "10"
+        }
+      ]
+    },
+    {
+      "title": "Request Parameters",
+      "level": 2,
+      "id": "request-parameters",
+      "blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "Name",
+            "Type",
+            "Mandatory",
+            "Description"
+          ],
+          "rows": [
+            [
+              "downloadId",
+              "STRING",
+              "YES",
+              "get by download id api"
+            ],
+            [
+              "recvWindow",
+              "LONG",
+              "NO",
+              ""
+            ],
+            [
+              "timestamp",
+              "LONG",
+              "YES",
+              ""
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "text": "Download link expiration: 24h"
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "blockquote",
+          "text": "Response:"
+        },
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "{\n\"downloadId\":\"545923594199212032\",\n\"status\":\"completed\", // Enum：completed，processing\n\"url\":\"www.binance.com\", // The link is mapped to download id\n\"notified\":true, // ignore\n\"expirationTimestamp\":1645009771000, // The link would expire after this timestamp\n\"isExpired\":null,\n}"
+        },
+        {
+          "type": "blockquote",
+          "text": "OR (Response when server is processing)"
+        },
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "{\n\"downloadId\":\"545923594199212032\",\n\"status\":\"processing\",\n\"url\":\"\",\n\"notified\":false,\n\"expirationTimestamp\":-1\n\"isExpired\":null,\n\n}"
+        }
+      ]
+    }
+  ],
+  "protocol": "rest",
+  "category": "rest-api",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "account",
+    "rest-api",
+    "Get-Futures-Trade-Download-Link-by-Id.html"
+  ],
+  "api_summary": {
+    "description": "Get futures trade download link by Id",
+    "http_method": "GET",
+    "path": "`/fapi/v1/trade/asyn/id`",
+    "http_request": "GET `/fapi/v1/trade/asyn/id`",
+    "request_weight": "10",
+    "request_parameters_tables": [
+      {
+        "type": "table",
+        "headers": [
+          "Name",
+          "Type",
+          "Mandatory",
+          "Description"
+        ],
+        "rows": [
+          [
+            "downloadId",
+            "STRING",
+            "YES",
+            "get by download id api"
+          ],
+          [
+            "recvWindow",
+            "LONG",
+            "NO",
+            ""
+          ],
+          [
+            "timestamp",
+            "LONG",
+            "YES",
+            ""
+          ]
+        ]
+      }
+    ],
+    "request_parameters_text": [
+      "Download link expiration: 24h"
+    ],
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "{\n\"downloadId\":\"545923594199212032\",\n\"status\":\"completed\", // Enum：completed，processing\n\"url\":\"www.binance.com\", // The link is mapped to download id\n\"notified\":true, // ignore\n\"expirationTimestamp\":1645009771000, // The link would expire after this timestamp\n\"isExpired\":null,\n}"
+      },
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "{\n\"downloadId\":\"545923594199212032\",\n\"status\":\"processing\",\n\"url\":\"\",\n\"notified\":false,\n\"expirationTimestamp\":-1\n\"isExpired\":null,\n\n}"
+      }
+    ]
+  }
+}

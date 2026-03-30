@@ -1,0 +1,149 @@
+{
+  "title": "Symbol Configuration(USER_DATA)",
+  "meta_description": "API Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "API Description",
+      "level": 2,
+      "id": "api-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Get current account symbol configuration."
+        }
+      ]
+    },
+    {
+      "title": "HTTP Request",
+      "level": 2,
+      "id": "http-request",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "GET `/fapi/v1/symbolConfig`"
+        },
+        {
+          "type": "paragraph",
+          "text": ""
+        }
+      ]
+    },
+    {
+      "title": "Request Weight",
+      "level": 2,
+      "id": "request-weight",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "5"
+        }
+      ]
+    },
+    {
+      "title": "Request Parameters",
+      "level": 2,
+      "id": "request-parameters",
+      "blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "Name",
+            "Type",
+            "Mandatory",
+            "Description"
+          ],
+          "rows": [
+            [
+              "symbol",
+              "STRING",
+              "NO",
+              ""
+            ],
+            [
+              "recvWindow",
+              "LONG",
+              "NO",
+              ""
+            ],
+            [
+              "timestamp",
+              "LONG",
+              "YES",
+              ""
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "[\n{\n\"symbol\": \"BTCUSDT\",\n\"marginType\": \"CROSSED\",\n\"isAutoAddMargin\": false,\n\"leverage\": 21,\n\"maxNotionalValue\": \"1000000\",\n}\n]"
+        }
+      ]
+    }
+  ],
+  "protocol": "rest",
+  "category": "rest-api",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "account",
+    "rest-api",
+    "Symbol-Config.html"
+  ],
+  "api_summary": {
+    "description": "Get current account symbol configuration.",
+    "http_method": "GET",
+    "path": "`/fapi/v1/symbolConfig`",
+    "http_request": "GET `/fapi/v1/symbolConfig`",
+    "request_weight": "5",
+    "request_parameters_tables": [
+      {
+        "type": "table",
+        "headers": [
+          "Name",
+          "Type",
+          "Mandatory",
+          "Description"
+        ],
+        "rows": [
+          [
+            "symbol",
+            "STRING",
+            "NO",
+            ""
+          ],
+          [
+            "recvWindow",
+            "LONG",
+            "NO",
+            ""
+          ],
+          [
+            "timestamp",
+            "LONG",
+            "YES",
+            ""
+          ]
+        ]
+      }
+    ],
+    "request_parameters_text": [],
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "[\n{\n\"symbol\": \"BTCUSDT\",\n\"marginType\": \"CROSSED\",\n\"isAutoAddMargin\": false,\n\"leverage\": 21,\n\"maxNotionalValue\": \"1000000\",\n}\n]"
+      }
+    ]
+  }
+}

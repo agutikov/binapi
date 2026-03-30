@@ -1,0 +1,94 @@
+{
+  "title": "RPI Diff. Book Depth Streams",
+  "meta_description": "Stream Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "Stream Description",
+      "level": 2,
+      "id": "stream-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Bids and asks including RPI orders, pushed every 500 milliseconds"
+        }
+      ]
+    },
+    {
+      "title": "URL PATH",
+      "level": 2,
+      "id": "url-path",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`/public`"
+        }
+      ]
+    },
+    {
+      "title": "Stream Name",
+      "level": 2,
+      "id": "stream-name",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`<symbol>@rpiDepth@500ms`"
+        },
+        {
+          "type": "paragraph",
+          "text": "Note:"
+        },
+        {
+          "type": "blockquote",
+          "text": "RPI(Retail Price Improvement) orders are included and aggreated in the response message. When the quantity of a price level to be updated is equal to 0, it means either all quotations for this price have been filled/canceled, or the quantity of crossed RPI orders for this price are hidden"
+        }
+      ]
+    },
+    {
+      "title": "Update Speed",
+      "level": 2,
+      "id": "update-speed",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "500ms"
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "{\n\"e\": \"depthUpdate\", // Event type\n\"E\": 123456789, // Event time\n\"T\": 123456788, // Transaction time\n\"s\": \"BTCUSDT\", // Symbol\n\"U\": 157, // First update ID in event\n\"u\": 160, // Final update ID in event\n\"pu\": 149, // Final update Id in last stream(ie `u` in last stream)\n\"b\": [ // Bids to be updated\n[\n\"0.0024\", // Price level to be updated\n\"10\" // Quantity\n]\n],\n\"a\": [ // Asks to be updated\n[\n\"0.0026\", // Price level to be updated\n\"100\" // Quantity\n]\n]\n}"
+        }
+      ]
+    }
+  ],
+  "protocol": "websocket_stream",
+  "category": "websocket-market-streams",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "websocket-market-streams",
+    "Diff-Book-Depth-Streams-RPI.html"
+  ],
+  "api_summary": {
+    "description": "Bids and asks including RPI orders, pushed every 500 milliseconds",
+    "url_path": "`/public`",
+    "stream_name": "`<symbol>@rpiDepth@500ms`",
+    "update_speed": "500ms",
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "{\n\"e\": \"depthUpdate\", // Event type\n\"E\": 123456789, // Event time\n\"T\": 123456788, // Transaction time\n\"s\": \"BTCUSDT\", // Symbol\n\"U\": 157, // First update ID in event\n\"u\": 160, // Final update ID in event\n\"pu\": 149, // Final update Id in last stream(ie `u` in last stream)\n\"b\": [ // Bids to be updated\n[\n\"0.0024\", // Price level to be updated\n\"10\" // Quantity\n]\n],\n\"a\": [ // Asks to be updated\n[\n\"0.0026\", // Price level to be updated\n\"100\" // Quantity\n]\n]\n}"
+      }
+    ]
+  }
+}

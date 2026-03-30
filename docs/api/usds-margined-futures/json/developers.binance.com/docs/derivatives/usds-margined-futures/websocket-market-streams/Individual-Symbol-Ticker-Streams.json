@@ -1,0 +1,86 @@
+{
+  "title": "Individual Symbol Ticker Streams",
+  "meta_description": "Stream Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "Stream Description",
+      "level": 2,
+      "id": "stream-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "24hr rolling window ticker statistics for a single symbol. These are NOT the statistics of the UTC day, but a 24hr rolling window from requestTime to 24hrs before."
+        }
+      ]
+    },
+    {
+      "title": "URL PATH",
+      "level": 2,
+      "id": "url-path",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`/market`"
+        }
+      ]
+    },
+    {
+      "title": "Stream Name",
+      "level": 2,
+      "id": "stream-name",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`<symbol>@ticker`"
+        }
+      ]
+    },
+    {
+      "title": "Update Speed",
+      "level": 2,
+      "id": "update-speed",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "2000ms"
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "{\n\"e\": \"24hrTicker\", // Event type\n\"E\": 123456789, // Event time\n\"s\": \"BTCUSDT\", // Symbol\n\"p\": \"0.0015\", // Price change\n\"P\": \"250.00\", // Price change percent\n\"w\": \"0.0018\", // Weighted average price\n\"c\": \"0.0025\", // Last price\n\"Q\": \"10\", // Last quantity\n\"o\": \"0.0010\", // Open price\n\"h\": \"0.0025\", // High price\n\"l\": \"0.0010\", // Low price\n\"v\": \"10000\", // Total traded base asset volume\n\"q\": \"18\", // Total traded quote asset volume\n\"O\": 0, // Statistics open time\n\"C\": 86400000, // Statistics close time\n\"F\": 0, // First trade ID\n\"L\": 18150, // Last trade Id\n\"n\": 18151 // Total number of trades\n}"
+        }
+      ]
+    }
+  ],
+  "protocol": "websocket_stream",
+  "category": "websocket-market-streams",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "websocket-market-streams",
+    "Individual-Symbol-Ticker-Streams.html"
+  ],
+  "api_summary": {
+    "description": "24hr rolling window ticker statistics for a single symbol. These are NOT the statistics of the UTC day, but a 24hr rolling window from requestTime to 24hrs before.",
+    "url_path": "`/market`",
+    "stream_name": "`<symbol>@ticker`",
+    "update_speed": "2000ms",
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "{\n\"e\": \"24hrTicker\", // Event type\n\"E\": 123456789, // Event time\n\"s\": \"BTCUSDT\", // Symbol\n\"p\": \"0.0015\", // Price change\n\"P\": \"250.00\", // Price change percent\n\"w\": \"0.0018\", // Weighted average price\n\"c\": \"0.0025\", // Last price\n\"Q\": \"10\", // Last quantity\n\"o\": \"0.0010\", // Open price\n\"h\": \"0.0025\", // High price\n\"l\": \"0.0010\", // Low price\n\"v\": \"10000\", // Total traded base asset volume\n\"q\": \"18\", // Total traded quote asset volume\n\"O\": 0, // Statistics open time\n\"C\": 86400000, // Statistics close time\n\"F\": 0, // First trade ID\n\"L\": 18150, // Last trade Id\n\"n\": 18151 // Total number of trades\n}"
+      }
+    ]
+  }
+}

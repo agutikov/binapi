@@ -1,0 +1,94 @@
+{
+  "title": "Partial Book Depth Streams",
+  "meta_description": "Stream Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "Stream Description",
+      "level": 2,
+      "id": "stream-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Top <levels> bids and asks, Valid <levels> are 5, 10, or 20."
+        }
+      ]
+    },
+    {
+      "title": "URL PATH",
+      "level": 2,
+      "id": "url-path",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`/public`"
+        }
+      ]
+    },
+    {
+      "title": "Stream Name",
+      "level": 2,
+      "id": "stream-name",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`<symbol>@depth<levels>` OR `<symbol>@depth<levels>@500ms` OR `<symbol>@depth<levels>@100ms`."
+        },
+        {
+          "type": "paragraph",
+          "text": "Note:"
+        },
+        {
+          "type": "blockquote",
+          "text": "Retail Price Improvement(RPI) orders are not visible and excluded in the response message."
+        }
+      ]
+    },
+    {
+      "title": "Update Speed",
+      "level": 2,
+      "id": "update-speed",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "250ms, 500ms or 100ms"
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "{\n\"e\": \"depthUpdate\", // Event type\n\"E\": 1571889248277, // Event time\n\"T\": 1571889248276, // Transaction time\n\"s\": \"BTCUSDT\",\n\"U\": 390497796, // First update ID in event\n\"u\": 390497878, // Final update ID in event\n\"pu\": 390497794, // Final update Id in last stream(ie `u` in last stream)\n\"b\": [ // Bids to be updated\n[\n\"7403.89\", // Price Level to be updated\n\"0.002\" // Quantity\n],\n[\n\"7403.90\",\n\"3.906\"\n],\n[\n\"7404.00\",\n\"1.428\"\n],\n[\n\"7404.85\",\n\"5.239\"\n],\n[\n\"7405.43\",\n\"2.562\"\n]\n],\n\"a\": [ // Asks to be updated\n[\n\"7405.96\", // Price level to be\n\"3.340\" // Quantity\n],\n[\n\"7406.63\",\n\"4.525\"\n],\n[\n\"7407.08\",\n\"2.475\"\n],\n[\n\"7407.15\",\n\"4.800\"\n],\n[\n\"7407.20\",\n\"0.175\"\n]\n]\n}"
+        }
+      ]
+    }
+  ],
+  "protocol": "websocket_stream",
+  "category": "websocket-market-streams",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "websocket-market-streams",
+    "Partial-Book-Depth-Streams.html"
+  ],
+  "api_summary": {
+    "description": "Top <levels> bids and asks, Valid <levels> are 5, 10, or 20.",
+    "url_path": "`/public`",
+    "stream_name": "`<symbol>@depth<levels>` OR `<symbol>@depth<levels>@500ms` OR `<symbol>@depth<levels>@100ms`.",
+    "update_speed": "250ms, 500ms or 100ms",
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "{\n\"e\": \"depthUpdate\", // Event type\n\"E\": 1571889248277, // Event time\n\"T\": 1571889248276, // Transaction time\n\"s\": \"BTCUSDT\",\n\"U\": 390497796, // First update ID in event\n\"u\": 390497878, // Final update ID in event\n\"pu\": 390497794, // Final update Id in last stream(ie `u` in last stream)\n\"b\": [ // Bids to be updated\n[\n\"7403.89\", // Price Level to be updated\n\"0.002\" // Quantity\n],\n[\n\"7403.90\",\n\"3.906\"\n],\n[\n\"7404.00\",\n\"1.428\"\n],\n[\n\"7404.85\",\n\"5.239\"\n],\n[\n\"7405.43\",\n\"2.562\"\n]\n],\n\"a\": [ // Asks to be updated\n[\n\"7405.96\", // Price level to be\n\"3.340\" // Quantity\n],\n[\n\"7406.63\",\n\"4.525\"\n],\n[\n\"7407.08\",\n\"2.475\"\n],\n[\n\"7407.15\",\n\"4.800\"\n],\n[\n\"7407.20\",\n\"0.175\"\n]\n]\n}"
+      }
+    ]
+  }
+}

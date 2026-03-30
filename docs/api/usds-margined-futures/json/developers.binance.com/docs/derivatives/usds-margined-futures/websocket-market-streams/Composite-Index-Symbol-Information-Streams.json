@@ -1,0 +1,86 @@
+{
+  "title": "Composite Index Symbol Information Streams",
+  "meta_description": "Stream Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "Stream Description",
+      "level": 2,
+      "id": "stream-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Composite index information for index symbols pushed every second."
+        }
+      ]
+    },
+    {
+      "title": "URL PATH",
+      "level": 2,
+      "id": "url-path",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`/market`"
+        }
+      ]
+    },
+    {
+      "title": "Stream Name",
+      "level": 2,
+      "id": "stream-name",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`<symbol>@compositeIndex`"
+        }
+      ]
+    },
+    {
+      "title": "Update Speed",
+      "level": 2,
+      "id": "update-speed",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "1000ms"
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "{\n\"e\":\"compositeIndex\", // Event type\n\"E\":1602310596000, // Event time\n\"s\":\"DEFIUSDT\", // Symbol\n\"p\":\"554.41604065\", // Price\n\"C\":\"baseAsset\",\n\"c\":[ // Composition\n{\n\"b\":\"BAL\", // Base asset\n\"q\":\"USDT\", // Quote asset\n\"w\":\"1.04884844\", // Weight in quantity\n\"W\":\"0.01457800\", // Weight in percentage\n\"i\":\"24.33521021\" // Index price\n},\n{\n\"b\":\"BAND\",\n\"q\":\"USDT\" ,\n\"w\":\"3.53782729\",\n\"W\":\"0.03935200\",\n\"i\":\"7.26420084\"\n}\n]\n}"
+        }
+      ]
+    }
+  ],
+  "protocol": "websocket_stream",
+  "category": "websocket-market-streams",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "websocket-market-streams",
+    "Composite-Index-Symbol-Information-Streams.html"
+  ],
+  "api_summary": {
+    "description": "Composite index information for index symbols pushed every second.",
+    "url_path": "`/market`",
+    "stream_name": "`<symbol>@compositeIndex`",
+    "update_speed": "1000ms",
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "{\n\"e\":\"compositeIndex\", // Event type\n\"E\":1602310596000, // Event time\n\"s\":\"DEFIUSDT\", // Symbol\n\"p\":\"554.41604065\", // Price\n\"C\":\"baseAsset\",\n\"c\":[ // Composition\n{\n\"b\":\"BAL\", // Base asset\n\"q\":\"USDT\", // Quote asset\n\"w\":\"1.04884844\", // Weight in quantity\n\"W\":\"0.01457800\", // Weight in percentage\n\"i\":\"24.33521021\" // Index price\n},\n{\n\"b\":\"BAND\",\n\"q\":\"USDT\" ,\n\"w\":\"3.53782729\",\n\"W\":\"0.03935200\",\n\"i\":\"7.26420084\"\n}\n]\n}"
+      }
+    ]
+  }
+}

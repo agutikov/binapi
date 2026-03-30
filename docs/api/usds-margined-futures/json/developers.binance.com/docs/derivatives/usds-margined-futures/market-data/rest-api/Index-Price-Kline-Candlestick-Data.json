@@ -1,0 +1,204 @@
+{
+  "title": "Index Price Kline/Candlestick Data",
+  "meta_description": "API Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "API Description",
+      "level": 2,
+      "id": "api-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Kline/candlestick bars for the index price of a pair. Klines are uniquely identified by their open time."
+        }
+      ]
+    },
+    {
+      "title": "HTTP Request",
+      "level": 2,
+      "id": "http-request",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "GET `/fapi/v1/indexPriceKlines`"
+        }
+      ]
+    },
+    {
+      "title": "Request Weight",
+      "level": 2,
+      "id": "request-weight",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "based on parameter `LIMIT`"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "LIMIT",
+            "weight"
+          ],
+          "rows": [
+            [
+              "[1,100)",
+              "1"
+            ],
+            [
+              "[100, 500)",
+              "2"
+            ],
+            [
+              "[500, 1000]",
+              "5"
+            ],
+            [
+              "> 1000",
+              "10"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Request Parameters",
+      "level": 2,
+      "id": "request-parameters",
+      "blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "Name",
+            "Type",
+            "Mandatory",
+            "Description"
+          ],
+          "rows": [
+            [
+              "pair",
+              "STRING",
+              "YES",
+              ""
+            ],
+            [
+              "interval",
+              "ENUM",
+              "YES",
+              ""
+            ],
+            [
+              "startTime",
+              "LONG",
+              "NO",
+              ""
+            ],
+            [
+              "endTime",
+              "LONG",
+              "NO",
+              ""
+            ],
+            [
+              "limit",
+              "INT",
+              "NO",
+              "Default 500; max 1500."
+            ]
+          ]
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "If startTime and endTime are not sent, the most recent klines are returned.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "[\n[\n1591256400000, // Open time\n\"9653.69440000\", // Open\n\"9653.69640000\", // High\n\"9651.38600000\", // Low\n\"9651.55200000\", // Close (or latest price)\n\"0 \", // Ignore\n1591256459999, // Close time\n\"0\", // Ignore\n60, // Ignore\n\"0\", // Ignore\n\"0\", // Ignore\n\"0\" // Ignore\n]\n]"
+        }
+      ]
+    }
+  ],
+  "protocol": "rest",
+  "category": "rest-api",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "market-data",
+    "rest-api",
+    "Index-Price-Kline-Candlestick-Data.html"
+  ],
+  "api_summary": {
+    "description": "Kline/candlestick bars for the index price of a pair. Klines are uniquely identified by their open time.",
+    "http_method": "GET",
+    "path": "`/fapi/v1/indexPriceKlines`",
+    "http_request": "GET `/fapi/v1/indexPriceKlines`",
+    "request_weight": "based on parameter `LIMIT`",
+    "request_parameters_tables": [
+      {
+        "type": "table",
+        "headers": [
+          "Name",
+          "Type",
+          "Mandatory",
+          "Description"
+        ],
+        "rows": [
+          [
+            "pair",
+            "STRING",
+            "YES",
+            ""
+          ],
+          [
+            "interval",
+            "ENUM",
+            "YES",
+            ""
+          ],
+          [
+            "startTime",
+            "LONG",
+            "NO",
+            ""
+          ],
+          [
+            "endTime",
+            "LONG",
+            "NO",
+            ""
+          ],
+          [
+            "limit",
+            "INT",
+            "NO",
+            "Default 500; max 1500."
+          ]
+        ]
+      }
+    ],
+    "request_parameters_text": [],
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "[\n[\n1591256400000, // Open time\n\"9653.69440000\", // Open\n\"9653.69640000\", // High\n\"9651.38600000\", // Low\n\"9651.55200000\", // Close (or latest price)\n\"0 \", // Ignore\n1591256459999, // Close time\n\"0\", // Ignore\n60, // Ignore\n\"0\", // Ignore\n\"0\", // Ignore\n\"0\" // Ignore\n]\n]"
+      }
+    ]
+  }
+}

@@ -1,0 +1,170 @@
+{
+  "protocol": "websocket_api",
+  "pages": [
+    {
+      "title": "Account Information V2(USER_DATA)",
+      "protocol": "websocket_api",
+      "category": "websocket-api",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/account/websocket-api/Account-Information-V2.json",
+      "http_method": null,
+      "path": null,
+      "method": "`v2/account.status`",
+      "stream_name": null,
+      "event_name": null
+    },
+    {
+      "title": "Account Information(USER_DATA)",
+      "protocol": "websocket_api",
+      "category": "websocket-api",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/account/websocket-api/Account-Information.json",
+      "http_method": null,
+      "path": null,
+      "method": "`account.status`",
+      "stream_name": null,
+      "event_name": null
+    },
+    {
+      "title": "Futures Account Balance(USER_DATA)",
+      "protocol": "websocket_api",
+      "category": "websocket-api",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/account/websocket-api/Futures-Account-Balance.json",
+      "http_method": null,
+      "path": null,
+      "method": "`account.balance`",
+      "stream_name": null,
+      "event_name": null
+    },
+    {
+      "title": "Futures Account Balance V2(USER_DATA)",
+      "protocol": "websocket_api",
+      "category": "account",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/account/websocket-api.json",
+      "http_method": null,
+      "path": null,
+      "method": "`v2/account.balance`",
+      "stream_name": null,
+      "event_name": null
+    },
+    {
+      "title": "Symbol Order Book Ticker",
+      "protocol": "websocket_api",
+      "category": "websocket-api",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/market-data/websocket-api/Symbol-Order-Book-Ticker.json",
+      "http_method": null,
+      "path": null,
+      "method": "`ticker.book`",
+      "stream_name": null,
+      "event_name": null
+    },
+    {
+      "title": "Symbol Price Ticker",
+      "protocol": "websocket_api",
+      "category": "websocket-api",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/market-data/websocket-api/Symbol-Price-Ticker.json",
+      "http_method": null,
+      "path": null,
+      "method": "`ticker.price`",
+      "stream_name": null,
+      "event_name": null
+    },
+    {
+      "title": "Order Book",
+      "protocol": "websocket_api",
+      "category": "market-data",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/market-data/websocket-api.json",
+      "http_method": null,
+      "path": null,
+      "method": "`depth`",
+      "stream_name": null,
+      "event_name": null
+    },
+    {
+      "title": "Cancel Algo Order (TRADE)",
+      "protocol": "websocket_api",
+      "category": "websocket-api",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/trade/websocket-api/Cancel-Algo-Order.json",
+      "http_method": null,
+      "path": null,
+      "method": "`algoOrder.cancel`",
+      "stream_name": null,
+      "event_name": null
+    },
+    {
+      "title": "Cancel Order (TRADE)",
+      "protocol": "websocket_api",
+      "category": "websocket-api",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/trade/websocket-api/Cancel-Order.json",
+      "http_method": null,
+      "path": null,
+      "method": "`order.cancel`",
+      "stream_name": null,
+      "event_name": null
+    },
+    {
+      "title": "Modify Order (TRADE)",
+      "protocol": "websocket_api",
+      "category": "websocket-api",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/trade/websocket-api/Modify-Order.json",
+      "http_method": null,
+      "path": null,
+      "method": "`order.modify`",
+      "stream_name": null,
+      "event_name": null
+    },
+    {
+      "title": "New Algo Order(TRADE)",
+      "protocol": "websocket_api",
+      "category": "websocket-api",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/trade/websocket-api/New-Algo-Order.json",
+      "http_method": null,
+      "path": null,
+      "method": "`algoOrder.place`",
+      "stream_name": null,
+      "event_name": null
+    },
+    {
+      "title": "Position Information V2 (USER_DATA)",
+      "protocol": "websocket_api",
+      "category": "websocket-api",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/trade/websocket-api/Position-Info-V2.json",
+      "http_method": null,
+      "path": null,
+      "method": "`v2/account.position`",
+      "stream_name": null,
+      "event_name": null
+    },
+    {
+      "title": "Position Information (USER_DATA)",
+      "protocol": "websocket_api",
+      "category": "websocket-api",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/trade/websocket-api/Position-Information.json",
+      "http_method": null,
+      "path": null,
+      "method": "`account.position`",
+      "stream_name": null,
+      "event_name": null
+    },
+    {
+      "title": "Query Order (USER_DATA)",
+      "protocol": "websocket_api",
+      "category": "websocket-api",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/trade/websocket-api/Query-Order.json",
+      "http_method": null,
+      "path": null,
+      "method": "`order.status`",
+      "stream_name": null,
+      "event_name": null
+    },
+    {
+      "title": "New Order(TRADE)",
+      "protocol": "websocket_api",
+      "category": "trade",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/trade/websocket-api.json",
+      "http_method": null,
+      "path": null,
+      "method": "`order.place`",
+      "stream_name": null,
+      "event_name": null
+    }
+  ]
+}

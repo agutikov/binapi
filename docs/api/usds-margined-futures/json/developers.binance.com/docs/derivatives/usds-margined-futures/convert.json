@@ -1,0 +1,155 @@
+{
+  "title": "List All Convert Pairs",
+  "meta_description": "API Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "API Description",
+      "level": 2,
+      "id": "api-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Query for all convertible token pairs and the tokens’ respective upper/lower limits"
+        }
+      ]
+    },
+    {
+      "title": "HTTP Request",
+      "level": 2,
+      "id": "http-request",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "GET `/fapi/v1/convert/exchangeInfo`"
+        }
+      ]
+    },
+    {
+      "title": "Request Weight",
+      "level": 2,
+      "id": "request-weight",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "20(IP)"
+        }
+      ]
+    },
+    {
+      "title": "Request Parameters",
+      "level": 2,
+      "id": "request-parameters",
+      "blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "Name",
+            "Type",
+            "Mandatory",
+            "Description"
+          ],
+          "rows": [
+            [
+              "fromAsset",
+              "STRING",
+              "EITHER OR BOTH",
+              "User spends coin"
+            ],
+            [
+              "toAsset",
+              "STRING",
+              "EITHER OR BOTH",
+              "User receives coin"
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "text": "User needs to supply either or both of the input parameter If not defined for both fromAsset and toAsset, only partial token pairs will be returned Asset BNFCR is only available to convert for MICA region users."
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "json",
+          "json": [
+            {
+              "fromAsset": "BTC",
+              "toAsset": "USDT",
+              "fromAssetMinAmount": "0.0004",
+              "fromAssetMaxAmount": "50",
+              "toAssetMinAmount": "20",
+              "toAssetMaxAmount": "2500000"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "protocol": "reference",
+  "category": "usds-margined-futures",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "convert.html"
+  ],
+  "api_summary": {
+    "description": "Query for all convertible token pairs and the tokens’ respective upper/lower limits",
+    "http_method": "GET",
+    "path": "`/fapi/v1/convert/exchangeInfo`",
+    "http_request": "GET `/fapi/v1/convert/exchangeInfo`",
+    "request_weight": "20(IP)",
+    "request_parameters_tables": [
+      {
+        "type": "table",
+        "headers": [
+          "Name",
+          "Type",
+          "Mandatory",
+          "Description"
+        ],
+        "rows": [
+          [
+            "fromAsset",
+            "STRING",
+            "EITHER OR BOTH",
+            "User spends coin"
+          ],
+          [
+            "toAsset",
+            "STRING",
+            "EITHER OR BOTH",
+            "User receives coin"
+          ]
+        ]
+      }
+    ],
+    "request_parameters_text": [
+      "User needs to supply either or both of the input parameter If not defined for both fromAsset and toAsset, only partial token pairs will be returned Asset BNFCR is only available to convert for MICA region users."
+    ],
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "json",
+        "json": [
+          {
+            "fromAsset": "BTC",
+            "toAsset": "USDT",
+            "fromAssetMinAmount": "0.0004",
+            "fromAssetMaxAmount": "50",
+            "toAssetMinAmount": "20",
+            "toAssetMaxAmount": "2500000"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "title": "Event: Account Configuration Update previous Leverage Update",
+  "meta_description": "Event Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "Event Description",
+      "level": 2,
+      "id": "event-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "When the account configuration is changed, the event type will be pushed as `ACCOUNT_CONFIG_UPDATE` When the leverage of a trade pair changes, the payload will contain the object `ac` to represent the account configuration of the trade pair, where `s` represents the specific trade pair and `l` represents the leverage When the user Multi-Assets margin mode changes the payload will contain the object `ai` representing the user account configuration, where `j` represents the user Multi-Assets margin mode"
+        }
+      ]
+    },
+    {
+      "title": "URL PATH",
+      "level": 2,
+      "id": "url-path",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`/private`"
+        }
+      ]
+    },
+    {
+      "title": "Event Name",
+      "level": 2,
+      "id": "event-name",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`ACCOUNT_CONFIG_UPDATE`"
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "blockquote",
+          "text": "Payload:"
+        },
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "{\n\"e\":\"ACCOUNT_CONFIG_UPDATE\", // Event Type\n\"E\":1611646737479, // Event Time\n\"T\":1611646737476, // Transaction Time\n\"ac\":{\n\"s\":\"BTCUSDT\", // symbol\n\"l\":25 // leverage\n\n}\n}"
+        },
+        {
+          "type": "blockquote",
+          "text": "Or"
+        },
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "{\n\"e\":\"ACCOUNT_CONFIG_UPDATE\", // Event Type\n\"E\":1611646737479, // Event Time\n\"T\":1611646737476, // Transaction Time\n\"ai\":{ // User's Account Configuration\n\"j\":true // Multi-Assets Mode\n}\n}"
+        }
+      ]
+    }
+  ],
+  "protocol": "user_data_stream",
+  "category": "user-data-streams",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "user-data-streams",
+    "Event-Account-Configuration-Update-previous-Leverage-Update.html"
+  ],
+  "api_summary": {
+    "description": "When the account configuration is changed, the event type will be pushed as `ACCOUNT_CONFIG_UPDATE` When the leverage of a trade pair changes, the payload will contain the object `ac` to represent the account configuration of the trade pair, where `s` represents the specific trade pair and `l` represents the leverage When the user Multi-Assets margin mode changes the payload will contain the object `ai` representing the user account configuration, where `j` represents the user Multi-Assets margin mode",
+    "url_path": "`/private`",
+    "event_name": "`ACCOUNT_CONFIG_UPDATE`",
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "{\n\"e\":\"ACCOUNT_CONFIG_UPDATE\", // Event Type\n\"E\":1611646737479, // Event Time\n\"T\":1611646737476, // Transaction Time\n\"ac\":{\n\"s\":\"BTCUSDT\", // symbol\n\"l\":25 // leverage\n\n}\n}"
+      },
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "{\n\"e\":\"ACCOUNT_CONFIG_UPDATE\", // Event Type\n\"E\":1611646737479, // Event Time\n\"T\":1611646737476, // Transaction Time\n\"ai\":{ // User's Account Configuration\n\"j\":true // Multi-Assets Mode\n}\n}"
+      }
+    ]
+  }
+}

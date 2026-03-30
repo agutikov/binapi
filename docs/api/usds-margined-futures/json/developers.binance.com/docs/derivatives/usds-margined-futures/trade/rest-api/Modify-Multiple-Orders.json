@@ -1,0 +1,298 @@
+{
+  "title": "Modify Multiple Orders(TRADE)",
+  "meta_description": "API Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "API Description",
+      "level": 2,
+      "id": "api-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Modify Multiple Orders (TRADE)"
+        }
+      ]
+    },
+    {
+      "title": "HTTP Request",
+      "level": 2,
+      "id": "http-request",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "PUT `/fapi/v1/batchOrders`"
+        }
+      ]
+    },
+    {
+      "title": "Request Weight",
+      "level": 2,
+      "id": "request-weight",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "5 on 10s order rate limit(X-MBX-ORDER-COUNT-10S); 1 on 1min order rate limit(X-MBX-ORDER-COUNT-1M); 5 on IP rate limit(x-mbx-used-weight-1m);"
+        }
+      ]
+    },
+    {
+      "title": "Request Parameters",
+      "level": 2,
+      "id": "request-parameters",
+      "blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "Name",
+            "Type",
+            "Mandatory",
+            "Description"
+          ],
+          "rows": [
+            [
+              "batchOrders",
+              "list<JSON>",
+              "YES",
+              "order list. Max 5 orders"
+            ],
+            [
+              "recvWindow",
+              "LONG",
+              "NO",
+              ""
+            ],
+            [
+              "timestamp",
+              "LONG",
+              "YES",
+              ""
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Where `batchOrders` is the list of order parameters in JSON"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "Name",
+            "Type",
+            "Mandatory",
+            "Description"
+          ],
+          "rows": [
+            [
+              "orderId",
+              "LONG",
+              "NO",
+              ""
+            ],
+            [
+              "origClientOrderId",
+              "STRING",
+              "NO",
+              ""
+            ],
+            [
+              "symbol",
+              "STRING",
+              "YES",
+              ""
+            ],
+            [
+              "side",
+              "ENUM",
+              "YES",
+              "`SELL`, `BUY`"
+            ],
+            [
+              "quantity",
+              "DECIMAL",
+              "YES",
+              "Order quantity, cannot be sent with `closePosition=true`"
+            ],
+            [
+              "price",
+              "DECIMAL",
+              "YES",
+              ""
+            ],
+            [
+              "priceMatch",
+              "ENUM",
+              "NO",
+              "only avaliable for `LIMIT`/`STOP`/`TAKE_PROFIT` order; can be set to `OPPONENT`/ `OPPONENT_5`/ `OPPONENT_10`/ `OPPONENT_20`: /`QUEUE`/ `QUEUE_5`/ `QUEUE_10`/ `QUEUE_20`; Can't be passed together with `price`"
+            ],
+            [
+              "stopPrice",
+              "DECIMAL",
+              "NO",
+              "stop price, only `STOP`, `STOP_MARKET`, `TAKE_PROFIT`, `TAKE_PROFIT_MARKET` need"
+            ],
+            [
+              "recvWindow",
+              "LONG",
+              "NO",
+              ""
+            ],
+            [
+              "timestamp",
+              "LONG",
+              "YES",
+              ""
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "text": "Parameter rules are same with `Modify Order` Batch modify orders are processed concurrently, and the order of matching is not guaranteed. The order of returned contents for batch modify orders is the same as the order of the order list. One order can only be modfied for less than 10000 times"
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "[\n{\n\"orderId\": 20072994037,\n\"symbol\": \"BTCUSDT\",\n\"pair\": \"BTCUSDT\",\n\"status\": \"NEW\",\n\"clientOrderId\": \"LJ9R4QZDihCaS8UAOOLpgW\",\n\"price\": \"30005\",\n\"avgPrice\": \"0.0\",\n\"origQty\": \"1\",\n\"executedQty\": \"0\",\n\"cumQty\": \"0\",\n\"cumBase\": \"0\",\n\"timeInForce\": \"GTC\",\n\"type\": \"LIMIT\",\n\"reduceOnly\": false,\n\"closePosition\": false,\n\"side\": \"BUY\",\n\"positionSide\": \"LONG\",\n\"stopPrice\": \"0\",\n\"workingType\": \"CONTRACT_PRICE\",\n\"priceProtect\": false,\n\"origType\": \"LIMIT\",\n\"priceMatch\": \"NONE\", //price match mode\n\"selfTradePreventionMode\": \"NONE\", //self trading preventation mode\n\"goodTillDate\": 0, //order pre-set auot cancel time for TIF GTD order\n\"updateTime\": 1629182711600\n},\n{\n\"code\": -2022,\n\"msg\": \"ReduceOnly Order is rejected.\"\n}\n]"
+        }
+      ]
+    }
+  ],
+  "protocol": "rest",
+  "category": "rest-api",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "trade",
+    "rest-api",
+    "Modify-Multiple-Orders.html"
+  ],
+  "api_summary": {
+    "description": "Modify Multiple Orders (TRADE)",
+    "http_method": "PUT",
+    "path": "`/fapi/v1/batchOrders`",
+    "http_request": "PUT `/fapi/v1/batchOrders`",
+    "request_weight": "5 on 10s order rate limit(X-MBX-ORDER-COUNT-10S); 1 on 1min order rate limit(X-MBX-ORDER-COUNT-1M); 5 on IP rate limit(x-mbx-used-weight-1m);",
+    "request_parameters_tables": [
+      {
+        "type": "table",
+        "headers": [
+          "Name",
+          "Type",
+          "Mandatory",
+          "Description"
+        ],
+        "rows": [
+          [
+            "batchOrders",
+            "list<JSON>",
+            "YES",
+            "order list. Max 5 orders"
+          ],
+          [
+            "recvWindow",
+            "LONG",
+            "NO",
+            ""
+          ],
+          [
+            "timestamp",
+            "LONG",
+            "YES",
+            ""
+          ]
+        ]
+      },
+      {
+        "type": "table",
+        "headers": [
+          "Name",
+          "Type",
+          "Mandatory",
+          "Description"
+        ],
+        "rows": [
+          [
+            "orderId",
+            "LONG",
+            "NO",
+            ""
+          ],
+          [
+            "origClientOrderId",
+            "STRING",
+            "NO",
+            ""
+          ],
+          [
+            "symbol",
+            "STRING",
+            "YES",
+            ""
+          ],
+          [
+            "side",
+            "ENUM",
+            "YES",
+            "`SELL`, `BUY`"
+          ],
+          [
+            "quantity",
+            "DECIMAL",
+            "YES",
+            "Order quantity, cannot be sent with `closePosition=true`"
+          ],
+          [
+            "price",
+            "DECIMAL",
+            "YES",
+            ""
+          ],
+          [
+            "priceMatch",
+            "ENUM",
+            "NO",
+            "only avaliable for `LIMIT`/`STOP`/`TAKE_PROFIT` order; can be set to `OPPONENT`/ `OPPONENT_5`/ `OPPONENT_10`/ `OPPONENT_20`: /`QUEUE`/ `QUEUE_5`/ `QUEUE_10`/ `QUEUE_20`; Can't be passed together with `price`"
+          ],
+          [
+            "stopPrice",
+            "DECIMAL",
+            "NO",
+            "stop price, only `STOP`, `STOP_MARKET`, `TAKE_PROFIT`, `TAKE_PROFIT_MARKET` need"
+          ],
+          [
+            "recvWindow",
+            "LONG",
+            "NO",
+            ""
+          ],
+          [
+            "timestamp",
+            "LONG",
+            "YES",
+            ""
+          ]
+        ]
+      }
+    ],
+    "request_parameters_text": [
+      "Where `batchOrders` is the list of order parameters in JSON",
+      "Parameter rules are same with `Modify Order` Batch modify orders are processed concurrently, and the order of matching is not guaranteed. The order of returned contents for batch modify orders is the same as the order of the order list. One order can only be modfied for less than 10000 times"
+    ],
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "[\n{\n\"orderId\": 20072994037,\n\"symbol\": \"BTCUSDT\",\n\"pair\": \"BTCUSDT\",\n\"status\": \"NEW\",\n\"clientOrderId\": \"LJ9R4QZDihCaS8UAOOLpgW\",\n\"price\": \"30005\",\n\"avgPrice\": \"0.0\",\n\"origQty\": \"1\",\n\"executedQty\": \"0\",\n\"cumQty\": \"0\",\n\"cumBase\": \"0\",\n\"timeInForce\": \"GTC\",\n\"type\": \"LIMIT\",\n\"reduceOnly\": false,\n\"closePosition\": false,\n\"side\": \"BUY\",\n\"positionSide\": \"LONG\",\n\"stopPrice\": \"0\",\n\"workingType\": \"CONTRACT_PRICE\",\n\"priceProtect\": false,\n\"origType\": \"LIMIT\",\n\"priceMatch\": \"NONE\", //price match mode\n\"selfTradePreventionMode\": \"NONE\", //self trading preventation mode\n\"goodTillDate\": 0, //order pre-set auot cancel time for TIF GTD order\n\"updateTime\": 1629182711600\n},\n{\n\"code\": -2022,\n\"msg\": \"ReduceOnly Order is rejected.\"\n}\n]"
+      }
+    ]
+  }
+}

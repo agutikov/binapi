@@ -1,0 +1,204 @@
+{
+  "title": "Symbol Price Ticker",
+  "meta_description": "API Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "API Description",
+      "level": 2,
+      "id": "api-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Latest price for a symbol or symbols."
+        }
+      ]
+    },
+    {
+      "title": "Method",
+      "level": 2,
+      "id": "method",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`ticker.price`"
+        }
+      ]
+    },
+    {
+      "title": "Request",
+      "level": 2,
+      "id": "request",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "json",
+          "json": {
+            "id": "9d32157c-a556-4d27-9866-66760a174b57",
+            "method": "ticker.price",
+            "params": {
+              "symbol": "BTCUSDT"
+            }
+          }
+        },
+        {
+          "type": "paragraph",
+          "text": "Weight:"
+        },
+        {
+          "type": "paragraph",
+          "text": "1 for a single symbol; 2 when the symbol parameter is omitted"
+        }
+      ]
+    },
+    {
+      "title": "Request Parameters",
+      "level": 2,
+      "id": "request-parameters",
+      "blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "Name",
+            "Type",
+            "Mandatory",
+            "Description"
+          ],
+          "rows": [
+            [
+              "symbol",
+              "STRING",
+              "NO",
+              ""
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "text": "If the symbol is not sent, prices for all symbols will be returned in an array."
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "{\n\"id\": \"9d32157c-a556-4d27-9866-66760a174b57\",\n\"status\": 200,\n\"result\": {\n\"symbol\": \"BTCUSDT\",\n\"price\": \"6000.01\",\n\"time\": 1589437530011 // Transaction time\n},\n\"rateLimits\": [\n{\n\"rateLimitType\": \"REQUEST_WEIGHT\",\n\"interval\": \"MINUTE\",\n\"intervalNum\": 1,\n\"limit\": 2400,\n\"count\": 2\n}\n]\n}"
+        },
+        {
+          "type": "blockquote",
+          "text": "OR"
+        },
+        {
+          "type": "code",
+          "language": "json",
+          "json": {
+            "id": "9d32157c-a556-4d27-9866-66760a174b57",
+            "status": 200,
+            "result": [
+              {
+                "symbol": "BTCUSDT",
+                "price": "6000.01",
+                "time": 1589437530011
+              }
+            ],
+            "rateLimits": [
+              {
+                "rateLimitType": "REQUEST_WEIGHT",
+                "interval": "MINUTE",
+                "intervalNum": 1,
+                "limit": 2400,
+                "count": 2
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "protocol": "websocket_api",
+  "category": "websocket-api",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "market-data",
+    "websocket-api",
+    "Symbol-Price-Ticker.html"
+  ],
+  "api_summary": {
+    "description": "Latest price for a symbol or symbols.",
+    "method": "`ticker.price`",
+    "request_parameters_tables": [
+      {
+        "type": "table",
+        "headers": [
+          "Name",
+          "Type",
+          "Mandatory",
+          "Description"
+        ],
+        "rows": [
+          [
+            "symbol",
+            "STRING",
+            "NO",
+            ""
+          ]
+        ]
+      }
+    ],
+    "request_parameters_text": [
+      "If the symbol is not sent, prices for all symbols will be returned in an array."
+    ],
+    "request_code_blocks": [
+      {
+        "type": "code",
+        "language": "json",
+        "json": {
+          "id": "9d32157c-a556-4d27-9866-66760a174b57",
+          "method": "ticker.price",
+          "params": {
+            "symbol": "BTCUSDT"
+          }
+        }
+      }
+    ],
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "{\n\"id\": \"9d32157c-a556-4d27-9866-66760a174b57\",\n\"status\": 200,\n\"result\": {\n\"symbol\": \"BTCUSDT\",\n\"price\": \"6000.01\",\n\"time\": 1589437530011 // Transaction time\n},\n\"rateLimits\": [\n{\n\"rateLimitType\": \"REQUEST_WEIGHT\",\n\"interval\": \"MINUTE\",\n\"intervalNum\": 1,\n\"limit\": 2400,\n\"count\": 2\n}\n]\n}"
+      },
+      {
+        "type": "code",
+        "language": "json",
+        "json": {
+          "id": "9d32157c-a556-4d27-9866-66760a174b57",
+          "status": 200,
+          "result": [
+            {
+              "symbol": "BTCUSDT",
+              "price": "6000.01",
+              "time": 1589437530011
+            }
+          ],
+          "rateLimits": [
+            {
+              "rateLimitType": "REQUEST_WEIGHT",
+              "interval": "MINUTE",
+              "intervalNum": 1,
+              "limit": 2400,
+              "count": 2
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

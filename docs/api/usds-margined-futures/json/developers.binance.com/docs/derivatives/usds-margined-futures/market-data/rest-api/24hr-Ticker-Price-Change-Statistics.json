@@ -1,0 +1,145 @@
+{
+  "title": "24hr Ticker Price Change Statistics",
+  "meta_description": "API Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "API Description",
+      "level": 2,
+      "id": "api-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "24 hour rolling window price change statistics. Careful when accessing this with no symbol."
+        }
+      ]
+    },
+    {
+      "title": "HTTP Request",
+      "level": 2,
+      "id": "http-request",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "GET `/fapi/v1/ticker/24hr`"
+        }
+      ]
+    },
+    {
+      "title": "Request Weight",
+      "level": 2,
+      "id": "request-weight",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "1 for a single symbol; 40 when the symbol parameter is omitted"
+        }
+      ]
+    },
+    {
+      "title": "Request Parameters",
+      "level": 2,
+      "id": "request-parameters",
+      "blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "Name",
+            "Type",
+            "Mandatory",
+            "Description"
+          ],
+          "rows": [
+            [
+              "symbol",
+              "STRING",
+              "NO",
+              ""
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "text": "If the symbol is not sent, tickers for all symbols will be returned in an array."
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "blockquote",
+          "text": "Response:"
+        },
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "{\n\"symbol\": \"BTCUSDT\",\n\"priceChange\": \"-94.99999800\",\n\"priceChangePercent\": \"-95.960\",\n\"weightedAvgPrice\": \"0.29628482\",\n\"lastPrice\": \"4.00000200\",\n\"lastQty\": \"200.00000000\",\n\"openPrice\": \"99.00000000\",\n\"highPrice\": \"100.00000000\",\n\"lowPrice\": \"0.10000000\",\n\"volume\": \"8913.30000000\",\n\"quoteVolume\": \"15.30000000\",\n\"openTime\": 1499783499040,\n\"closeTime\": 1499869899040,\n\"firstId\": 28385, // First tradeId\n\"lastId\": 28460, // Last tradeId\n\"count\": 76 // Trade count\n}"
+        },
+        {
+          "type": "blockquote",
+          "text": "OR"
+        },
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "[\n{\n\"symbol\": \"BTCUSDT\",\n\"priceChange\": \"-94.99999800\",\n\"priceChangePercent\": \"-95.960\",\n\"weightedAvgPrice\": \"0.29628482\",\n\"lastPrice\": \"4.00000200\",\n\"lastQty\": \"200.00000000\",\n\"openPrice\": \"99.00000000\",\n\"highPrice\": \"100.00000000\",\n\"lowPrice\": \"0.10000000\",\n\"volume\": \"8913.30000000\",\n\"quoteVolume\": \"15.30000000\",\n\"openTime\": 1499783499040,\n\"closeTime\": 1499869899040,\n\"firstId\": 28385, // First tradeId\n\"lastId\": 28460, // Last tradeId\n\"count\": 76 // Trade count\n}\n]"
+        }
+      ]
+    }
+  ],
+  "protocol": "rest",
+  "category": "rest-api",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "market-data",
+    "rest-api",
+    "24hr-Ticker-Price-Change-Statistics.html"
+  ],
+  "api_summary": {
+    "description": "24 hour rolling window price change statistics. Careful when accessing this with no symbol.",
+    "http_method": "GET",
+    "path": "`/fapi/v1/ticker/24hr`",
+    "http_request": "GET `/fapi/v1/ticker/24hr`",
+    "request_weight": "1 for a single symbol; 40 when the symbol parameter is omitted",
+    "request_parameters_tables": [
+      {
+        "type": "table",
+        "headers": [
+          "Name",
+          "Type",
+          "Mandatory",
+          "Description"
+        ],
+        "rows": [
+          [
+            "symbol",
+            "STRING",
+            "NO",
+            ""
+          ]
+        ]
+      }
+    ],
+    "request_parameters_text": [
+      "If the symbol is not sent, tickers for all symbols will be returned in an array."
+    ],
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "{\n\"symbol\": \"BTCUSDT\",\n\"priceChange\": \"-94.99999800\",\n\"priceChangePercent\": \"-95.960\",\n\"weightedAvgPrice\": \"0.29628482\",\n\"lastPrice\": \"4.00000200\",\n\"lastQty\": \"200.00000000\",\n\"openPrice\": \"99.00000000\",\n\"highPrice\": \"100.00000000\",\n\"lowPrice\": \"0.10000000\",\n\"volume\": \"8913.30000000\",\n\"quoteVolume\": \"15.30000000\",\n\"openTime\": 1499783499040,\n\"closeTime\": 1499869899040,\n\"firstId\": 28385, // First tradeId\n\"lastId\": 28460, // Last tradeId\n\"count\": 76 // Trade count\n}"
+      },
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "[\n{\n\"symbol\": \"BTCUSDT\",\n\"priceChange\": \"-94.99999800\",\n\"priceChangePercent\": \"-95.960\",\n\"weightedAvgPrice\": \"0.29628482\",\n\"lastPrice\": \"4.00000200\",\n\"lastQty\": \"200.00000000\",\n\"openPrice\": \"99.00000000\",\n\"highPrice\": \"100.00000000\",\n\"lowPrice\": \"0.10000000\",\n\"volume\": \"8913.30000000\",\n\"quoteVolume\": \"15.30000000\",\n\"openTime\": 1499783499040,\n\"closeTime\": 1499869899040,\n\"firstId\": 28385, // First tradeId\n\"lastId\": 28460, // Last tradeId\n\"count\": 76 // Trade count\n}\n]"
+      }
+    ]
+  }
+}

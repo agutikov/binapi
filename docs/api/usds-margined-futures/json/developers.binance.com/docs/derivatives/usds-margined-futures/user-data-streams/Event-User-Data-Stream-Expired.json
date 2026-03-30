@@ -1,0 +1,82 @@
+{
+  "title": "Event: User Data Stream Expired",
+  "meta_description": "Event Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "Event Description",
+      "level": 2,
+      "id": "event-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "When the `listenKey` used for the user data stream turns expired, this event will be pushed."
+        },
+        {
+          "type": "paragraph",
+          "text": "Notice:"
+        },
+        {
+          "type": "blockquote",
+          "text": "This event is not related to the websocket disconnection. This event will be received only when a valid `listenKey` in connection got expired. No more user data event will be updated after this event received until a new valid `listenKey` used."
+        }
+      ]
+    },
+    {
+      "title": "URL PATH",
+      "level": 2,
+      "id": "url-path",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`/private`"
+        }
+      ]
+    },
+    {
+      "title": "Event Name",
+      "level": 2,
+      "id": "event-name",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`listenKeyExpired`"
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "{\n\"e\": \"listenKeyExpired\", // event type\n\"E\": \"1736996475556\", // event time\n\"listenKey\":\"WsCMN0a4KHUPTQuX6IUnqEZfB1inxmv1qR4kbf1LuEjur5VdbzqvyxqG9TSjVVxv\"\n}"
+        }
+      ]
+    }
+  ],
+  "protocol": "user_data_stream",
+  "category": "user-data-streams",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "user-data-streams",
+    "Event-User-Data-Stream-Expired.html"
+  ],
+  "api_summary": {
+    "description": "When the `listenKey` used for the user data stream turns expired, this event will be pushed.",
+    "url_path": "`/private`",
+    "event_name": "`listenKeyExpired`",
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "{\n\"e\": \"listenKeyExpired\", // event type\n\"E\": \"1736996475556\", // event time\n\"listenKey\":\"WsCMN0a4KHUPTQuX6IUnqEZfB1inxmv1qR4kbf1LuEjur5VdbzqvyxqG9TSjVVxv\"\n}"
+      }
+    ]
+  }
+}

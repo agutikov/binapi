@@ -1,0 +1,197 @@
+{
+  "title": "Modify Isolated Position Margin(TRADE)",
+  "meta_description": "API Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "API Description",
+      "level": 2,
+      "id": "api-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Modify Isolated Position Margin"
+        }
+      ]
+    },
+    {
+      "title": "HTTP Request",
+      "level": 2,
+      "id": "http-request",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "POST `/fapi/v1/positionMargin`"
+        }
+      ]
+    },
+    {
+      "title": "Request Weight",
+      "level": 2,
+      "id": "request-weight",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "1"
+        }
+      ]
+    },
+    {
+      "title": "Request Parameters",
+      "level": 2,
+      "id": "request-parameters",
+      "blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "Name",
+            "Type",
+            "Mandatory",
+            "Description"
+          ],
+          "rows": [
+            [
+              "symbol",
+              "STRING",
+              "YES",
+              ""
+            ],
+            [
+              "positionSide",
+              "ENUM",
+              "NO",
+              "Default `BOTH` for One-way Mode ; `LONG` or `SHORT` for Hedge Mode. It must be sent with Hedge Mode."
+            ],
+            [
+              "amount",
+              "DECIMAL",
+              "YES",
+              ""
+            ],
+            [
+              "type",
+              "INT",
+              "YES",
+              "1: Add position margin，2: Reduce position margin"
+            ],
+            [
+              "recvWindow",
+              "LONG",
+              "NO",
+              ""
+            ],
+            [
+              "timestamp",
+              "LONG",
+              "YES",
+              ""
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "text": "Only for isolated symbol"
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "json",
+          "json": {
+            "amount": 100.0,
+            "code": 200,
+            "msg": "Successfully modify position margin.",
+            "type": 1
+          }
+        }
+      ]
+    }
+  ],
+  "protocol": "rest",
+  "category": "rest-api",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "trade",
+    "rest-api",
+    "Modify-Isolated-Position-Margin.html"
+  ],
+  "api_summary": {
+    "description": "Modify Isolated Position Margin",
+    "http_method": "POST",
+    "path": "`/fapi/v1/positionMargin`",
+    "http_request": "POST `/fapi/v1/positionMargin`",
+    "request_weight": "1",
+    "request_parameters_tables": [
+      {
+        "type": "table",
+        "headers": [
+          "Name",
+          "Type",
+          "Mandatory",
+          "Description"
+        ],
+        "rows": [
+          [
+            "symbol",
+            "STRING",
+            "YES",
+            ""
+          ],
+          [
+            "positionSide",
+            "ENUM",
+            "NO",
+            "Default `BOTH` for One-way Mode ; `LONG` or `SHORT` for Hedge Mode. It must be sent with Hedge Mode."
+          ],
+          [
+            "amount",
+            "DECIMAL",
+            "YES",
+            ""
+          ],
+          [
+            "type",
+            "INT",
+            "YES",
+            "1: Add position margin，2: Reduce position margin"
+          ],
+          [
+            "recvWindow",
+            "LONG",
+            "NO",
+            ""
+          ],
+          [
+            "timestamp",
+            "LONG",
+            "YES",
+            ""
+          ]
+        ]
+      }
+    ],
+    "request_parameters_text": [
+      "Only for isolated symbol"
+    ],
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "json",
+        "json": {
+          "amount": 100.0,
+          "code": 200,
+          "msg": "Successfully modify position margin.",
+          "type": 1
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,199 @@
+{
+  "title": "User's Force Orders (USER_DATA)",
+  "meta_description": "API Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "API Description",
+      "level": 2,
+      "id": "api-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Query user's Force Orders"
+        }
+      ]
+    },
+    {
+      "title": "HTTP Request",
+      "level": 2,
+      "id": "http-request",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "GET `/fapi/v1/forceOrders`"
+        }
+      ]
+    },
+    {
+      "title": "Request Weight",
+      "level": 2,
+      "id": "request-weight",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "20 with symbol, 50 without symbol"
+        }
+      ]
+    },
+    {
+      "title": "Request Parameters",
+      "level": 2,
+      "id": "request-parameters",
+      "blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "Name",
+            "Type",
+            "Mandatory",
+            "Description"
+          ],
+          "rows": [
+            [
+              "symbol",
+              "STRING",
+              "NO",
+              ""
+            ],
+            [
+              "autoCloseType",
+              "ENUM",
+              "NO",
+              "\"LIQUIDATION\" for liquidation orders, \"ADL\" for ADL orders."
+            ],
+            [
+              "startTime",
+              "LONG",
+              "NO",
+              ""
+            ],
+            [
+              "endTime",
+              "LONG",
+              "NO",
+              ""
+            ],
+            [
+              "limit",
+              "INT",
+              "NO",
+              "Default 50; max 100."
+            ],
+            [
+              "recvWindow",
+              "LONG",
+              "NO",
+              ""
+            ],
+            [
+              "timestamp",
+              "LONG",
+              "YES",
+              ""
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "text": "If \"autoCloseType\" is not sent, orders with both of the types will be returned If \"startTime\" is not sent, data within 7 days before \"endTime\" can be queried"
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "[\n{\n\"orderId\": 6071832819,\n\"symbol\": \"BTCUSDT\",\n\"status\": \"FILLED\",\n\"clientOrderId\": \"autoclose-1596107620040000020\",\n\"price\": \"10871.09\",\n\"avgPrice\": \"10913.21000\",\n\"origQty\": \"0.001\",\n\"executedQty\": \"0.001\",\n\"cumQuote\": \"10.91321\",\n\"timeInForce\": \"IOC\",\n\"type\": \"LIMIT\",\n\"reduceOnly\": false,\n\"closePosition\": false,\n\"side\": \"SELL\",\n\"positionSide\": \"BOTH\",\n\"stopPrice\": \"0\",\n\"workingType\": \"CONTRACT_PRICE\",\n\"origType\": \"LIMIT\",\n\"time\": 1596107620044,\n\"updateTime\": 1596107620087\n}\n{\n\"orderId\": 6072734303,\n\"symbol\": \"BTCUSDT\",\n\"status\": \"FILLED\",\n\"clientOrderId\": \"adl_autoclose\",\n\"price\": \"11023.14\",\n\"avgPrice\": \"10979.82000\",\n\"origQty\": \"0.001\",\n\"executedQty\": \"0.001\",\n\"cumQuote\": \"10.97982\",\n\"timeInForce\": \"GTC\",\n\"type\": \"LIMIT\",\n\"reduceOnly\": false,\n\"closePosition\": false,\n\"side\": \"BUY\",\n\"positionSide\": \"SHORT\",\n\"stopPrice\": \"0\",\n\"workingType\": \"CONTRACT_PRICE\",\n\"origType\": \"LIMIT\",\n\"time\": 1596110725059,\n\"updateTime\": 1596110725071\n}\n]"
+        }
+      ]
+    }
+  ],
+  "protocol": "rest",
+  "category": "rest-api",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "trade",
+    "rest-api",
+    "Users-Force-Orders.html"
+  ],
+  "api_summary": {
+    "description": "Query user's Force Orders",
+    "http_method": "GET",
+    "path": "`/fapi/v1/forceOrders`",
+    "http_request": "GET `/fapi/v1/forceOrders`",
+    "request_weight": "20 with symbol, 50 without symbol",
+    "request_parameters_tables": [
+      {
+        "type": "table",
+        "headers": [
+          "Name",
+          "Type",
+          "Mandatory",
+          "Description"
+        ],
+        "rows": [
+          [
+            "symbol",
+            "STRING",
+            "NO",
+            ""
+          ],
+          [
+            "autoCloseType",
+            "ENUM",
+            "NO",
+            "\"LIQUIDATION\" for liquidation orders, \"ADL\" for ADL orders."
+          ],
+          [
+            "startTime",
+            "LONG",
+            "NO",
+            ""
+          ],
+          [
+            "endTime",
+            "LONG",
+            "NO",
+            ""
+          ],
+          [
+            "limit",
+            "INT",
+            "NO",
+            "Default 50; max 100."
+          ],
+          [
+            "recvWindow",
+            "LONG",
+            "NO",
+            ""
+          ],
+          [
+            "timestamp",
+            "LONG",
+            "YES",
+            ""
+          ]
+        ]
+      }
+    ],
+    "request_parameters_text": [
+      "If \"autoCloseType\" is not sent, orders with both of the types will be returned If \"startTime\" is not sent, data within 7 days before \"endTime\" can be queried"
+    ],
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "[\n{\n\"orderId\": 6071832819,\n\"symbol\": \"BTCUSDT\",\n\"status\": \"FILLED\",\n\"clientOrderId\": \"autoclose-1596107620040000020\",\n\"price\": \"10871.09\",\n\"avgPrice\": \"10913.21000\",\n\"origQty\": \"0.001\",\n\"executedQty\": \"0.001\",\n\"cumQuote\": \"10.91321\",\n\"timeInForce\": \"IOC\",\n\"type\": \"LIMIT\",\n\"reduceOnly\": false,\n\"closePosition\": false,\n\"side\": \"SELL\",\n\"positionSide\": \"BOTH\",\n\"stopPrice\": \"0\",\n\"workingType\": \"CONTRACT_PRICE\",\n\"origType\": \"LIMIT\",\n\"time\": 1596107620044,\n\"updateTime\": 1596107620087\n}\n{\n\"orderId\": 6072734303,\n\"symbol\": \"BTCUSDT\",\n\"status\": \"FILLED\",\n\"clientOrderId\": \"adl_autoclose\",\n\"price\": \"11023.14\",\n\"avgPrice\": \"10979.82000\",\n\"origQty\": \"0.001\",\n\"executedQty\": \"0.001\",\n\"cumQuote\": \"10.97982\",\n\"timeInForce\": \"GTC\",\n\"type\": \"LIMIT\",\n\"reduceOnly\": false,\n\"closePosition\": false,\n\"side\": \"BUY\",\n\"positionSide\": \"SHORT\",\n\"stopPrice\": \"0\",\n\"workingType\": \"CONTRACT_PRICE\",\n\"origType\": \"LIMIT\",\n\"time\": 1596110725059,\n\"updateTime\": 1596110725071\n}\n]"
+      }
+    ]
+  }
+}

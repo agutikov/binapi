@@ -1,0 +1,173 @@
+{
+  "title": "Futures Trading Quantitative Rules Indicators (USER_DATA)",
+  "meta_description": "API Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "API Description",
+      "level": 2,
+      "id": "api-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Futures trading quantitative rules indicators, for more information on this, please refer to the Futures Trading Quantitative Rules"
+        }
+      ]
+    },
+    {
+      "title": "HTTP Request",
+      "level": 2,
+      "id": "http-request",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "GET `/fapi/v1/apiTradingStatus`"
+        }
+      ]
+    },
+    {
+      "title": "Request Weight",
+      "level": 2,
+      "id": "request-weight",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "1 for a single symbol",
+              "blocks": []
+            },
+            {
+              "text": "10 when the symbol parameter is omitted",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Request Parameters",
+      "level": 2,
+      "id": "request-parameters",
+      "blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "Name",
+            "Type",
+            "Mandatory",
+            "Description"
+          ],
+          "rows": [
+            [
+              "symbol",
+              "STRING",
+              "NO",
+              ""
+            ],
+            [
+              "recvWindow",
+              "LONG",
+              "NO",
+              ""
+            ],
+            [
+              "timestamp",
+              "LONG",
+              "YES",
+              ""
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "blockquote",
+          "text": "Response:"
+        },
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "{\n\"indicators\": { // indicator: quantitative rules indicators, value: user's indicators value, triggerValue: trigger indicator value threshold of quantitative rules.\n\"BTCUSDT\": [\n{\n\"isLocked\": true,\n\"plannedRecoverTime\": 1545741270000,\n\"indicator\": \"UFR\", // Unfilled Ratio (UFR)\n\"value\": 0.05, // Current value\n\"triggerValue\": 0.995 // Trigger value\n},\n{\n\"isLocked\": true,\n\"plannedRecoverTime\": 1545741270000,\n\"indicator\": \"IFER\", // IOC/FOK Expiration Ratio (IFER)\n\"value\": 0.99, // Current value\n\"triggerValue\": 0.99 // Trigger value\n},\n{\n\"isLocked\": true,\n\"plannedRecoverTime\": 1545741270000,\n\"indicator\": \"GCR\", // GTC Cancellation Ratio (GCR)\n\"value\": 0.99, // Current value\n\"triggerValue\": 0.99 // Trigger value\n},\n{\n\"isLocked\": true,\n\"plannedRecoverTime\": 1545741270000,\n\"indicator\": \"DR\", // Dust Ratio (DR)\n\"value\": 0.99, // Current value\n\"triggerValue\": 0.99 // Trigger value\n}\n],\n\"ETHUSDT\": [\n{\n\"isLocked\": true,\n\"plannedRecoverTime\": 1545741270000,\n\"indicator\": \"UFR\",\n\"value\": 0.05,\n\"triggerValue\": 0.995\n},\n{\n\"isLocked\": true,\n\"plannedRecoverTime\": 1545741270000,\n\"indicator\": \"IFER\",\n\"value\": 0.99,\n\"triggerValue\": 0.99\n},\n{\n\"isLocked\": true,\n\"plannedRecoverTime\": 1545741270000,\n\"indicator\": \"GCR\",\n\"value\": 0.99,\n\"triggerValue\": 0.99\n}\n{\n\"isLocked\": true,\n\"plannedRecoverTime\": 1545741270000,\n\"indicator\": \"DR\",\n\"value\": 0.99,\n\"triggerValue\": 0.99\n}\n]\n},\n\"updateTime\": 1545741270000\n}"
+        },
+        {
+          "type": "blockquote",
+          "text": "Or (account violation triggered)"
+        },
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "{\n\"indicators\":{\n\"ACCOUNT\":[\n{\n\"indicator\":\"TMV\", // Too many violations under multiple symbols trigger account violation\n\"value\":10,\n\"triggerValue\":1,\n\"plannedRecoverTime\":1644919865000,\n\"isLocked\":true\n}\n]\n},\n\"updateTime\":1644913304748\n}"
+        }
+      ]
+    }
+  ],
+  "protocol": "rest",
+  "category": "rest-api",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "account",
+    "rest-api",
+    "Futures-Trading-Quantitative-Rules-Indicators.html"
+  ],
+  "api_summary": {
+    "description": "Futures trading quantitative rules indicators, for more information on this, please refer to the Futures Trading Quantitative Rules",
+    "http_method": "GET",
+    "path": "`/fapi/v1/apiTradingStatus`",
+    "http_request": "GET `/fapi/v1/apiTradingStatus`",
+    "request_weight": null,
+    "request_parameters_tables": [
+      {
+        "type": "table",
+        "headers": [
+          "Name",
+          "Type",
+          "Mandatory",
+          "Description"
+        ],
+        "rows": [
+          [
+            "symbol",
+            "STRING",
+            "NO",
+            ""
+          ],
+          [
+            "recvWindow",
+            "LONG",
+            "NO",
+            ""
+          ],
+          [
+            "timestamp",
+            "LONG",
+            "YES",
+            ""
+          ]
+        ]
+      }
+    ],
+    "request_parameters_text": [],
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "{\n\"indicators\": { // indicator: quantitative rules indicators, value: user's indicators value, triggerValue: trigger indicator value threshold of quantitative rules.\n\"BTCUSDT\": [\n{\n\"isLocked\": true,\n\"plannedRecoverTime\": 1545741270000,\n\"indicator\": \"UFR\", // Unfilled Ratio (UFR)\n\"value\": 0.05, // Current value\n\"triggerValue\": 0.995 // Trigger value\n},\n{\n\"isLocked\": true,\n\"plannedRecoverTime\": 1545741270000,\n\"indicator\": \"IFER\", // IOC/FOK Expiration Ratio (IFER)\n\"value\": 0.99, // Current value\n\"triggerValue\": 0.99 // Trigger value\n},\n{\n\"isLocked\": true,\n\"plannedRecoverTime\": 1545741270000,\n\"indicator\": \"GCR\", // GTC Cancellation Ratio (GCR)\n\"value\": 0.99, // Current value\n\"triggerValue\": 0.99 // Trigger value\n},\n{\n\"isLocked\": true,\n\"plannedRecoverTime\": 1545741270000,\n\"indicator\": \"DR\", // Dust Ratio (DR)\n\"value\": 0.99, // Current value\n\"triggerValue\": 0.99 // Trigger value\n}\n],\n\"ETHUSDT\": [\n{\n\"isLocked\": true,\n\"plannedRecoverTime\": 1545741270000,\n\"indicator\": \"UFR\",\n\"value\": 0.05,\n\"triggerValue\": 0.995\n},\n{\n\"isLocked\": true,\n\"plannedRecoverTime\": 1545741270000,\n\"indicator\": \"IFER\",\n\"value\": 0.99,\n\"triggerValue\": 0.99\n},\n{\n\"isLocked\": true,\n\"plannedRecoverTime\": 1545741270000,\n\"indicator\": \"GCR\",\n\"value\": 0.99,\n\"triggerValue\": 0.99\n}\n{\n\"isLocked\": true,\n\"plannedRecoverTime\": 1545741270000,\n\"indicator\": \"DR\",\n\"value\": 0.99,\n\"triggerValue\": 0.99\n}\n]\n},\n\"updateTime\": 1545741270000\n}"
+      },
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "{\n\"indicators\":{\n\"ACCOUNT\":[\n{\n\"indicator\":\"TMV\", // Too many violations under multiple symbols trigger account violation\n\"value\":10,\n\"triggerValue\":1,\n\"plannedRecoverTime\":1644919865000,\n\"isLocked\":true\n}\n]\n},\n\"updateTime\":1644913304748\n}"
+      }
+    ]
+  }
+}

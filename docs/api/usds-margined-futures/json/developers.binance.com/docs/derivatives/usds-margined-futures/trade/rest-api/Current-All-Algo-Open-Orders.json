@@ -1,0 +1,245 @@
+{
+  "title": "Current All Algo Open Orders (USER_DATA)",
+  "meta_description": "API Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "API Description",
+      "level": 2,
+      "id": "api-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Get all algo open orders on a symbol."
+        }
+      ]
+    },
+    {
+      "title": "HTTP Request",
+      "level": 2,
+      "id": "http-request",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "GET `/fapi/v1/openAlgoOrders`"
+        }
+      ]
+    },
+    {
+      "title": "Request Weight",
+      "level": 2,
+      "id": "request-weight",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "1 for a single symbol; 40 when the symbol parameter is omitted"
+        },
+        {
+          "type": "paragraph",
+          "text": "Careful when accessing this with no symbol."
+        }
+      ]
+    },
+    {
+      "title": "Request Parameters",
+      "level": 2,
+      "id": "request-parameters",
+      "blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "Name",
+            "Type",
+            "Mandatory",
+            "Description"
+          ],
+          "rows": [
+            [
+              "algoType",
+              "STRING",
+              "NO",
+              ""
+            ],
+            [
+              "symbol",
+              "STRING",
+              "NO",
+              ""
+            ],
+            [
+              "algoId",
+              "LONG",
+              "NO",
+              ""
+            ],
+            [
+              "recvWindow",
+              "LONG",
+              "NO",
+              ""
+            ],
+            [
+              "timestamp",
+              "LONG",
+              "YES",
+              ""
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "text": "If the symbol is not sent, orders for all symbols will be returned in an array."
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "json",
+          "json": [
+            {
+              "algoId": 2148627,
+              "clientAlgoId": "MRumok0dkhrP4kCm12AHaB",
+              "algoType": "CONDITIONAL",
+              "orderType": "TAKE_PROFIT",
+              "symbol": "BNBUSDT",
+              "side": "SELL",
+              "positionSide": "BOTH",
+              "timeInForce": "GTC",
+              "quantity": "0.01",
+              "algoStatus": "NEW",
+              "actualOrderId": "",
+              "actualPrice": "0.00000",
+              "triggerPrice": "750.000",
+              "price": "750.000",
+              "icebergQuantity": null,
+              "tpTriggerPrice": "0.000",
+              "tpPrice": "0.000",
+              "slTriggerPrice": "0.000",
+              "slPrice": "0.000",
+              "tpOrderType": "",
+              "selfTradePreventionMode": "EXPIRE_MAKER",
+              "workingType": "CONTRACT_PRICE",
+              "priceMatch": "NONE",
+              "closePosition": false,
+              "priceProtect": false,
+              "reduceOnly": false,
+              "createTime": 1750514941540,
+              "updateTime": 1750514941540,
+              "triggerTime": 0,
+              "goodTillDate": 0
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "protocol": "rest",
+  "category": "rest-api",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "trade",
+    "rest-api",
+    "Current-All-Algo-Open-Orders.html"
+  ],
+  "api_summary": {
+    "description": "Get all algo open orders on a symbol.",
+    "http_method": "GET",
+    "path": "`/fapi/v1/openAlgoOrders`",
+    "http_request": "GET `/fapi/v1/openAlgoOrders`",
+    "request_weight": "1 for a single symbol; 40 when the symbol parameter is omitted",
+    "request_parameters_tables": [
+      {
+        "type": "table",
+        "headers": [
+          "Name",
+          "Type",
+          "Mandatory",
+          "Description"
+        ],
+        "rows": [
+          [
+            "algoType",
+            "STRING",
+            "NO",
+            ""
+          ],
+          [
+            "symbol",
+            "STRING",
+            "NO",
+            ""
+          ],
+          [
+            "algoId",
+            "LONG",
+            "NO",
+            ""
+          ],
+          [
+            "recvWindow",
+            "LONG",
+            "NO",
+            ""
+          ],
+          [
+            "timestamp",
+            "LONG",
+            "YES",
+            ""
+          ]
+        ]
+      }
+    ],
+    "request_parameters_text": [
+      "If the symbol is not sent, orders for all symbols will be returned in an array."
+    ],
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "json",
+        "json": [
+          {
+            "algoId": 2148627,
+            "clientAlgoId": "MRumok0dkhrP4kCm12AHaB",
+            "algoType": "CONDITIONAL",
+            "orderType": "TAKE_PROFIT",
+            "symbol": "BNBUSDT",
+            "side": "SELL",
+            "positionSide": "BOTH",
+            "timeInForce": "GTC",
+            "quantity": "0.01",
+            "algoStatus": "NEW",
+            "actualOrderId": "",
+            "actualPrice": "0.00000",
+            "triggerPrice": "750.000",
+            "price": "750.000",
+            "icebergQuantity": null,
+            "tpTriggerPrice": "0.000",
+            "tpPrice": "0.000",
+            "slTriggerPrice": "0.000",
+            "slPrice": "0.000",
+            "tpOrderType": "",
+            "selfTradePreventionMode": "EXPIRE_MAKER",
+            "workingType": "CONTRACT_PRICE",
+            "priceMatch": "NONE",
+            "closePosition": false,
+            "priceProtect": false,
+            "reduceOnly": false,
+            "createTime": 1750514941540,
+            "updateTime": 1750514941540,
+            "triggerTime": 0,
+            "goodTillDate": 0
+          }
+        ]
+      }
+    ]
+  }
+}

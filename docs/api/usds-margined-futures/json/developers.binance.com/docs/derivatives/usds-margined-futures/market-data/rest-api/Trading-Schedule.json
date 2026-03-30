@@ -1,0 +1,156 @@
+{
+  "title": "Trading Schedule",
+  "meta_description": "API Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "API Description",
+      "level": 2,
+      "id": "api-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Trading session schedules for the underlying assets of TradFi Perps are provided for a one-week period starting from the day prior to the query time, covering both the U.S. equity and commodity markets. Equity market session types include \"PRE_MARKET\", \"REGULAR\", \"AFTER_MARKET\", \"OVERNIGHT\", and \"NO_TRADING\", while commodity market session types include \"REGULAR\" and \"NO_TRADING\"."
+        }
+      ]
+    },
+    {
+      "title": "HTTP Request",
+      "level": 2,
+      "id": "http-request",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "GET `/fapi/v1/tradingSchedule`"
+        }
+      ]
+    },
+    {
+      "title": "Request Weight",
+      "level": 2,
+      "id": "request-weight",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "5"
+        }
+      ]
+    },
+    {
+      "title": "Request Parameters",
+      "level": 2,
+      "id": "request-parameters",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "NONE"
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "json",
+          "json": {
+            "updateTime": 1761286643918,
+            "marketSchedules": {
+              "EQUITY": {
+                "sessions": [
+                  {
+                    "startTime": 1761177600000,
+                    "endTime": 1761206400000,
+                    "type": "OVERNIGHT"
+                  },
+                  {
+                    "startTime": 1761206400000,
+                    "endTime": 1761226200000,
+                    "type": "PRE_MARKET"
+                  }
+                ]
+              },
+              "COMMODITY": {
+                "sessions": [
+                  {
+                    "startTime": 1761724800000,
+                    "endTime": 1761744600000,
+                    "type": "NO_TRADING"
+                  },
+                  {
+                    "startTime": 1761744600000,
+                    "endTime": 1761768000000,
+                    "type": "REGULAR"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "protocol": "rest",
+  "category": "rest-api",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "market-data",
+    "rest-api",
+    "Trading-Schedule.html"
+  ],
+  "api_summary": {
+    "description": "Trading session schedules for the underlying assets of TradFi Perps are provided for a one-week period starting from the day prior to the query time, covering both the U.S. equity and commodity markets. Equity market session types include \"PRE_MARKET\", \"REGULAR\", \"AFTER_MARKET\", \"OVERNIGHT\", and \"NO_TRADING\", while commodity market session types include \"REGULAR\" and \"NO_TRADING\".",
+    "http_method": "GET",
+    "path": "`/fapi/v1/tradingSchedule`",
+    "http_request": "GET `/fapi/v1/tradingSchedule`",
+    "request_weight": "5",
+    "request_parameters_tables": [],
+    "request_parameters_text": [
+      "NONE"
+    ],
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "json",
+        "json": {
+          "updateTime": 1761286643918,
+          "marketSchedules": {
+            "EQUITY": {
+              "sessions": [
+                {
+                  "startTime": 1761177600000,
+                  "endTime": 1761206400000,
+                  "type": "OVERNIGHT"
+                },
+                {
+                  "startTime": 1761206400000,
+                  "endTime": 1761226200000,
+                  "type": "PRE_MARKET"
+                }
+              ]
+            },
+            "COMMODITY": {
+              "sessions": [
+                {
+                  "startTime": 1761724800000,
+                  "endTime": 1761744600000,
+                  "type": "NO_TRADING"
+                },
+                {
+                  "startTime": 1761744600000,
+                  "endTime": 1761768000000,
+                  "type": "REGULAR"
+                }
+              ]
+            }
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "title": "Event: Conditional_Order_Trigger_Reject",
+  "meta_description": "Event Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "Event Description",
+      "level": 2,
+      "id": "event-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`CONDITIONAL_ORDER_TRIGGER_REJECT` update when a triggered TP/SL order got rejected."
+        }
+      ]
+    },
+    {
+      "title": "URL PATH",
+      "level": 2,
+      "id": "url-path",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`/private`"
+        }
+      ]
+    },
+    {
+      "title": "Event Name",
+      "level": 2,
+      "id": "event-name",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`CONDITIONAL_ORDER_TRIGGER_REJECT`"
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "{\n\"e\":\"CONDITIONAL_ORDER_TRIGGER_REJECT\", // Event Type\n\"E\":1685517224945, // Event Time\n\"T\":1685517224955, // me message send Time\n\"or\":{\n\"s\":\"ETHUSDT\", // Symbol\n\"i\":155618472834, // orderId\n\"r\":\"Due to the order could not be filled immediately, the FOK order has been rejected. The order will not be recorded in the order history\", // reject reason\n}\n}"
+        }
+      ]
+    }
+  ],
+  "protocol": "user_data_stream",
+  "category": "user-data-streams",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "user-data-streams",
+    "Event-Conditional-Order-Trigger-Reject.html"
+  ],
+  "api_summary": {
+    "description": "`CONDITIONAL_ORDER_TRIGGER_REJECT` update when a triggered TP/SL order got rejected.",
+    "url_path": "`/private`",
+    "event_name": "`CONDITIONAL_ORDER_TRIGGER_REJECT`",
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "{\n\"e\":\"CONDITIONAL_ORDER_TRIGGER_REJECT\", // Event Type\n\"E\":1685517224945, // Event Time\n\"T\":1685517224955, // me message send Time\n\"or\":{\n\"s\":\"ETHUSDT\", // Symbol\n\"i\":155618472834, // orderId\n\"r\":\"Due to the order could not be filled immediately, the FOK order has been rejected. The order will not be recorded in the order history\", // reject reason\n}\n}"
+      }
+    ]
+  }
+}

@@ -1,0 +1,174 @@
+{
+  "title": "Position Information V3 (USER_DATA)",
+  "meta_description": "API Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "API Description",
+      "level": 2,
+      "id": "api-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Get current position information(only symbol that has position or open orders will be returned)."
+        }
+      ]
+    },
+    {
+      "title": "HTTP Request",
+      "level": 2,
+      "id": "http-request",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "GET `/fapi/v3/positionRisk`"
+        }
+      ]
+    },
+    {
+      "title": "Request Weight",
+      "level": 2,
+      "id": "request-weight",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "5"
+        }
+      ]
+    },
+    {
+      "title": "Request Parameters",
+      "level": 2,
+      "id": "request-parameters",
+      "blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "Name",
+            "Type",
+            "Mandatory",
+            "Description"
+          ],
+          "rows": [
+            [
+              "symbol",
+              "STRING",
+              "NO",
+              ""
+            ],
+            [
+              "recvWindow",
+              "LONG",
+              "NO",
+              ""
+            ],
+            [
+              "timestamp",
+              "LONG",
+              "YES",
+              ""
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Note"
+        },
+        {
+          "type": "blockquote",
+          "text": "Please use with user data stream `ACCOUNT_UPDATE` to meet your timeliness and accuracy needs."
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "blockquote",
+          "text": "For One-way position mode:"
+        },
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "[\n{\n\"symbol\": \"ADAUSDT\",\n\"positionSide\": \"BOTH\", // position side\n\"positionAmt\": \"30\",\n\"entryPrice\": \"0.385\",\n\"breakEvenPrice\": \"0.385077\",\n\"markPrice\": \"0.41047590\",\n\"unRealizedProfit\": \"0.76427700\", // unrealized profit\n\"liquidationPrice\": \"0\",\n\"isolatedMargin\": \"0\",\n\"notional\": \"12.31427700\",\n\"marginAsset\": \"USDT\",\n\"isolatedWallet\": \"0\",\n\"initialMargin\": \"0.61571385\", // initial margin required with current mark price\n\"maintMargin\": \"0.08004280\", // maintenance margin required\n\"positionInitialMargin\": \"0.61571385\",// initial margin required for positions with current mark price\n\"openOrderInitialMargin\": \"0\", // initial margin required for open orders with current mark price\n\"adl\": 2,\n\"bidNotional\": \"0\", // bids notional, ignore\n\"askNotional\": \"0\", // ask notional, ignore\n\"updateTime\": 1720736417660\n}\n]"
+        },
+        {
+          "type": "blockquote",
+          "text": "For Hedge position mode:"
+        },
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "[\n{\n\"symbol\": \"ADAUSDT\",\n\"positionSide\": \"LONG\", // position side\n\"positionAmt\": \"30\",\n\"entryPrice\": \"0.385\",\n\"breakEvenPrice\": \"0.385077\",\n\"markPrice\": \"0.41047590\",\n\"unRealizedProfit\": \"0.76427700\", // unrealized profit\n\"liquidationPrice\": \"0\",\n\"isolatedMargin\": \"0\",\n\"notional\": \"12.31427700\",\n\"marginAsset\": \"USDT\",\n\"isolatedWallet\": \"0\",\n\"initialMargin\": \"0.61571385\", // initial margin required with current mark price\n\"maintMargin\": \"0.08004280\", // maintenance margin required\n\"positionInitialMargin\": \"0.61571385\",// initial margin required for positions with current mark price\n\"openOrderInitialMargin\": \"0\", // initial margin required for open orders with current mark price\n\"adl\": 2,\n\"bidNotional\": \"0\", // bids notional, ignore\n\"askNotional\": \"0\", // ask notional, ignore\n\"updateTime\": 1720736417660\n},\n{\n\"symbol\": \"COMPUSDT\",\n\"positionSide\": \"SHORT\",\n\"positionAmt\": \"-1.000\",\n\"entryPrice\": \"70.92841\",\n\"breakEvenPrice\": \"70.900038636\",\n\"markPrice\": \"49.72023376\",\n\"unRealizedProfit\": \"21.20817624\",\n\"liquidationPrice\": \"2260.56757210\",\n\"isolatedMargin\": \"0\",\n\"notional\": \"-49.72023376\",\n\"marginAsset\": \"USDT\",\n\"isolatedWallet\": \"0\",\n\"initialMargin\": \"2.48601168\",\n\"maintMargin\": \"0.49720233\",\n\"positionInitialMargin\": \"2.48601168\",\n\"openOrderInitialMargin\": \"0\",\n\"adl\": 2,\n\"bidNotional\": \"0\",\n\"askNotional\": \"0\",\n\"updateTime\": 1708943511656\n}\n]"
+        }
+      ]
+    }
+  ],
+  "protocol": "rest",
+  "category": "rest-api",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "trade",
+    "rest-api",
+    "Position-Information-V3.html"
+  ],
+  "api_summary": {
+    "description": "Get current position information(only symbol that has position or open orders will be returned).",
+    "http_method": "GET",
+    "path": "`/fapi/v3/positionRisk`",
+    "http_request": "GET `/fapi/v3/positionRisk`",
+    "request_weight": "5",
+    "request_parameters_tables": [
+      {
+        "type": "table",
+        "headers": [
+          "Name",
+          "Type",
+          "Mandatory",
+          "Description"
+        ],
+        "rows": [
+          [
+            "symbol",
+            "STRING",
+            "NO",
+            ""
+          ],
+          [
+            "recvWindow",
+            "LONG",
+            "NO",
+            ""
+          ],
+          [
+            "timestamp",
+            "LONG",
+            "YES",
+            ""
+          ]
+        ]
+      }
+    ],
+    "request_parameters_text": [
+      "Note",
+      "Please use with user data stream `ACCOUNT_UPDATE` to meet your timeliness and accuracy needs."
+    ],
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "[\n{\n\"symbol\": \"ADAUSDT\",\n\"positionSide\": \"BOTH\", // position side\n\"positionAmt\": \"30\",\n\"entryPrice\": \"0.385\",\n\"breakEvenPrice\": \"0.385077\",\n\"markPrice\": \"0.41047590\",\n\"unRealizedProfit\": \"0.76427700\", // unrealized profit\n\"liquidationPrice\": \"0\",\n\"isolatedMargin\": \"0\",\n\"notional\": \"12.31427700\",\n\"marginAsset\": \"USDT\",\n\"isolatedWallet\": \"0\",\n\"initialMargin\": \"0.61571385\", // initial margin required with current mark price\n\"maintMargin\": \"0.08004280\", // maintenance margin required\n\"positionInitialMargin\": \"0.61571385\",// initial margin required for positions with current mark price\n\"openOrderInitialMargin\": \"0\", // initial margin required for open orders with current mark price\n\"adl\": 2,\n\"bidNotional\": \"0\", // bids notional, ignore\n\"askNotional\": \"0\", // ask notional, ignore\n\"updateTime\": 1720736417660\n}\n]"
+      },
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "[\n{\n\"symbol\": \"ADAUSDT\",\n\"positionSide\": \"LONG\", // position side\n\"positionAmt\": \"30\",\n\"entryPrice\": \"0.385\",\n\"breakEvenPrice\": \"0.385077\",\n\"markPrice\": \"0.41047590\",\n\"unRealizedProfit\": \"0.76427700\", // unrealized profit\n\"liquidationPrice\": \"0\",\n\"isolatedMargin\": \"0\",\n\"notional\": \"12.31427700\",\n\"marginAsset\": \"USDT\",\n\"isolatedWallet\": \"0\",\n\"initialMargin\": \"0.61571385\", // initial margin required with current mark price\n\"maintMargin\": \"0.08004280\", // maintenance margin required\n\"positionInitialMargin\": \"0.61571385\",// initial margin required for positions with current mark price\n\"openOrderInitialMargin\": \"0\", // initial margin required for open orders with current mark price\n\"adl\": 2,\n\"bidNotional\": \"0\", // bids notional, ignore\n\"askNotional\": \"0\", // ask notional, ignore\n\"updateTime\": 1720736417660\n},\n{\n\"symbol\": \"COMPUSDT\",\n\"positionSide\": \"SHORT\",\n\"positionAmt\": \"-1.000\",\n\"entryPrice\": \"70.92841\",\n\"breakEvenPrice\": \"70.900038636\",\n\"markPrice\": \"49.72023376\",\n\"unRealizedProfit\": \"21.20817624\",\n\"liquidationPrice\": \"2260.56757210\",\n\"isolatedMargin\": \"0\",\n\"notional\": \"-49.72023376\",\n\"marginAsset\": \"USDT\",\n\"isolatedWallet\": \"0\",\n\"initialMargin\": \"2.48601168\",\n\"maintMargin\": \"0.49720233\",\n\"positionInitialMargin\": \"2.48601168\",\n\"openOrderInitialMargin\": \"0\",\n\"adl\": 2,\n\"bidNotional\": \"0\",\n\"askNotional\": \"0\",\n\"updateTime\": 1708943511656\n}\n]"
+      }
+    ]
+  }
+}

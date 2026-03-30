@@ -1,0 +1,160 @@
+{
+  "title": "Kline/Candlestick Streams",
+  "meta_description": "Stream Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "Stream Description",
+      "level": 2,
+      "id": "stream-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "The Kline/Candlestick Stream push updates to the current klines/candlestick every 250 milliseconds (if existing)."
+        },
+        {
+          "type": "paragraph",
+          "text": "Kline/Candlestick chart intervals:"
+        },
+        {
+          "type": "paragraph",
+          "text": "m -> minutes; h -> hours; d -> days; w -> weeks; M -> months"
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "1m",
+              "blocks": []
+            },
+            {
+              "text": "3m",
+              "blocks": []
+            },
+            {
+              "text": "5m",
+              "blocks": []
+            },
+            {
+              "text": "15m",
+              "blocks": []
+            },
+            {
+              "text": "30m",
+              "blocks": []
+            },
+            {
+              "text": "1h",
+              "blocks": []
+            },
+            {
+              "text": "2h",
+              "blocks": []
+            },
+            {
+              "text": "4h",
+              "blocks": []
+            },
+            {
+              "text": "6h",
+              "blocks": []
+            },
+            {
+              "text": "8h",
+              "blocks": []
+            },
+            {
+              "text": "12h",
+              "blocks": []
+            },
+            {
+              "text": "1d",
+              "blocks": []
+            },
+            {
+              "text": "3d",
+              "blocks": []
+            },
+            {
+              "text": "1w",
+              "blocks": []
+            },
+            {
+              "text": "1M",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "URL PATH",
+      "level": 2,
+      "id": "url-path",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`/market`"
+        }
+      ]
+    },
+    {
+      "title": "Stream Name",
+      "level": 2,
+      "id": "stream-name",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`<symbol>@kline_<interval>`"
+        }
+      ]
+    },
+    {
+      "title": "Update Speed",
+      "level": 2,
+      "id": "update-speed",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "250ms"
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "{\n\"e\": \"kline\", // Event type\n\"E\": 1638747660000, // Event time\n\"s\": \"BTCUSDT\", // Symbol\n\"k\": {\n\"t\": 1638747660000, // Kline start time\n\"T\": 1638747719999, // Kline close time\n\"s\": \"BTCUSDT\", // Symbol\n\"i\": \"1m\", // Interval\n\"f\": 100, // First trade ID\n\"L\": 200, // Last trade ID\n\"o\": \"0.0010\", // Open price\n\"c\": \"0.0020\", // Close price\n\"h\": \"0.0025\", // High price\n\"l\": \"0.0015\", // Low price\n\"v\": \"1000\", // Base asset volume\n\"n\": 100, // Number of trades\n\"x\": false, // Is this kline closed?\n\"q\": \"1.0000\", // Quote asset volume\n\"V\": \"500\", // Taker buy base asset volume\n\"Q\": \"0.500\", // Taker buy quote asset volume\n\"B\": \"123456\" // Ignore\n}\n}"
+        }
+      ]
+    }
+  ],
+  "protocol": "websocket_stream",
+  "category": "websocket-market-streams",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "websocket-market-streams",
+    "Kline-Candlestick-Streams.html"
+  ],
+  "api_summary": {
+    "description": "The Kline/Candlestick Stream push updates to the current klines/candlestick every 250 milliseconds (if existing).",
+    "url_path": "`/market`",
+    "stream_name": "`<symbol>@kline_<interval>`",
+    "update_speed": "250ms",
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "{\n\"e\": \"kline\", // Event type\n\"E\": 1638747660000, // Event time\n\"s\": \"BTCUSDT\", // Symbol\n\"k\": {\n\"t\": 1638747660000, // Kline start time\n\"T\": 1638747719999, // Kline close time\n\"s\": \"BTCUSDT\", // Symbol\n\"i\": \"1m\", // Interval\n\"f\": 100, // First trade ID\n\"L\": 200, // Last trade ID\n\"o\": \"0.0010\", // Open price\n\"c\": \"0.0020\", // Close price\n\"h\": \"0.0025\", // High price\n\"l\": \"0.0015\", // Low price\n\"v\": \"1000\", // Base asset volume\n\"n\": 100, // Number of trades\n\"x\": false, // Is this kline closed?\n\"q\": \"1.0000\", // Quote asset volume\n\"V\": \"500\", // Taker buy base asset volume\n\"Q\": \"0.500\", // Taker buy quote asset volume\n\"B\": \"123456\" // Ignore\n}\n}"
+      }
+    ]
+  }
+}

@@ -1,0 +1,191 @@
+{
+  "title": "Multi-Assets Mode Asset Index",
+  "meta_description": "API Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "API Description",
+      "level": 2,
+      "id": "api-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "asset index for Multi-Assets mode"
+        }
+      ]
+    },
+    {
+      "title": "HTTP Request",
+      "level": 2,
+      "id": "http-request",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "GET `/fapi/v1/assetIndex`"
+        }
+      ]
+    },
+    {
+      "title": "Request Weight",
+      "level": 2,
+      "id": "request-weight",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "1 for a single symbol; 10 when the symbol parameter is omitted"
+        }
+      ]
+    },
+    {
+      "title": "Request Parameters",
+      "level": 2,
+      "id": "request-parameters",
+      "blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "Name",
+            "Type",
+            "Mandatory",
+            "Description"
+          ],
+          "rows": [
+            [
+              "symbol",
+              "STRING",
+              "NO",
+              "Asset pair"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "blockquote",
+          "text": "Response:"
+        },
+        {
+          "type": "code",
+          "language": "json",
+          "json": {
+            "symbol": "ADAUSD",
+            "time": 1635740268004,
+            "index": "1.92957370",
+            "bidBuffer": "0.10000000",
+            "askBuffer": "0.10000000",
+            "bidRate": "1.73661633",
+            "askRate": "2.12253107",
+            "autoExchangeBidBuffer": "0.05000000",
+            "autoExchangeAskBuffer": "0.05000000",
+            "autoExchangeBidRate": "1.83309501",
+            "autoExchangeAskRate": "2.02605238"
+          }
+        },
+        {
+          "type": "blockquote",
+          "text": "Or(without symbol)"
+        },
+        {
+          "type": "code",
+          "language": "json",
+          "json": [
+            {
+              "symbol": "ADAUSD",
+              "time": 1635740268004,
+              "index": "1.92957370",
+              "bidBuffer": "0.10000000",
+              "askBuffer": "0.10000000",
+              "bidRate": "1.73661633",
+              "askRate": "2.12253107",
+              "autoExchangeBidBuffer": "0.05000000",
+              "autoExchangeAskBuffer": "0.05000000",
+              "autoExchangeBidRate": "1.83309501",
+              "autoExchangeAskRate": "2.02605238"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "protocol": "rest",
+  "category": "rest-api",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "market-data",
+    "rest-api",
+    "Multi-Assets-Mode-Asset-Index.html"
+  ],
+  "api_summary": {
+    "description": "asset index for Multi-Assets mode",
+    "http_method": "GET",
+    "path": "`/fapi/v1/assetIndex`",
+    "http_request": "GET `/fapi/v1/assetIndex`",
+    "request_weight": "1 for a single symbol; 10 when the symbol parameter is omitted",
+    "request_parameters_tables": [
+      {
+        "type": "table",
+        "headers": [
+          "Name",
+          "Type",
+          "Mandatory",
+          "Description"
+        ],
+        "rows": [
+          [
+            "symbol",
+            "STRING",
+            "NO",
+            "Asset pair"
+          ]
+        ]
+      }
+    ],
+    "request_parameters_text": [],
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "json",
+        "json": {
+          "symbol": "ADAUSD",
+          "time": 1635740268004,
+          "index": "1.92957370",
+          "bidBuffer": "0.10000000",
+          "askBuffer": "0.10000000",
+          "bidRate": "1.73661633",
+          "askRate": "2.12253107",
+          "autoExchangeBidBuffer": "0.05000000",
+          "autoExchangeAskBuffer": "0.05000000",
+          "autoExchangeBidRate": "1.83309501",
+          "autoExchangeAskRate": "2.02605238"
+        }
+      },
+      {
+        "type": "code",
+        "language": "json",
+        "json": [
+          {
+            "symbol": "ADAUSD",
+            "time": 1635740268004,
+            "index": "1.92957370",
+            "bidBuffer": "0.10000000",
+            "askBuffer": "0.10000000",
+            "bidRate": "1.73661633",
+            "askRate": "2.12253107",
+            "autoExchangeBidBuffer": "0.05000000",
+            "autoExchangeAskBuffer": "0.05000000",
+            "autoExchangeBidRate": "1.83309501",
+            "autoExchangeAskRate": "2.02605238"
+          }
+        ]
+      }
+    ]
+  }
+}

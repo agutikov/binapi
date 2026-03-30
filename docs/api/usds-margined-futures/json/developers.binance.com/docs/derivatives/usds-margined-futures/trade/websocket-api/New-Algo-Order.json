@@ -1,0 +1,508 @@
+{
+  "title": "New Algo Order(TRADE)",
+  "meta_description": "API Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "API Description",
+      "level": 2,
+      "id": "api-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Send in a new algo order."
+        }
+      ]
+    },
+    {
+      "title": "Method",
+      "level": 2,
+      "id": "method",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`algoOrder.place`"
+        }
+      ]
+    },
+    {
+      "title": "Request",
+      "level": 2,
+      "id": "request",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "json",
+          "json": {
+            "id": "7731f6b5-8d5e-419c-a424-016b0a5fe8d7",
+            "method": "algoOrder.place",
+            "params": {
+              "algoType": "CONDITIONAL",
+              "apiKey": "autoApiKey7mM4kPWaRuTUypdTEZKG8U8tDjO64xdBJBrmE1nXU2XSwdxGPyXcYx",
+              "newOrderRespType": "RESULT",
+              "positionSide": "SHORT",
+              "price": "160000",
+              "quantity": "1",
+              "recvWindow": "99999999",
+              "side": "SELL",
+              "symbol": "BTCUSDT",
+              "timeInForce": "GTC",
+              "timestamp": 1762506268690,
+              "triggerprice": 120000,
+              "type": "TAKE_PROFIT",
+              "signature": "ec6e529c69fd8193b19484907bc713114eae06259fcab9728dafd5910f9cac5a"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "title": "Request Weight",
+      "level": 2,
+      "id": "request-weight",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "0"
+        }
+      ]
+    },
+    {
+      "title": "Request Parameters",
+      "level": 2,
+      "id": "request-parameters",
+      "blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "Name",
+            "Type",
+            "Mandatory",
+            "Description"
+          ],
+          "rows": [
+            [
+              "algoType",
+              "ENUM",
+              "YES",
+              "Only support `CONDITIONAL`"
+            ],
+            [
+              "symbol",
+              "STRING",
+              "YES",
+              ""
+            ],
+            [
+              "side",
+              "ENUM",
+              "YES",
+              ""
+            ],
+            [
+              "positionSide",
+              "ENUM",
+              "NO",
+              "Default `BOTH` for One-way Mode ; `LONG` or `SHORT` for Hedge Mode. It must be sent in Hedge Mode."
+            ],
+            [
+              "type",
+              "ENUM",
+              "YES",
+              "For `CONDITIONAL` algoType, `STOP_MARKET`/`TAKE_PROFIT_MARKET`/`STOP`/`TAKE_PROFIT`/`TRAILING_STOP_MARKET` as order type"
+            ],
+            [
+              "timeInForce",
+              "ENUM",
+              "NO",
+              "`IOC` or `GTC` or `FOK`, default `GTC`"
+            ],
+            [
+              "quantity",
+              "DECIMAL",
+              "NO",
+              "Cannot be sent with `closePosition`=`true`(Close-All)"
+            ],
+            [
+              "price",
+              "DECIMAL",
+              "NO",
+              ""
+            ],
+            [
+              "triggerPrice",
+              "DECIMAL",
+              "NO",
+              ""
+            ],
+            [
+              "workingType",
+              "ENUM",
+              "NO",
+              "triggerPrice triggered by: `MARK_PRICE`, `CONTRACT_PRICE`. Default `CONTRACT_PRICE`"
+            ],
+            [
+              "priceMatch",
+              "ENUM",
+              "NO",
+              "only avaliable for `LIMIT`/`STOP`/`TAKE_PROFIT` order; can be set to `OPPONENT`/ `OPPONENT_5`/ `OPPONENT_10`/ `OPPONENT_20`: /`QUEUE`/ `QUEUE_5`/ `QUEUE_10`/ `QUEUE_20`; Can't be passed together with `price`"
+            ],
+            [
+              "closePosition",
+              "STRING",
+              "NO",
+              "true, false；Close-All，used with `STOP_MARKET` or `TAKE_PROFIT_MARKET`."
+            ],
+            [
+              "priceProtect",
+              "STRING",
+              "NO",
+              "\"TRUE\" or \"FALSE\", default \"FALSE\". Used with `STOP_MARKET` or `TAKE_PROFIT_MARKET` order. when price reaches the triggerPrice ，the difference rate between \"MARK_PRICE\" and \"CONTRACT_PRICE\" cannot be larger than the Price Protection Threshold of the symbol."
+            ],
+            [
+              "reduceOnly",
+              "STRING",
+              "NO",
+              "\"true\" or \"false\". default \"false\". Cannot be sent in Hedge Mode; cannot be sent with `closePosition`=`true`"
+            ],
+            [
+              "activatePrice",
+              "DECIMAL",
+              "NO",
+              "Used with `TRAILING_STOP_MARKET` orders, default as the latest price(supporting different `workingType`)"
+            ],
+            [
+              "callbackRate",
+              "DECIMAL",
+              "NO",
+              "Used with `TRAILING_STOP_MARKET` orders, min 0.1, max 10 where 1 for 1%"
+            ],
+            [
+              "clientAlgoId",
+              "STRING",
+              "NO",
+              "A unique id among open orders. Automatically generated if not sent. Can only be string following the rule: `^[\\.A-Z\\:/a-z0-9_-]{1,36}$`"
+            ],
+            [
+              "newOrderRespType",
+              "ENUM",
+              "NO",
+              "\"ACK\", \"RESULT\", default \"ACK\""
+            ],
+            [
+              "selfTradePreventionMode",
+              "ENUM",
+              "NO",
+              "`EXPIRE_TAKER`:expire taker order when STP triggers/ `EXPIRE_MAKER`:expire taker order when STP triggers/ `EXPIRE_BOTH`:expire both orders when STP triggers; default `NONE`"
+            ],
+            [
+              "goodTillDate",
+              "LONG",
+              "NO",
+              "order cancel time for timeInForce `GTD`, mandatory when `timeInforce` set to `GTD`; order the timestamp only retains second-level precision, ms part will be ignored; The goodTillDate timestamp must be greater than the current time plus 600 seconds and smaller than 253402300799000"
+            ],
+            [
+              "recvWindow",
+              "LONG",
+              "NO",
+              ""
+            ],
+            [
+              "timestamp",
+              "LONG",
+              "YES",
+              ""
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "text": "Condition orders will be triggered when: If parameter`priceProtect`is sent as true: when price reaches the `triggerPrice` ，the difference rate between \"MARK_PRICE\" and \"CONTRACT_PRICE\" cannot be larger than the \"triggerProtect\" of the symbol \"triggerProtect\" of a symbol can be got from `GET /fapi/v1/exchangeInfo` `STOP`, `STOP_MARKET`: BUY: latest price (\"MARK_PRICE\" or \"CONTRACT_PRICE\") >= `triggerPrice` SELL: latest price (\"MARK_PRICE\" or \"CONTRACT_PRICE\") <= `triggerPrice` `TAKE_PROFIT`, `TAKE_PROFIT_MARKET`: BUY: latest price (\"MARK_PRICE\" or \"CONTRACT_PRICE\") <= `triggerPrice` SELL: latest price (\"MARK_PRICE\" or \"CONTRACT_PRICE\") >= `triggerPrice` `TRAILING_STOP_MARKET`: BUY: the lowest price after order placed <= `activatePrice`, and the latest price >= the lowest price * (1 + `callbackRate`) SELL: the highest price after order placed >= `activatePrice`, and the latest price <= the highest price * (1 - `callbackRate`) For `TRAILING_STOP_MARKET`, if you got such error code. `{\"code\": -2021, \"msg\": \"Order would immediately trigger.\"}` means that the parameters you send do not meet the following requirements: BUY: `activatePrice` should be smaller than latest price. SELL: `activatePrice` should be larger than latest price. `STOP_MARKET`, `TAKE_PROFIT_MARKET` with `closePosition`=`true`: Follow the same rules for condition orders. If triggered，close all current long position( if `SELL`) or current short position( if `BUY`). Cannot be used with `quantity` paremeter Cannot be used with `reduceOnly` parameter In Hedge Mode,cannot be used with `BUY` orders in `LONG` position side. and cannot be used with `SELL` orders in `SHORT` position side `selfTradePreventionMode` is only effective when `timeInForce` set to `IOC` or `GTC` or `GTD`."
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "json",
+          "json": {
+            "id": "06c9dbd8-ccbf-4ecf-a29c-fe31495ac73f",
+            "status": 200,
+            "result": {
+              "algoId": 3000000000003505,
+              "clientAlgoId": "0Xkl1p621E4EryvufmYre1",
+              "algoType": "CONDITIONAL",
+              "orderType": "TAKE_PROFIT",
+              "symbol": "BTCUSDT",
+              "side": "SELL",
+              "positionSide": "SHORT",
+              "timeInForce": "GTC",
+              "quantity": "1.000",
+              "algoStatus": "NEW",
+              "triggerPrice": "120000.00",
+              "price": "160000.00",
+              "icebergQuantity": null,
+              "selfTradePreventionMode": "EXPIRE_MAKER",
+              "workingType": "CONTRACT_PRICE",
+              "priceMatch": "NONE",
+              "closePosition": false,
+              "priceProtect": false,
+              "reduceOnly": false,
+              "createTime": 1762507264142,
+              "updateTime": 1762507264143,
+              "triggerTime": 0,
+              "goodTillDate": 0
+            },
+            "rateLimits": [
+              {
+                "rateLimitType": "REQUEST_WEIGHT",
+                "interval": "MINUTE",
+                "intervalNum": 1,
+                "limit": 2400,
+                "count": 1
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "protocol": "websocket_api",
+  "category": "websocket-api",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "trade",
+    "websocket-api",
+    "New-Algo-Order.html"
+  ],
+  "api_summary": {
+    "description": "Send in a new algo order.",
+    "method": "`algoOrder.place`",
+    "request_weight": "0",
+    "request_parameters_tables": [
+      {
+        "type": "table",
+        "headers": [
+          "Name",
+          "Type",
+          "Mandatory",
+          "Description"
+        ],
+        "rows": [
+          [
+            "algoType",
+            "ENUM",
+            "YES",
+            "Only support `CONDITIONAL`"
+          ],
+          [
+            "symbol",
+            "STRING",
+            "YES",
+            ""
+          ],
+          [
+            "side",
+            "ENUM",
+            "YES",
+            ""
+          ],
+          [
+            "positionSide",
+            "ENUM",
+            "NO",
+            "Default `BOTH` for One-way Mode ; `LONG` or `SHORT` for Hedge Mode. It must be sent in Hedge Mode."
+          ],
+          [
+            "type",
+            "ENUM",
+            "YES",
+            "For `CONDITIONAL` algoType, `STOP_MARKET`/`TAKE_PROFIT_MARKET`/`STOP`/`TAKE_PROFIT`/`TRAILING_STOP_MARKET` as order type"
+          ],
+          [
+            "timeInForce",
+            "ENUM",
+            "NO",
+            "`IOC` or `GTC` or `FOK`, default `GTC`"
+          ],
+          [
+            "quantity",
+            "DECIMAL",
+            "NO",
+            "Cannot be sent with `closePosition`=`true`(Close-All)"
+          ],
+          [
+            "price",
+            "DECIMAL",
+            "NO",
+            ""
+          ],
+          [
+            "triggerPrice",
+            "DECIMAL",
+            "NO",
+            ""
+          ],
+          [
+            "workingType",
+            "ENUM",
+            "NO",
+            "triggerPrice triggered by: `MARK_PRICE`, `CONTRACT_PRICE`. Default `CONTRACT_PRICE`"
+          ],
+          [
+            "priceMatch",
+            "ENUM",
+            "NO",
+            "only avaliable for `LIMIT`/`STOP`/`TAKE_PROFIT` order; can be set to `OPPONENT`/ `OPPONENT_5`/ `OPPONENT_10`/ `OPPONENT_20`: /`QUEUE`/ `QUEUE_5`/ `QUEUE_10`/ `QUEUE_20`; Can't be passed together with `price`"
+          ],
+          [
+            "closePosition",
+            "STRING",
+            "NO",
+            "true, false；Close-All，used with `STOP_MARKET` or `TAKE_PROFIT_MARKET`."
+          ],
+          [
+            "priceProtect",
+            "STRING",
+            "NO",
+            "\"TRUE\" or \"FALSE\", default \"FALSE\". Used with `STOP_MARKET` or `TAKE_PROFIT_MARKET` order. when price reaches the triggerPrice ，the difference rate between \"MARK_PRICE\" and \"CONTRACT_PRICE\" cannot be larger than the Price Protection Threshold of the symbol."
+          ],
+          [
+            "reduceOnly",
+            "STRING",
+            "NO",
+            "\"true\" or \"false\". default \"false\". Cannot be sent in Hedge Mode; cannot be sent with `closePosition`=`true`"
+          ],
+          [
+            "activatePrice",
+            "DECIMAL",
+            "NO",
+            "Used with `TRAILING_STOP_MARKET` orders, default as the latest price(supporting different `workingType`)"
+          ],
+          [
+            "callbackRate",
+            "DECIMAL",
+            "NO",
+            "Used with `TRAILING_STOP_MARKET` orders, min 0.1, max 10 where 1 for 1%"
+          ],
+          [
+            "clientAlgoId",
+            "STRING",
+            "NO",
+            "A unique id among open orders. Automatically generated if not sent. Can only be string following the rule: `^[\\.A-Z\\:/a-z0-9_-]{1,36}$`"
+          ],
+          [
+            "newOrderRespType",
+            "ENUM",
+            "NO",
+            "\"ACK\", \"RESULT\", default \"ACK\""
+          ],
+          [
+            "selfTradePreventionMode",
+            "ENUM",
+            "NO",
+            "`EXPIRE_TAKER`:expire taker order when STP triggers/ `EXPIRE_MAKER`:expire taker order when STP triggers/ `EXPIRE_BOTH`:expire both orders when STP triggers; default `NONE`"
+          ],
+          [
+            "goodTillDate",
+            "LONG",
+            "NO",
+            "order cancel time for timeInForce `GTD`, mandatory when `timeInforce` set to `GTD`; order the timestamp only retains second-level precision, ms part will be ignored; The goodTillDate timestamp must be greater than the current time plus 600 seconds and smaller than 253402300799000"
+          ],
+          [
+            "recvWindow",
+            "LONG",
+            "NO",
+            ""
+          ],
+          [
+            "timestamp",
+            "LONG",
+            "YES",
+            ""
+          ]
+        ]
+      }
+    ],
+    "request_parameters_text": [
+      "Condition orders will be triggered when: If parameter`priceProtect`is sent as true: when price reaches the `triggerPrice` ，the difference rate between \"MARK_PRICE\" and \"CONTRACT_PRICE\" cannot be larger than the \"triggerProtect\" of the symbol \"triggerProtect\" of a symbol can be got from `GET /fapi/v1/exchangeInfo` `STOP`, `STOP_MARKET`: BUY: latest price (\"MARK_PRICE\" or \"CONTRACT_PRICE\") >= `triggerPrice` SELL: latest price (\"MARK_PRICE\" or \"CONTRACT_PRICE\") <= `triggerPrice` `TAKE_PROFIT`, `TAKE_PROFIT_MARKET`: BUY: latest price (\"MARK_PRICE\" or \"CONTRACT_PRICE\") <= `triggerPrice` SELL: latest price (\"MARK_PRICE\" or \"CONTRACT_PRICE\") >= `triggerPrice` `TRAILING_STOP_MARKET`: BUY: the lowest price after order placed <= `activatePrice`, and the latest price >= the lowest price * (1 + `callbackRate`) SELL: the highest price after order placed >= `activatePrice`, and the latest price <= the highest price * (1 - `callbackRate`) For `TRAILING_STOP_MARKET`, if you got such error code. `{\"code\": -2021, \"msg\": \"Order would immediately trigger.\"}` means that the parameters you send do not meet the following requirements: BUY: `activatePrice` should be smaller than latest price. SELL: `activatePrice` should be larger than latest price. `STOP_MARKET`, `TAKE_PROFIT_MARKET` with `closePosition`=`true`: Follow the same rules for condition orders. If triggered，close all current long position( if `SELL`) or current short position( if `BUY`). Cannot be used with `quantity` paremeter Cannot be used with `reduceOnly` parameter In Hedge Mode,cannot be used with `BUY` orders in `LONG` position side. and cannot be used with `SELL` orders in `SHORT` position side `selfTradePreventionMode` is only effective when `timeInForce` set to `IOC` or `GTC` or `GTD`."
+    ],
+    "request_code_blocks": [
+      {
+        "type": "code",
+        "language": "json",
+        "json": {
+          "id": "7731f6b5-8d5e-419c-a424-016b0a5fe8d7",
+          "method": "algoOrder.place",
+          "params": {
+            "algoType": "CONDITIONAL",
+            "apiKey": "autoApiKey7mM4kPWaRuTUypdTEZKG8U8tDjO64xdBJBrmE1nXU2XSwdxGPyXcYx",
+            "newOrderRespType": "RESULT",
+            "positionSide": "SHORT",
+            "price": "160000",
+            "quantity": "1",
+            "recvWindow": "99999999",
+            "side": "SELL",
+            "symbol": "BTCUSDT",
+            "timeInForce": "GTC",
+            "timestamp": 1762506268690,
+            "triggerprice": 120000,
+            "type": "TAKE_PROFIT",
+            "signature": "ec6e529c69fd8193b19484907bc713114eae06259fcab9728dafd5910f9cac5a"
+          }
+        }
+      }
+    ],
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "json",
+        "json": {
+          "id": "06c9dbd8-ccbf-4ecf-a29c-fe31495ac73f",
+          "status": 200,
+          "result": {
+            "algoId": 3000000000003505,
+            "clientAlgoId": "0Xkl1p621E4EryvufmYre1",
+            "algoType": "CONDITIONAL",
+            "orderType": "TAKE_PROFIT",
+            "symbol": "BTCUSDT",
+            "side": "SELL",
+            "positionSide": "SHORT",
+            "timeInForce": "GTC",
+            "quantity": "1.000",
+            "algoStatus": "NEW",
+            "triggerPrice": "120000.00",
+            "price": "160000.00",
+            "icebergQuantity": null,
+            "selfTradePreventionMode": "EXPIRE_MAKER",
+            "workingType": "CONTRACT_PRICE",
+            "priceMatch": "NONE",
+            "closePosition": false,
+            "priceProtect": false,
+            "reduceOnly": false,
+            "createTime": 1762507264142,
+            "updateTime": 1762507264143,
+            "triggerTime": 0,
+            "goodTillDate": 0
+          },
+          "rateLimits": [
+            {
+              "rateLimitType": "REQUEST_WEIGHT",
+              "interval": "MINUTE",
+              "intervalNum": 1,
+              "limit": 2400,
+              "count": 1
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

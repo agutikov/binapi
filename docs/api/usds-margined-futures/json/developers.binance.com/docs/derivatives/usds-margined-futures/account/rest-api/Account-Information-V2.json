@@ -1,0 +1,155 @@
+{
+  "title": "Account Information V2(USER_DATA)",
+  "meta_description": "API Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "API Description",
+      "level": 2,
+      "id": "api-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Get current account information. User in single-asset/ multi-assets mode will see different value, see comments in response section for detail."
+        }
+      ]
+    },
+    {
+      "title": "HTTP Request",
+      "level": 2,
+      "id": "http-request",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "GET `/fapi/v2/account`"
+        },
+        {
+          "type": "paragraph",
+          "text": ""
+        }
+      ]
+    },
+    {
+      "title": "Request Weight",
+      "level": 2,
+      "id": "request-weight",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "5"
+        }
+      ]
+    },
+    {
+      "title": "Request Parameters",
+      "level": 2,
+      "id": "request-parameters",
+      "blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "Name",
+            "Type",
+            "Mandatory",
+            "Description"
+          ],
+          "rows": [
+            [
+              "recvWindow",
+              "LONG",
+              "NO",
+              ""
+            ],
+            [
+              "timestamp",
+              "LONG",
+              "YES",
+              ""
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "blockquote",
+          "text": "single-asset mode"
+        },
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "{\n\"feeTier\": 0, // account commission tier\n\"feeBurn\": true, // \"true\": Fee Discount On; \"false\": Fee Discount Off \"canTrade\": true, // if can trade\n\"canDeposit\": true, // if can transfer in asset\n\"canWithdraw\": true, // if can transfer out asset\n\"updateTime\": 0, // reserved property, please ignore\n\"multiAssetsMargin\": false,\n\"tradeGroupId\": -1,\n\"totalInitialMargin\": \"0.00000000\", // total initial margin required with current mark price (useless with isolated positions), only for USDT asset\n\"totalMaintMargin\": \"0.00000000\", // total maintenance margin required, only for USDT asset\n\"totalWalletBalance\": \"23.72469206\", // total wallet balance, only for USDT asset\n\"totalUnrealizedProfit\": \"0.00000000\", // total unrealized profit, only for USDT asset\n\"totalMarginBalance\": \"23.72469206\", // total margin balance, only for USDT asset\n\"totalPositionInitialMargin\": \"0.00000000\", // initial margin required for positions with current mark price, only for USDT asset\n\"totalOpenOrderInitialMargin\": \"0.00000000\", // initial margin required for open orders with current mark price, only for USDT asset\n\"totalCrossWalletBalance\": \"23.72469206\", // crossed wallet balance, only for USDT asset\n\"totalCrossUnPnl\": \"0.00000000\", // unrealized profit of crossed positions, only for USDT asset\n\"availableBalance\": \"23.72469206\", // available balance, only for USDT asset\n\"maxWithdrawAmount\": \"23.72469206\" // maximum amount for transfer out, only for USDT asset\n\"assets\": [\n{\n\"asset\": \"USDT\", // asset name\n\"walletBalance\": \"23.72469206\", // wallet balance\n\"unrealizedProfit\": \"0.00000000\", // unrealized profit\n\"marginBalance\": \"23.72469206\", // margin balance\n\"maintMargin\": \"0.00000000\", // maintenance margin required\n\"initialMargin\": \"0.00000000\", // total initial margin required with current mark price\n\"positionInitialMargin\": \"0.00000000\", //initial margin required for positions with current mark price\n\"openOrderInitialMargin\": \"0.00000000\", // initial margin required for open orders with current mark price\n\"crossWalletBalance\": \"23.72469206\", // crossed wallet balance\n\"crossUnPnl\": \"0.00000000\" // unrealized profit of crossed positions\n\"availableBalance\": \"23.72469206\", // available balance\n\"maxWithdrawAmount\": \"23.72469206\", // maximum amount for transfer out\n\"marginAvailable\": true, // whether the asset can be used as margin in Multi-Assets mode\n\"updateTime\": 1625474304765 // last update time\n},\n{\n\"asset\": \"BUSD\", // asset name\n\"walletBalance\": \"103.12345678\", // wallet balance\n\"unrealizedProfit\": \"0.00000000\", // unrealized profit\n\"marginBalance\": \"103.12345678\", // margin balance\n\"maintMargin\": \"0.00000000\", // maintenance margin required\n\"initialMargin\": \"0.00000000\", // total initial margin required with current mark price\n\"positionInitialMargin\": \"0.00000000\", //initial margin required for positions with current mark price\n\"openOrderInitialMargin\": \"0.00000000\", // initial margin required for open orders with current mark price\n\"crossWalletBalance\": \"103.12345678\", // crossed wallet balance\n\"crossUnPnl\": \"0.00000000\" // unrealized profit of crossed positions\n\"availableBalance\": \"103.12345678\", // available balance\n\"maxWithdrawAmount\": \"103.12345678\", // maximum amount for transfer out\n\"marginAvailable\": true, // whether the asset can be used as margin in Multi-Assets mode\n\"updateTime\": 1625474304765 // last update time\n}\n],\n\"positions\": [ // positions of all symbols in the market are returned\n// only \"BOTH\" positions will be returned with One-way mode\n// only \"LONG\" and \"SHORT\" positions will be returned with Hedge mode\n{\n\"symbol\": \"BTCUSDT\", // symbol name\n\"initialMargin\": \"0\", // initial margin required with current mark price\n\"maintMargin\": \"0\", // maintenance margin required\n\"unrealizedProfit\": \"0.00000000\", // unrealized profit\n\"positionInitialMargin\": \"0\", // initial margin required for positions with current mark price\n\"openOrderInitialMargin\": \"0\", // initial margin required for open orders with current mark price\n\"leverage\": \"100\", // current initial leverage\n\"isolated\": true, // if the position is isolated\n\"entryPrice\": \"0.00000\", // average entry price\n\"maxNotional\": \"250000\", // maximum available notional with current leverage\n\"bidNotional\": \"0\", // bids notional, ignore\n\"askNotional\": \"0\", // ask notional, ignore\n\"positionSide\": \"BOTH\", // position side\n\"positionAmt\": \"0\", // position amount\n\"updateTime\": 0 // last update time\n}\n]\n}"
+        },
+        {
+          "type": "blockquote",
+          "text": "OR multi-assets mode"
+        },
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "{\n\"feeTier\": 0, // account commission tier\n\"feeBurn\": true, // \"true\": Fee Discount On; \"false\": Fee Discount Off \"canTrade\": true, // if can trade\n\"canTrade\": true, // if can trade\n\"canDeposit\": true, // if can transfer in asset\n\"canWithdraw\": true, // if can transfer out asset\n\"updateTime\": 0, // reserved property, please ignore\n\"multiAssetsMargin\": true,\n\"tradeGroupId\": -1,\n\"totalInitialMargin\": \"0.00000000\", // the sum of USD value of all cross positions/open order initial margin\n\"totalMaintMargin\": \"0.00000000\", // the sum of USD value of all cross positions maintenance margin\n\"totalWalletBalance\": \"126.72469206\", // total wallet balance in USD\n\"totalUnrealizedProfit\": \"0.00000000\", // total unrealized profit in USD\n\"totalMarginBalance\": \"126.72469206\", // total margin balance in USD\n\"totalPositionInitialMargin\": \"0.00000000\", // the sum of USD value of all cross positions initial margin\n\"totalOpenOrderInitialMargin\": \"0.00000000\", // initial margin required for open orders with current mark price in USD\n\"totalCrossWalletBalance\": \"126.72469206\", // crossed wallet balance in USD\n\"totalCrossUnPnl\": \"0.00000000\", // unrealized profit of crossed positions in USD\n\"availableBalance\": \"126.72469206\", // available balance in USD\n\"maxWithdrawAmount\": \"126.72469206\" // maximum virtual amount for transfer out in USD\n\"assets\": [\n{\n\"asset\": \"USDT\", // asset name\n\"walletBalance\": \"23.72469206\", // wallet balance\n\"unrealizedProfit\": \"0.00000000\", // unrealized profit\n\"marginBalance\": \"23.72469206\", // margin balance\n\"maintMargin\": \"0.00000000\", // maintenance margin required\n\"initialMargin\": \"0.00000000\", // total initial margin required with current mark price\n\"positionInitialMargin\": \"0.00000000\", //initial margin required for positions with current mark price\n\"openOrderInitialMargin\": \"0.00000000\", // initial margin required for open orders with current mark price\n\"crossWalletBalance\": \"23.72469206\", // crossed wallet balance\n\"crossUnPnl\": \"0.00000000\" // unrealized profit of crossed positions\n\"availableBalance\": \"126.72469206\", // available balance\n\"maxWithdrawAmount\": \"23.72469206\", // maximum amount for transfer out\n\"marginAvailable\": true, // whether the asset can be used as margin in Multi-Assets mode\n\"updateTime\": 1625474304765 // last update time\n},\n{\n\"asset\": \"BUSD\", // asset name\n\"walletBalance\": \"103.12345678\", // wallet balance\n\"unrealizedProfit\": \"0.00000000\", // unrealized profit\n\"marginBalance\": \"103.12345678\", // margin balance\n\"maintMargin\": \"0.00000000\", // maintenance margin required\n\"initialMargin\": \"0.00000000\", // total initial margin required with current mark price\n\"positionInitialMargin\": \"0.00000000\", //initial margin required for positions with current mark price\n\"openOrderInitialMargin\": \"0.00000000\", // initial margin required for open orders with current mark price\n\"crossWalletBalance\": \"103.12345678\", // crossed wallet balance\n\"crossUnPnl\": \"0.00000000\" // unrealized profit of crossed positions\n\"availableBalance\": \"126.72469206\", // available balance\n\"maxWithdrawAmount\": \"103.12345678\", // maximum amount for transfer out\n\"marginAvailable\": true, // whether the asset can be used as margin in Multi-Assets mode\n\"updateTime\": 1625474304765 // last update time\n}\n],\n\"positions\": [ // positions of all symbols in the market are returned\n// only \"BOTH\" positions will be returned with One-way mode\n// only \"LONG\" and \"SHORT\" positions will be returned with Hedge mode\n{\n\"symbol\": \"BTCUSDT\", // symbol name\n\"initialMargin\": \"0\", // initial margin required with current mark price\n\"maintMargin\": \"0\", // maintenance margin required\n\"unrealizedProfit\": \"0.00000000\", // unrealized profit\n\"positionInitialMargin\": \"0\", // initial margin required for positions with current mark price\n\"openOrderInitialMargin\": \"0\", // initial margin required for open orders with current mark price\n\"leverage\": \"100\", // current initial leverage\n\"isolated\": true, // if the position is isolated\n\"entryPrice\": \"0.00000\", // average entry price\n\"maxNotional\": \"250000\", // maximum available notional with current leverage\n\"bidNotional\": \"0\", // bids notional, ignore\n\"askNotional\": \"0\", // ask notional, ignore\n\"positionSide\": \"BOTH\", // position side\n\"positionAmt\": \"0\", // position amount\n\"updateTime\": 0 // last update time\n}\n]\n}"
+        }
+      ]
+    }
+  ],
+  "protocol": "rest",
+  "category": "rest-api",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "account",
+    "rest-api",
+    "Account-Information-V2.html"
+  ],
+  "api_summary": {
+    "description": "Get current account information. User in single-asset/ multi-assets mode will see different value, see comments in response section for detail.",
+    "http_method": "GET",
+    "path": "`/fapi/v2/account`",
+    "http_request": "GET `/fapi/v2/account`",
+    "request_weight": "5",
+    "request_parameters_tables": [
+      {
+        "type": "table",
+        "headers": [
+          "Name",
+          "Type",
+          "Mandatory",
+          "Description"
+        ],
+        "rows": [
+          [
+            "recvWindow",
+            "LONG",
+            "NO",
+            ""
+          ],
+          [
+            "timestamp",
+            "LONG",
+            "YES",
+            ""
+          ]
+        ]
+      }
+    ],
+    "request_parameters_text": [],
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "{\n\"feeTier\": 0, // account commission tier\n\"feeBurn\": true, // \"true\": Fee Discount On; \"false\": Fee Discount Off \"canTrade\": true, // if can trade\n\"canDeposit\": true, // if can transfer in asset\n\"canWithdraw\": true, // if can transfer out asset\n\"updateTime\": 0, // reserved property, please ignore\n\"multiAssetsMargin\": false,\n\"tradeGroupId\": -1,\n\"totalInitialMargin\": \"0.00000000\", // total initial margin required with current mark price (useless with isolated positions), only for USDT asset\n\"totalMaintMargin\": \"0.00000000\", // total maintenance margin required, only for USDT asset\n\"totalWalletBalance\": \"23.72469206\", // total wallet balance, only for USDT asset\n\"totalUnrealizedProfit\": \"0.00000000\", // total unrealized profit, only for USDT asset\n\"totalMarginBalance\": \"23.72469206\", // total margin balance, only for USDT asset\n\"totalPositionInitialMargin\": \"0.00000000\", // initial margin required for positions with current mark price, only for USDT asset\n\"totalOpenOrderInitialMargin\": \"0.00000000\", // initial margin required for open orders with current mark price, only for USDT asset\n\"totalCrossWalletBalance\": \"23.72469206\", // crossed wallet balance, only for USDT asset\n\"totalCrossUnPnl\": \"0.00000000\", // unrealized profit of crossed positions, only for USDT asset\n\"availableBalance\": \"23.72469206\", // available balance, only for USDT asset\n\"maxWithdrawAmount\": \"23.72469206\" // maximum amount for transfer out, only for USDT asset\n\"assets\": [\n{\n\"asset\": \"USDT\", // asset name\n\"walletBalance\": \"23.72469206\", // wallet balance\n\"unrealizedProfit\": \"0.00000000\", // unrealized profit\n\"marginBalance\": \"23.72469206\", // margin balance\n\"maintMargin\": \"0.00000000\", // maintenance margin required\n\"initialMargin\": \"0.00000000\", // total initial margin required with current mark price\n\"positionInitialMargin\": \"0.00000000\", //initial margin required for positions with current mark price\n\"openOrderInitialMargin\": \"0.00000000\", // initial margin required for open orders with current mark price\n\"crossWalletBalance\": \"23.72469206\", // crossed wallet balance\n\"crossUnPnl\": \"0.00000000\" // unrealized profit of crossed positions\n\"availableBalance\": \"23.72469206\", // available balance\n\"maxWithdrawAmount\": \"23.72469206\", // maximum amount for transfer out\n\"marginAvailable\": true, // whether the asset can be used as margin in Multi-Assets mode\n\"updateTime\": 1625474304765 // last update time\n},\n{\n\"asset\": \"BUSD\", // asset name\n\"walletBalance\": \"103.12345678\", // wallet balance\n\"unrealizedProfit\": \"0.00000000\", // unrealized profit\n\"marginBalance\": \"103.12345678\", // margin balance\n\"maintMargin\": \"0.00000000\", // maintenance margin required\n\"initialMargin\": \"0.00000000\", // total initial margin required with current mark price\n\"positionInitialMargin\": \"0.00000000\", //initial margin required for positions with current mark price\n\"openOrderInitialMargin\": \"0.00000000\", // initial margin required for open orders with current mark price\n\"crossWalletBalance\": \"103.12345678\", // crossed wallet balance\n\"crossUnPnl\": \"0.00000000\" // unrealized profit of crossed positions\n\"availableBalance\": \"103.12345678\", // available balance\n\"maxWithdrawAmount\": \"103.12345678\", // maximum amount for transfer out\n\"marginAvailable\": true, // whether the asset can be used as margin in Multi-Assets mode\n\"updateTime\": 1625474304765 // last update time\n}\n],\n\"positions\": [ // positions of all symbols in the market are returned\n// only \"BOTH\" positions will be returned with One-way mode\n// only \"LONG\" and \"SHORT\" positions will be returned with Hedge mode\n{\n\"symbol\": \"BTCUSDT\", // symbol name\n\"initialMargin\": \"0\", // initial margin required with current mark price\n\"maintMargin\": \"0\", // maintenance margin required\n\"unrealizedProfit\": \"0.00000000\", // unrealized profit\n\"positionInitialMargin\": \"0\", // initial margin required for positions with current mark price\n\"openOrderInitialMargin\": \"0\", // initial margin required for open orders with current mark price\n\"leverage\": \"100\", // current initial leverage\n\"isolated\": true, // if the position is isolated\n\"entryPrice\": \"0.00000\", // average entry price\n\"maxNotional\": \"250000\", // maximum available notional with current leverage\n\"bidNotional\": \"0\", // bids notional, ignore\n\"askNotional\": \"0\", // ask notional, ignore\n\"positionSide\": \"BOTH\", // position side\n\"positionAmt\": \"0\", // position amount\n\"updateTime\": 0 // last update time\n}\n]\n}"
+      },
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "{\n\"feeTier\": 0, // account commission tier\n\"feeBurn\": true, // \"true\": Fee Discount On; \"false\": Fee Discount Off \"canTrade\": true, // if can trade\n\"canTrade\": true, // if can trade\n\"canDeposit\": true, // if can transfer in asset\n\"canWithdraw\": true, // if can transfer out asset\n\"updateTime\": 0, // reserved property, please ignore\n\"multiAssetsMargin\": true,\n\"tradeGroupId\": -1,\n\"totalInitialMargin\": \"0.00000000\", // the sum of USD value of all cross positions/open order initial margin\n\"totalMaintMargin\": \"0.00000000\", // the sum of USD value of all cross positions maintenance margin\n\"totalWalletBalance\": \"126.72469206\", // total wallet balance in USD\n\"totalUnrealizedProfit\": \"0.00000000\", // total unrealized profit in USD\n\"totalMarginBalance\": \"126.72469206\", // total margin balance in USD\n\"totalPositionInitialMargin\": \"0.00000000\", // the sum of USD value of all cross positions initial margin\n\"totalOpenOrderInitialMargin\": \"0.00000000\", // initial margin required for open orders with current mark price in USD\n\"totalCrossWalletBalance\": \"126.72469206\", // crossed wallet balance in USD\n\"totalCrossUnPnl\": \"0.00000000\", // unrealized profit of crossed positions in USD\n\"availableBalance\": \"126.72469206\", // available balance in USD\n\"maxWithdrawAmount\": \"126.72469206\" // maximum virtual amount for transfer out in USD\n\"assets\": [\n{\n\"asset\": \"USDT\", // asset name\n\"walletBalance\": \"23.72469206\", // wallet balance\n\"unrealizedProfit\": \"0.00000000\", // unrealized profit\n\"marginBalance\": \"23.72469206\", // margin balance\n\"maintMargin\": \"0.00000000\", // maintenance margin required\n\"initialMargin\": \"0.00000000\", // total initial margin required with current mark price\n\"positionInitialMargin\": \"0.00000000\", //initial margin required for positions with current mark price\n\"openOrderInitialMargin\": \"0.00000000\", // initial margin required for open orders with current mark price\n\"crossWalletBalance\": \"23.72469206\", // crossed wallet balance\n\"crossUnPnl\": \"0.00000000\" // unrealized profit of crossed positions\n\"availableBalance\": \"126.72469206\", // available balance\n\"maxWithdrawAmount\": \"23.72469206\", // maximum amount for transfer out\n\"marginAvailable\": true, // whether the asset can be used as margin in Multi-Assets mode\n\"updateTime\": 1625474304765 // last update time\n},\n{\n\"asset\": \"BUSD\", // asset name\n\"walletBalance\": \"103.12345678\", // wallet balance\n\"unrealizedProfit\": \"0.00000000\", // unrealized profit\n\"marginBalance\": \"103.12345678\", // margin balance\n\"maintMargin\": \"0.00000000\", // maintenance margin required\n\"initialMargin\": \"0.00000000\", // total initial margin required with current mark price\n\"positionInitialMargin\": \"0.00000000\", //initial margin required for positions with current mark price\n\"openOrderInitialMargin\": \"0.00000000\", // initial margin required for open orders with current mark price\n\"crossWalletBalance\": \"103.12345678\", // crossed wallet balance\n\"crossUnPnl\": \"0.00000000\" // unrealized profit of crossed positions\n\"availableBalance\": \"126.72469206\", // available balance\n\"maxWithdrawAmount\": \"103.12345678\", // maximum amount for transfer out\n\"marginAvailable\": true, // whether the asset can be used as margin in Multi-Assets mode\n\"updateTime\": 1625474304765 // last update time\n}\n],\n\"positions\": [ // positions of all symbols in the market are returned\n// only \"BOTH\" positions will be returned with One-way mode\n// only \"LONG\" and \"SHORT\" positions will be returned with Hedge mode\n{\n\"symbol\": \"BTCUSDT\", // symbol name\n\"initialMargin\": \"0\", // initial margin required with current mark price\n\"maintMargin\": \"0\", // maintenance margin required\n\"unrealizedProfit\": \"0.00000000\", // unrealized profit\n\"positionInitialMargin\": \"0\", // initial margin required for positions with current mark price\n\"openOrderInitialMargin\": \"0\", // initial margin required for open orders with current mark price\n\"leverage\": \"100\", // current initial leverage\n\"isolated\": true, // if the position is isolated\n\"entryPrice\": \"0.00000\", // average entry price\n\"maxNotional\": \"250000\", // maximum available notional with current leverage\n\"bidNotional\": \"0\", // bids notional, ignore\n\"askNotional\": \"0\", // ask notional, ignore\n\"positionSide\": \"BOTH\", // position side\n\"positionAmt\": \"0\", // position amount\n\"updateTime\": 0 // last update time\n}\n]\n}"
+      }
+    ]
+  }
+}

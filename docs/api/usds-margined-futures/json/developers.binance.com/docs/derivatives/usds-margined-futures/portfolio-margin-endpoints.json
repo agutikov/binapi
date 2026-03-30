@@ -1,0 +1,149 @@
+{
+  "title": "Classic Portfolio Margin Account Information (USER_DATA)",
+  "meta_description": "API Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "API Description",
+      "level": 2,
+      "id": "api-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Get Classic Portfolio Margin current account information."
+        }
+      ]
+    },
+    {
+      "title": "HTTP Request",
+      "level": 2,
+      "id": "http-request",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "GET `/fapi/v1/pmAccountInfo`"
+        }
+      ]
+    },
+    {
+      "title": "Request Weight",
+      "level": 2,
+      "id": "request-weight",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "5"
+        }
+      ]
+    },
+    {
+      "title": "Request Parameters",
+      "level": 2,
+      "id": "request-parameters",
+      "blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "Name",
+            "Type",
+            "Mandatory",
+            "Description"
+          ],
+          "rows": [
+            [
+              "asset",
+              "STRING",
+              "YES",
+              ""
+            ],
+            [
+              "recvWindow",
+              "LONG",
+              "NO",
+              ""
+            ],
+            [
+              "timestamp",
+              "LONG",
+              "YES",
+              ""
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "text": "maxWithdrawAmount is for asset transfer out to the spot wallet."
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "{\n\"maxWithdrawAmountUSD\": \"1627523.32459208\", // Classic Portfolio margin maximum virtual amount for transfer out in USD\n\"asset\": \"BTC\", // asset name\n\"maxWithdrawAmount\": \"27.43689636\", // maximum amount for transfer out\n}"
+        }
+      ]
+    }
+  ],
+  "protocol": "reference",
+  "category": "usds-margined-futures",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "portfolio-margin-endpoints.html"
+  ],
+  "api_summary": {
+    "description": "Get Classic Portfolio Margin current account information.",
+    "http_method": "GET",
+    "path": "`/fapi/v1/pmAccountInfo`",
+    "http_request": "GET `/fapi/v1/pmAccountInfo`",
+    "request_weight": "5",
+    "request_parameters_tables": [
+      {
+        "type": "table",
+        "headers": [
+          "Name",
+          "Type",
+          "Mandatory",
+          "Description"
+        ],
+        "rows": [
+          [
+            "asset",
+            "STRING",
+            "YES",
+            ""
+          ],
+          [
+            "recvWindow",
+            "LONG",
+            "NO",
+            ""
+          ],
+          [
+            "timestamp",
+            "LONG",
+            "YES",
+            ""
+          ]
+        ]
+      }
+    ],
+    "request_parameters_text": [
+      "maxWithdrawAmount is for asset transfer out to the spot wallet."
+    ],
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "{\n\"maxWithdrawAmountUSD\": \"1627523.32459208\", // Classic Portfolio margin maximum virtual amount for transfer out in USD\n\"asset\": \"BTC\", // asset name\n\"maxWithdrawAmount\": \"27.43689636\", // maximum amount for transfer out\n}"
+      }
+    ]
+  }
+}

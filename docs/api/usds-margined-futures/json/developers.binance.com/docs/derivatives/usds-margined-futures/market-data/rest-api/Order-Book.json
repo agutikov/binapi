@@ -1,0 +1,166 @@
+{
+  "title": "Order Book",
+  "meta_description": "API Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "API Description",
+      "level": 2,
+      "id": "api-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Query symbol orderbook"
+        }
+      ]
+    },
+    {
+      "title": "HTTP Request",
+      "level": 2,
+      "id": "http-request",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "GET `/fapi/v1/depth`"
+        },
+        {
+          "type": "paragraph",
+          "text": "Note:"
+        },
+        {
+          "type": "blockquote",
+          "text": "Retail Price Improvement(RPI) orders are not visible and excluded in the response message."
+        }
+      ]
+    },
+    {
+      "title": "Request Weight",
+      "level": 2,
+      "id": "request-weight",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Adjusted based on the limit:"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "Limit",
+            "Weight"
+          ],
+          "rows": [
+            [
+              "5, 10, 20, 50",
+              "2"
+            ],
+            [
+              "100",
+              "5"
+            ],
+            [
+              "500",
+              "10"
+            ],
+            [
+              "1000",
+              "20"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Request Parameters",
+      "level": 2,
+      "id": "request-parameters",
+      "blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "Name",
+            "Type",
+            "Mandatory",
+            "Description"
+          ],
+          "rows": [
+            [
+              "symbol",
+              "STRING",
+              "YES",
+              ""
+            ],
+            [
+              "limit",
+              "INT",
+              "NO",
+              "Default 500; Valid limits:[5, 10, 20, 50, 100, 500, 1000]"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "{\n\"lastUpdateId\": 1027024,\n\"E\": 1589436922972, // Message output time\n\"T\": 1589436922959, // Transaction time\n\"bids\": [\n[\n\"4.00000000\", // PRICE\n\"431.00000000\" // QTY\n]\n],\n\"asks\": [\n[\n\"4.00000200\",\n\"12.00000000\"\n]\n]\n}"
+        }
+      ]
+    }
+  ],
+  "protocol": "rest",
+  "category": "rest-api",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "market-data",
+    "rest-api",
+    "Order-Book.html"
+  ],
+  "api_summary": {
+    "description": "Query symbol orderbook",
+    "http_method": "GET",
+    "path": "`/fapi/v1/depth`",
+    "http_request": "GET `/fapi/v1/depth`",
+    "request_weight": "Adjusted based on the limit:",
+    "request_parameters_tables": [
+      {
+        "type": "table",
+        "headers": [
+          "Name",
+          "Type",
+          "Mandatory",
+          "Description"
+        ],
+        "rows": [
+          [
+            "symbol",
+            "STRING",
+            "YES",
+            ""
+          ],
+          [
+            "limit",
+            "INT",
+            "NO",
+            "Default 500; Valid limits:[5, 10, 20, 50, 100, 500, 1000]"
+          ]
+        ]
+      }
+    ],
+    "request_parameters_text": [],
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "{\n\"lastUpdateId\": 1027024,\n\"E\": 1589436922972, // Message output time\n\"T\": 1589436922959, // Transaction time\n\"bids\": [\n[\n\"4.00000000\", // PRICE\n\"431.00000000\" // QTY\n]\n],\n\"asks\": [\n[\n\"4.00000200\",\n\"12.00000000\"\n]\n]\n}"
+      }
+    ]
+  }
+}

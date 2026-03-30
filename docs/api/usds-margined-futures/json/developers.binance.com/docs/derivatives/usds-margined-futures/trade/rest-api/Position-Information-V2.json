@@ -1,0 +1,248 @@
+{
+  "title": "Position Information V2 (USER_DATA)",
+  "meta_description": "API Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "API Description",
+      "level": 2,
+      "id": "api-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Get current position information."
+        }
+      ]
+    },
+    {
+      "title": "HTTP Request",
+      "level": 2,
+      "id": "http-request",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "GET `/fapi/v2/positionRisk`"
+        }
+      ]
+    },
+    {
+      "title": "Request Weight",
+      "level": 2,
+      "id": "request-weight",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "5"
+        }
+      ]
+    },
+    {
+      "title": "Request Parameters",
+      "level": 2,
+      "id": "request-parameters",
+      "blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "Name",
+            "Type",
+            "Mandatory",
+            "Description"
+          ],
+          "rows": [
+            [
+              "symbol",
+              "STRING",
+              "NO",
+              ""
+            ],
+            [
+              "recvWindow",
+              "LONG",
+              "NO",
+              ""
+            ],
+            [
+              "timestamp",
+              "LONG",
+              "YES",
+              ""
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Note"
+        },
+        {
+          "type": "blockquote",
+          "text": "Please use with user data stream `ACCOUNT_UPDATE` to meet your timeliness and accuracy needs."
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "blockquote",
+          "text": "For One-way position mode:"
+        },
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "[\n{\n\"entryPrice\": \"0.00000\",\n\"breakEvenPrice\": \"0.0\",\n\"marginType\": \"isolated\",\n\"isAutoAddMargin\": \"false\",\n\"isolatedMargin\": \"0.00000000\",\n\"leverage\": \"10\",\n\"liquidationPrice\": \"0\",\n\"markPrice\": \"6679.50671178\",\n\"maxNotionalValue\": \"20000000\",\n\"positionAmt\": \"0.000\",\n\"notional\": \"0\",,\n\"isolatedWallet\": \"0\",\n\"symbol\": \"BTCUSDT\",\n\"unRealizedProfit\": \"0.00000000\",\n\"positionSide\": \"BOTH\",\n\"updateTime\": 0\n}\n]"
+        },
+        {
+          "type": "blockquote",
+          "text": "For Hedge position mode:"
+        },
+        {
+          "type": "code",
+          "language": "json",
+          "json": [
+            {
+              "symbol": "BTCUSDT",
+              "positionAmt": "0.001",
+              "entryPrice": "22185.2",
+              "breakEvenPrice": "0.0",
+              "markPrice": "21123.05052574",
+              "unRealizedProfit": "-1.06214947",
+              "liquidationPrice": "19731.45529116",
+              "leverage": "4",
+              "maxNotionalValue": "100000000",
+              "marginType": "cross",
+              "isolatedMargin": "0.00000000",
+              "isAutoAddMargin": "false",
+              "positionSide": "LONG",
+              "notional": "21.12305052",
+              "isolatedWallet": "0",
+              "updateTime": 1655217461579
+            },
+            {
+              "symbol": "BTCUSDT",
+              "positionAmt": "0.000",
+              "entryPrice": "0.0",
+              "breakEvenPrice": "0.0",
+              "markPrice": "21123.05052574",
+              "unRealizedProfit": "0.00000000",
+              "liquidationPrice": "0",
+              "leverage": "4",
+              "maxNotionalValue": "100000000",
+              "marginType": "cross",
+              "isolatedMargin": "0.00000000",
+              "isAutoAddMargin": "false",
+              "positionSide": "SHORT",
+              "notional": "0",
+              "isolatedWallet": "0",
+              "updateTime": 0
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "protocol": "rest",
+  "category": "rest-api",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "trade",
+    "rest-api",
+    "Position-Information-V2.html"
+  ],
+  "api_summary": {
+    "description": "Get current position information.",
+    "http_method": "GET",
+    "path": "`/fapi/v2/positionRisk`",
+    "http_request": "GET `/fapi/v2/positionRisk`",
+    "request_weight": "5",
+    "request_parameters_tables": [
+      {
+        "type": "table",
+        "headers": [
+          "Name",
+          "Type",
+          "Mandatory",
+          "Description"
+        ],
+        "rows": [
+          [
+            "symbol",
+            "STRING",
+            "NO",
+            ""
+          ],
+          [
+            "recvWindow",
+            "LONG",
+            "NO",
+            ""
+          ],
+          [
+            "timestamp",
+            "LONG",
+            "YES",
+            ""
+          ]
+        ]
+      }
+    ],
+    "request_parameters_text": [
+      "Note",
+      "Please use with user data stream `ACCOUNT_UPDATE` to meet your timeliness and accuracy needs."
+    ],
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "[\n{\n\"entryPrice\": \"0.00000\",\n\"breakEvenPrice\": \"0.0\",\n\"marginType\": \"isolated\",\n\"isAutoAddMargin\": \"false\",\n\"isolatedMargin\": \"0.00000000\",\n\"leverage\": \"10\",\n\"liquidationPrice\": \"0\",\n\"markPrice\": \"6679.50671178\",\n\"maxNotionalValue\": \"20000000\",\n\"positionAmt\": \"0.000\",\n\"notional\": \"0\",,\n\"isolatedWallet\": \"0\",\n\"symbol\": \"BTCUSDT\",\n\"unRealizedProfit\": \"0.00000000\",\n\"positionSide\": \"BOTH\",\n\"updateTime\": 0\n}\n]"
+      },
+      {
+        "type": "code",
+        "language": "json",
+        "json": [
+          {
+            "symbol": "BTCUSDT",
+            "positionAmt": "0.001",
+            "entryPrice": "22185.2",
+            "breakEvenPrice": "0.0",
+            "markPrice": "21123.05052574",
+            "unRealizedProfit": "-1.06214947",
+            "liquidationPrice": "19731.45529116",
+            "leverage": "4",
+            "maxNotionalValue": "100000000",
+            "marginType": "cross",
+            "isolatedMargin": "0.00000000",
+            "isAutoAddMargin": "false",
+            "positionSide": "LONG",
+            "notional": "21.12305052",
+            "isolatedWallet": "0",
+            "updateTime": 1655217461579
+          },
+          {
+            "symbol": "BTCUSDT",
+            "positionAmt": "0.000",
+            "entryPrice": "0.0",
+            "breakEvenPrice": "0.0",
+            "markPrice": "21123.05052574",
+            "unRealizedProfit": "0.00000000",
+            "liquidationPrice": "0",
+            "leverage": "4",
+            "maxNotionalValue": "100000000",
+            "marginType": "cross",
+            "isolatedMargin": "0.00000000",
+            "isAutoAddMargin": "false",
+            "positionSide": "SHORT",
+            "notional": "0",
+            "isolatedWallet": "0",
+            "updateTime": 0
+          }
+        ]
+      }
+    ]
+  }
+}

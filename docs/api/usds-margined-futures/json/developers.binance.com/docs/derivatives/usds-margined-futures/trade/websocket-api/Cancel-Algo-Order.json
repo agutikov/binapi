@@ -1,0 +1,236 @@
+{
+  "title": "Cancel Algo Order (TRADE)",
+  "meta_description": "API Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "API Description",
+      "level": 2,
+      "id": "api-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Cancel an active algo order."
+        }
+      ]
+    },
+    {
+      "title": "Method",
+      "level": 2,
+      "id": "method",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`algoOrder.cancel`"
+        }
+      ]
+    },
+    {
+      "title": "Request",
+      "level": 2,
+      "id": "request",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "json",
+          "json": {
+            "id": "5633b6a2-90a9-4192-83e7-925c90b6a2fd",
+            "method": "algoOrder.cancel",
+            "params": {
+              "apiKey": "HsOehcfih8ZRxnhjp2XjGXhsOBd6msAhKz9joQaWwZ7arcJTlD2hGOGQj1lGdTjR",
+              "algoId": 283194212,
+              "clientAlgoId": "DolwRKnQNjoc1E9Bbh03ER",
+              "timestamp": 1703439070722,
+              "signature": "b09c49815b4e3f1f6098cd9fbe26a933a9af79803deaaaae03c29f719c08a8a8"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "title": "Request Weight",
+      "level": 2,
+      "id": "request-weight",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "1"
+        }
+      ]
+    },
+    {
+      "title": "Request Parameters",
+      "level": 2,
+      "id": "request-parameters",
+      "blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "Name",
+            "Type",
+            "Mandatory",
+            "Description"
+          ],
+          "rows": [
+            [
+              "algoId",
+              "LONG",
+              "NO",
+              ""
+            ],
+            [
+              "clientAlgoId",
+              "STRING",
+              "NO",
+              ""
+            ],
+            [
+              "recvWindow",
+              "LONG",
+              "NO",
+              ""
+            ],
+            [
+              "timestamp",
+              "LONG",
+              "YES",
+              ""
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "text": "Either `algoId` or `clientAlgoId` must be sent."
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "json",
+          "json": {
+            "id": "unique-cancel-request-id-5678",
+            "status": 200,
+            "result": {
+              "algoId": 2000000002162519,
+              "clientAlgoId": "rDMG8WSde6LkyMNtk6s825",
+              "code": "200",
+              "msg": "success"
+            },
+            "rateLimits": [
+              {
+                "rateLimitType": "REQUEST_WEIGHT",
+                "interval": "MINUTE",
+                "intervalNum": 1,
+                "limit": 2400,
+                "count": 6
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "protocol": "websocket_api",
+  "category": "websocket-api",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "trade",
+    "websocket-api",
+    "Cancel-Algo-Order.html"
+  ],
+  "api_summary": {
+    "description": "Cancel an active algo order.",
+    "method": "`algoOrder.cancel`",
+    "request_weight": "1",
+    "request_parameters_tables": [
+      {
+        "type": "table",
+        "headers": [
+          "Name",
+          "Type",
+          "Mandatory",
+          "Description"
+        ],
+        "rows": [
+          [
+            "algoId",
+            "LONG",
+            "NO",
+            ""
+          ],
+          [
+            "clientAlgoId",
+            "STRING",
+            "NO",
+            ""
+          ],
+          [
+            "recvWindow",
+            "LONG",
+            "NO",
+            ""
+          ],
+          [
+            "timestamp",
+            "LONG",
+            "YES",
+            ""
+          ]
+        ]
+      }
+    ],
+    "request_parameters_text": [
+      "Either `algoId` or `clientAlgoId` must be sent."
+    ],
+    "request_code_blocks": [
+      {
+        "type": "code",
+        "language": "json",
+        "json": {
+          "id": "5633b6a2-90a9-4192-83e7-925c90b6a2fd",
+          "method": "algoOrder.cancel",
+          "params": {
+            "apiKey": "HsOehcfih8ZRxnhjp2XjGXhsOBd6msAhKz9joQaWwZ7arcJTlD2hGOGQj1lGdTjR",
+            "algoId": 283194212,
+            "clientAlgoId": "DolwRKnQNjoc1E9Bbh03ER",
+            "timestamp": 1703439070722,
+            "signature": "b09c49815b4e3f1f6098cd9fbe26a933a9af79803deaaaae03c29f719c08a8a8"
+          }
+        }
+      }
+    ],
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "json",
+        "json": {
+          "id": "unique-cancel-request-id-5678",
+          "status": 200,
+          "result": {
+            "algoId": 2000000002162519,
+            "clientAlgoId": "rDMG8WSde6LkyMNtk6s825",
+            "code": "200",
+            "msg": "success"
+          },
+          "rateLimits": [
+            {
+              "rateLimitType": "REQUEST_WEIGHT",
+              "interval": "MINUTE",
+              "intervalNum": 1,
+              "limit": 2400,
+              "count": 6
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,112 @@
+{
+  "title": "Event: Algo Order Update",
+  "meta_description": "Event Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "Event Description",
+      "level": 2,
+      "id": "event-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "When new algo order created, order status changed will push such event. event type is `ALGO_UPDATE`."
+        },
+        {
+          "type": "paragraph",
+          "text": "Algo Status"
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "`NEW`: This status indicates that the conditional order was successfully placed into the Algo Service but has not yet been triggered.",
+              "blocks": []
+            },
+            {
+              "text": "`CANCELED`: This status signifies that the conditional order has been canceled.",
+              "blocks": []
+            },
+            {
+              "text": "`TRIGGERING`: This status suggests that the order has met the triggering condition and has been forwarded to the matching engine.",
+              "blocks": []
+            },
+            {
+              "text": "`TRIGGERED`: This status means that the order has been successfully placed into the matching engine.",
+              "blocks": []
+            },
+            {
+              "text": "`FINISHED`: This status shows that the triggered conditional order has been filled or canceled in the matching engine.",
+              "blocks": []
+            },
+            {
+              "text": "`REJECTED`: This status signifies that the conditional order has been denied by the matching engine, such as in scenarios of margin check failures.",
+              "blocks": []
+            },
+            {
+              "text": "`EXPIRED`: This status denotes that the conditional order has been canceled by the system. An example would be when a user places a GTE_GTC Time-In-Force conditional order but then closes all positions on that symbol, resulting in system-led cancellation of the conditional order.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "URL PATH",
+      "level": 2,
+      "id": "url-path",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`/private`"
+        }
+      ]
+    },
+    {
+      "title": "Event Name",
+      "level": 2,
+      "id": "event-name",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`ALGO_UPDATE`"
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "{\n\"e\":\"ALGO_UPDATE\", // Event Type\n\"T\":1750515742297, // Transaction Time\n\"E\":1750515742303, // Event Time\n\"o\":{\n\"caid\":\"Q5xaq5EGKgXXa0fD7fs0Ip\", // Client Algo Id\n\"aid\":2148719, // Algo Id\n\"at\":\"CONDITIONAL\", // Algo Type\n\"o\":\"TAKE_PROFIT\", //Order Type\n\"s\":\"BNBUSDT\", //Symbol\n\"S\":\"SELL\", //Side\n\"ps\":\"BOTH\", //Position Side\n\"f\":\"GTC\", //Time in force\n\"q\":\"0.01\", //quantity\n\"X\":\"CANCELED\", //Algo status\n\"ai\":\"\", // order id\n\"ap\": \"0.00000\", // avg fill price in matching engine, only display when order is triggered and placed in matching engine\n\"aq\": \"0.00000\", // execuated quantity in matching engine, only display when order is triggered and placed in matching engine\n\"act\": \"0\", // actual order type in matching engine, only display when order is triggered and placed in matching engine\n\"tp\":\"750\", //Trigger price\n\"p\":\"750\", //Order Price\n\"V\":\"EXPIRE_MAKER\", //STP mode\n\"wt\":\"CONTRACT_PRICE\", //Working type\n\"pm\":\"NONE\", // Price match mode\n\"cp\":false, //If Close-All\n\"pP\":false, //If price protection is turned on\n\"R\":false, // Is this reduce only\n\"tt\":0, //Trigger time\n\"gtd\":0, // good till time for GTD time in force\n\"rm\": \"Reduce Only reject\" // algo order failed reason\n}\n}"
+        }
+      ]
+    }
+  ],
+  "protocol": "user_data_stream",
+  "category": "user-data-streams",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "user-data-streams",
+    "Event-Algo-Order-Update.html"
+  ],
+  "api_summary": {
+    "description": "When new algo order created, order status changed will push such event. event type is `ALGO_UPDATE`.",
+    "url_path": "`/private`",
+    "event_name": "`ALGO_UPDATE`",
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "{\n\"e\":\"ALGO_UPDATE\", // Event Type\n\"T\":1750515742297, // Transaction Time\n\"E\":1750515742303, // Event Time\n\"o\":{\n\"caid\":\"Q5xaq5EGKgXXa0fD7fs0Ip\", // Client Algo Id\n\"aid\":2148719, // Algo Id\n\"at\":\"CONDITIONAL\", // Algo Type\n\"o\":\"TAKE_PROFIT\", //Order Type\n\"s\":\"BNBUSDT\", //Symbol\n\"S\":\"SELL\", //Side\n\"ps\":\"BOTH\", //Position Side\n\"f\":\"GTC\", //Time in force\n\"q\":\"0.01\", //quantity\n\"X\":\"CANCELED\", //Algo status\n\"ai\":\"\", // order id\n\"ap\": \"0.00000\", // avg fill price in matching engine, only display when order is triggered and placed in matching engine\n\"aq\": \"0.00000\", // execuated quantity in matching engine, only display when order is triggered and placed in matching engine\n\"act\": \"0\", // actual order type in matching engine, only display when order is triggered and placed in matching engine\n\"tp\":\"750\", //Trigger price\n\"p\":\"750\", //Order Price\n\"V\":\"EXPIRE_MAKER\", //STP mode\n\"wt\":\"CONTRACT_PRICE\", //Working type\n\"pm\":\"NONE\", // Price match mode\n\"cp\":false, //If Close-All\n\"pP\":false, //If price protection is turned on\n\"R\":false, // Is this reduce only\n\"tt\":0, //Trigger time\n\"gtd\":0, // good till time for GTD time in force\n\"rm\": \"Reduce Only reject\" // algo order failed reason\n}\n}"
+      }
+    ]
+  }
+}

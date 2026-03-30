@@ -1,0 +1,152 @@
+{
+  "title": "Order status(USER_DATA)",
+  "meta_description": "API Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "API Description",
+      "level": 2,
+      "id": "api-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Query order status by order ID."
+        }
+      ]
+    },
+    {
+      "title": "HTTP Request",
+      "level": 2,
+      "id": "http-request",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "GET `/fapi/v1/convert/orderStatus`"
+        }
+      ]
+    },
+    {
+      "title": "Request Weight",
+      "level": 2,
+      "id": "request-weight",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "50(IP)"
+        }
+      ]
+    },
+    {
+      "title": "Request Parameters",
+      "level": 2,
+      "id": "request-parameters",
+      "blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "Name",
+            "Type",
+            "Mandatory",
+            "Description"
+          ],
+          "rows": [
+            [
+              "orderId",
+              "STRING",
+              "NO",
+              "Either orderId or quoteId is required"
+            ],
+            [
+              "quoteId",
+              "STRING",
+              "NO",
+              "Either orderId or quoteId is required"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "json",
+          "json": {
+            "orderId": 933256278426274426,
+            "orderStatus": "SUCCESS",
+            "fromAsset": "BTC",
+            "fromAmount": "0.00054414",
+            "toAsset": "USDT",
+            "toAmount": "20",
+            "ratio": "36755",
+            "inverseRatio": "0.00002721",
+            "createTime": 1623381330472
+          }
+        }
+      ]
+    }
+  ],
+  "protocol": "reference",
+  "category": "convert",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "convert",
+    "Order-Status.html"
+  ],
+  "api_summary": {
+    "description": "Query order status by order ID.",
+    "http_method": "GET",
+    "path": "`/fapi/v1/convert/orderStatus`",
+    "http_request": "GET `/fapi/v1/convert/orderStatus`",
+    "request_weight": "50(IP)",
+    "request_parameters_tables": [
+      {
+        "type": "table",
+        "headers": [
+          "Name",
+          "Type",
+          "Mandatory",
+          "Description"
+        ],
+        "rows": [
+          [
+            "orderId",
+            "STRING",
+            "NO",
+            "Either orderId or quoteId is required"
+          ],
+          [
+            "quoteId",
+            "STRING",
+            "NO",
+            "Either orderId or quoteId is required"
+          ]
+        ]
+      }
+    ],
+    "request_parameters_text": [],
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "json",
+        "json": {
+          "orderId": 933256278426274426,
+          "orderStatus": "SUCCESS",
+          "fromAsset": "BTC",
+          "fromAmount": "0.00054414",
+          "toAsset": "USDT",
+          "toAmount": "20",
+          "ratio": "36755",
+          "inverseRatio": "0.00002721",
+          "createTime": 1623381330472
+        }
+      }
+    ]
+  }
+}

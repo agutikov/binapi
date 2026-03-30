@@ -1,0 +1,86 @@
+{
+  "title": "Individual Symbol Mini Ticker Stream",
+  "meta_description": "Stream Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "Stream Description",
+      "level": 2,
+      "id": "stream-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "24hr rolling window mini-ticker statistics for a single symbol. These are NOT the statistics of the UTC day, but a 24hr rolling window from requestTime to 24hrs before."
+        }
+      ]
+    },
+    {
+      "title": "URL PATH",
+      "level": 2,
+      "id": "url-path",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`/market`"
+        }
+      ]
+    },
+    {
+      "title": "Stream Name",
+      "level": 2,
+      "id": "stream-name",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`<symbol>@miniTicker`"
+        }
+      ]
+    },
+    {
+      "title": "Update Speed",
+      "level": 2,
+      "id": "update-speed",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "2s"
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "{\n\"e\": \"24hrMiniTicker\", // Event type\n\"E\": 123456789, // Event time\n\"s\": \"BTCUSDT\", // Symbol\n\"c\": \"0.0025\", // Close price\n\"o\": \"0.0010\", // Open price\n\"h\": \"0.0025\", // High price\n\"l\": \"0.0010\", // Low price\n\"v\": \"10000\", // Total traded base asset volume\n\"q\": \"18\" // Total traded quote asset volume\n}"
+        }
+      ]
+    }
+  ],
+  "protocol": "websocket_stream",
+  "category": "websocket-market-streams",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "websocket-market-streams",
+    "Individual-Symbol-Mini-Ticker-Stream.html"
+  ],
+  "api_summary": {
+    "description": "24hr rolling window mini-ticker statistics for a single symbol. These are NOT the statistics of the UTC day, but a 24hr rolling window from requestTime to 24hrs before.",
+    "url_path": "`/market`",
+    "stream_name": "`<symbol>@miniTicker`",
+    "update_speed": "2s",
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "{\n\"e\": \"24hrMiniTicker\", // Event type\n\"E\": 123456789, // Event time\n\"s\": \"BTCUSDT\", // Symbol\n\"c\": \"0.0025\", // Close price\n\"o\": \"0.0010\", // Open price\n\"h\": \"0.0025\", // High price\n\"l\": \"0.0010\", // Low price\n\"v\": \"10000\", // Total traded base asset volume\n\"q\": \"18\" // Total traded quote asset volume\n}"
+      }
+    ]
+  }
+}

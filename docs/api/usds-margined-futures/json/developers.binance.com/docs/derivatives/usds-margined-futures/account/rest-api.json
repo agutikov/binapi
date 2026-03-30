@@ -1,0 +1,22 @@
+{
+  "title": "New Future Account Transfer",
+  "meta_description": "Please find details from here.",
+  "intro_blocks": [
+    {
+      "type": "paragraph",
+      "text": "Please find details from here."
+    }
+  ],
+  "sections": [],
+  "protocol": "rest",
+  "category": "account",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "account",
+    "rest-api.html"
+  ],
+  "api_summary": {}
+}

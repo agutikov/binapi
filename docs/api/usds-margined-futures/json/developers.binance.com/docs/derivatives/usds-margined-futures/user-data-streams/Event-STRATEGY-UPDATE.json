@@ -1,0 +1,170 @@
+{
+  "title": "Event: STRATEGY_UPDATE",
+  "meta_description": "Event Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "Event Description",
+      "level": 2,
+      "id": "event-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`STRATEGY_UPDATE` update when a strategy is created/cancelled/expired, ...etc."
+        },
+        {
+          "type": "paragraph",
+          "text": "Strategy Status"
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "NEW",
+              "blocks": []
+            },
+            {
+              "text": "WORKING",
+              "blocks": []
+            },
+            {
+              "text": "CANCELLED",
+              "blocks": []
+            },
+            {
+              "text": "EXPIRED",
+              "blocks": []
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "opCode"
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "8001: The strategy params have been updated",
+              "blocks": []
+            },
+            {
+              "text": "8002: User cancelled the strategy",
+              "blocks": []
+            },
+            {
+              "text": "8003: User manually placed or cancelled an order",
+              "blocks": []
+            },
+            {
+              "text": "8004: The stop limit of this order reached",
+              "blocks": []
+            },
+            {
+              "text": "8005: User position liquidated",
+              "blocks": []
+            },
+            {
+              "text": "8006: Max open order limit reached",
+              "blocks": []
+            },
+            {
+              "text": "8007: New grid order",
+              "blocks": []
+            },
+            {
+              "text": "8008: Margin not enough",
+              "blocks": []
+            },
+            {
+              "text": "8009: Price out of bounds",
+              "blocks": []
+            },
+            {
+              "text": "8010: Market is closed or paused",
+              "blocks": []
+            },
+            {
+              "text": "8011: Close position failed, unable to fill",
+              "blocks": []
+            },
+            {
+              "text": "8012: Exceeded the maximum allowable notional value at current leverage",
+              "blocks": []
+            },
+            {
+              "text": "8013: Grid expired due to incomplete KYC verification or access from a restricted jurisdiction",
+              "blocks": []
+            },
+            {
+              "text": "8014: Violated Futures Trading Quantitative Rules. Strategy stopped",
+              "blocks": []
+            },
+            {
+              "text": "8015: User position empty or liquidated",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "URL PATH",
+      "level": 2,
+      "id": "url-path",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`/private`"
+        }
+      ]
+    },
+    {
+      "title": "Event Name",
+      "level": 2,
+      "id": "event-name",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`STRATEGY_UPDATE`"
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "{\n\"e\": \"STRATEGY_UPDATE\", // Event Type\n\"T\": 1669261797627, // Transaction Time\n\"E\": 1669261797628, // Event Time\n\"su\": {\n\"si\": 176054594, // Strategy ID\n\"st\": \"GRID\", // Strategy Type\n\"ss\": \"NEW\", // Strategy Status\n\"s\": \"BTCUSDT\", // Symbol\n\"ut\": 1669261797627, // Update Time\n\"c\": 8007 // opCode\n}\n}"
+        }
+      ]
+    }
+  ],
+  "protocol": "user_data_stream",
+  "category": "user-data-streams",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "user-data-streams",
+    "Event-STRATEGY-UPDATE.html"
+  ],
+  "api_summary": {
+    "description": "`STRATEGY_UPDATE` update when a strategy is created/cancelled/expired, ...etc.",
+    "url_path": "`/private`",
+    "event_name": "`STRATEGY_UPDATE`",
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "{\n\"e\": \"STRATEGY_UPDATE\", // Event Type\n\"T\": 1669261797627, // Transaction Time\n\"E\": 1669261797628, // Event Time\n\"su\": {\n\"si\": 176054594, // Strategy ID\n\"st\": \"GRID\", // Strategy Type\n\"ss\": \"NEW\", // Strategy Status\n\"s\": \"BTCUSDT\", // Symbol\n\"ut\": 1669261797627, // Update Time\n\"c\": 8007 // opCode\n}\n}"
+      }
+    ]
+  }
+}

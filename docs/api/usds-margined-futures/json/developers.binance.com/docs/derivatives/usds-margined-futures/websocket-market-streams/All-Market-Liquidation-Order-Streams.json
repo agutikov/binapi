@@ -1,0 +1,86 @@
+{
+  "title": "All Market Liquidation Order Streams",
+  "meta_description": "Stream Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "Stream Description",
+      "level": 2,
+      "id": "stream-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "The All Liquidation Order Snapshot Streams push force liquidation order information for all symbols in the market. For each symbol，only the latest one liquidation order within 1000ms will be pushed as the snapshot. If no liquidation happens in the interval of 1000ms, no stream will be pushed."
+        }
+      ]
+    },
+    {
+      "title": "URL PATH",
+      "level": 2,
+      "id": "url-path",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`/market`"
+        }
+      ]
+    },
+    {
+      "title": "Stream Name",
+      "level": 2,
+      "id": "stream-name",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`!forceOrder@arr`"
+        }
+      ]
+    },
+    {
+      "title": "Update Speed",
+      "level": 2,
+      "id": "update-speed",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "1000ms"
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "{\n\n\"e\":\"forceOrder\", // Event Type\n\"E\":1568014460893, // Event Time\n\"o\":{\n\n\"s\":\"BTCUSDT\", // Symbol\n\"S\":\"SELL\", // Side\n\"o\":\"LIMIT\", // Order Type\n\"f\":\"IOC\", // Time in Force\n\"q\":\"0.014\", // Original Quantity\n\"p\":\"9910\", // Price\n\"ap\":\"9910\", // Average Price\n\"X\":\"FILLED\", // Order Status\n\"l\":\"0.014\", // Order Last Filled Quantity\n\"z\":\"0.014\", // Order Filled Accumulated Quantity\n\"T\":1568014460893, // Order Trade Time\n}\n}"
+        }
+      ]
+    }
+  ],
+  "protocol": "websocket_stream",
+  "category": "websocket-market-streams",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "websocket-market-streams",
+    "All-Market-Liquidation-Order-Streams.html"
+  ],
+  "api_summary": {
+    "description": "The All Liquidation Order Snapshot Streams push force liquidation order information for all symbols in the market. For each symbol，only the latest one liquidation order within 1000ms will be pushed as the snapshot. If no liquidation happens in the interval of 1000ms, no stream will be pushed.",
+    "url_path": "`/market`",
+    "stream_name": "`!forceOrder@arr`",
+    "update_speed": "1000ms",
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "{\n\n\"e\":\"forceOrder\", // Event Type\n\"E\":1568014460893, // Event Time\n\"o\":{\n\n\"s\":\"BTCUSDT\", // Symbol\n\"S\":\"SELL\", // Side\n\"o\":\"LIMIT\", // Order Type\n\"f\":\"IOC\", // Time in Force\n\"q\":\"0.014\", // Original Quantity\n\"p\":\"9910\", // Price\n\"ap\":\"9910\", // Average Price\n\"X\":\"FILLED\", // Order Status\n\"l\":\"0.014\", // Order Last Filled Quantity\n\"z\":\"0.014\", // Order Filled Accumulated Quantity\n\"T\":1568014460893, // Order Trade Time\n}\n}"
+      }
+    ]
+  }
+}

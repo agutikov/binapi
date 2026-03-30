@@ -1,0 +1,237 @@
+{
+  "title": "Get Position Margin Change History (TRADE)",
+  "meta_description": "API Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "API Description",
+      "level": 2,
+      "id": "api-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Get Position Margin Change History"
+        }
+      ]
+    },
+    {
+      "title": "HTTP Request",
+      "level": 2,
+      "id": "http-request",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "GET `/fapi/v1/positionMargin/history`"
+        }
+      ]
+    },
+    {
+      "title": "Request Weight",
+      "level": 2,
+      "id": "request-weight",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "1"
+        }
+      ]
+    },
+    {
+      "title": "Request Parameters",
+      "level": 2,
+      "id": "request-parameters",
+      "blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "Name",
+            "Type",
+            "Mandatory",
+            "Description"
+          ],
+          "rows": [
+            [
+              "symbol",
+              "STRING",
+              "YES",
+              ""
+            ],
+            [
+              "type",
+              "INT",
+              "NO",
+              "1: Add position margin，2: Reduce position margin"
+            ],
+            [
+              "startTime",
+              "LONG",
+              "NO",
+              ""
+            ],
+            [
+              "endTime",
+              "LONG",
+              "NO",
+              "Default current time if not pass"
+            ],
+            [
+              "limit",
+              "INT",
+              "NO",
+              "Default: 500"
+            ],
+            [
+              "recvWindow",
+              "LONG",
+              "NO",
+              ""
+            ],
+            [
+              "timestamp",
+              "LONG",
+              "YES",
+              ""
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "text": "Support querying future histories that are not older than 30 days The time between `startTime` and `endTime`can't be more than 30 days"
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "json",
+          "json": [
+            {
+              "symbol": "BTCUSDT",
+              "type": 1,
+              "deltaType": "USER_ADJUST",
+              "amount": "23.36332311",
+              "asset": "USDT",
+              "time": 1578047897183,
+              "positionSide": "BOTH"
+            },
+            {
+              "symbol": "BTCUSDT",
+              "type": 1,
+              "deltaType": "USER_ADJUST",
+              "amount": "100",
+              "asset": "USDT",
+              "time": 1578047900425,
+              "positionSide": "LONG"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "protocol": "rest",
+  "category": "rest-api",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "trade",
+    "rest-api",
+    "Get-Position-Margin-Change-History.html"
+  ],
+  "api_summary": {
+    "description": "Get Position Margin Change History",
+    "http_method": "GET",
+    "path": "`/fapi/v1/positionMargin/history`",
+    "http_request": "GET `/fapi/v1/positionMargin/history`",
+    "request_weight": "1",
+    "request_parameters_tables": [
+      {
+        "type": "table",
+        "headers": [
+          "Name",
+          "Type",
+          "Mandatory",
+          "Description"
+        ],
+        "rows": [
+          [
+            "symbol",
+            "STRING",
+            "YES",
+            ""
+          ],
+          [
+            "type",
+            "INT",
+            "NO",
+            "1: Add position margin，2: Reduce position margin"
+          ],
+          [
+            "startTime",
+            "LONG",
+            "NO",
+            ""
+          ],
+          [
+            "endTime",
+            "LONG",
+            "NO",
+            "Default current time if not pass"
+          ],
+          [
+            "limit",
+            "INT",
+            "NO",
+            "Default: 500"
+          ],
+          [
+            "recvWindow",
+            "LONG",
+            "NO",
+            ""
+          ],
+          [
+            "timestamp",
+            "LONG",
+            "YES",
+            ""
+          ]
+        ]
+      }
+    ],
+    "request_parameters_text": [
+      "Support querying future histories that are not older than 30 days The time between `startTime` and `endTime`can't be more than 30 days"
+    ],
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "json",
+        "json": [
+          {
+            "symbol": "BTCUSDT",
+            "type": 1,
+            "deltaType": "USER_ADJUST",
+            "amount": "23.36332311",
+            "asset": "USDT",
+            "time": 1578047897183,
+            "positionSide": "BOTH"
+          },
+          {
+            "symbol": "BTCUSDT",
+            "type": 1,
+            "deltaType": "USER_ADJUST",
+            "amount": "100",
+            "asset": "USDT",
+            "time": 1578047900425,
+            "positionSide": "LONG"
+          }
+        ]
+      }
+    ]
+  }
+}

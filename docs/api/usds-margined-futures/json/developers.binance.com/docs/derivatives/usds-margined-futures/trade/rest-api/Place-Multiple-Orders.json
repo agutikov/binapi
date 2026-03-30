@@ -1,0 +1,344 @@
+{
+  "title": "Place Multiple Orders(TRADE)",
+  "meta_description": "API Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "API Description",
+      "level": 2,
+      "id": "api-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Place Multiple Orders"
+        }
+      ]
+    },
+    {
+      "title": "HTTP Request",
+      "level": 2,
+      "id": "http-request",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "POST `/fapi/v1/batchOrders`"
+        }
+      ]
+    },
+    {
+      "title": "Request Weight",
+      "level": 2,
+      "id": "request-weight",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "5 on 10s order rate limit(X-MBX-ORDER-COUNT-10S); 1 on 1min order rate limit(X-MBX-ORDER-COUNT-1M); 5 on IP rate limit(x-mbx-used-weight-1m);"
+        }
+      ]
+    },
+    {
+      "title": "Request Parameters",
+      "level": 2,
+      "id": "request-parameters",
+      "blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "Name",
+            "Type",
+            "Mandatory",
+            "Description"
+          ],
+          "rows": [
+            [
+              "batchOrders",
+              "LIST<JSON>",
+              "YES",
+              "order list. Max 5 orders"
+            ],
+            [
+              "recvWindow",
+              "LONG",
+              "NO",
+              ""
+            ],
+            [
+              "timestamp",
+              "LONG",
+              "YES",
+              ""
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Where `batchOrders` is the list of order parameters in JSON"
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Example: /fapi/v1/batchOrders?batchOrders=[{\"type\":\"LIMIT\",\"timeInForce\":\"GTC\", \"symbol\":\"BTCUSDT\",\"side\":\"BUY\",\"price\":\"10001\",\"quantity\":\"0.001\"}]",
+              "blocks": []
+            }
+          ]
+        },
+        {
+          "type": "table",
+          "headers": [
+            "Name",
+            "Type",
+            "Mandatory",
+            "Description"
+          ],
+          "rows": [
+            [
+              "symbol",
+              "STRING",
+              "YES",
+              ""
+            ],
+            [
+              "side",
+              "ENUM",
+              "YES",
+              ""
+            ],
+            [
+              "positionSide",
+              "ENUM",
+              "NO",
+              "Default `BOTH` for One-way Mode ; `LONG` or `SHORT` for Hedge Mode. It must be sent with Hedge Mode."
+            ],
+            [
+              "type",
+              "ENUM",
+              "YES",
+              ""
+            ],
+            [
+              "timeInForce",
+              "ENUM",
+              "NO",
+              ""
+            ],
+            [
+              "quantity",
+              "DECIMAL",
+              "YES",
+              ""
+            ],
+            [
+              "reduceOnly",
+              "STRING",
+              "NO",
+              "\"true\" or \"false\". default \"false\"."
+            ],
+            [
+              "price",
+              "DECIMAL",
+              "NO",
+              ""
+            ],
+            [
+              "newClientOrderId",
+              "STRING",
+              "NO",
+              "A unique id among open orders. Automatically generated if not sent. Can only be string following the rule: `^[\\.A-Z\\:/a-z0-9_-]{1,36}$`"
+            ],
+            [
+              "newOrderRespType",
+              "ENUM",
+              "NO",
+              "\"ACK\", \"RESULT\", default \"ACK\""
+            ],
+            [
+              "priceMatch",
+              "ENUM",
+              "NO",
+              "only avaliable for `LIMIT`/`STOP`/`TAKE_PROFIT` order; can be set to `OPPONENT`/ `OPPONENT_5`/ `OPPONENT_10`/ `OPPONENT_20`: /`QUEUE`/ `QUEUE_5`/ `QUEUE_10`/ `QUEUE_20`; Can't be passed together with `price`"
+            ],
+            [
+              "selfTradePreventionMode",
+              "ENUM",
+              "NO",
+              "`EXPIRE_TAKER`:expire taker order when STP triggers/ `EXPIRE_MAKER`:expire taker order when STP triggers/ `EXPIRE_BOTH`:expire both orders when STP triggers; default `NONE`"
+            ],
+            [
+              "goodTillDate",
+              "LONG",
+              "NO",
+              "order cancel time for timeInForce `GTD`, mandatory when `timeInforce` set to `GTD`; order the timestamp only retains second-level precision, ms part will be ignored; The goodTillDate timestamp must be greater than the current time plus 600 seconds and smaller than 253402300799000"
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "text": "Paremeter rules are same with `New Order` Batch orders are processed concurrently, and the order of matching is not guaranteed. The order of returned contents for batch orders is the same as the order of the order list."
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "[\n{\n\"clientOrderId\": \"testOrder\",\n\"cumQty\": \"0\",\n\"cumQuote\": \"0\",\n\"executedQty\": \"0\",\n\"orderId\": 22542179,\n\"avgPrice\": \"0.00000\",\n\"origQty\": \"10\",\n\"price\": \"0\",\n\"reduceOnly\": false,\n\"side\": \"BUY\",\n\"positionSide\": \"SHORT\",\n\"status\": \"NEW\",\n\"stopPrice\": \"0\",\n\"closePosition\": false,\n\"symbol\": \"BTCUSDT\",\n\"timeInForce\": \"GTC\",\n\"type\": \"TRAILING_STOP_MARKET\",\n\"origType\": \"TRAILING_STOP_MARKET\",\n\"updateTime\": 1566818724722,\n\"workingType\": \"CONTRACT_PRICE\",\n\"priceProtect\": false, // if conditional order trigger is protected\n\"priceMatch\": \"NONE\", //price match mode\n\"selfTradePreventionMode\": \"NONE\", //self trading preventation mode\n\"goodTillDate\": 1693207680000 //order pre-set auto cancel time for TIF GTD order\n},\n{\n\"code\": -2022,\n\"msg\": \"ReduceOnly Order is rejected.\"\n}\n]"
+        }
+      ]
+    }
+  ],
+  "protocol": "rest",
+  "category": "rest-api",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "trade",
+    "rest-api",
+    "Place-Multiple-Orders.html"
+  ],
+  "api_summary": {
+    "description": "Place Multiple Orders",
+    "http_method": "POST",
+    "path": "`/fapi/v1/batchOrders`",
+    "http_request": "POST `/fapi/v1/batchOrders`",
+    "request_weight": "5 on 10s order rate limit(X-MBX-ORDER-COUNT-10S); 1 on 1min order rate limit(X-MBX-ORDER-COUNT-1M); 5 on IP rate limit(x-mbx-used-weight-1m);",
+    "request_parameters_tables": [
+      {
+        "type": "table",
+        "headers": [
+          "Name",
+          "Type",
+          "Mandatory",
+          "Description"
+        ],
+        "rows": [
+          [
+            "batchOrders",
+            "LIST<JSON>",
+            "YES",
+            "order list. Max 5 orders"
+          ],
+          [
+            "recvWindow",
+            "LONG",
+            "NO",
+            ""
+          ],
+          [
+            "timestamp",
+            "LONG",
+            "YES",
+            ""
+          ]
+        ]
+      },
+      {
+        "type": "table",
+        "headers": [
+          "Name",
+          "Type",
+          "Mandatory",
+          "Description"
+        ],
+        "rows": [
+          [
+            "symbol",
+            "STRING",
+            "YES",
+            ""
+          ],
+          [
+            "side",
+            "ENUM",
+            "YES",
+            ""
+          ],
+          [
+            "positionSide",
+            "ENUM",
+            "NO",
+            "Default `BOTH` for One-way Mode ; `LONG` or `SHORT` for Hedge Mode. It must be sent with Hedge Mode."
+          ],
+          [
+            "type",
+            "ENUM",
+            "YES",
+            ""
+          ],
+          [
+            "timeInForce",
+            "ENUM",
+            "NO",
+            ""
+          ],
+          [
+            "quantity",
+            "DECIMAL",
+            "YES",
+            ""
+          ],
+          [
+            "reduceOnly",
+            "STRING",
+            "NO",
+            "\"true\" or \"false\". default \"false\"."
+          ],
+          [
+            "price",
+            "DECIMAL",
+            "NO",
+            ""
+          ],
+          [
+            "newClientOrderId",
+            "STRING",
+            "NO",
+            "A unique id among open orders. Automatically generated if not sent. Can only be string following the rule: `^[\\.A-Z\\:/a-z0-9_-]{1,36}$`"
+          ],
+          [
+            "newOrderRespType",
+            "ENUM",
+            "NO",
+            "\"ACK\", \"RESULT\", default \"ACK\""
+          ],
+          [
+            "priceMatch",
+            "ENUM",
+            "NO",
+            "only avaliable for `LIMIT`/`STOP`/`TAKE_PROFIT` order; can be set to `OPPONENT`/ `OPPONENT_5`/ `OPPONENT_10`/ `OPPONENT_20`: /`QUEUE`/ `QUEUE_5`/ `QUEUE_10`/ `QUEUE_20`; Can't be passed together with `price`"
+          ],
+          [
+            "selfTradePreventionMode",
+            "ENUM",
+            "NO",
+            "`EXPIRE_TAKER`:expire taker order when STP triggers/ `EXPIRE_MAKER`:expire taker order when STP triggers/ `EXPIRE_BOTH`:expire both orders when STP triggers; default `NONE`"
+          ],
+          [
+            "goodTillDate",
+            "LONG",
+            "NO",
+            "order cancel time for timeInForce `GTD`, mandatory when `timeInforce` set to `GTD`; order the timestamp only retains second-level precision, ms part will be ignored; The goodTillDate timestamp must be greater than the current time plus 600 seconds and smaller than 253402300799000"
+          ]
+        ]
+      }
+    ],
+    "request_parameters_text": [
+      "Where `batchOrders` is the list of order parameters in JSON",
+      "Paremeter rules are same with `New Order` Batch orders are processed concurrently, and the order of matching is not guaranteed. The order of returned contents for batch orders is the same as the order of the order list."
+    ],
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "[\n{\n\"clientOrderId\": \"testOrder\",\n\"cumQty\": \"0\",\n\"cumQuote\": \"0\",\n\"executedQty\": \"0\",\n\"orderId\": 22542179,\n\"avgPrice\": \"0.00000\",\n\"origQty\": \"10\",\n\"price\": \"0\",\n\"reduceOnly\": false,\n\"side\": \"BUY\",\n\"positionSide\": \"SHORT\",\n\"status\": \"NEW\",\n\"stopPrice\": \"0\",\n\"closePosition\": false,\n\"symbol\": \"BTCUSDT\",\n\"timeInForce\": \"GTC\",\n\"type\": \"TRAILING_STOP_MARKET\",\n\"origType\": \"TRAILING_STOP_MARKET\",\n\"updateTime\": 1566818724722,\n\"workingType\": \"CONTRACT_PRICE\",\n\"priceProtect\": false, // if conditional order trigger is protected\n\"priceMatch\": \"NONE\", //price match mode\n\"selfTradePreventionMode\": \"NONE\", //self trading preventation mode\n\"goodTillDate\": 1693207680000 //order pre-set auto cancel time for TIF GTD order\n},\n{\n\"code\": -2022,\n\"msg\": \"ReduceOnly Order is rejected.\"\n}\n]"
+      }
+    ]
+  }
+}

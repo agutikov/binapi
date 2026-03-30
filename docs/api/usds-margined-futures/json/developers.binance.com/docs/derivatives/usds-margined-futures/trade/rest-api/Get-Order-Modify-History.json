@@ -1,0 +1,211 @@
+{
+  "title": "Get Order Modify History (USER_DATA)",
+  "meta_description": "API Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "API Description",
+      "level": 2,
+      "id": "api-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Get order modification history"
+        }
+      ]
+    },
+    {
+      "title": "HTTP Request",
+      "level": 2,
+      "id": "http-request",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "GET `/fapi/v1/orderAmendment`"
+        }
+      ]
+    },
+    {
+      "title": "Request Weight",
+      "level": 2,
+      "id": "request-weight",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "1"
+        }
+      ]
+    },
+    {
+      "title": "Request Parameters",
+      "level": 2,
+      "id": "request-parameters",
+      "blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "Name",
+            "Type",
+            "Mandatory",
+            "Description"
+          ],
+          "rows": [
+            [
+              "symbol",
+              "STRING",
+              "YES",
+              ""
+            ],
+            [
+              "orderId",
+              "LONG",
+              "NO",
+              ""
+            ],
+            [
+              "origClientOrderId",
+              "STRING",
+              "NO",
+              ""
+            ],
+            [
+              "startTime",
+              "LONG",
+              "NO",
+              "Timestamp in ms to get modification history from INCLUSIVE"
+            ],
+            [
+              "endTime",
+              "LONG",
+              "NO",
+              "Timestamp in ms to get modification history until INCLUSIVE"
+            ],
+            [
+              "limit",
+              "INT",
+              "NO",
+              "Default 50; max 100"
+            ],
+            [
+              "recvWindow",
+              "LONG",
+              "NO",
+              ""
+            ],
+            [
+              "timestamp",
+              "LONG",
+              "YES",
+              ""
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "text": "Either `orderId` or `origClientOrderId` must be sent, and the `orderId` will prevail if both are sent. Order modify history longer than 3 month is not avaliable"
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "[\n{\n\"amendmentId\": 5363, // Order modification ID\n\"symbol\": \"BTCUSDT\",\n\"pair\": \"BTCUSDT\",\n\"orderId\": 20072994037,\n\"clientOrderId\": \"LJ9R4QZDihCaS8UAOOLpgW\",\n\"time\": 1629184560899, // Order modification time\n\"amendment\": {\n\"price\": {\n\"before\": \"30004\",\n\"after\": \"30003.2\"\n},\n\"origQty\": {\n\"before\": \"1\",\n\"after\": \"1\"\n},\n\"count\": 3 // Order modification count, representing the number of times the order has been modified\n}\n},\n{\n\"amendmentId\": 5361,\n\"symbol\": \"BTCUSDT\",\n\"pair\": \"BTCUSDT\",\n\"orderId\": 20072994037,\n\"clientOrderId\": \"LJ9R4QZDihCaS8UAOOLpgW\",\n\"time\": 1629184533946,\n\"amendment\": {\n\"price\": {\n\"before\": \"30005\",\n\"after\": \"30004\"\n},\n\"origQty\": {\n\"before\": \"1\",\n\"after\": \"1\"\n},\n\"count\": 2\n}\n},\n{\n\"amendmentId\": 5325,\n\"symbol\": \"BTCUSDT\",\n\"pair\": \"BTCUSDT\",\n\"orderId\": 20072994037,\n\"clientOrderId\": \"LJ9R4QZDihCaS8UAOOLpgW\",\n\"time\": 1629182711787,\n\"amendment\": {\n\"price\": {\n\"before\": \"30002\",\n\"after\": \"30005\"\n},\n\"origQty\": {\n\"before\": \"1\",\n\"after\": \"1\"\n},\n\"count\": 1\n}\n}\n]"
+        }
+      ]
+    }
+  ],
+  "protocol": "rest",
+  "category": "rest-api",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "trade",
+    "rest-api",
+    "Get-Order-Modify-History.html"
+  ],
+  "api_summary": {
+    "description": "Get order modification history",
+    "http_method": "GET",
+    "path": "`/fapi/v1/orderAmendment`",
+    "http_request": "GET `/fapi/v1/orderAmendment`",
+    "request_weight": "1",
+    "request_parameters_tables": [
+      {
+        "type": "table",
+        "headers": [
+          "Name",
+          "Type",
+          "Mandatory",
+          "Description"
+        ],
+        "rows": [
+          [
+            "symbol",
+            "STRING",
+            "YES",
+            ""
+          ],
+          [
+            "orderId",
+            "LONG",
+            "NO",
+            ""
+          ],
+          [
+            "origClientOrderId",
+            "STRING",
+            "NO",
+            ""
+          ],
+          [
+            "startTime",
+            "LONG",
+            "NO",
+            "Timestamp in ms to get modification history from INCLUSIVE"
+          ],
+          [
+            "endTime",
+            "LONG",
+            "NO",
+            "Timestamp in ms to get modification history until INCLUSIVE"
+          ],
+          [
+            "limit",
+            "INT",
+            "NO",
+            "Default 50; max 100"
+          ],
+          [
+            "recvWindow",
+            "LONG",
+            "NO",
+            ""
+          ],
+          [
+            "timestamp",
+            "LONG",
+            "YES",
+            ""
+          ]
+        ]
+      }
+    ],
+    "request_parameters_text": [
+      "Either `orderId` or `origClientOrderId` must be sent, and the `orderId` will prevail if both are sent. Order modify history longer than 3 month is not avaliable"
+    ],
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "[\n{\n\"amendmentId\": 5363, // Order modification ID\n\"symbol\": \"BTCUSDT\",\n\"pair\": \"BTCUSDT\",\n\"orderId\": 20072994037,\n\"clientOrderId\": \"LJ9R4QZDihCaS8UAOOLpgW\",\n\"time\": 1629184560899, // Order modification time\n\"amendment\": {\n\"price\": {\n\"before\": \"30004\",\n\"after\": \"30003.2\"\n},\n\"origQty\": {\n\"before\": \"1\",\n\"after\": \"1\"\n},\n\"count\": 3 // Order modification count, representing the number of times the order has been modified\n}\n},\n{\n\"amendmentId\": 5361,\n\"symbol\": \"BTCUSDT\",\n\"pair\": \"BTCUSDT\",\n\"orderId\": 20072994037,\n\"clientOrderId\": \"LJ9R4QZDihCaS8UAOOLpgW\",\n\"time\": 1629184533946,\n\"amendment\": {\n\"price\": {\n\"before\": \"30005\",\n\"after\": \"30004\"\n},\n\"origQty\": {\n\"before\": \"1\",\n\"after\": \"1\"\n},\n\"count\": 2\n}\n},\n{\n\"amendmentId\": 5325,\n\"symbol\": \"BTCUSDT\",\n\"pair\": \"BTCUSDT\",\n\"orderId\": 20072994037,\n\"clientOrderId\": \"LJ9R4QZDihCaS8UAOOLpgW\",\n\"time\": 1629182711787,\n\"amendment\": {\n\"price\": {\n\"before\": \"30002\",\n\"after\": \"30005\"\n},\n\"origQty\": {\n\"before\": \"1\",\n\"after\": \"1\"\n},\n\"count\": 1\n}\n}\n]"
+      }
+    ]
+  }
+}

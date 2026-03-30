@@ -1,0 +1,86 @@
+{
+  "title": "Multi-Assets Mode Asset Index",
+  "meta_description": "Stream Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "Stream Description",
+      "level": 2,
+      "id": "stream-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Asset index for multi-assets mode user"
+        }
+      ]
+    },
+    {
+      "title": "URL PATH",
+      "level": 2,
+      "id": "url-path",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`/market`"
+        }
+      ]
+    },
+    {
+      "title": "Stream Name",
+      "level": 2,
+      "id": "stream-name",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`!assetIndex@arr` OR `<assetSymbol>@assetIndex`"
+        }
+      ]
+    },
+    {
+      "title": "Update Speed",
+      "level": 2,
+      "id": "update-speed",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "1s"
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "[\n{\n\"e\":\"assetIndexUpdate\",\n\"E\":1686749230000,\n\"s\":\"ADAUSD\", // asset index symbol\n\"i\":\"0.27462452\", // index price\n\"b\":\"0.10000000\", // bid buffer\n\"a\":\"0.10000000\", // ask buffer\n\"B\":\"0.24716207\", // bid rate\n\"A\":\"0.30208698\", // ask rate\n\"q\":\"0.05000000\", // auto exchange bid buffer\n\"g\":\"0.05000000\", // auto exchange ask buffer\n\"Q\":\"0.26089330\", // auto exchange bid rate\n\"G\":\"0.28835575\" // auto exchange ask rate\n},\n{\n\"e\":\"assetIndexUpdate\",\n\"E\":1686749230000,\n\"s\":\"USDTUSD\",\n\"i\":\"0.99987691\",\n\"b\":\"0.00010000\",\n\"a\":\"0.00010000\",\n\"B\":\"0.99977692\",\n\"A\":\"0.99997689\",\n\"q\":\"0.00010000\",\n\"g\":\"0.00010000\",\n\"Q\":\"0.99977692\",\n\"G\":\"0.99997689\"\n}\n]"
+        }
+      ]
+    }
+  ],
+  "protocol": "websocket_stream",
+  "category": "websocket-market-streams",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "websocket-market-streams",
+    "Multi-Assets-Mode-Asset-Index.html"
+  ],
+  "api_summary": {
+    "description": "Asset index for multi-assets mode user",
+    "url_path": "`/market`",
+    "stream_name": "`!assetIndex@arr` OR `<assetSymbol>@assetIndex`",
+    "update_speed": "1s",
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "[\n{\n\"e\":\"assetIndexUpdate\",\n\"E\":1686749230000,\n\"s\":\"ADAUSD\", // asset index symbol\n\"i\":\"0.27462452\", // index price\n\"b\":\"0.10000000\", // bid buffer\n\"a\":\"0.10000000\", // ask buffer\n\"B\":\"0.24716207\", // bid rate\n\"A\":\"0.30208698\", // ask rate\n\"q\":\"0.05000000\", // auto exchange bid buffer\n\"g\":\"0.05000000\", // auto exchange ask buffer\n\"Q\":\"0.26089330\", // auto exchange bid rate\n\"G\":\"0.28835575\" // auto exchange ask rate\n},\n{\n\"e\":\"assetIndexUpdate\",\n\"E\":1686749230000,\n\"s\":\"USDTUSD\",\n\"i\":\"0.99987691\",\n\"b\":\"0.00010000\",\n\"a\":\"0.00010000\",\n\"B\":\"0.99977692\",\n\"A\":\"0.99997689\",\n\"q\":\"0.00010000\",\n\"g\":\"0.00010000\",\n\"Q\":\"0.99977692\",\n\"G\":\"0.99997689\"\n}\n]"
+      }
+    ]
+  }
+}

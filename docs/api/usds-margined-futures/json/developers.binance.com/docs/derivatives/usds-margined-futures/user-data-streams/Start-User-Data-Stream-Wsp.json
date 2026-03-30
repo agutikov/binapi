@@ -1,0 +1,179 @@
+{
+  "title": "Start User Data Stream (USER_STREAM)",
+  "meta_description": "API Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "API Description",
+      "level": 2,
+      "id": "api-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Start a new user data stream. The stream will close after 60 minutes unless a keepalive is sent. If the account has an active `listenKey`, that `listenKey` will be returned and its validity will be extended for 60 minutes."
+        }
+      ]
+    },
+    {
+      "title": "Method",
+      "level": 2,
+      "id": "method",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`userDataStream.start`"
+        }
+      ]
+    },
+    {
+      "title": "Request",
+      "level": 2,
+      "id": "request",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "json",
+          "json": {
+            "id": "d3df8a61-98ea-4fe0-8f4e-0fcea5d418b0",
+            "method": "userDataStream.start",
+            "params": {
+              "apiKey": "vmPUZE6mv9SD5VNHk4HlWFsOr6aKE2zvsw0MuIgwCIPy6utIco14y7Ju91duEh8A"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "title": "Request Weight",
+      "level": 2,
+      "id": "request-weight",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "1"
+        }
+      ]
+    },
+    {
+      "title": "Request Parameters",
+      "level": 2,
+      "id": "request-parameters",
+      "blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "Name",
+            "Type",
+            "Mandatory",
+            "Description"
+          ],
+          "rows": [
+            [
+              "apiKey",
+              "STRING",
+              "YES",
+              ""
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "json",
+          "json": {
+            "id": "d3df8a61-98ea-4fe0-8f4e-0fcea5d418b0",
+            "status": 200,
+            "result": {
+              "listenKey": "xs0mRXdAKlIPDRFrlPcw0qI41Eh3ixNntmymGyhrhgqo7L6FuLaWArTD7RLP"
+            },
+            "rateLimits": [
+              {
+                "rateLimitType": "REQUEST_WEIGHT",
+                "interval": "MINUTE",
+                "intervalNum": 1,
+                "limit": 2400,
+                "count": 2
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "protocol": "user_data_stream",
+  "category": "user-data-streams",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "user-data-streams",
+    "Start-User-Data-Stream-Wsp.html"
+  ],
+  "api_summary": {
+    "description": "Start a new user data stream. The stream will close after 60 minutes unless a keepalive is sent. If the account has an active `listenKey`, that `listenKey` will be returned and its validity will be extended for 60 minutes.",
+    "method": "`userDataStream.start`",
+    "request_weight": "1",
+    "request_parameters_tables": [
+      {
+        "type": "table",
+        "headers": [
+          "Name",
+          "Type",
+          "Mandatory",
+          "Description"
+        ],
+        "rows": [
+          [
+            "apiKey",
+            "STRING",
+            "YES",
+            ""
+          ]
+        ]
+      }
+    ],
+    "request_parameters_text": [],
+    "request_code_blocks": [
+      {
+        "type": "code",
+        "language": "json",
+        "json": {
+          "id": "d3df8a61-98ea-4fe0-8f4e-0fcea5d418b0",
+          "method": "userDataStream.start",
+          "params": {
+            "apiKey": "vmPUZE6mv9SD5VNHk4HlWFsOr6aKE2zvsw0MuIgwCIPy6utIco14y7Ju91duEh8A"
+          }
+        }
+      }
+    ],
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "json",
+        "json": {
+          "id": "d3df8a61-98ea-4fe0-8f4e-0fcea5d418b0",
+          "status": 200,
+          "result": {
+            "listenKey": "xs0mRXdAKlIPDRFrlPcw0qI41Eh3ixNntmymGyhrhgqo7L6FuLaWArTD7RLP"
+          },
+          "rateLimits": [
+            {
+              "rateLimitType": "REQUEST_WEIGHT",
+              "interval": "MINUTE",
+              "intervalNum": 1,
+              "limit": 2400,
+              "count": 2
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

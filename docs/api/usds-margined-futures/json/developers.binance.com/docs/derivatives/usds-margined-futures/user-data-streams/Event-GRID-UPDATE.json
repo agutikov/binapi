@@ -1,0 +1,96 @@
+{
+  "title": "Event: GRID_UPDATE",
+  "meta_description": "Event Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "Event Description",
+      "level": 2,
+      "id": "event-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`GRID_UPDATE` update when a sub order of a grid is filled or partially filled. Strategy Status"
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "NEW",
+              "blocks": []
+            },
+            {
+              "text": "WORKING",
+              "blocks": []
+            },
+            {
+              "text": "CANCELLED",
+              "blocks": []
+            },
+            {
+              "text": "EXPIRED",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "URL PATH",
+      "level": 2,
+      "id": "url-path",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`/private`"
+        }
+      ]
+    },
+    {
+      "title": "Event Name",
+      "level": 2,
+      "id": "event-name",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`GRID_UPDATE`"
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "{\n\"e\": \"GRID_UPDATE\", // Event Type\n\"T\": 1669262908216, // Transaction Time\n\"E\": 1669262908218, // Event Time\n\"gu\": {\n\"si\": 176057039, // Strategy ID\n\"st\": \"GRID\", // Strategy Type\n\"ss\": \"WORKING\", // Strategy Status\n\"s\": \"BTCUSDT\", // Symbol\n\"r\": \"-0.00300716\", // Realized PNL\n\"up\": \"16720\", // Unmatched Average Price\n\"uq\": \"-0.001\", // Unmatched Qty\n\"uf\": \"-0.00300716\", // Unmatched Fee\n\"mp\": \"0.0\", // Matched PNL\n\"ut\": 1669262908197 // Update Time\n}\n}"
+        }
+      ]
+    }
+  ],
+  "protocol": "user_data_stream",
+  "category": "user-data-streams",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "user-data-streams",
+    "Event-GRID-UPDATE.html"
+  ],
+  "api_summary": {
+    "description": "`GRID_UPDATE` update when a sub order of a grid is filled or partially filled. Strategy Status",
+    "url_path": "`/private`",
+    "event_name": "`GRID_UPDATE`",
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "{\n\"e\": \"GRID_UPDATE\", // Event Type\n\"T\": 1669262908216, // Transaction Time\n\"E\": 1669262908218, // Event Time\n\"gu\": {\n\"si\": 176057039, // Strategy ID\n\"st\": \"GRID\", // Strategy Type\n\"ss\": \"WORKING\", // Strategy Status\n\"s\": \"BTCUSDT\", // Symbol\n\"r\": \"-0.00300716\", // Realized PNL\n\"up\": \"16720\", // Unmatched Average Price\n\"uq\": \"-0.001\", // Unmatched Qty\n\"uf\": \"-0.00300716\", // Unmatched Fee\n\"mp\": \"0.0\", // Matched PNL\n\"ut\": 1669262908197 // Update Time\n}\n}"
+      }
+    ]
+  }
+}

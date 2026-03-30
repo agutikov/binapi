@@ -1,0 +1,86 @@
+{
+  "title": "Trading Session Stream",
+  "meta_description": "Stream Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "Stream Description",
+      "level": 2,
+      "id": "stream-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Trading session information for the underlying assets of TradFi Perpetual contracts—covering the U.S. equity market and the commodity market—is updated every second. Trading session information for different underlying markets is pushed in separate messages. Session types for the equity market include \"PRE_MARKET\", \"REGULAR\", \"AFTER_MARKET\", \"OVERNIGHT\", and \"NO_TRADING\". Session types for the commodity market include \"REGULAR\" and \"NO_TRADING\"."
+        }
+      ]
+    },
+    {
+      "title": "URL PATH",
+      "level": 2,
+      "id": "url-path",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`/market`"
+        }
+      ]
+    },
+    {
+      "title": "Stream Name",
+      "level": 2,
+      "id": "stream-name",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`tradingSession`"
+        }
+      ]
+    },
+    {
+      "title": "Update Speed",
+      "level": 2,
+      "id": "update-speed",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "1s"
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "{\n\"e\": \"EquityUpdate\", // Event type, can also be CommodityUpdate\n\"E\": 1765244143062, // Event time\n\"t\": 1765242000000, // Session start time\n\"T\": 1765270800000, // Session end time\n\"S\": \"OVERNIGHT\" // Session type\n}"
+        }
+      ]
+    }
+  ],
+  "protocol": "websocket_stream",
+  "category": "websocket-market-streams",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "websocket-market-streams",
+    "Trading-Session-Stream.html"
+  ],
+  "api_summary": {
+    "description": "Trading session information for the underlying assets of TradFi Perpetual contracts—covering the U.S. equity market and the commodity market—is updated every second. Trading session information for different underlying markets is pushed in separate messages. Session types for the equity market include \"PRE_MARKET\", \"REGULAR\", \"AFTER_MARKET\", \"OVERNIGHT\", and \"NO_TRADING\". Session types for the commodity market include \"REGULAR\" and \"NO_TRADING\".",
+    "url_path": "`/market`",
+    "stream_name": "`tradingSession`",
+    "update_speed": "1s",
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "{\n\"e\": \"EquityUpdate\", // Event type, can also be CommodityUpdate\n\"E\": 1765244143062, // Event time\n\"t\": 1765242000000, // Session start time\n\"T\": 1765270800000, // Session end time\n\"S\": \"OVERNIGHT\" // Session type\n}"
+      }
+    ]
+  }
+}

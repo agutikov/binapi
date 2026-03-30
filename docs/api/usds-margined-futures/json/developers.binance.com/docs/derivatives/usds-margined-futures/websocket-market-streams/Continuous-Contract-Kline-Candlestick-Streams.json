@@ -1,0 +1,186 @@
+{
+  "title": "Continuous Contract Kline/Candlestick Streams",
+  "meta_description": "Stream Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "Stream Description",
+      "level": 2,
+      "id": "stream-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Contract type:"
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "perpetual",
+              "blocks": []
+            },
+            {
+              "text": "current_quarter",
+              "blocks": []
+            },
+            {
+              "text": "next_quarter",
+              "blocks": []
+            },
+            {
+              "text": "tradifi_perpetual",
+              "blocks": []
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Kline/Candlestick chart intervals:"
+        },
+        {
+          "type": "paragraph",
+          "text": "s -> seconds; m -> minutes; h -> hours; d -> days; w -> weeks; M -> months"
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "1s",
+              "blocks": []
+            },
+            {
+              "text": "1m",
+              "blocks": []
+            },
+            {
+              "text": "3m",
+              "blocks": []
+            },
+            {
+              "text": "5m",
+              "blocks": []
+            },
+            {
+              "text": "15m",
+              "blocks": []
+            },
+            {
+              "text": "30m",
+              "blocks": []
+            },
+            {
+              "text": "1h",
+              "blocks": []
+            },
+            {
+              "text": "2h",
+              "blocks": []
+            },
+            {
+              "text": "4h",
+              "blocks": []
+            },
+            {
+              "text": "6h",
+              "blocks": []
+            },
+            {
+              "text": "8h",
+              "blocks": []
+            },
+            {
+              "text": "12h",
+              "blocks": []
+            },
+            {
+              "text": "1d",
+              "blocks": []
+            },
+            {
+              "text": "3d",
+              "blocks": []
+            },
+            {
+              "text": "1w",
+              "blocks": []
+            },
+            {
+              "text": "1M",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "URL PATH",
+      "level": 2,
+      "id": "url-path",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`/market`"
+        }
+      ]
+    },
+    {
+      "title": "Stream Name",
+      "level": 2,
+      "id": "stream-name",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`<pair>_<contractType>@continuousKline_<interval>`"
+        }
+      ]
+    },
+    {
+      "title": "Update Speed",
+      "level": 2,
+      "id": "update-speed",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "250ms"
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "{\n\"e\":\"continuous_kline\", // Event type\n\"E\":1607443058651, // Event time\n\"ps\":\"BTCUSDT\", // Pair\n\"ct\":\"PERPETUAL\" // Contract type\n\"k\":{\n\"t\":1607443020000, // Kline start time\n\"T\":1607443079999, // Kline close time\n\"i\":\"1m\", // Interval\n\"f\":116467658886, // First updateId\n\"L\":116468012423, // Last updateId\n\"o\":\"18787.00\", // Open price\n\"c\":\"18804.04\", // Close price\n\"h\":\"18804.04\", // High price\n\"l\":\"18786.54\", // Low price\n\"v\":\"197.664\", // volume\n\"n\": 543, // Number of trades\n\"x\":false, // Is this kline closed?\n\"q\":\"3715253.19494\", // Quote asset volume\n\"V\":\"184.769\", // Taker buy volume\n\"Q\":\"3472925.84746\", //Taker buy quote asset volume\n\"B\":\"0\" // Ignore\n}\n}"
+        }
+      ]
+    }
+  ],
+  "protocol": "websocket_stream",
+  "category": "websocket-market-streams",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "websocket-market-streams",
+    "Continuous-Contract-Kline-Candlestick-Streams.html"
+  ],
+  "api_summary": {
+    "description": "Contract type:",
+    "url_path": "`/market`",
+    "stream_name": "`<pair>_<contractType>@continuousKline_<interval>`",
+    "update_speed": "250ms",
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "{\n\"e\":\"continuous_kline\", // Event type\n\"E\":1607443058651, // Event time\n\"ps\":\"BTCUSDT\", // Pair\n\"ct\":\"PERPETUAL\" // Contract type\n\"k\":{\n\"t\":1607443020000, // Kline start time\n\"T\":1607443079999, // Kline close time\n\"i\":\"1m\", // Interval\n\"f\":116467658886, // First updateId\n\"L\":116468012423, // Last updateId\n\"o\":\"18787.00\", // Open price\n\"c\":\"18804.04\", // Close price\n\"h\":\"18804.04\", // High price\n\"l\":\"18786.54\", // Low price\n\"v\":\"197.664\", // volume\n\"n\": 543, // Number of trades\n\"x\":false, // Is this kline closed?\n\"q\":\"3715253.19494\", // Quote asset volume\n\"V\":\"184.769\", // Taker buy volume\n\"Q\":\"3472925.84746\", //Taker buy quote asset volume\n\"B\":\"0\" // Ignore\n}\n}"
+      }
+    ]
+  }
+}

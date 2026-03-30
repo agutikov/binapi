@@ -1,0 +1,165 @@
+{
+  "title": "Futures Account Balance V2(USER_DATA)",
+  "meta_description": "API Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "API Description",
+      "level": 2,
+      "id": "api-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Query account balance info"
+        }
+      ]
+    },
+    {
+      "title": "Method",
+      "level": 2,
+      "id": "method",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`v2/account.balance`"
+        }
+      ]
+    },
+    {
+      "title": "Request",
+      "level": 2,
+      "id": "request",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "json",
+          "json": {
+            "id": "605a6d20-6588-4cb9-afa0-b0ab087507ba",
+            "method": "v2/account.balance",
+            "params": {
+              "apiKey": "xTaDyrmvA9XT2oBHHjy39zyPzKCvMdtH3b9q4xadkAg2dNSJXQGCxzui26L823W2",
+              "timestamp": 1702561978458,
+              "signature": "208bb94a26f99aa122b1319490ca9cb2798fccc81d9b6449521a26268d53217a"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "title": "Request Weight",
+      "level": 2,
+      "id": "request-weight",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "5"
+        }
+      ]
+    },
+    {
+      "title": "Request Parameters",
+      "level": 2,
+      "id": "request-parameters",
+      "blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "Name",
+            "Type",
+            "Mandatory",
+            "Description"
+          ],
+          "rows": [
+            [
+              "recvWindow",
+              "LONG",
+              "NO",
+              ""
+            ],
+            [
+              "timestamp",
+              "LONG",
+              "YES",
+              ""
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "{\n\"id\": \"605a6d20-6588-4cb9-afa0-b0ab087507ba\",\n\"status\": 200,\n\"result\": [\n{\n\"accountAlias\": \"SgsR\", // unique account code\n\"asset\": \"USDT\", // asset name\n\"balance\": \"122607.35137903\", // wallet balance\n\"crossWalletBalance\": \"23.72469206\", // crossed wallet balance\n\"crossUnPnl\": \"0.00000000\" // unrealized profit of crossed positions\n\"availableBalance\": \"23.72469206\", // available balance\n\"maxWithdrawAmount\": \"23.72469206\", // maximum amount for transfer out\n\"marginAvailable\": true, // whether the asset can be used as margin in Multi-Assets mode\n\"updateTime\": 1617939110373\n}\n],\n\"rateLimits\": [\n{\n\"rateLimitType\": \"REQUEST_WEIGHT\",\n\"interval\": \"MINUTE\",\n\"intervalNum\": 1,\n\"limit\": 2400,\n\"count\": 20\n}\n]\n}"
+        }
+      ]
+    }
+  ],
+  "protocol": "websocket_api",
+  "category": "account",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "account",
+    "websocket-api.html"
+  ],
+  "api_summary": {
+    "description": "Query account balance info",
+    "method": "`v2/account.balance`",
+    "request_weight": "5",
+    "request_parameters_tables": [
+      {
+        "type": "table",
+        "headers": [
+          "Name",
+          "Type",
+          "Mandatory",
+          "Description"
+        ],
+        "rows": [
+          [
+            "recvWindow",
+            "LONG",
+            "NO",
+            ""
+          ],
+          [
+            "timestamp",
+            "LONG",
+            "YES",
+            ""
+          ]
+        ]
+      }
+    ],
+    "request_parameters_text": [],
+    "request_code_blocks": [
+      {
+        "type": "code",
+        "language": "json",
+        "json": {
+          "id": "605a6d20-6588-4cb9-afa0-b0ab087507ba",
+          "method": "v2/account.balance",
+          "params": {
+            "apiKey": "xTaDyrmvA9XT2oBHHjy39zyPzKCvMdtH3b9q4xadkAg2dNSJXQGCxzui26L823W2",
+            "timestamp": 1702561978458,
+            "signature": "208bb94a26f99aa122b1319490ca9cb2798fccc81d9b6449521a26268d53217a"
+          }
+        }
+      }
+    ],
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "{\n\"id\": \"605a6d20-6588-4cb9-afa0-b0ab087507ba\",\n\"status\": 200,\n\"result\": [\n{\n\"accountAlias\": \"SgsR\", // unique account code\n\"asset\": \"USDT\", // asset name\n\"balance\": \"122607.35137903\", // wallet balance\n\"crossWalletBalance\": \"23.72469206\", // crossed wallet balance\n\"crossUnPnl\": \"0.00000000\" // unrealized profit of crossed positions\n\"availableBalance\": \"23.72469206\", // available balance\n\"maxWithdrawAmount\": \"23.72469206\", // maximum amount for transfer out\n\"marginAvailable\": true, // whether the asset can be used as margin in Multi-Assets mode\n\"updateTime\": 1617939110373\n}\n],\n\"rateLimits\": [\n{\n\"rateLimitType\": \"REQUEST_WEIGHT\",\n\"interval\": \"MINUTE\",\n\"intervalNum\": 1,\n\"limit\": 2400,\n\"count\": 20\n}\n]\n}"
+      }
+    ]
+  }
+}

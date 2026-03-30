@@ -1,0 +1,373 @@
+{
+  "title": "Position Information (USER_DATA)",
+  "meta_description": "API Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "API Description",
+      "level": 2,
+      "id": "api-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Get current position information."
+        }
+      ]
+    },
+    {
+      "title": "Method",
+      "level": 2,
+      "id": "method",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`account.position`"
+        }
+      ]
+    },
+    {
+      "title": "Request",
+      "level": 2,
+      "id": "request",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "json",
+          "json": {
+            "id": "605a6d20-6588-4cb9-afa0-b0ab087507ba",
+            "method": "account.position",
+            "params": {
+              "apiKey": "xTaDyrmvA9XT2oBHHjy39zyPzKCvMdtH3b9q4xadkAg2dNSJXQGCxzui26L823W2",
+              "symbol": "BTCUSDT",
+              "timestamp": 1702920680303,
+              "signature": "31ab02a51a3989b66c29d40fcdf78216978a60afc6d8dc1c753ae49fa3164a2a"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "title": "Request Weight",
+      "level": 2,
+      "id": "request-weight",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "5"
+        }
+      ]
+    },
+    {
+      "title": "Request Parameters",
+      "level": 2,
+      "id": "request-parameters",
+      "blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "Name",
+            "Type",
+            "Mandatory",
+            "Description"
+          ],
+          "rows": [
+            [
+              "symbol",
+              "STRING",
+              "NO",
+              ""
+            ],
+            [
+              "recvWindow",
+              "LONG",
+              "NO",
+              ""
+            ],
+            [
+              "timestamp",
+              "LONG",
+              "YES",
+              ""
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Note"
+        },
+        {
+          "type": "blockquote",
+          "text": "Please use with user data stream `ACCOUNT_UPDATE` to meet your timeliness and accuracy needs."
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "blockquote",
+          "text": "For One-way position mode:"
+        },
+        {
+          "type": "code",
+          "language": "json",
+          "json": {
+            "id": "605a6d20-6588-4cb9-afa0-b0ab087507ba",
+            "status": 200,
+            "result": [
+              {
+                "entryPrice": "0.00000",
+                "breakEvenPrice": "0.0",
+                "marginType": "isolated",
+                "isAutoAddMargin": "false",
+                "isolatedMargin": "0.00000000",
+                "leverage": "10",
+                "liquidationPrice": "0",
+                "markPrice": "6679.50671178",
+                "maxNotionalValue": "20000000",
+                "positionAmt": "0.000",
+                "notional": "0",
+                "isolatedWallet": "0",
+                "symbol": "BTCUSDT",
+                "unRealizedProfit": "0.00000000",
+                "positionSide": "BOTH",
+                "updateTime": 0
+              }
+            ],
+            "rateLimits": [
+              {
+                "rateLimitType": "REQUEST_WEIGHT",
+                "interval": "MINUTE",
+                "intervalNum": 1,
+                "limit": 2400,
+                "count": 20
+              }
+            ]
+          }
+        },
+        {
+          "type": "blockquote",
+          "text": "For Hedge position mode:"
+        },
+        {
+          "type": "code",
+          "language": "json",
+          "json": {
+            "id": "605a6d20-6588-4cb9-afa0-b0ab087507ba",
+            "status": 200,
+            "result": [
+              {
+                "symbol": "BTCUSDT",
+                "positionAmt": "0.001",
+                "entryPrice": "22185.2",
+                "breakEvenPrice": "0.0",
+                "markPrice": "21123.05052574",
+                "unRealizedProfit": "-1.06214947",
+                "liquidationPrice": "19731.45529116",
+                "leverage": "4",
+                "maxNotionalValue": "100000000",
+                "marginType": "cross",
+                "isolatedMargin": "0.00000000",
+                "isAutoAddMargin": "false",
+                "positionSide": "LONG",
+                "notional": "21.12305052",
+                "isolatedWallet": "0",
+                "updateTime": 1655217461579
+              },
+              {
+                "symbol": "BTCUSDT",
+                "positionAmt": "0.000",
+                "entryPrice": "0.0",
+                "breakEvenPrice": "0.0",
+                "markPrice": "21123.05052574",
+                "unRealizedProfit": "0.00000000",
+                "liquidationPrice": "0",
+                "leverage": "4",
+                "maxNotionalValue": "100000000",
+                "marginType": "cross",
+                "isolatedMargin": "0.00000000",
+                "isAutoAddMargin": "false",
+                "positionSide": "SHORT",
+                "notional": "0",
+                "isolatedWallet": "0",
+                "updateTime": 0
+              }
+            ],
+            "rateLimits": [
+              {
+                "rateLimitType": "REQUEST_WEIGHT",
+                "interval": "MINUTE",
+                "intervalNum": 1,
+                "limit": 2400,
+                "count": 20
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "protocol": "websocket_api",
+  "category": "websocket-api",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "trade",
+    "websocket-api",
+    "Position-Information.html"
+  ],
+  "api_summary": {
+    "description": "Get current position information.",
+    "method": "`account.position`",
+    "request_weight": "5",
+    "request_parameters_tables": [
+      {
+        "type": "table",
+        "headers": [
+          "Name",
+          "Type",
+          "Mandatory",
+          "Description"
+        ],
+        "rows": [
+          [
+            "symbol",
+            "STRING",
+            "NO",
+            ""
+          ],
+          [
+            "recvWindow",
+            "LONG",
+            "NO",
+            ""
+          ],
+          [
+            "timestamp",
+            "LONG",
+            "YES",
+            ""
+          ]
+        ]
+      }
+    ],
+    "request_parameters_text": [
+      "Note",
+      "Please use with user data stream `ACCOUNT_UPDATE` to meet your timeliness and accuracy needs."
+    ],
+    "request_code_blocks": [
+      {
+        "type": "code",
+        "language": "json",
+        "json": {
+          "id": "605a6d20-6588-4cb9-afa0-b0ab087507ba",
+          "method": "account.position",
+          "params": {
+            "apiKey": "xTaDyrmvA9XT2oBHHjy39zyPzKCvMdtH3b9q4xadkAg2dNSJXQGCxzui26L823W2",
+            "symbol": "BTCUSDT",
+            "timestamp": 1702920680303,
+            "signature": "31ab02a51a3989b66c29d40fcdf78216978a60afc6d8dc1c753ae49fa3164a2a"
+          }
+        }
+      }
+    ],
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "json",
+        "json": {
+          "id": "605a6d20-6588-4cb9-afa0-b0ab087507ba",
+          "status": 200,
+          "result": [
+            {
+              "entryPrice": "0.00000",
+              "breakEvenPrice": "0.0",
+              "marginType": "isolated",
+              "isAutoAddMargin": "false",
+              "isolatedMargin": "0.00000000",
+              "leverage": "10",
+              "liquidationPrice": "0",
+              "markPrice": "6679.50671178",
+              "maxNotionalValue": "20000000",
+              "positionAmt": "0.000",
+              "notional": "0",
+              "isolatedWallet": "0",
+              "symbol": "BTCUSDT",
+              "unRealizedProfit": "0.00000000",
+              "positionSide": "BOTH",
+              "updateTime": 0
+            }
+          ],
+          "rateLimits": [
+            {
+              "rateLimitType": "REQUEST_WEIGHT",
+              "interval": "MINUTE",
+              "intervalNum": 1,
+              "limit": 2400,
+              "count": 20
+            }
+          ]
+        }
+      },
+      {
+        "type": "code",
+        "language": "json",
+        "json": {
+          "id": "605a6d20-6588-4cb9-afa0-b0ab087507ba",
+          "status": 200,
+          "result": [
+            {
+              "symbol": "BTCUSDT",
+              "positionAmt": "0.001",
+              "entryPrice": "22185.2",
+              "breakEvenPrice": "0.0",
+              "markPrice": "21123.05052574",
+              "unRealizedProfit": "-1.06214947",
+              "liquidationPrice": "19731.45529116",
+              "leverage": "4",
+              "maxNotionalValue": "100000000",
+              "marginType": "cross",
+              "isolatedMargin": "0.00000000",
+              "isAutoAddMargin": "false",
+              "positionSide": "LONG",
+              "notional": "21.12305052",
+              "isolatedWallet": "0",
+              "updateTime": 1655217461579
+            },
+            {
+              "symbol": "BTCUSDT",
+              "positionAmt": "0.000",
+              "entryPrice": "0.0",
+              "breakEvenPrice": "0.0",
+              "markPrice": "21123.05052574",
+              "unRealizedProfit": "0.00000000",
+              "liquidationPrice": "0",
+              "leverage": "4",
+              "maxNotionalValue": "100000000",
+              "marginType": "cross",
+              "isolatedMargin": "0.00000000",
+              "isAutoAddMargin": "false",
+              "positionSide": "SHORT",
+              "notional": "0",
+              "isolatedWallet": "0",
+              "updateTime": 0
+            }
+          ],
+          "rateLimits": [
+            {
+              "rateLimitType": "REQUEST_WEIGHT",
+              "interval": "MINUTE",
+              "intervalNum": 1,
+              "limit": 2400,
+              "count": 20
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

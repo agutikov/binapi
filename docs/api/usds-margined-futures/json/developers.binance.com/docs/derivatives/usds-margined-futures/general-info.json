@@ -1,0 +1,1051 @@
+{
+  "title": "General Info",
+  "meta_description": "General API Information",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "General API Information",
+      "level": 2,
+      "id": "general-api-information",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Some endpoints will require an API Key. Please refer to this page",
+              "blocks": []
+            },
+            {
+              "text": "The base endpoint is: https://fapi.binance.com",
+              "blocks": []
+            },
+            {
+              "text": "All endpoints return either a JSON object or array.",
+              "blocks": []
+            },
+            {
+              "text": "Data is returned in ascending order. Oldest first, newest last.",
+              "blocks": []
+            },
+            {
+              "text": "All time and timestamp related fields are in milliseconds.",
+              "blocks": []
+            },
+            {
+              "text": "All data types adopt definition in JAVA.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Testnet API Information",
+      "level": 3,
+      "id": "testnet-api-information",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Most of the endpoints can be used in the testnet platform.",
+              "blocks": []
+            },
+            {
+              "text": "The REST base url for testnet is \"https://demo-fapi.binance.com\"",
+              "blocks": []
+            },
+            {
+              "text": "The Websocket base url for testnet is \"wss://fstream.binancefuture.com\"",
+              "blocks": []
+            }
+          ]
+        },
+        {
+          "type": "separator"
+        }
+      ]
+    },
+    {
+      "title": "General Information on Endpoints",
+      "level": 2,
+      "id": "general-information-on-endpoints",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "For `GET` endpoints, parameters must be sent as a `query string`.",
+              "blocks": []
+            },
+            {
+              "text": "For `POST`, `PUT`, and `DELETE` endpoints, the parameters may be sent as a `query string` or in the `request body` with content type `application/x-www-form-urlencoded`. You may mix parameters between both the `query string` and `request body` if you wish to do so.",
+              "blocks": []
+            },
+            {
+              "text": "Parameters may be sent in any order.",
+              "blocks": []
+            },
+            {
+              "text": "If a parameter sent in both the `query string` and `request body`, the `query string` parameter will be used.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "HTTP Return Codes",
+      "level": 3,
+      "id": "http-return-codes",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "HTTP `4XX` return codes are used for for malformed requests; the issue is on the sender's side.",
+              "blocks": []
+            },
+            {
+              "text": "HTTP `403` return code is used when the WAF Limit (Web Application Firewall) has been violated.",
+              "blocks": []
+            },
+            {
+              "text": "HTTP `408` return code is used when a timeout has occurred while waiting for a response from the backend server.",
+              "blocks": []
+            },
+            {
+              "text": "HTTP `429` return code is used when breaking a request rate limit.",
+              "blocks": []
+            },
+            {
+              "text": "HTTP `418` return code is used when an IP has been auto-banned for continuing to send requests after receiving `429` codes.",
+              "blocks": []
+            },
+            {
+              "text": "HTTP `5XX` return codes are used for internal errors; the issue is on Binance's side. If there is an error message \"Request occur unknown error.\", please retry later.",
+              "blocks": [
+                {
+                  "type": "list",
+                  "ordered": true,
+                  "items": [
+                    {
+                      "text": "If there is an error message \"Request occur unknown error.\", please retry later.",
+                      "blocks": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "text": "HTTP `503` return code is used when: If there is an error message \"Unknown error, please check your request or try again later.\" returned in the response, the API successfully sent the request but not get a response within the timeout period. It is important to NOT treat this as a failure operation; the execution status is UNKNOWN and could have been a success; If there is an error message \"Service Unavailable.\" returned in the response, it means this is a failure API operation and the service might be unavailable at the moment, you need to retry later. If there is an error message \"Internal error; unable to process your request. Please try again.\" returned in the response, it means this is a failure API operation and you can resend your request if you need. If the response contains the error message \"Request throttled by system-level protection. Reduce-only/close-position orders are exempt. Please try again.\" (-1008), This indicates the node has exceeded its maximum concurrency and is temporarily throttled. Close-position, reduce-only, and cancel orders are exempt and will not receive this error.",
+              "blocks": [
+                {
+                  "type": "list",
+                  "ordered": true,
+                  "items": [
+                    {
+                      "text": "If there is an error message \"Unknown error, please check your request or try again later.\" returned in the response, the API successfully sent the request but not get a response within the timeout period. It is important to NOT treat this as a failure operation; the execution status is UNKNOWN and could have been a success;",
+                      "blocks": []
+                    },
+                    {
+                      "text": "If there is an error message \"Service Unavailable.\" returned in the response, it means this is a failure API operation and the service might be unavailable at the moment, you need to retry later.",
+                      "blocks": []
+                    },
+                    {
+                      "text": "If there is an error message \"Internal error; unable to process your request. Please try again.\" returned in the response, it means this is a failure API operation and you can resend your request if you need.",
+                      "blocks": []
+                    },
+                    {
+                      "text": "If the response contains the error message \"Request throttled by system-level protection. Reduce-only/close-position orders are exempt. Please try again.\" (-1008), This indicates the node has exceeded its maximum concurrency and is temporarily throttled. Close-position, reduce-only, and cancel orders are exempt and will not receive this error.",
+                      "blocks": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "HTTP 503 Status: Message Variants & Handling",
+      "level": 3,
+      "id": "http-503-status-message-variants--handling",
+      "blocks": []
+    },
+    {
+      "title": "A. “Unknown error, please check your request or try again later.” (Execution status unknown)",
+      "level": 4,
+      "id": "a-unknown-error-please-check-your-request-or-try-again-later-execution-status-unknown",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Meaning: Request accepted but no response before timeout; execution may have succeeded.",
+              "blocks": []
+            },
+            {
+              "text": "Handling: Do not treat as immediate failure; first verify via WebSocket updates or orderId queries to avoid duplicates. During peaks, prefer single orders over batch to reduce uncertainty.",
+              "blocks": [
+                {
+                  "type": "list",
+                  "ordered": false,
+                  "items": [
+                    {
+                      "text": "Do not treat as immediate failure; first verify via WebSocket updates or orderId queries to avoid duplicates.",
+                      "blocks": []
+                    },
+                    {
+                      "text": "During peaks, prefer single orders over batch to reduce uncertainty.",
+                      "blocks": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "text": "Rate-limit counting: May or may not count, check header to verify rate limit info",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "B. “Service Unavailable.” (Failure)",
+      "level": 4,
+      "id": "b-service-unavailable-failure",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Meaning: Service temporarily unavailable; 100% failure.",
+              "blocks": []
+            },
+            {
+              "text": "Handling: Retry with exponential backoff (e.g., 200ms → 400ms → 800ms, max 3–5 attempts).",
+              "blocks": []
+            },
+            {
+              "text": "Rate-limit counting: not counted",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "C. “Request throttled by system-level protection. Reduce-only/close-position orders are exempt. Please try again.” (-1008, Failure)",
+      "level": 4,
+      "id": "c-request-throttled-by-system-level-protection-reduce-onlyclose-position-orders-are-exempt-please-try-again--1008-failure",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Meaning: System overload; 100% failure.",
+              "blocks": []
+            },
+            {
+              "text": "Handling: Retry with backoff and reduce concurrency;",
+              "blocks": []
+            },
+            {
+              "text": "Applicable endpoints: `POST /fapi/v1/order` `POST /fapi/v1/batchOrders` `POST /fapi/v1/order/test`",
+              "blocks": [
+                {
+                  "type": "list",
+                  "ordered": false,
+                  "items": [
+                    {
+                      "text": "`POST /fapi/v1/order`",
+                      "blocks": []
+                    },
+                    {
+                      "text": "`POST /fapi/v1/batchOrders`",
+                      "blocks": []
+                    },
+                    {
+                      "text": "`POST /fapi/v1/order/test`",
+                      "blocks": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "text": "Rate-limit counting: Not counted (overload protection).",
+              "blocks": []
+            },
+            {
+              "text": "Exception integrated here: When a request reduces exposure (Reduce-only / Close-position: `closePosition = true`, or `positionSide = BOTH` with `reduceOnly = true`, or `LONG+SELL`, or `SHORT+BUY`), it is not affected or prioritized under -1008 to ensure risk reduction. Covered endpoints: `POST /fapi/v1/order`、`POST /fapi/v1/batchOrders` (when parameters satisfy the condition)",
+              "blocks": [
+                {
+                  "type": "list",
+                  "ordered": false,
+                  "items": [
+                    {
+                      "text": "Covered endpoints: `POST /fapi/v1/order`、`POST /fapi/v1/batchOrders` (when parameters satisfy the condition)",
+                      "blocks": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Error Codes and Messages",
+      "level": 3,
+      "id": "error-codes-and-messages",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Any endpoint can return an ERROR",
+              "blocks": []
+            }
+          ]
+        },
+        {
+          "type": "blockquote",
+          "text": "The error payload is as follows:"
+        },
+        {
+          "type": "code",
+          "language": "json",
+          "json": {
+            "code": -1121,
+            "msg": "Invalid symbol."
+          }
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Specific error codes and messages defined in Error Codes.",
+              "blocks": []
+            }
+          ]
+        },
+        {
+          "type": "separator"
+        }
+      ]
+    },
+    {
+      "title": "SDK and Code Demonstration",
+      "level": 2,
+      "id": "sdk-and-code-demonstration",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Disclaimer:"
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "The following SDKs are provided by partners and users, and are not officially produced. They are only used to help users become familiar with the API endpoint. Please use it with caution and expand R&D according to your own situation.",
+              "blocks": []
+            },
+            {
+              "text": "Binance does not make any commitment to the safety and performance of the SDKs, nor will be liable for the risks or even losses caused by using the SDKs.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Python3",
+      "level": 3,
+      "id": "python3",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "SDK: To get the provided SDK for Binance Futures Connector, please visit https://github.com/binance/binance-connector-python, or use the command below: `pip install binance-sdk-derivatives-trading-usds-futures`"
+        }
+      ]
+    },
+    {
+      "title": "Java",
+      "level": 3,
+      "id": "java",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "To get the provided SDK for Binance Futures, please visit https://github.com/binance/binance-connector-java, or use the command below: `git clone https://github.com/binance/binance-connector-java.git`"
+        },
+        {
+          "type": "separator"
+        }
+      ]
+    },
+    {
+      "title": "LIMITS",
+      "level": 2,
+      "id": "limits",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "The `/fapi/v1/exchangeInfo` `rateLimits` array contains objects related to the exchange's `RAW_REQUEST`, `REQUEST_WEIGHT`, and `ORDER` rate limits. These are further defined in the `ENUM definitions` section under `Rate limiters (rateLimitType)`.",
+              "blocks": []
+            },
+            {
+              "text": "A `429` will be returned when either rate limit is violated.",
+              "blocks": []
+            }
+          ]
+        },
+        {
+          "type": "notice",
+          "text": "Binance has the right to further tighten the rate limits on users with intent to attack."
+        }
+      ]
+    },
+    {
+      "title": "IP Limits",
+      "level": 3,
+      "id": "ip-limits",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Every request will contain `X-MBX-USED-WEIGHT-(intervalNum)(intervalLetter)` in the response headers which has the current used weight for the IP for all request rate limiters defined.",
+              "blocks": []
+            },
+            {
+              "text": "Each route has a `weight` which determines for the number of requests each endpoint counts for. Heavier endpoints and endpoints that do operations on multiple symbols will have a heavier `weight`.",
+              "blocks": []
+            },
+            {
+              "text": "When a 429 is received, it's your obligation as an API to back off and not spam the API.",
+              "blocks": []
+            },
+            {
+              "text": "Repeatedly violating rate limits and/or failing to back off after receiving 429s will result in an automated IP ban (HTTP status 418).",
+              "blocks": []
+            },
+            {
+              "text": "IP bans are tracked and scale in duration for repeat offenders, from 2 minutes to 3 days.",
+              "blocks": []
+            },
+            {
+              "text": "The limits on the API are based on the IPs, not the API keys.",
+              "blocks": []
+            }
+          ]
+        },
+        {
+          "type": "notice",
+          "text": "It is strongly recommended to use websocket stream for getting data as much as possible, which can not only ensure the timeliness of the message, but also reduce the access restriction pressure caused by the request."
+        }
+      ]
+    },
+    {
+      "title": "Order Rate Limits",
+      "level": 3,
+      "id": "order-rate-limits",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Every order response will contain a `X-MBX-ORDER-COUNT-(intervalNum)(intervalLetter)` header which has the current order count for the account for all order rate limiters defined.",
+              "blocks": []
+            },
+            {
+              "text": "Rejected/unsuccessful orders are not guaranteed to have `X-MBX-ORDER-COUNT-**` headers in the response.",
+              "blocks": []
+            },
+            {
+              "text": "The order rate limit is counted against each account.",
+              "blocks": []
+            }
+          ]
+        },
+        {
+          "type": "separator"
+        }
+      ]
+    },
+    {
+      "title": "Endpoint Security Type",
+      "level": 2,
+      "id": "endpoint-security-type",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Each endpoint has a security type that determines the how you will interact with it.",
+              "blocks": []
+            },
+            {
+              "text": "API-keys are passed into the Rest API via the `X-MBX-APIKEY` header.",
+              "blocks": []
+            },
+            {
+              "text": "API-keys and secret-keys are case sensitive.",
+              "blocks": []
+            },
+            {
+              "text": "API-keys can be configured to only access certain types of secure endpoints. For example, one API-key could be used for TRADE only, while another API-key can access everything except for TRADE routes.",
+              "blocks": []
+            },
+            {
+              "text": "By default, API-keys can access all secure routes.",
+              "blocks": []
+            }
+          ]
+        },
+        {
+          "type": "table",
+          "headers": [
+            "Security Type",
+            "Description"
+          ],
+          "rows": [
+            [
+              "NONE",
+              "Endpoint can be accessed freely."
+            ],
+            [
+              "TRADE",
+              "Endpoint requires sending a valid API-Key and signature."
+            ],
+            [
+              "USER_DATA",
+              "Endpoint requires sending a valid API-Key and signature."
+            ],
+            [
+              "USER_STREAM",
+              "Endpoint requires sending a valid API-Key."
+            ],
+            [
+              "MARKET_DATA",
+              "Endpoint requires sending a valid API-Key."
+            ]
+          ]
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "`TRADE` and `USER_DATA` endpoints are `SIGNED` endpoints.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "SIGNED (TRADE and USER_DATA) Endpoint Security",
+      "level": 3,
+      "id": "signed-trade-and-user_data-endpoint-security",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "`SIGNED` endpoints require an additional parameter, `signature`, to be sent in the `query string` or `request body`.",
+              "blocks": []
+            },
+            {
+              "text": "Endpoints use `HMAC SHA256` signatures. The `HMAC SHA256 signature` is a keyed `HMAC SHA256` operation. Use your `secretKey` as the key and `totalParams` as the value for the HMAC operation.",
+              "blocks": []
+            },
+            {
+              "text": "The `signature` is not case sensitive.",
+              "blocks": []
+            },
+            {
+              "text": "Please make sure the `signature` is the end part of your `query string` or `request body`.",
+              "blocks": []
+            },
+            {
+              "text": "`totalParams` is defined as the `query string` concatenated with the `request body`.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Timing Security",
+      "level": 3,
+      "id": "timing-security",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "A `SIGNED` endpoint also requires a parameter, `timestamp`, to be sent which should be the millisecond timestamp of when the request was created and sent.",
+              "blocks": []
+            },
+            {
+              "text": "An additional parameter, `recvWindow`, may be sent to specify the number of milliseconds after `timestamp` the request is valid for. If `recvWindow` is not sent, it defaults to 5000.",
+              "blocks": []
+            }
+          ]
+        },
+        {
+          "type": "blockquote",
+          "text": "The logic is as follows:"
+        },
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "if (timestamp < serverTime + 1000 && serverTime - timestamp <= recvWindow) {\n// process request\n} else {\n// reject request\n}"
+        },
+        {
+          "type": "paragraph",
+          "text": "Serious trading is about timing. Networks can be unstable and unreliable, which can lead to requests taking varying amounts of time to reach the servers. With `recvWindow`, you can specify that the request must be processed within a certain number of milliseconds or be rejected by the server."
+        },
+        {
+          "type": "notice",
+          "text": "It is recommended to use a small recvWindow of 5000 or less!"
+        }
+      ]
+    },
+    {
+      "title": "SIGNED Endpoint Examples for POST /fapi/v1/order - HMAC Keys",
+      "level": 3,
+      "id": "signed-endpoint-examples-for-post-fapiv1order---hmac-keys",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Here is a step-by-step example of how to send a vaild signed payload from the Linux command line using `echo`, `openssl`, and `curl`."
+        },
+        {
+          "type": "table",
+          "headers": [
+            "Key",
+            "Value"
+          ],
+          "rows": [
+            [
+              "apiKey",
+              "dbefbc809e3e83c283a984c3a1459732ea7db1360ca80c5c2c8867408d28cc83"
+            ],
+            [
+              "secretKey",
+              "2b5eb11e18796d12d88f13dc27dbbd02c2cc51ff7059765ed9821957d82bb4d9"
+            ]
+          ]
+        },
+        {
+          "type": "table",
+          "headers": [
+            "Parameter",
+            "Value"
+          ],
+          "rows": [
+            [
+              "symbol",
+              "BTCUSDT"
+            ],
+            [
+              "side",
+              "BUY"
+            ],
+            [
+              "type",
+              "LIMIT"
+            ],
+            [
+              "timeInForce",
+              "GTC"
+            ],
+            [
+              "quantity",
+              "1"
+            ],
+            [
+              "price",
+              "9000"
+            ],
+            [
+              "recvWindow",
+              "5000"
+            ],
+            [
+              "timestamp",
+              "1591702613943"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Example 1: As a query string",
+      "level": 4,
+      "id": "example-1-as-a-query-string",
+      "blocks": [
+        {
+          "type": "blockquote",
+          "text": "Example 1"
+        },
+        {
+          "type": "blockquote",
+          "text": "HMAC SHA256 signature:"
+        },
+        {
+          "type": "code",
+          "language": "shell",
+          "text": "$ echo -n \"symbol=BTCUSDT&side=BUY&type=LIMIT&quantity=1&price=9000&timeInForce=GTC&recvWindow=5000&timestamp=1591702613943\" | openssl dgst -sha256 -hmac \"2b5eb11e18796d12d88f13dc27dbbd02c2cc51ff7059765ed9821957d82bb4d9\"\n(stdin)= 3c661234138461fcc7a7d8746c6558c9842d4e10870d2ecbedf7777cad694af9"
+        },
+        {
+          "type": "blockquote",
+          "text": "curl command:"
+        },
+        {
+          "type": "code",
+          "language": "shell",
+          "text": "(HMAC SHA256)\n$ curl -H \"X-MBX-APIKEY: dbefbc809e3e83c283a984c3a1459732ea7db1360ca80c5c2c8867408d28cc83\" -X POST 'https://fapi/binance.com/fapi/v1/order?symbol=BTCUSDT&side=BUY&type=LIMIT&quantity=1&price=9000&timeInForce=GTC&recvWindow=5000&timestamp=1591702613943&signature= 3c661234138461fcc7a7d8746c6558c9842d4e10870d2ecbedf7777cad694af9'"
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "queryString:",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "symbol=BTCUSDT &side=BUY &type=LIMIT &timeInForce=GTC &quantity=1 &price=9000 &recvWindow=5000 &timestamp=1591702613943"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Example 2: As a request body",
+      "level": 4,
+      "id": "example-2-as-a-request-body",
+      "blocks": [
+        {
+          "type": "blockquote",
+          "text": "Example 2"
+        },
+        {
+          "type": "blockquote",
+          "text": "HMAC SHA256 signature:"
+        },
+        {
+          "type": "code",
+          "language": "shell",
+          "text": "$ echo -n \"symbol=BTCUSDT&side=BUY&type=LIMIT&quantity=1&price=9000&timeInForce=GTC&recvWindow=5000&timestamp=1591702613943\" | openssl dgst -sha256 -hmac \"2b5eb11e18796d12d88f13dc27dbbd02c2cc51ff7059765ed9821957d82bb4d9\"\n(stdin)= 3c661234138461fcc7a7d8746c6558c9842d4e10870d2ecbedf7777cad694af9"
+        },
+        {
+          "type": "blockquote",
+          "text": "curl command:"
+        },
+        {
+          "type": "code",
+          "language": "shell",
+          "text": "(HMAC SHA256)\n$ curl -H \"X-MBX-APIKEY: dbefbc809e3e83c283a984c3a1459732ea7db1360ca80c5c2c8867408d28cc83\" -X POST 'https://fapi/binance.com/fapi/v1/order' -d 'symbol=BTCUSDT&side=BUY&type=LIMIT&quantity=1&price=9000&timeInForce=GTC&recvWindow=5000&timestamp=1591702613943&signature= 3c661234138461fcc7a7d8746c6558c9842d4e10870d2ecbedf7777cad694af9'"
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "requestBody:",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "text": "symbol=BTCUSDT &side=BUY &type=LIMIT &timeInForce=GTC &quantity=1 &price=9000 &recvWindow=5000 &timestamp=1591702613943"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Example 3: Mixed query string and request body",
+      "level": 4,
+      "id": "example-3-mixed-query-string-and-request-body",
+      "blocks": [
+        {
+          "type": "blockquote",
+          "text": "Example 3"
+        },
+        {
+          "type": "blockquote",
+          "text": "HMAC SHA256 signature:"
+        },
+        {
+          "type": "code",
+          "language": "shell",
+          "text": "$ echo -n \"symbol=BTCUSDT&side=BUY&type=LIMIT&timeInForce=GTCquantity=1&price=9000&recvWindow=5000&timestamp= 1591702613943\" | openssl dgst -sha256 -hmac \"2b5eb11e18796d12d88f13dc27dbbd02c2cc51ff7059765ed9821957d82bb4d9\"\n(stdin)= f9d0ae5e813ef6ccf15c2b5a434047a0181cb5a342b903b367ca6d27a66e36f2"
+        },
+        {
+          "type": "blockquote",
+          "text": "curl command:"
+        },
+        {
+          "type": "code",
+          "language": "shell",
+          "text": "(HMAC SHA256)\n$ curl -H \"X-MBX-APIKEY: dbefbc809e3e83c283a984c3a1459732ea7db1360ca80c5c2c8867408d28cc83\" -X POST 'https://fapi.binance.com/fapi/v1/order?symbol=BTCUSDT&side=BUY&type=LIMIT&timeInForce=GTC' -d 'quantity=1&price=9000&recvWindow=5000&timestamp=1591702613943&signature=f9d0ae5e813ef6ccf15c2b5a434047a0181cb5a342b903b367ca6d27a66e36f2'"
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "queryString: symbol=BTCUSDT&side=BUY&type=LIMIT&timeInForce=GTC",
+              "blocks": []
+            },
+            {
+              "text": "requestBody: quantity=1&price=9000&recvWindow=5000&timestamp= 1591702613943",
+              "blocks": []
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Note that the signature is different in example 3. There is no & between \"GTC\" and \"quantity=1\"."
+        }
+      ]
+    },
+    {
+      "title": "SIGNED Endpoint Examples for POST /fapi/v1/order - RSA Keys",
+      "level": 3,
+      "id": "signed-endpoint-examples-for-post-fapiv1order---rsa-keys",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "This will be a step by step process how to create the signature payload to send a valid signed payload.",
+              "blocks": []
+            },
+            {
+              "text": "We support `PKCS#8` currently.",
+              "blocks": []
+            },
+            {
+              "text": "To get your API key, you need to upload your RSA Public Key to your account and a corresponding API key will be provided for you.",
+              "blocks": []
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "For this example, the private key will be referenced as `test-prv-key.pem`"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "Key",
+            "Value"
+          ],
+          "rows": [
+            [
+              "apiKey",
+              "vE3BDAL1gP1UaexugRLtteaAHg3UO8Nza20uexEuW1Kh3tVwQfFHdAiyjjY428o2"
+            ]
+          ]
+        },
+        {
+          "type": "table",
+          "headers": [
+            "Parameter",
+            "Value"
+          ],
+          "rows": [
+            [
+              "symbol",
+              "BTCUSDT"
+            ],
+            [
+              "side",
+              "SELL"
+            ],
+            [
+              "type",
+              "MARKET"
+            ],
+            [
+              "quantity",
+              "1.23"
+            ],
+            [
+              "recvWindow",
+              "9999999"
+            ],
+            [
+              "timestamp",
+              "1671090801999"
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "text": "Signature payload (with the listed parameters):"
+        },
+        {
+          "type": "code",
+          "language": "console",
+          "text": "timestamp=1671090801999&recvWindow=9999999&symbol=BTCUSDT&side=SELL&type=MARKET&quantity=1.23"
+        },
+        {
+          "type": "paragraph",
+          "text": "Step 1: Construct the payload"
+        },
+        {
+          "type": "paragraph",
+          "text": "Arrange the list of parameters into a string. Separate each parameter with a `&`."
+        },
+        {
+          "type": "paragraph",
+          "text": "Step 2: Compute the signature:"
+        },
+        {
+          "type": "paragraph",
+          "text": "2.1 - Encode signature payload as ASCII data."
+        },
+        {
+          "type": "blockquote",
+          "text": "Step 2.2"
+        },
+        {
+          "type": "code",
+          "language": "console",
+          "text": "$ echo -n 'timestamp=1671090801999&recvWindow=9999999&symbol=BTCUSDT&side=SELL&type=MARKET&quantity=1.23' | openssl dgst -keyform PEM -sha256 -sign ./test-prv-key.pem"
+        },
+        {
+          "type": "paragraph",
+          "text": "2.2 - Sign payload using RSASSA-PKCS1-v1_5 algorithm with SHA-256 hash function."
+        },
+        {
+          "type": "blockquote",
+          "text": "Step 2.3"
+        },
+        {
+          "type": "code",
+          "language": "console",
+          "text": "$ echo -n 'timestamp=1671090801999&recvWindow=9999999&symbol=BTCUSDT&side=SELL&type=MARKET&quantity=1.23' | openssl dgst -keyform PEM -sha256 -sign ./test-prv-key.pem | openssl enc -base64\naap36wD5loVXizxvvPI3wz9Cjqwmb3KVbxoym0XeWG1jZq8umqrnSk8H8dkLQeySjgVY91Ufs%2BBGCW%2B4sZjQEpgAfjM76riNxjlD3coGGEsPsT2lG39R%2F1q72zpDs8pYcQ4A692NgHO1zXcgScTGgdkjp%2Brp2bcddKjyz5XBrBM%3D"
+        },
+        {
+          "type": "paragraph",
+          "text": "2.3 - Encode output as base64 string."
+        },
+        {
+          "type": "blockquote",
+          "text": "Step 2.4"
+        },
+        {
+          "type": "code",
+          "language": "console",
+          "text": "$ echo -n 'timestamp=1671090801999&recvWindow=9999999&symbol=BTCUSDT&side=SELL&type=MARKET&quantity=1.23' | openssl dgst -keyform PEM -sha256 -sign ./test-prv-key.pem | openssl enc -base64 | tr -d '\\n'\naap36wD5loVXizxvvPI3wz9Cjqwmb3KVbxoym0XeWG1jZq8umqrnSk8H8dkLQeySjgVY91Ufs%2BBGCW%2B4sZjQEpgAfjM76riNxjlD3coGGEsPsT2lG39R%2F1q72zpDs8pYcQ4A692NgHO1zXcgScTGgdkjp%2Brp2bcddKjyz5XBrBM%3D"
+        },
+        {
+          "type": "paragraph",
+          "text": "2.4 - Delete any newlines in the signature."
+        },
+        {
+          "type": "blockquote",
+          "text": "Step 2.5"
+        },
+        {
+          "type": "code",
+          "language": "console",
+          "text": "aap36wD5loVXizxvvPI3wz9Cjqwmb3KVbxoym0XeWG1jZq8umqrnSk8H8dkLQeySjgVY91Ufs%2BBGCW%2B4sZjQEpgAfjM76riNxjlD3coGGEsPsT2lG39R%2F1q72zpDs8pYcQ4A692NgHO1zXcgScTGgdkjp%2Brp2bcddKjyz5XBrBM%3D"
+        },
+        {
+          "type": "paragraph",
+          "text": "2.5 - Since the signature may contain `/` and `=`, this could cause issues with sending the request. So the signature has to be URL encoded."
+        },
+        {
+          "type": "blockquote",
+          "text": "Step 2.6"
+        },
+        {
+          "type": "code",
+          "language": "console",
+          "text": "curl -H \"X-MBX-APIKEY: vE3BDAL1gP1UaexugRLtteaAHg3UO8Nza20uexEuW1Kh3tVwQfFHdAiyjjY428o2\" -X POST 'https://fapi.binance.com/fapi/v1/order?timestamp=1671090801999&recvWindow=9999999&symbol=BTCUSDT&side=SELL&type=MARKET&quantity=1.23&signature=aap36wD5loVXizxvvPI3wz9Cjqwmb3KVbxoym0XeWG1jZq8umqrnSk8H8dkLQeySjgVY91Ufs%2BBGCW%2B4sZjQEpgAfjM76riNxjlD3coGGEsPsT2lG39R%2F1q72zpDs8pYcQ4A692NgHO1zXcgScTGgdkjp%2Brp2bcddKjyz5XBrBM%3D'"
+        },
+        {
+          "type": "paragraph",
+          "text": "2.6 - curl command"
+        },
+        {
+          "type": "blockquote",
+          "text": "Bash script"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "text": "#!/usr/bin/env bash\n\n# Set up authentication:\napiKey=\"vE3BDAL1gP1UaexugRLtteaAHg3UO8Nza20uexEuW1Kh3tVwQfFHdAiyjjY428o2\" ### REPLACE THIS WITH YOUR API KEY\n\n# Set up the request:\napiMethod=\"POST\"\napiCall=\"v1/order\"\napiParams=\"timestamp=1671090801999&recvWindow=9999999&symbol=BTCUSDT&side=SELL&type=MARKET&quantity=1.23\"\nfunction rawurlencode {\nlocal value=\"$1\"\nlocal len=${#value}\nlocal encoded=\"\"\nlocal pos c o\nfor (( pos=0 ; pos<len ; pos++ ))\ndo\nc=${value:$pos:1}\ncase \"$c\" in\n[-_.~a-zA-Z0-9] ) o=\"${c}\" ;;\n* ) printf -v o '%%%02x' \"'$c\"\nesac\nencoded+=\"$o\"\ndone\necho \"$encoded\"\n}\nts=$(date +%s000)\nparamsWithTs=\"$apiParams&timestamp=$ts\"\nrawSignature=$(echo -n \"$paramsWithTs\" \\\n| openssl dgst -keyform PEM -sha256 -sign ./test-prv-key.pem \\ ### THIS IS YOUR PRIVATE KEY. DO NOT SHARE THIS FILE WITH ANYONE.\n| openssl enc -base64 \\\n| tr -d '\\n')\nsignature=$(rawurlencode \"$rawSignature\")\ncurl -H \"X-MBX-APIKEY: $apiKey\" -X $apiMethod \\\n\"https://fapi.binance.com/fapi/$apiCall?$paramsWithTs&signature=$signature\""
+        },
+        {
+          "type": "paragraph",
+          "text": "A sample Bash script containing similar steps is available in the right side."
+        },
+        {
+          "type": "separator"
+        }
+      ]
+    },
+    {
+      "title": "Postman Collections",
+      "level": 2,
+      "id": "postman-collections",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "There is now a Postman collection containing the API endpoints for quick and easy use."
+        },
+        {
+          "type": "paragraph",
+          "text": "For more information please refer to this page: Binance API Postman"
+        }
+      ]
+    }
+  ],
+  "protocol": "reference",
+  "category": "usds-margined-futures",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "general-info.html"
+  ],
+  "api_summary": {
+    "description": null
+  }
+}

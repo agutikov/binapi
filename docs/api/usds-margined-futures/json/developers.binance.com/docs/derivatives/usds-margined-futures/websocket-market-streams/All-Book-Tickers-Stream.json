@@ -1,0 +1,94 @@
+{
+  "title": "All Book Tickers Stream",
+  "meta_description": "Stream Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "Stream Description",
+      "level": 2,
+      "id": "stream-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Pushes any update to the best bid or ask's price or quantity in real-time for all symbols."
+        }
+      ]
+    },
+    {
+      "title": "URL PATH",
+      "level": 2,
+      "id": "url-path",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`/public`"
+        }
+      ]
+    },
+    {
+      "title": "Stream Name",
+      "level": 2,
+      "id": "stream-name",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`!bookTicker`"
+        },
+        {
+          "type": "paragraph",
+          "text": "Note:"
+        },
+        {
+          "type": "blockquote",
+          "text": "Retail Price Improvement(RPI) orders are not visible and excluded in the response message."
+        }
+      ]
+    },
+    {
+      "title": "Update Speed",
+      "level": 2,
+      "id": "update-speed",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "5s"
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "{\n\"e\":\"bookTicker\", // event type\n\"u\":400900217, // order book updateId\n\"E\": 1568014460893, // event time\n\"T\": 1568014460891, // transaction time\n\"s\":\"BNBUSDT\", // symbol\n\"b\":\"25.35190000\", // best bid price\n\"B\":\"31.21000000\", // best bid qty\n\"a\":\"25.36520000\", // best ask price\n\"A\":\"40.66000000\" // best ask qty\n}"
+        }
+      ]
+    }
+  ],
+  "protocol": "websocket_stream",
+  "category": "websocket-market-streams",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "websocket-market-streams",
+    "All-Book-Tickers-Stream.html"
+  ],
+  "api_summary": {
+    "description": "Pushes any update to the best bid or ask's price or quantity in real-time for all symbols.",
+    "url_path": "`/public`",
+    "stream_name": "`!bookTicker`",
+    "update_speed": "5s",
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "{\n\"e\":\"bookTicker\", // event type\n\"u\":400900217, // order book updateId\n\"E\": 1568014460893, // event time\n\"T\": 1568014460891, // transaction time\n\"s\":\"BNBUSDT\", // symbol\n\"b\":\"25.35190000\", // best bid price\n\"B\":\"31.21000000\", // best bid qty\n\"a\":\"25.36520000\", // best ask price\n\"A\":\"40.66000000\" // best ask qty\n}"
+      }
+    ]
+  }
+}

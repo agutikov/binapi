@@ -1,0 +1,92 @@
+{
+  "title": "Exchange Information",
+  "meta_description": "API Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "API Description",
+      "level": 2,
+      "id": "api-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Current exchange trading rules and symbol information"
+        }
+      ]
+    },
+    {
+      "title": "HTTP Request",
+      "level": 2,
+      "id": "http-request",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "GET `/fapi/v1/exchangeInfo`"
+        }
+      ]
+    },
+    {
+      "title": "Request Weight",
+      "level": 2,
+      "id": "request-weight",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "1"
+        }
+      ]
+    },
+    {
+      "title": "Request Parameters",
+      "level": 2,
+      "id": "request-parameters",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "NONE"
+        }
+      ]
+    },
+    {
+      "title": "Response Example��",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "{\n\"exchangeFilters\": [],\n\"rateLimits\": [\n{\n\"interval\": \"MINUTE\",\n\"intervalNum\": 1,\n\"limit\": 2400,\n\"rateLimitType\": \"REQUEST_WEIGHT\"\n},\n{\n\"interval\": \"MINUTE\",\n\"intervalNum\": 1,\n\"limit\": 1200,\n\"rateLimitType\": \"ORDERS\"\n}\n],\n\"serverTime\": 1565613908500, // Ignore please. If you want to check current server time, please check via \"GET /fapi/v1/time\"\n\"assets\": [ // assets information\n{\n\"asset\": \"BTC\",\n\"marginAvailable\": true, // whether the asset can be used as margin in Multi-Assets mode\n\"autoAssetExchange\": \"-0.10\" // auto-exchange threshold in Multi-Assets margin mode\n},\n{\n\"asset\": \"USDT\",\n\"marginAvailable\": true,\n\"autoAssetExchange\": \"0\"\n},\n{\n\"asset\": \"BNB\",\n\"marginAvailable\": false,\n\"autoAssetExchange\": null\n}\n],\n\"symbols\": [\n{\n\"symbol\": \"BLZUSDT\",\n\"pair\": \"BLZUSDT\",\n\"contractType\": \"PERPETUAL\",\n\"deliveryDate\": 4133404800000,\n\"onboardDate\": 1598252400000,\n\"status\": \"TRADING\",\n\"maintMarginPercent\": \"2.5000\", // ignore\n\"requiredMarginPercent\": \"5.0000\", // ignore\n\"baseAsset\": \"BLZ\",\n\"quoteAsset\": \"USDT\",\n\"marginAsset\": \"USDT\",\n\"pricePrecision\": 5, // please do not use it as tickSize\n\"quantityPrecision\": 0, // please do not use it as stepSize\n\"baseAssetPrecision\": 8,\n\"quotePrecision\": 8,\n\"underlyingType\": \"COIN\",\n\"underlyingSubType\": [\"STORAGE\"],\n\"settlePlan\": 0,\n\"triggerProtect\": \"0.15\", // threshold for algo order with \"priceProtect\"\n\"filters\": [\n{\n\"filterType\": \"PRICE_FILTER\",\n\"maxPrice\": \"300\",\n\"minPrice\": \"0.0001\",\n\"tickSize\": \"0.0001\"\n},\n{\n\"filterType\": \"LOT_SIZE\",\n\"maxQty\": \"10000000\",\n\"minQty\": \"1\",\n\"stepSize\": \"1\"\n},\n{\n\"filterType\": \"MARKET_LOT_SIZE\",\n\"maxQty\": \"590119\",\n\"minQty\": \"1\",\n\"stepSize\": \"1\"\n},\n{\n\"filterType\": \"MAX_NUM_ORDERS\",\n\"limit\": 200\n},\n{\n\"filterType\": \"MIN_NOTIONAL\",\n\"notional\": \"5.0\",\n},\n{\n\"filterType\": \"PERCENT_PRICE\",\n\"multiplierUp\": \"1.1500\",\n\"multiplierDown\": \"0.8500\",\n\"multiplierDecimal\": \"4\"\n}\n],\n\"orderTypes\": [\n\"LIMIT\",\n\"MARKET\",\n\"STOP\",\n\"STOP_MARKET\",\n\"TAKE_PROFIT\",\n\"TAKE_PROFIT_MARKET\",\n\"TRAILING_STOP_MARKET\"\n],\n\"timeInForce\": [\n\"GTC\",\n\"IOC\",\n\"FOK\",\n\"GTX\"\n],\n\"liquidationFee\": \"0.010000\", // liquidation fee rate\n\"marketTakeBound\": \"0.30\", // the max price difference rate( from mark price) a market order can make\n}\n],\n\"timezone\": \"UTC\"\n}"
+        }
+      ]
+    }
+  ],
+  "protocol": "rest",
+  "category": "rest-api",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "market-data",
+    "rest-api",
+    "Exchange-Information.html"
+  ],
+  "api_summary": {
+    "description": "Current exchange trading rules and symbol information",
+    "http_method": "GET",
+    "path": "`/fapi/v1/exchangeInfo`",
+    "http_request": "GET `/fapi/v1/exchangeInfo`",
+    "request_weight": "1",
+    "request_parameters_tables": [],
+    "request_parameters_text": [
+      "NONE"
+    ],
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "{\n\"exchangeFilters\": [],\n\"rateLimits\": [\n{\n\"interval\": \"MINUTE\",\n\"intervalNum\": 1,\n\"limit\": 2400,\n\"rateLimitType\": \"REQUEST_WEIGHT\"\n},\n{\n\"interval\": \"MINUTE\",\n\"intervalNum\": 1,\n\"limit\": 1200,\n\"rateLimitType\": \"ORDERS\"\n}\n],\n\"serverTime\": 1565613908500, // Ignore please. If you want to check current server time, please check via \"GET /fapi/v1/time\"\n\"assets\": [ // assets information\n{\n\"asset\": \"BTC\",\n\"marginAvailable\": true, // whether the asset can be used as margin in Multi-Assets mode\n\"autoAssetExchange\": \"-0.10\" // auto-exchange threshold in Multi-Assets margin mode\n},\n{\n\"asset\": \"USDT\",\n\"marginAvailable\": true,\n\"autoAssetExchange\": \"0\"\n},\n{\n\"asset\": \"BNB\",\n\"marginAvailable\": false,\n\"autoAssetExchange\": null\n}\n],\n\"symbols\": [\n{\n\"symbol\": \"BLZUSDT\",\n\"pair\": \"BLZUSDT\",\n\"contractType\": \"PERPETUAL\",\n\"deliveryDate\": 4133404800000,\n\"onboardDate\": 1598252400000,\n\"status\": \"TRADING\",\n\"maintMarginPercent\": \"2.5000\", // ignore\n\"requiredMarginPercent\": \"5.0000\", // ignore\n\"baseAsset\": \"BLZ\",\n\"quoteAsset\": \"USDT\",\n\"marginAsset\": \"USDT\",\n\"pricePrecision\": 5, // please do not use it as tickSize\n\"quantityPrecision\": 0, // please do not use it as stepSize\n\"baseAssetPrecision\": 8,\n\"quotePrecision\": 8,\n\"underlyingType\": \"COIN\",\n\"underlyingSubType\": [\"STORAGE\"],\n\"settlePlan\": 0,\n\"triggerProtect\": \"0.15\", // threshold for algo order with \"priceProtect\"\n\"filters\": [\n{\n\"filterType\": \"PRICE_FILTER\",\n\"maxPrice\": \"300\",\n\"minPrice\": \"0.0001\",\n\"tickSize\": \"0.0001\"\n},\n{\n\"filterType\": \"LOT_SIZE\",\n\"maxQty\": \"10000000\",\n\"minQty\": \"1\",\n\"stepSize\": \"1\"\n},\n{\n\"filterType\": \"MARKET_LOT_SIZE\",\n\"maxQty\": \"590119\",\n\"minQty\": \"1\",\n\"stepSize\": \"1\"\n},\n{\n\"filterType\": \"MAX_NUM_ORDERS\",\n\"limit\": 200\n},\n{\n\"filterType\": \"MIN_NOTIONAL\",\n\"notional\": \"5.0\",\n},\n{\n\"filterType\": \"PERCENT_PRICE\",\n\"multiplierUp\": \"1.1500\",\n\"multiplierDown\": \"0.8500\",\n\"multiplierDecimal\": \"4\"\n}\n],\n\"orderTypes\": [\n\"LIMIT\",\n\"MARKET\",\n\"STOP\",\n\"STOP_MARKET\",\n\"TAKE_PROFIT\",\n\"TAKE_PROFIT_MARKET\",\n\"TRAILING_STOP_MARKET\"\n],\n\"timeInForce\": [\n\"GTC\",\n\"IOC\",\n\"FOK\",\n\"GTX\"\n],\n\"liquidationFee\": \"0.010000\", // liquidation fee rate\n\"marketTakeBound\": \"0.30\", // the max price difference rate( from mark price) a market order can make\n}\n],\n\"timezone\": \"UTC\"\n}"
+      }
+    ]
+  }
+}

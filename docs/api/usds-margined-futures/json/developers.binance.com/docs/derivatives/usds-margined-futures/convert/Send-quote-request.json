@@ -1,0 +1,224 @@
+{
+  "title": "Send Quote Request(USER_DATA)",
+  "meta_description": "API Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "API Description",
+      "level": 2,
+      "id": "api-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Request a quote for the requested token pairs"
+        }
+      ]
+    },
+    {
+      "title": "HTTP Request",
+      "level": 2,
+      "id": "http-request",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "POST `/fapi/v1/convert/getQuote`"
+        }
+      ]
+    },
+    {
+      "title": "Request Weight",
+      "level": 2,
+      "id": "request-weight",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "50(IP)"
+        },
+        {
+          "type": "paragraph",
+          "text": "360/hour，500/day"
+        }
+      ]
+    },
+    {
+      "title": "Request Parameters",
+      "level": 2,
+      "id": "request-parameters",
+      "blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "Name",
+            "Type",
+            "Mandatory",
+            "Description"
+          ],
+          "rows": [
+            [
+              "fromAsset",
+              "STRING",
+              "YES",
+              ""
+            ],
+            [
+              "toAsset",
+              "STRING",
+              "YES",
+              ""
+            ],
+            [
+              "fromAmount",
+              "DECIMAL",
+              "EITHER",
+              "When specified, it is the amount you will be debited after the conversion"
+            ],
+            [
+              "toAmount",
+              "DECIMAL",
+              "EITHER",
+              "When specified, it is the amount you will be credited after the conversion"
+            ],
+            [
+              "validTime",
+              "ENUM",
+              "NO",
+              "10s, default 10s"
+            ],
+            [
+              "recvWindow",
+              "LONG",
+              "NO",
+              "The value cannot be greater than 60000"
+            ],
+            [
+              "timestamp",
+              "LONG",
+              "YES",
+              ""
+            ]
+          ]
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Either fromAmount or toAmount should be sent",
+              "blocks": []
+            },
+            {
+              "text": "`quoteId` will be returned only if you have enough funds to convert",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "json",
+          "json": {
+            "quoteId": "12415572564",
+            "ratio": "38163.7",
+            "inverseRatio": "0.0000262",
+            "validTimestamp": 1623319461670,
+            "toAmount": "3816.37",
+            "fromAmount": "0.1"
+          }
+        }
+      ]
+    }
+  ],
+  "protocol": "reference",
+  "category": "convert",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "convert",
+    "Send-quote-request.html"
+  ],
+  "api_summary": {
+    "description": "Request a quote for the requested token pairs",
+    "http_method": "POST",
+    "path": "`/fapi/v1/convert/getQuote`",
+    "http_request": "POST `/fapi/v1/convert/getQuote`",
+    "request_weight": "50(IP)",
+    "request_parameters_tables": [
+      {
+        "type": "table",
+        "headers": [
+          "Name",
+          "Type",
+          "Mandatory",
+          "Description"
+        ],
+        "rows": [
+          [
+            "fromAsset",
+            "STRING",
+            "YES",
+            ""
+          ],
+          [
+            "toAsset",
+            "STRING",
+            "YES",
+            ""
+          ],
+          [
+            "fromAmount",
+            "DECIMAL",
+            "EITHER",
+            "When specified, it is the amount you will be debited after the conversion"
+          ],
+          [
+            "toAmount",
+            "DECIMAL",
+            "EITHER",
+            "When specified, it is the amount you will be credited after the conversion"
+          ],
+          [
+            "validTime",
+            "ENUM",
+            "NO",
+            "10s, default 10s"
+          ],
+          [
+            "recvWindow",
+            "LONG",
+            "NO",
+            "The value cannot be greater than 60000"
+          ],
+          [
+            "timestamp",
+            "LONG",
+            "YES",
+            ""
+          ]
+        ]
+      }
+    ],
+    "request_parameters_text": [],
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "json",
+        "json": {
+          "quoteId": "12415572564",
+          "ratio": "38163.7",
+          "inverseRatio": "0.0000262",
+          "validTimestamp": 1623319461670,
+          "toAmount": "3816.37",
+          "fromAmount": "0.1"
+        }
+      }
+    ]
+  }
+}

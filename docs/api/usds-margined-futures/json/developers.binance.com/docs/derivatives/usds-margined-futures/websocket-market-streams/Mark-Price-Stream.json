@@ -1,0 +1,86 @@
+{
+  "title": "Mark Price Stream",
+  "meta_description": "Stream Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "Stream Description",
+      "level": 2,
+      "id": "stream-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Mark price and funding rate for a single symbol pushed every 3 seconds or every second."
+        }
+      ]
+    },
+    {
+      "title": "URL PATH",
+      "level": 2,
+      "id": "url-path",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`/market`"
+        }
+      ]
+    },
+    {
+      "title": "Stream Name",
+      "level": 2,
+      "id": "stream-name",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`<symbol>@markPrice` or `<symbol>@markPrice@1s`"
+        }
+      ]
+    },
+    {
+      "title": "Update Speed",
+      "level": 2,
+      "id": "update-speed",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "3000ms or 1000ms"
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "{\n\"e\": \"markPriceUpdate\", // Event type\n\"E\": 1562305380000, // Event time\n\"s\": \"BTCUSDT\", // Symbol\n\"p\": \"11794.15000000\", // Mark price\n\"ap\": \"11794.15000000\", // Mark price moving average\n\"i\": \"11784.62659091\", // Index price\n\"P\": \"11784.25641265\", // Estimated Settle Price, only useful in the last hour before the settlement starts\n\"r\": \"0.00038167\", // Funding rate\n\"T\": 1562306400000 // Next funding time\n}"
+        }
+      ]
+    }
+  ],
+  "protocol": "websocket_stream",
+  "category": "websocket-market-streams",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "websocket-market-streams",
+    "Mark-Price-Stream.html"
+  ],
+  "api_summary": {
+    "description": "Mark price and funding rate for a single symbol pushed every 3 seconds or every second.",
+    "url_path": "`/market`",
+    "stream_name": "`<symbol>@markPrice` or `<symbol>@markPrice@1s`",
+    "update_speed": "3000ms or 1000ms",
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "{\n\"e\": \"markPriceUpdate\", // Event type\n\"E\": 1562305380000, // Event time\n\"s\": \"BTCUSDT\", // Symbol\n\"p\": \"11794.15000000\", // Mark price\n\"ap\": \"11794.15000000\", // Mark price moving average\n\"i\": \"11784.62659091\", // Index price\n\"P\": \"11784.25641265\", // Estimated Settle Price, only useful in the last hour before the settlement starts\n\"r\": \"0.00038167\", // Funding rate\n\"T\": 1562306400000 // Next funding time\n}"
+      }
+    ]
+  }
+}

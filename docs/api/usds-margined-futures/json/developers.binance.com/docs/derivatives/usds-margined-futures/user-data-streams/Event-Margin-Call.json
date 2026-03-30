@@ -1,0 +1,88 @@
+{
+  "title": "Event: Margin Call",
+  "meta_description": "Event Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "Event Description",
+      "level": 2,
+      "id": "event-description",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "When the user's position risk ratio is too high, this stream will be pushed.",
+              "blocks": []
+            },
+            {
+              "text": "This message is only used as risk guidance information and is not recommended for investment strategies.",
+              "blocks": []
+            },
+            {
+              "text": "In the case of a highly volatile market, there may be the possibility that the user's position has been liquidated at the same time when this stream is pushed out.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "URL PATH",
+      "level": 2,
+      "id": "url-path",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`/private`"
+        }
+      ]
+    },
+    {
+      "title": "Event Name",
+      "level": 2,
+      "id": "event-name",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`MARGIN_CALL`"
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "{\n\"e\":\"MARGIN_CALL\", // Event Type\n\"E\":1587727187525, // Event Time\n\"cw\":\"3.16812045\", // Cross Wallet Balance. Only pushed with crossed position margin call\n\"p\":[ // Position(s) of Margin Call\n{\n\"s\":\"ETHUSDT\", // Symbol\n\"ps\":\"LONG\", // Position Side\n\"pa\":\"1.327\", // Position Amount\n\"mt\":\"CROSSED\", // Margin Type\n\"iw\":\"0\", // Isolated Wallet (if isolated position)\n\"mp\":\"187.17127\", // Mark Price\n\"up\":\"-1.166074\", // Unrealized PnL\n\"mm\":\"1.614445\" // Maintenance Margin Required\n}\n]\n}"
+        }
+      ]
+    }
+  ],
+  "protocol": "user_data_stream",
+  "category": "user-data-streams",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "user-data-streams",
+    "Event-Margin-Call.html"
+  ],
+  "api_summary": {
+    "description": null,
+    "url_path": "`/private`",
+    "event_name": "`MARGIN_CALL`",
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "{\n\"e\":\"MARGIN_CALL\", // Event Type\n\"E\":1587727187525, // Event Time\n\"cw\":\"3.16812045\", // Cross Wallet Balance. Only pushed with crossed position margin call\n\"p\":[ // Position(s) of Margin Call\n{\n\"s\":\"ETHUSDT\", // Symbol\n\"ps\":\"LONG\", // Position Side\n\"pa\":\"1.327\", // Position Amount\n\"mt\":\"CROSSED\", // Margin Type\n\"iw\":\"0\", // Isolated Wallet (if isolated position)\n\"mp\":\"187.17127\", // Mark Price\n\"up\":\"-1.166074\", // Unrealized PnL\n\"mm\":\"1.614445\" // Maintenance Margin Required\n}\n]\n}"
+      }
+    ]
+  }
+}

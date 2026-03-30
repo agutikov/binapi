@@ -1,0 +1,139 @@
+{
+  "title": "Recent Trades List",
+  "meta_description": "API Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "API Description",
+      "level": 2,
+      "id": "api-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Get recent market trades"
+        }
+      ]
+    },
+    {
+      "title": "HTTP Request",
+      "level": 2,
+      "id": "http-request",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "GET `/fapi/v1/trades`"
+        }
+      ]
+    },
+    {
+      "title": "Request Weight",
+      "level": 2,
+      "id": "request-weight",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "5"
+        }
+      ]
+    },
+    {
+      "title": "Request Parameters",
+      "level": 2,
+      "id": "request-parameters",
+      "blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "Name",
+            "Type",
+            "Mandatory",
+            "Description"
+          ],
+          "rows": [
+            [
+              "symbol",
+              "STRING",
+              "YES",
+              ""
+            ],
+            [
+              "limit",
+              "INT",
+              "NO",
+              "Default 500; max 1000."
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "text": "Market trades means trades filled in the order book. Only market trades will be returned, which means the insurance fund trades and ADL trades won't be returned."
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "[\n{\n\"id\": 28457,\n\"price\": \"4.00000100\",\n\"qty\": \"12.00000000\",\n\"quoteQty\": \"48.00\",\n\"time\": 1499865549590,\n\"isBuyerMaker\": true,\n\"isRPITrade\": true,\n}\n]"
+        }
+      ]
+    }
+  ],
+  "protocol": "rest",
+  "category": "rest-api",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "market-data",
+    "rest-api",
+    "Recent-Trades-List.html"
+  ],
+  "api_summary": {
+    "description": "Get recent market trades",
+    "http_method": "GET",
+    "path": "`/fapi/v1/trades`",
+    "http_request": "GET `/fapi/v1/trades`",
+    "request_weight": "5",
+    "request_parameters_tables": [
+      {
+        "type": "table",
+        "headers": [
+          "Name",
+          "Type",
+          "Mandatory",
+          "Description"
+        ],
+        "rows": [
+          [
+            "symbol",
+            "STRING",
+            "YES",
+            ""
+          ],
+          [
+            "limit",
+            "INT",
+            "NO",
+            "Default 500; max 1000."
+          ]
+        ]
+      }
+    ],
+    "request_parameters_text": [
+      "Market trades means trades filled in the order book. Only market trades will be returned, which means the insurance fund trades and ADL trades won't be returned."
+    ],
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "[\n{\n\"id\": 28457,\n\"price\": \"4.00000100\",\n\"qty\": \"12.00000000\",\n\"quoteQty\": \"48.00\",\n\"time\": 1499865549590,\n\"isBuyerMaker\": true,\n\"isRPITrade\": true,\n}\n]"
+      }
+    ]
+  }
+}

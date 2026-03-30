@@ -1,0 +1,74 @@
+{
+  "title": "Event: Trade Lite Update",
+  "meta_description": "Event Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "Event Description",
+      "level": 2,
+      "id": "event-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Fast trade stream reduces data latency compared original `ORDER_TRADE_UPDATE` stream. However, it only pushes TRADE Execution Type, and fewer data fields."
+        }
+      ]
+    },
+    {
+      "title": "URL PATH",
+      "level": 2,
+      "id": "url-path",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`/private`"
+        }
+      ]
+    },
+    {
+      "title": "Event Name",
+      "level": 2,
+      "id": "event-name",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`TRADE_LITE`"
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "{\n\"e\":\"TRADE_LITE\", // Event Type\n\"E\":1721895408092, // Event Time\n\"T\":1721895408214, // Transaction Time\n\"s\":\"BTCUSDT\", // Symbol\n\"q\":\"0.001\", // Original Quantity\n\"p\":\"0\", // Original Price\n\"m\":false, // Is this trade the maker side?\n\"c\":\"z8hcUoOsqEdKMeKPSABslD\", // Client Order Id\n// special client order id:\n// starts with \"autoclose-\": liquidation order\n// \"adl_autoclose\": ADL auto close order\n// \"settlement_autoclose-\": settlement order for delisting or delivery\n\"S\":\"BUY\", // Side\n\"L\":\"64089.20\", // Last Filled Price\n\"l\":\"0.040\", // Order Last Filled Quantity\n\"t\":109100866, // Trade Id\n\"i\":8886774, // Order Id\n}"
+        }
+      ]
+    }
+  ],
+  "protocol": "user_data_stream",
+  "category": "user-data-streams",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "user-data-streams",
+    "Event-Trade-Lite.html"
+  ],
+  "api_summary": {
+    "description": "Fast trade stream reduces data latency compared original `ORDER_TRADE_UPDATE` stream. However, it only pushes TRADE Execution Type, and fewer data fields.",
+    "url_path": "`/private`",
+    "event_name": "`TRADE_LITE`",
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "{\n\"e\":\"TRADE_LITE\", // Event Type\n\"E\":1721895408092, // Event Time\n\"T\":1721895408214, // Transaction Time\n\"s\":\"BTCUSDT\", // Symbol\n\"q\":\"0.001\", // Original Quantity\n\"p\":\"0\", // Original Price\n\"m\":false, // Is this trade the maker side?\n\"c\":\"z8hcUoOsqEdKMeKPSABslD\", // Client Order Id\n// special client order id:\n// starts with \"autoclose-\": liquidation order\n// \"adl_autoclose\": ADL auto close order\n// \"settlement_autoclose-\": settlement order for delisting or delivery\n\"S\":\"BUY\", // Side\n\"L\":\"64089.20\", // Last Filled Price\n\"l\":\"0.040\", // Order Last Filled Quantity\n\"t\":109100866, // Trade Id\n\"i\":8886774, // Order Id\n}"
+      }
+    ]
+  }
+}

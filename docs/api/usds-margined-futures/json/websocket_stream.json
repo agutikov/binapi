@@ -1,0 +1,258 @@
+{
+  "protocol": "websocket_stream",
+  "pages": [
+    {
+      "title": "Aggregate Trade Streams",
+      "protocol": "websocket_stream",
+      "category": "websocket-market-streams",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Aggregate-Trade-Streams.json",
+      "http_method": null,
+      "path": null,
+      "method": null,
+      "stream_name": "`<symbol>@aggTrade`",
+      "event_name": null
+    },
+    {
+      "title": "All Book Tickers Stream",
+      "protocol": "websocket_stream",
+      "category": "websocket-market-streams",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/All-Book-Tickers-Stream.json",
+      "http_method": null,
+      "path": null,
+      "method": null,
+      "stream_name": "`!bookTicker`",
+      "event_name": null
+    },
+    {
+      "title": "All Market Liquidation Order Streams",
+      "protocol": "websocket_stream",
+      "category": "websocket-market-streams",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/All-Market-Liquidation-Order-Streams.json",
+      "http_method": null,
+      "path": null,
+      "method": null,
+      "stream_name": "`!forceOrder@arr`",
+      "event_name": null
+    },
+    {
+      "title": "All Market Mini Tickers Stream",
+      "protocol": "websocket_stream",
+      "category": "websocket-market-streams",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/All-Market-Mini-Tickers-Stream.json",
+      "http_method": null,
+      "path": null,
+      "method": null,
+      "stream_name": "`!miniTicker@arr`",
+      "event_name": null
+    },
+    {
+      "title": "All Market Tickers Streams",
+      "protocol": "websocket_stream",
+      "category": "websocket-market-streams",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/All-Market-Tickers-Streams.json",
+      "http_method": null,
+      "path": null,
+      "method": null,
+      "stream_name": "`!ticker@arr`",
+      "event_name": null
+    },
+    {
+      "title": "Composite Index Symbol Information Streams",
+      "protocol": "websocket_stream",
+      "category": "websocket-market-streams",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Composite-Index-Symbol-Information-Streams.json",
+      "http_method": null,
+      "path": null,
+      "method": null,
+      "stream_name": "`<symbol>@compositeIndex`",
+      "event_name": null
+    },
+    {
+      "title": "Continuous Contract Kline/Candlestick Streams",
+      "protocol": "websocket_stream",
+      "category": "websocket-market-streams",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Continuous-Contract-Kline-Candlestick-Streams.json",
+      "http_method": null,
+      "path": null,
+      "method": null,
+      "stream_name": "`<pair>_<contractType>@continuousKline_<interval>`",
+      "event_name": null
+    },
+    {
+      "title": "Contract Info Stream",
+      "protocol": "websocket_stream",
+      "category": "websocket-market-streams",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Contract-Info-Stream.json",
+      "http_method": null,
+      "path": null,
+      "method": null,
+      "stream_name": "`!contractInfo`",
+      "event_name": null
+    },
+    {
+      "title": "RPI Diff. Book Depth Streams",
+      "protocol": "websocket_stream",
+      "category": "websocket-market-streams",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Diff-Book-Depth-Streams-RPI.json",
+      "http_method": null,
+      "path": null,
+      "method": null,
+      "stream_name": "`<symbol>@rpiDepth@500ms`",
+      "event_name": null
+    },
+    {
+      "title": "Diff. Book Depth Streams",
+      "protocol": "websocket_stream",
+      "category": "websocket-market-streams",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Diff-Book-Depth-Streams.json",
+      "http_method": null,
+      "path": null,
+      "method": null,
+      "stream_name": "`<symbol>@depth` OR `<symbol>@depth@500ms` OR `<symbol>@depth@100ms`",
+      "event_name": null
+    },
+    {
+      "title": "How to manage a local order book correctly",
+      "protocol": "websocket_stream",
+      "category": "websocket-market-streams",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/How-to-manage-a-local-order-book-correctly.json",
+      "http_method": null,
+      "path": null,
+      "method": null,
+      "stream_name": null,
+      "event_name": null
+    },
+    {
+      "title": "Important WebSocket Change Notice — Base URL Split & Migration",
+      "protocol": "websocket_stream",
+      "category": "websocket-market-streams",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Important-WebSocket-Change-Notice.json",
+      "http_method": null,
+      "path": null,
+      "method": null,
+      "stream_name": null,
+      "event_name": null
+    },
+    {
+      "title": "Individual Symbol Book Ticker Streams",
+      "protocol": "websocket_stream",
+      "category": "websocket-market-streams",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Individual-Symbol-Book-Ticker-Streams.json",
+      "http_method": null,
+      "path": null,
+      "method": null,
+      "stream_name": "`<symbol>@bookTicker`",
+      "event_name": null
+    },
+    {
+      "title": "Individual Symbol Mini Ticker Stream",
+      "protocol": "websocket_stream",
+      "category": "websocket-market-streams",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Individual-Symbol-Mini-Ticker-Stream.json",
+      "http_method": null,
+      "path": null,
+      "method": null,
+      "stream_name": "`<symbol>@miniTicker`",
+      "event_name": null
+    },
+    {
+      "title": "Individual Symbol Ticker Streams",
+      "protocol": "websocket_stream",
+      "category": "websocket-market-streams",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Individual-Symbol-Ticker-Streams.json",
+      "http_method": null,
+      "path": null,
+      "method": null,
+      "stream_name": "`<symbol>@ticker`",
+      "event_name": null
+    },
+    {
+      "title": "Kline/Candlestick Streams",
+      "protocol": "websocket_stream",
+      "category": "websocket-market-streams",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Kline-Candlestick-Streams.json",
+      "http_method": null,
+      "path": null,
+      "method": null,
+      "stream_name": "`<symbol>@kline_<interval>`",
+      "event_name": null
+    },
+    {
+      "title": "Liquidation Order Streams",
+      "protocol": "websocket_stream",
+      "category": "websocket-market-streams",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Liquidation-Order-Streams.json",
+      "http_method": null,
+      "path": null,
+      "method": null,
+      "stream_name": "`<symbol>@forceOrder`",
+      "event_name": null
+    },
+    {
+      "title": "Live Subscribing/Unsubscribing to streams",
+      "protocol": "websocket_stream",
+      "category": "websocket-market-streams",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Live-Subscribing-Unsubscribing-to-streams.json",
+      "http_method": null,
+      "path": null,
+      "method": null,
+      "stream_name": null,
+      "event_name": null
+    },
+    {
+      "title": "Mark Price Stream for All market",
+      "protocol": "websocket_stream",
+      "category": "websocket-market-streams",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Mark-Price-Stream-for-All-market.json",
+      "http_method": null,
+      "path": null,
+      "method": null,
+      "stream_name": "`!markPrice@arr` or `!markPrice@arr@1s`",
+      "event_name": null
+    },
+    {
+      "title": "Mark Price Stream",
+      "protocol": "websocket_stream",
+      "category": "websocket-market-streams",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Mark-Price-Stream.json",
+      "http_method": null,
+      "path": null,
+      "method": null,
+      "stream_name": "`<symbol>@markPrice` or `<symbol>@markPrice@1s`",
+      "event_name": null
+    },
+    {
+      "title": "Multi-Assets Mode Asset Index",
+      "protocol": "websocket_stream",
+      "category": "websocket-market-streams",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Multi-Assets-Mode-Asset-Index.json",
+      "http_method": null,
+      "path": null,
+      "method": null,
+      "stream_name": "`!assetIndex@arr` OR `<assetSymbol>@assetIndex`",
+      "event_name": null
+    },
+    {
+      "title": "Partial Book Depth Streams",
+      "protocol": "websocket_stream",
+      "category": "websocket-market-streams",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Partial-Book-Depth-Streams.json",
+      "http_method": null,
+      "path": null,
+      "method": null,
+      "stream_name": "`<symbol>@depth<levels>` OR `<symbol>@depth<levels>@500ms` OR `<symbol>@depth<levels>@100ms`.",
+      "event_name": null
+    },
+    {
+      "title": "Trading Session Stream",
+      "protocol": "websocket_stream",
+      "category": "websocket-market-streams",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Trading-Session-Stream.json",
+      "http_method": null,
+      "path": null,
+      "method": null,
+      "stream_name": "`tradingSession`",
+      "event_name": null
+    }
+  ]
+}

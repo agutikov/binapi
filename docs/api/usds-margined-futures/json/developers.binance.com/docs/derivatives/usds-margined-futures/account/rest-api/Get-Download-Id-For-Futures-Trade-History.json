@@ -1,0 +1,163 @@
+{
+  "title": "Get Download Id For Futures Trade History (USER_DATA)",
+  "meta_description": "API Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "API Description",
+      "level": 2,
+      "id": "api-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Get download id for futures trade history"
+        }
+      ]
+    },
+    {
+      "title": "HTTP Request",
+      "level": 2,
+      "id": "http-request",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "GET `/fapi/v1/trade/asyn`"
+        }
+      ]
+    },
+    {
+      "title": "Request Weight",
+      "level": 2,
+      "id": "request-weight",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "1000"
+        }
+      ]
+    },
+    {
+      "title": "Request Parameters",
+      "level": 2,
+      "id": "request-parameters",
+      "blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "Name",
+            "Type",
+            "Mandatory",
+            "Description"
+          ],
+          "rows": [
+            [
+              "startTime",
+              "LONG",
+              "YES",
+              "Timestamp in ms"
+            ],
+            [
+              "endTime",
+              "LONG",
+              "YES",
+              "Timestamp in ms"
+            ],
+            [
+              "recvWindow",
+              "LONG",
+              "NO",
+              ""
+            ],
+            [
+              "timestamp",
+              "LONG",
+              "YES",
+              ""
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "text": "Request Limitation is 5 times per month, shared by front end download page and rest api The time between `startTime` and `endTime` can not be longer than 1 year"
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "{\n\"avgCostTimestampOfLast30d\":7241837, // Average time taken for data download in the past 30 days\n\"downloadId\":\"546975389218332672\",\n}"
+        }
+      ]
+    }
+  ],
+  "protocol": "rest",
+  "category": "rest-api",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "account",
+    "rest-api",
+    "Get-Download-Id-For-Futures-Trade-History.html"
+  ],
+  "api_summary": {
+    "description": "Get download id for futures trade history",
+    "http_method": "GET",
+    "path": "`/fapi/v1/trade/asyn`",
+    "http_request": "GET `/fapi/v1/trade/asyn`",
+    "request_weight": "1000",
+    "request_parameters_tables": [
+      {
+        "type": "table",
+        "headers": [
+          "Name",
+          "Type",
+          "Mandatory",
+          "Description"
+        ],
+        "rows": [
+          [
+            "startTime",
+            "LONG",
+            "YES",
+            "Timestamp in ms"
+          ],
+          [
+            "endTime",
+            "LONG",
+            "YES",
+            "Timestamp in ms"
+          ],
+          [
+            "recvWindow",
+            "LONG",
+            "NO",
+            ""
+          ],
+          [
+            "timestamp",
+            "LONG",
+            "YES",
+            ""
+          ]
+        ]
+      }
+    ],
+    "request_parameters_text": [
+      "Request Limitation is 5 times per month, shared by front end download page and rest api The time between `startTime` and `endTime` can not be longer than 1 year"
+    ],
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "{\n\"avgCostTimestampOfLast30d\":7241837, // Average time taken for data download in the past 30 days\n\"downloadId\":\"546975389218332672\",\n}"
+      }
+    ]
+  }
+}

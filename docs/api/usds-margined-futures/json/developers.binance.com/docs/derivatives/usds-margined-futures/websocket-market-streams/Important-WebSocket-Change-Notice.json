@@ -1,0 +1,383 @@
+{
+  "title": "Important WebSocket Change Notice — Base URL Split & Migration",
+  "meta_description": "Background",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "Background",
+      "level": 2,
+      "id": "background",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Due to sustained heavy traffic, we have upgraded the WebSocket URL structure by introducing a root plus dedicated entry points for Public / Market / Private traffic. This separation improves stability, scalability, and operational isolation across different data types."
+        }
+      ]
+    },
+    {
+      "title": "What’s New",
+      "level": 2,
+      "id": "whats-new",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "3 new WebSocket base URLs (Root + routed paths) Public (high-frequency public market data): `wss://fstream.binance.com/public` Market (regular market data): `wss://fstream.binance.com/market` Private (user data): `wss://fstream.binance.com/private`",
+              "blocks": [
+                {
+                  "type": "list",
+                  "ordered": false,
+                  "items": [
+                    {
+                      "text": "Public (high-frequency public market data): `wss://fstream.binance.com/public`",
+                      "blocks": []
+                    },
+                    {
+                      "text": "Market (regular market data): `wss://fstream.binance.com/market`",
+                      "blocks": []
+                    },
+                    {
+                      "text": "Private (user data): `wss://fstream.binance.com/private`",
+                      "blocks": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "text": "Two access modes are supported `ws` mode: streams are composed in the URL path `stream` mode: streams are passed via query (e.g., `?streams=`) — private uses `listenKey/events`",
+              "blocks": [
+                {
+                  "type": "list",
+                  "ordered": false,
+                  "items": [
+                    {
+                      "text": "`ws` mode: streams are composed in the URL path",
+                      "blocks": []
+                    },
+                    {
+                      "text": "`stream` mode: streams are passed via query (e.g., `?streams=`) — private uses `listenKey/events`",
+                      "blocks": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "text": "Combined streams remain supported",
+              "blocks": []
+            },
+            {
+              "text": "Private supports listenKey + events subscription (multiple listenKeys and multiple events)",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Examples",
+      "level": 2,
+      "id": "examples",
+      "blocks": []
+    },
+    {
+      "title": "Public / Market: combined subscriptions",
+      "level": 3,
+      "id": "public--market-combined-subscriptions",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "`ws` mode (path-based) `wss://fstream.binance.com/public/ws/bnbusdt@depth/ethusdt@depth` `wss://fstream.binance.com/market/ws/btcusdt@aggTrade/ethusdt@aggTrade`",
+              "blocks": [
+                {
+                  "type": "list",
+                  "ordered": false,
+                  "items": [
+                    {
+                      "text": "`wss://fstream.binance.com/public/ws/bnbusdt@depth/ethusdt@depth`",
+                      "blocks": []
+                    },
+                    {
+                      "text": "`wss://fstream.binance.com/market/ws/btcusdt@aggTrade/ethusdt@aggTrade`",
+                      "blocks": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "text": "`stream` mode (query-based) `wss://fstream.binance.com/market/stream?streams=bnbusdt@aggTrade/btcusdt@markPrice` `wss://fstream.binance.com/public/stream?streams=btcusdt@depth/ethusdt@depth`",
+              "blocks": [
+                {
+                  "type": "list",
+                  "ordered": false,
+                  "items": [
+                    {
+                      "text": "`wss://fstream.binance.com/market/stream?streams=bnbusdt@aggTrade/btcusdt@markPrice`",
+                      "blocks": []
+                    },
+                    {
+                      "text": "`wss://fstream.binance.com/public/stream?streams=btcusdt@depth/ethusdt@depth`",
+                      "blocks": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Private: listenKey & events",
+      "level": 3,
+      "id": "private-listenkey--events",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "`ws` mode (listenKey + events) `wss://fstream.binance.com/private/ws?listenKey=<listenKey1>&events=ORDER_TRADE_UPDATE/ACCOUNT_UPDATE`",
+              "blocks": [
+                {
+                  "type": "list",
+                  "ordered": false,
+                  "items": [
+                    {
+                      "text": "`wss://fstream.binance.com/private/ws?listenKey=<listenKey1>&events=ORDER_TRADE_UPDATE/ACCOUNT_UPDATE`",
+                      "blocks": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "text": "`stream` mode (multiple listenKeys + events) `wss://fstream.binance.com/private/stream?listenKey=<listenKey1>&events=ORDER_TRADE_UPDATE&listenKey=<listenKey2>&events=ACCOUNT_UPDATE`",
+              "blocks": [
+                {
+                  "type": "list",
+                  "ordered": false,
+                  "items": [
+                    {
+                      "text": "`wss://fstream.binance.com/private/stream?listenKey=<listenKey1>&events=ORDER_TRADE_UPDATE&listenKey=<listenKey2>&events=ACCOUNT_UPDATE`",
+                      "blocks": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "blockquote",
+          "text": "JSON `SUBSCRIBE` is also supported; params may include market/public streams and listenKey event items."
+        }
+      ]
+    },
+    {
+      "title": "Endpoint & Stream Mapping (Excerpt)",
+      "level": 2,
+      "id": "endpoint--stream-mapping-excerpt",
+      "blocks": []
+    },
+    {
+      "title": "Public (high-frequency public data)",
+      "level": 3,
+      "id": "public-high-frequency-public-data",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Individual Symbol Book Ticker: `<symbol>@bookTicker`",
+              "blocks": []
+            },
+            {
+              "text": "All Book Tickers: `!bookTicker`",
+              "blocks": []
+            },
+            {
+              "text": "Partial Book Depth: `<symbol>@depth<levels>` (supports `@500ms` / `@100ms`)",
+              "blocks": []
+            },
+            {
+              "text": "Diff. Book Depth: `<symbol>@depth` (supports `@500ms` / `@100ms`)",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Market (regular market data)",
+      "level": 3,
+      "id": "market-regular-market-data",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Aggregate Trades: `<symbol>@aggTrade`",
+              "blocks": []
+            },
+            {
+              "text": "Mark Price: `<symbol>@markPrice` or `<symbol>@markPrice@1s`",
+              "blocks": []
+            },
+            {
+              "text": "Mark Price (All market): `!markPrice@arr` or `!markPrice@arr@1s`",
+              "blocks": []
+            },
+            {
+              "text": "Kline/Candlestick: `<symbol>@kline_<interval>`",
+              "blocks": []
+            },
+            {
+              "text": "Continuous Kline: `<pair>_<contractType>@continuousKline_<interval>`",
+              "blocks": []
+            },
+            {
+              "text": "Mini Ticker: `<symbol>@miniTicker`; All: `!miniTicker@arr`",
+              "blocks": []
+            },
+            {
+              "text": "Ticker: `<symbol>@ticker`; All: `!ticker@arr`",
+              "blocks": []
+            },
+            {
+              "text": "Liquidations: `<symbol>@forceOrder`; All: `!forceOrder@arr`",
+              "blocks": []
+            },
+            {
+              "text": "Composite Index: `<symbol>@compositeIndex`",
+              "blocks": []
+            },
+            {
+              "text": "Contract Info: `!contractInfo`",
+              "blocks": []
+            },
+            {
+              "text": "Multi-Assets Mode Asset Index: `!assetIndex@arr` or `<assetSymbol>@assetIndex`",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Compatibility & Migration Guidance",
+      "level": 2,
+      "id": "compatibility--migration-guidance",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Legacy URLs will remain available during a transition period, but users are strongly encouraged to migrate to the new `/public`, `/market`, `/private` endpoints for improved connection quality and clearer traffic separation.",
+              "blocks": []
+            },
+            {
+              "text": "Recommended migration order: High-frequency order book & core public feeds → `/public` Regular market feeds (markPrice/kline/ticker, etc.) → `/market` User data feeds (listenKey-based) → `/private`",
+              "blocks": [
+                {
+                  "type": "list",
+                  "ordered": true,
+                  "items": [
+                    {
+                      "text": "High-frequency order book & core public feeds → `/public`",
+                      "blocks": []
+                    },
+                    {
+                      "text": "Regular market feeds (markPrice/kline/ticker, etc.) → `/market`",
+                      "blocks": []
+                    },
+                    {
+                      "text": "User data feeds (listenKey-based) → `/private`",
+                      "blocks": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "text": "Client / SDK recommendations: Split connections by traffic type (separate public/market/private sessions) to reduce per-connection load and jitter. For combined subscriptions, prefer `stream` mode (`?streams=`; private uses listenKey/events).",
+              "blocks": [
+                {
+                  "type": "list",
+                  "ordered": false,
+                  "items": [
+                    {
+                      "text": "Split connections by traffic type (separate public/market/private sessions) to reduce per-connection load and jitter.",
+                      "blocks": []
+                    },
+                    {
+                      "text": "For combined subscriptions, prefer `stream` mode (`?streams=`; private uses listenKey/events).",
+                      "blocks": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Action Required",
+      "level": 2,
+      "id": "action-required",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Update your WebSocket configuration: Switch base URLs to `/public`, `/market`, `/private` Ensure each stream is subscribed via the correct endpoint category",
+              "blocks": [
+                {
+                  "type": "list",
+                  "ordered": false,
+                  "items": [
+                    {
+                      "text": "Switch base URLs to `/public`, `/market`, `/private`",
+                      "blocks": []
+                    },
+                    {
+                      "text": "Ensure each stream is subscribed via the correct endpoint category",
+                      "blocks": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "text": "After completing migration, gradually reduce reliance on legacy URLs to avoid peak-time connection instability.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "protocol": "websocket_stream",
+  "category": "websocket-market-streams",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "websocket-market-streams",
+    "Important-WebSocket-Change-Notice.html"
+  ],
+  "api_summary": {}
+}

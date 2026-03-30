@@ -1,0 +1,336 @@
+{
+  "title": "Event: Order Update",
+  "meta_description": "Event Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "Event Description",
+      "level": 2,
+      "id": "event-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "When new order created, order status changed will push such event. event type is `ORDER_TRADE_UPDATE`."
+        }
+      ]
+    },
+    {
+      "title": "URL PATH",
+      "level": 2,
+      "id": "url-path",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`/private`"
+        },
+        {
+          "type": "paragraph",
+          "text": "Side"
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "BUY",
+              "blocks": []
+            },
+            {
+              "text": "SELL",
+              "blocks": []
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Order Type"
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "LIMIT",
+              "blocks": []
+            },
+            {
+              "text": "MARKET",
+              "blocks": []
+            },
+            {
+              "text": "STOP",
+              "blocks": []
+            },
+            {
+              "text": "STOP_MARKET",
+              "blocks": []
+            },
+            {
+              "text": "TAKE_PROFIT",
+              "blocks": []
+            },
+            {
+              "text": "TAKE_PROFIT_MARKET",
+              "blocks": []
+            },
+            {
+              "text": "TRAILING_STOP_MARKET",
+              "blocks": []
+            },
+            {
+              "text": "LIQUIDATION",
+              "blocks": []
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Execution Type"
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "NEW",
+              "blocks": []
+            },
+            {
+              "text": "CANCELED",
+              "blocks": []
+            },
+            {
+              "text": "CALCULATED - Liquidation Execution",
+              "blocks": []
+            },
+            {
+              "text": "EXPIRED",
+              "blocks": []
+            },
+            {
+              "text": "TRADE",
+              "blocks": []
+            },
+            {
+              "text": "AMENDMENT - Order Modified",
+              "blocks": []
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Order Status"
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "NEW",
+              "blocks": []
+            },
+            {
+              "text": "PARTIALLY_FILLED",
+              "blocks": []
+            },
+            {
+              "text": "FILLED",
+              "blocks": []
+            },
+            {
+              "text": "CANCELED",
+              "blocks": []
+            },
+            {
+              "text": "EXPIRED",
+              "blocks": []
+            },
+            {
+              "text": "EXPIRED_IN_MATCH",
+              "blocks": []
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Time in force"
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "GTC",
+              "blocks": []
+            },
+            {
+              "text": "IOC",
+              "blocks": []
+            },
+            {
+              "text": "FOK",
+              "blocks": []
+            },
+            {
+              "text": "GTX",
+              "blocks": []
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Working Type"
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "MARK_PRICE",
+              "blocks": []
+            },
+            {
+              "text": "CONTRACT_PRICE",
+              "blocks": []
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Liquidation and ADL:"
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "If user gets liquidated due to insufficient margin balance:",
+              "blocks": [
+                {
+                  "type": "list",
+                  "ordered": false,
+                  "items": [
+                    {
+                      "text": "`c` shows as \"autoclose-XXX\"，`X` shows as \"NEW\"",
+                      "blocks": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "text": "If user has enough margin balance but gets ADL:",
+              "blocks": [
+                {
+                  "type": "list",
+                  "ordered": false,
+                  "items": [
+                    {
+                      "text": "`c` shows as “adl_autoclose”，`X` shows as “NEW”",
+                      "blocks": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Expiry Reason"
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "`0`: None, the default value",
+              "blocks": []
+            },
+            {
+              "text": "`1`: Order has expired to prevent users from inadvertently trading against themselves",
+              "blocks": []
+            },
+            {
+              "text": "`2`: IOC order could not be filled completely, remaining quantity is canceled",
+              "blocks": []
+            },
+            {
+              "text": "`3`: IOC order could not be filled completely to prevent users from inadvertently trading against themselves, remaining quantity is canceled",
+              "blocks": []
+            },
+            {
+              "text": "`4`: Order has been canceled, as it's knocked out by another higher priority RO (market) order or reversed positions would be opened",
+              "blocks": []
+            },
+            {
+              "text": "`5`: Order has expired when the account was liquidated",
+              "blocks": []
+            },
+            {
+              "text": "`6`: Order has expired as GTE condition unsatisfied",
+              "blocks": []
+            },
+            {
+              "text": "`7`: Order has been canceled as the symbol is delisted",
+              "blocks": []
+            },
+            {
+              "text": "`8`: The initial order has expired after the stop order is triggered",
+              "blocks": []
+            },
+            {
+              "text": "`9`: Market order could not be filled completely, remaining quantity is canceled",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Event Name",
+      "level": 2,
+      "id": "event-name",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`ORDER_TRADE_UPDATE`"
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "{\n\"e\":\"ORDER_TRADE_UPDATE\", // Event Type\n\"E\":1568879465651, // Event Time\n\"T\":1568879465650, // Transaction Time\n\"o\":{\n\"s\":\"BTCUSDT\", // Symbol\n\"c\":\"TEST\", // Client Order Id\n// special client order id:\n// starts with \"autoclose-\": liquidation order\n// \"adl_autoclose\": ADL auto close order\n// \"settlement_autoclose-\": settlement order for delisting or delivery\n\"S\":\"SELL\", // Side\n\"o\":\"TRAILING_STOP_MARKET\", // Order Type\n\"f\":\"GTC\", // Time in Force\n\"q\":\"0.001\", // Original Quantity\n\"p\":\"0\", // Original Price\n\"ap\":\"0\", // Average Price\n\"sp\":\"7103.04\", // Stop Price. Please ignore with TRAILING_STOP_MARKET order\n\"x\":\"NEW\", // Execution Type\n\"X\":\"NEW\", // Order Status\n\"i\":8886774, // Order Id\n\"l\":\"0\", // Order Last Filled Quantity\n\"z\":\"0\", // Order Filled Accumulated Quantity\n\"L\":\"0\", // Last Filled Price\n\"N\":\"USDT\", // Commission Asset\n\"n\":\"0\", // Commission\n\"T\":1568879465650, // Order Trade Time\n\"t\":0, // Trade Id\n\"b\":\"0\", // Bids Notional\n\"a\":\"9.91\", // Ask Notional\n\"m\":false, // Is this trade the maker side?\n\"R\":false, // Is this reduce only\n\"wt\":\"CONTRACT_PRICE\", // Stop Price Working Type\n\"ot\":\"TRAILING_STOP_MARKET\", // Original Order Type\n\"ps\":\"LONG\", // Position Side\n\"cp\":false, // If Close-All, pushed with conditional order\n\"AP\":\"7476.89\", // Activation Price, only puhed with TRAILING_STOP_MARKET order\n\"cr\":\"5.0\", // Callback Rate, only puhed with TRAILING_STOP_MARKET order\n\"pP\": false, // If price protection is turned on\n\"si\": 0, // ignore\n\"ss\": 0, // ignore\n\"rp\":\"0\", // Realized Profit of the trade\n\"V\":\"EXPIRE_TAKER\", // STP mode\n\"pm\":\"OPPONENT\", // Price match mode\n\"gtd\":0, // TIF GTD order auto cancel time\n\"er\":\"0\" // Expiry Reason\n}\n}"
+        }
+      ]
+    }
+  ],
+  "protocol": "user_data_stream",
+  "category": "user-data-streams",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "user-data-streams",
+    "Event-Order-Update.html"
+  ],
+  "api_summary": {
+    "description": "When new order created, order status changed will push such event. event type is `ORDER_TRADE_UPDATE`.",
+    "url_path": "`/private`",
+    "event_name": "`ORDER_TRADE_UPDATE`",
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "{\n\"e\":\"ORDER_TRADE_UPDATE\", // Event Type\n\"E\":1568879465651, // Event Time\n\"T\":1568879465650, // Transaction Time\n\"o\":{\n\"s\":\"BTCUSDT\", // Symbol\n\"c\":\"TEST\", // Client Order Id\n// special client order id:\n// starts with \"autoclose-\": liquidation order\n// \"adl_autoclose\": ADL auto close order\n// \"settlement_autoclose-\": settlement order for delisting or delivery\n\"S\":\"SELL\", // Side\n\"o\":\"TRAILING_STOP_MARKET\", // Order Type\n\"f\":\"GTC\", // Time in Force\n\"q\":\"0.001\", // Original Quantity\n\"p\":\"0\", // Original Price\n\"ap\":\"0\", // Average Price\n\"sp\":\"7103.04\", // Stop Price. Please ignore with TRAILING_STOP_MARKET order\n\"x\":\"NEW\", // Execution Type\n\"X\":\"NEW\", // Order Status\n\"i\":8886774, // Order Id\n\"l\":\"0\", // Order Last Filled Quantity\n\"z\":\"0\", // Order Filled Accumulated Quantity\n\"L\":\"0\", // Last Filled Price\n\"N\":\"USDT\", // Commission Asset\n\"n\":\"0\", // Commission\n\"T\":1568879465650, // Order Trade Time\n\"t\":0, // Trade Id\n\"b\":\"0\", // Bids Notional\n\"a\":\"9.91\", // Ask Notional\n\"m\":false, // Is this trade the maker side?\n\"R\":false, // Is this reduce only\n\"wt\":\"CONTRACT_PRICE\", // Stop Price Working Type\n\"ot\":\"TRAILING_STOP_MARKET\", // Original Order Type\n\"ps\":\"LONG\", // Position Side\n\"cp\":false, // If Close-All, pushed with conditional order\n\"AP\":\"7476.89\", // Activation Price, only puhed with TRAILING_STOP_MARKET order\n\"cr\":\"5.0\", // Callback Rate, only puhed with TRAILING_STOP_MARKET order\n\"pP\": false, // If price protection is turned on\n\"si\": 0, // ignore\n\"ss\": 0, // ignore\n\"rp\":\"0\", // Realized Profit of the trade\n\"V\":\"EXPIRE_TAKER\", // STP mode\n\"pm\":\"OPPONENT\", // Price match mode\n\"gtd\":0, // TIF GTD order auto cancel time\n\"er\":\"0\" // Expiry Reason\n}\n}"
+      }
+    ]
+  }
+}

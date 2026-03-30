@@ -1,0 +1,181 @@
+{
+  "protocol": "user_data_stream",
+  "pages": [
+    {
+      "title": "Close User Data Stream (USER_STREAM)",
+      "protocol": "user_data_stream",
+      "category": "user-data-streams",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Close-User-Data-Stream-Wsp.json",
+      "http_method": null,
+      "path": null,
+      "method": "`userDataStream.stop`",
+      "stream_name": null,
+      "event_name": null
+    },
+    {
+      "title": "Close User Data Stream (USER_STREAM)",
+      "protocol": "user_data_stream",
+      "category": "user-data-streams",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Close-User-Data-Stream.json",
+      "http_method": "DELETE",
+      "path": "`/fapi/v1/listenKey`",
+      "method": null,
+      "stream_name": null,
+      "event_name": null
+    },
+    {
+      "title": "Event: Account Configuration Update previous Leverage Update",
+      "protocol": "user_data_stream",
+      "category": "user-data-streams",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Account-Configuration-Update-previous-Leverage-Update.json",
+      "http_method": null,
+      "path": null,
+      "method": null,
+      "stream_name": null,
+      "event_name": "`ACCOUNT_CONFIG_UPDATE`"
+    },
+    {
+      "title": "Event: Algo Order Update",
+      "protocol": "user_data_stream",
+      "category": "user-data-streams",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Algo-Order-Update.json",
+      "http_method": null,
+      "path": null,
+      "method": null,
+      "stream_name": null,
+      "event_name": "`ALGO_UPDATE`"
+    },
+    {
+      "title": "Event: Balance and Position Update",
+      "protocol": "user_data_stream",
+      "category": "user-data-streams",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Balance-and-Position-Update.json",
+      "http_method": null,
+      "path": null,
+      "method": null,
+      "stream_name": null,
+      "event_name": "`ACCOUNT_UPDATE`"
+    },
+    {
+      "title": "Event: Conditional_Order_Trigger_Reject",
+      "protocol": "user_data_stream",
+      "category": "user-data-streams",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Conditional-Order-Trigger-Reject.json",
+      "http_method": null,
+      "path": null,
+      "method": null,
+      "stream_name": null,
+      "event_name": "`CONDITIONAL_ORDER_TRIGGER_REJECT`"
+    },
+    {
+      "title": "Event: GRID_UPDATE",
+      "protocol": "user_data_stream",
+      "category": "user-data-streams",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-GRID-UPDATE.json",
+      "http_method": null,
+      "path": null,
+      "method": null,
+      "stream_name": null,
+      "event_name": "`GRID_UPDATE`"
+    },
+    {
+      "title": "Event: Margin Call",
+      "protocol": "user_data_stream",
+      "category": "user-data-streams",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Margin-Call.json",
+      "http_method": null,
+      "path": null,
+      "method": null,
+      "stream_name": null,
+      "event_name": "`MARGIN_CALL`"
+    },
+    {
+      "title": "Event: Order Update",
+      "protocol": "user_data_stream",
+      "category": "user-data-streams",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Order-Update.json",
+      "http_method": null,
+      "path": null,
+      "method": null,
+      "stream_name": null,
+      "event_name": "`ORDER_TRADE_UPDATE`"
+    },
+    {
+      "title": "Event: STRATEGY_UPDATE",
+      "protocol": "user_data_stream",
+      "category": "user-data-streams",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-STRATEGY-UPDATE.json",
+      "http_method": null,
+      "path": null,
+      "method": null,
+      "stream_name": null,
+      "event_name": "`STRATEGY_UPDATE`"
+    },
+    {
+      "title": "Event: Trade Lite Update",
+      "protocol": "user_data_stream",
+      "category": "user-data-streams",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Trade-Lite.json",
+      "http_method": null,
+      "path": null,
+      "method": null,
+      "stream_name": null,
+      "event_name": "`TRADE_LITE`"
+    },
+    {
+      "title": "Event: User Data Stream Expired",
+      "protocol": "user_data_stream",
+      "category": "user-data-streams",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-User-Data-Stream-Expired.json",
+      "http_method": null,
+      "path": null,
+      "method": null,
+      "stream_name": null,
+      "event_name": "`listenKeyExpired`"
+    },
+    {
+      "title": "Keepalive User Data Stream (USER_STREAM)",
+      "protocol": "user_data_stream",
+      "category": "user-data-streams",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Keepalive-User-Data-Stream-Wsp.json",
+      "http_method": null,
+      "path": null,
+      "method": "`userDataStream.ping`",
+      "stream_name": null,
+      "event_name": null
+    },
+    {
+      "title": "Keepalive User Data Stream (USER_STREAM)",
+      "protocol": "user_data_stream",
+      "category": "user-data-streams",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Keepalive-User-Data-Stream.json",
+      "http_method": "PUT",
+      "path": "`/fapi/v1/listenKey`",
+      "method": null,
+      "stream_name": null,
+      "event_name": null
+    },
+    {
+      "title": "Start User Data Stream (USER_STREAM)",
+      "protocol": "user_data_stream",
+      "category": "user-data-streams",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Start-User-Data-Stream-Wsp.json",
+      "http_method": null,
+      "path": null,
+      "method": "`userDataStream.start`",
+      "stream_name": null,
+      "event_name": null
+    },
+    {
+      "title": "Start User Data Stream (USER_STREAM)",
+      "protocol": "user_data_stream",
+      "category": "user-data-streams",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Start-User-Data-Stream.json",
+      "http_method": "POST",
+      "path": "`/fapi/v1/listenKey`",
+      "method": null,
+      "stream_name": null,
+      "event_name": null
+    }
+  ]
+}

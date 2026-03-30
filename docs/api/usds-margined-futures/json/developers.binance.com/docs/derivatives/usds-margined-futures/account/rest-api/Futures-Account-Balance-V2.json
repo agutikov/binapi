@@ -1,0 +1,133 @@
+{
+  "title": "Futures Account Balance V2 (USER_DATA)",
+  "meta_description": "API Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "API Description",
+      "level": 2,
+      "id": "api-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Query account balance info"
+        }
+      ]
+    },
+    {
+      "title": "HTTP Request",
+      "level": 2,
+      "id": "http-request",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "GET `/fapi/v2/balance`"
+        }
+      ]
+    },
+    {
+      "title": "Request Weight",
+      "level": 2,
+      "id": "request-weight",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "5"
+        }
+      ]
+    },
+    {
+      "title": "Request Parameters",
+      "level": 2,
+      "id": "request-parameters",
+      "blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "Name",
+            "Type",
+            "Mandatory",
+            "Description"
+          ],
+          "rows": [
+            [
+              "recvWindow",
+              "LONG",
+              "NO",
+              ""
+            ],
+            [
+              "timestamp",
+              "LONG",
+              "YES",
+              ""
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "[\n{\n\"accountAlias\": \"SgsR\", // unique account code\n\"asset\": \"USDT\", // asset name\n\"balance\": \"122607.35137903\", // wallet balance\n\"crossWalletBalance\": \"23.72469206\", // crossed wallet balance\n\"crossUnPnl\": \"0.00000000\", // unrealized profit of crossed positions\n\"availableBalance\": \"23.72469206\", // available balance\n\"maxWithdrawAmount\": \"23.72469206\", // maximum amount for transfer out\n\"marginAvailable\": true, // whether the asset can be used as margin in Multi-Assets mode\n\"updateTime\": 1617939110373\n}\n]"
+        }
+      ]
+    }
+  ],
+  "protocol": "rest",
+  "category": "rest-api",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "account",
+    "rest-api",
+    "Futures-Account-Balance-V2.html"
+  ],
+  "api_summary": {
+    "description": "Query account balance info",
+    "http_method": "GET",
+    "path": "`/fapi/v2/balance`",
+    "http_request": "GET `/fapi/v2/balance`",
+    "request_weight": "5",
+    "request_parameters_tables": [
+      {
+        "type": "table",
+        "headers": [
+          "Name",
+          "Type",
+          "Mandatory",
+          "Description"
+        ],
+        "rows": [
+          [
+            "recvWindow",
+            "LONG",
+            "NO",
+            ""
+          ],
+          [
+            "timestamp",
+            "LONG",
+            "YES",
+            ""
+          ]
+        ]
+      }
+    ],
+    "request_parameters_text": [],
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "[\n{\n\"accountAlias\": \"SgsR\", // unique account code\n\"asset\": \"USDT\", // asset name\n\"balance\": \"122607.35137903\", // wallet balance\n\"crossWalletBalance\": \"23.72469206\", // crossed wallet balance\n\"crossUnPnl\": \"0.00000000\", // unrealized profit of crossed positions\n\"availableBalance\": \"23.72469206\", // available balance\n\"maxWithdrawAmount\": \"23.72469206\", // maximum amount for transfer out\n\"marginAvailable\": true, // whether the asset can be used as margin in Multi-Assets mode\n\"updateTime\": 1617939110373\n}\n]"
+      }
+    ]
+  }
+}

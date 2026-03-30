@@ -1,0 +1,147 @@
+# Query Index Price Constituents
+
+- **protocol**: rest
+- **category**: rest-api
+- **meta_description**: API Description
+
+## API Summary
+
+- **description**: Query index price constituents
+- **http_method**: GET
+- **path**: `/fapi/v1/constituents`
+- **http_request**: GET `/fapi/v1/constituents`
+- **request_weight**: 2
+
+### Request Parameters
+
+| Name | Type | Mandatory | Description |
+| --- | --- | --- | --- |
+| symbol | STRING | YES |  |
+
+### Response Examples
+
+```json
+{
+  "symbol": "BTCUSDT",
+  "time": 1745401553408,
+  "constituents": [
+    {
+      "exchange": "binance",
+      "symbol": "BTCUSDT",
+      "price": "94057.03000000",
+      "weight": "0.51282051"
+    },
+    {
+      "exchange": "coinbase",
+      "symbol": "BTC-USDT",
+      "price": "94140.58000000",
+      "weight": "0.15384615"
+    },
+    {
+      "exchange": "gateio",
+      "symbol": "BTC_USDT",
+      "price": "94060.10000000",
+      "weight": "0.02564103"
+    },
+    {
+      "exchange": "kucoin",
+      "symbol": "BTC-USDT",
+      "price": "94096.70000000",
+      "weight": "0.07692308"
+    },
+    {
+      "exchange": "mxc",
+      "symbol": "BTCUSDT",
+      "price": "94057.02000000",
+      "weight": "0.07692308"
+    },
+    {
+      "exchange": "bitget",
+      "symbol": "BTCUSDT",
+      "price": "94064.03000000",
+      "weight": "0.07692308"
+    },
+    {
+      "exchange": "bybit",
+      "symbol": "BTCUSDT",
+      "price": "94067.90000000",
+      "weight": "0.07692308"
+    }
+  ]
+}
+```
+
+## API Description
+
+Query index price constituents
+
+Note:
+
+> Prices from constituents of TradFi perps will be hiden and displayed as -1.
+
+## HTTP Request
+
+GET `/fapi/v1/constituents`
+
+## Request Weight
+
+2
+
+## Request Parameters
+
+| Name | Type | Mandatory | Description |
+| --- | --- | --- | --- |
+| symbol | STRING | YES |  |
+
+## Response Example
+
+```json
+{
+  "symbol": "BTCUSDT",
+  "time": 1745401553408,
+  "constituents": [
+    {
+      "exchange": "binance",
+      "symbol": "BTCUSDT",
+      "price": "94057.03000000",
+      "weight": "0.51282051"
+    },
+    {
+      "exchange": "coinbase",
+      "symbol": "BTC-USDT",
+      "price": "94140.58000000",
+      "weight": "0.15384615"
+    },
+    {
+      "exchange": "gateio",
+      "symbol": "BTC_USDT",
+      "price": "94060.10000000",
+      "weight": "0.02564103"
+    },
+    {
+      "exchange": "kucoin",
+      "symbol": "BTC-USDT",
+      "price": "94096.70000000",
+      "weight": "0.07692308"
+    },
+    {
+      "exchange": "mxc",
+      "symbol": "BTCUSDT",
+      "price": "94057.02000000",
+      "weight": "0.07692308"
+    },
+    {
+      "exchange": "bitget",
+      "symbol": "BTCUSDT",
+      "price": "94064.03000000",
+      "weight": "0.07692308"
+    },
+    {
+      "exchange": "bybit",
+      "symbol": "BTCUSDT",
+      "price": "94067.90000000",
+      "weight": "0.07692308"
+    }
+  ]
+}
+```

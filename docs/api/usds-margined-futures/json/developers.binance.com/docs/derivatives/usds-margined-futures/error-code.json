@@ -1,0 +1,3653 @@
+{
+  "title": "Error Codes",
+  "meta_description": "Here is the error JSON payload:",
+  "intro_blocks": [
+    {
+      "type": "blockquote",
+      "text": "Here is the error JSON payload:"
+    },
+    {
+      "type": "code",
+      "language": "json",
+      "json": {
+        "code": -1121,
+        "msg": "Invalid symbol."
+      }
+    },
+    {
+      "type": "paragraph",
+      "text": "Errors consist of two parts: an error code and a message. Codes are universal,but messages can vary."
+    }
+  ],
+  "sections": [
+    {
+      "title": "10xx - General Server or Network issues",
+      "level": 2,
+      "id": "10xx---general-server-or-network-issues",
+      "blocks": []
+    },
+    {
+      "title": "-1000 UNKNOWN",
+      "level": 3,
+      "id": "-1000-unknown",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "An unknown error occured while processing the request.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-1001 DISCONNECTED",
+      "level": 3,
+      "id": "-1001-disconnected",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Internal error; unable to process your request. Please try again.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-1002 UNAUTHORIZED",
+      "level": 3,
+      "id": "-1002-unauthorized",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "You are not authorized to execute this request.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-1003 TOO_MANY_REQUESTS",
+      "level": 3,
+      "id": "-1003-too_many_requests",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Too many requests; current limit is %s requests per minute. Please use the websocket for live updates to avoid polling the API.",
+              "blocks": []
+            },
+            {
+              "text": "Way too many requests; IP banned until %s. Please use the websocket for live updates to avoid bans.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-1004 DUPLICATE_IP",
+      "level": 3,
+      "id": "-1004-duplicate_ip",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "This IP is already on the white list",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-1005 NO_SUCH_IP",
+      "level": 3,
+      "id": "-1005-no_such_ip",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "No such IP has been white listed",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-1006 UNEXPECTED_RESP",
+      "level": 3,
+      "id": "-1006-unexpected_resp",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "An unexpected response was received from the message bus. Execution status unknown.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-1007 TIMEOUT",
+      "level": 3,
+      "id": "-1007-timeout",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Timeout waiting for response from backend server. Send status unknown; execution status unknown.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-1008 Request Throttled",
+      "level": 3,
+      "id": "-1008-request-throttled",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Server is currently overloaded with other requests. Please try again in a few minutes.",
+              "blocks": []
+            },
+            {
+              "text": "Request throttled by system-level protection. Reduce-only/close-position orders are exempt. Please try again.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-1010 ERROR_MSG_RECEIVED",
+      "level": 3,
+      "id": "-1010-error_msg_received",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "ERROR_MSG_RECEIVED.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-1011 NON_WHITE_LIST",
+      "level": 3,
+      "id": "-1011-non_white_list",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "This IP cannot access this route.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-1013 INVALID_MESSAGE",
+      "level": 3,
+      "id": "-1013-invalid_message",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "INVALID_MESSAGE.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-1014 UNKNOWN_ORDER_COMPOSITION",
+      "level": 3,
+      "id": "-1014-unknown_order_composition",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Unsupported order combination.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-1015 TOO_MANY_ORDERS",
+      "level": 3,
+      "id": "-1015-too_many_orders",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Too many new orders.",
+              "blocks": []
+            },
+            {
+              "text": "Too many new orders; current limit is %s orders per %s.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-1016 SERVICE_SHUTTING_DOWN",
+      "level": 3,
+      "id": "-1016-service_shutting_down",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "This service is no longer available.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-1020 UNSUPPORTED_OPERATION",
+      "level": 3,
+      "id": "-1020-unsupported_operation",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "This operation is not supported.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-1021 INVALID_TIMESTAMP",
+      "level": 3,
+      "id": "-1021-invalid_timestamp",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Timestamp for this request is outside of the recvWindow.",
+              "blocks": []
+            },
+            {
+              "text": "Timestamp for this request was 1000ms ahead of the server's time.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-1022 INVALID_SIGNATURE",
+      "level": 3,
+      "id": "-1022-invalid_signature",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Signature for this request is not valid.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-1023 START_TIME_GREATER_THAN_END_TIME",
+      "level": 3,
+      "id": "-1023-start_time_greater_than_end_time",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Start time is greater than end time.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-1099 NOT_FOUND",
+      "level": 3,
+      "id": "-1099-not_found",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Not found, unauthenticated, or unauthorized.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "11xx - Request issues",
+      "level": 2,
+      "id": "11xx---request-issues",
+      "blocks": []
+    },
+    {
+      "title": "-1100 ILLEGAL_CHARS",
+      "level": 3,
+      "id": "-1100-illegal_chars",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Illegal characters found in a parameter.",
+              "blocks": []
+            },
+            {
+              "text": "Illegal characters found in parameter '%s'; legal range is '%s'.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-1101 TOO_MANY_PARAMETERS",
+      "level": 3,
+      "id": "-1101-too_many_parameters",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Too many parameters sent for this endpoint.",
+              "blocks": []
+            },
+            {
+              "text": "Too many parameters; expected '%s' and received '%s'.",
+              "blocks": []
+            },
+            {
+              "text": "Duplicate values for a parameter detected.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-1102 MANDATORY_PARAM_EMPTY_OR_MALFORMED",
+      "level": 3,
+      "id": "-1102-mandatory_param_empty_or_malformed",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "A mandatory parameter was not sent, was empty/null, or malformed.",
+              "blocks": []
+            },
+            {
+              "text": "Mandatory parameter '%s' was not sent, was empty/null, or malformed.",
+              "blocks": []
+            },
+            {
+              "text": "Param '%s' or '%s' must be sent, but both were empty/null!",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-1103 UNKNOWN_PARAM",
+      "level": 3,
+      "id": "-1103-unknown_param",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "An unknown parameter was sent.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-1104 UNREAD_PARAMETERS",
+      "level": 3,
+      "id": "-1104-unread_parameters",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Not all sent parameters were read.",
+              "blocks": []
+            },
+            {
+              "text": "Not all sent parameters were read; read '%s' parameter(s) but was sent '%s'.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-1105 PARAM_EMPTY",
+      "level": 3,
+      "id": "-1105-param_empty",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "A parameter was empty.",
+              "blocks": []
+            },
+            {
+              "text": "Parameter '%s' was empty.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-1106 PARAM_NOT_REQUIRED",
+      "level": 3,
+      "id": "-1106-param_not_required",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "A parameter was sent when not required.",
+              "blocks": []
+            },
+            {
+              "text": "Parameter '%s' sent when not required.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-1108 BAD_ASSET",
+      "level": 3,
+      "id": "-1108-bad_asset",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Invalid asset.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-1109 BAD_ACCOUNT",
+      "level": 3,
+      "id": "-1109-bad_account",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Invalid account.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-1110 BAD_INSTRUMENT_TYPE",
+      "level": 3,
+      "id": "-1110-bad_instrument_type",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Invalid symbolType.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-1111 BAD_PRECISION",
+      "level": 3,
+      "id": "-1111-bad_precision",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Precision is over the maximum defined for this asset.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-1112 NO_DEPTH",
+      "level": 3,
+      "id": "-1112-no_depth",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "No orders on book for symbol.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-1113 WITHDRAW_NOT_NEGATIVE",
+      "level": 3,
+      "id": "-1113-withdraw_not_negative",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Withdrawal amount must be negative.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-1114 TIF_NOT_REQUIRED",
+      "level": 3,
+      "id": "-1114-tif_not_required",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "TimeInForce parameter sent when not required.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-1115 INVALID_TIF",
+      "level": 3,
+      "id": "-1115-invalid_tif",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Invalid timeInForce.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-1116 INVALID_ORDER_TYPE",
+      "level": 3,
+      "id": "-1116-invalid_order_type",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Invalid orderType.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-1117 INVALID_SIDE",
+      "level": 3,
+      "id": "-1117-invalid_side",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Invalid side.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-1118 EMPTY_NEW_CL_ORD_ID",
+      "level": 3,
+      "id": "-1118-empty_new_cl_ord_id",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "New client order ID was empty.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-1119 EMPTY_ORG_CL_ORD_ID",
+      "level": 3,
+      "id": "-1119-empty_org_cl_ord_id",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Original client order ID was empty.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-1120 BAD_INTERVAL",
+      "level": 3,
+      "id": "-1120-bad_interval",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Invalid interval.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-1121 BAD_SYMBOL",
+      "level": 3,
+      "id": "-1121-bad_symbol",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Invalid symbol.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-1122 INVALID_SYMBOL_STATUS",
+      "level": 3,
+      "id": "-1122-invalid_symbol_status",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Invalid symbol status.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-1125 INVALID_LISTEN_KEY",
+      "level": 3,
+      "id": "-1125-invalid_listen_key",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "This listenKey does not exist. Please use `POST /fapi/v1/listenKey` to recreate `listenKey`",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-1126 ASSET_NOT_SUPPORTED",
+      "level": 3,
+      "id": "-1126-asset_not_supported",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "This asset is not supported.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-1127 MORE_THAN_XX_HOURS",
+      "level": 3,
+      "id": "-1127-more_than_xx_hours",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Lookup interval is too big.",
+              "blocks": []
+            },
+            {
+              "text": "More than %s hours between startTime and endTime.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-1128 OPTIONAL_PARAMS_BAD_COMBO",
+      "level": 3,
+      "id": "-1128-optional_params_bad_combo",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Combination of optional parameters invalid.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-1130 INVALID_PARAMETER",
+      "level": 3,
+      "id": "-1130-invalid_parameter",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Invalid data sent for a parameter.",
+              "blocks": []
+            },
+            {
+              "text": "Data sent for parameter '%s' is not valid.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-1136 INVALID_NEW_ORDER_RESP_TYPE",
+      "level": 3,
+      "id": "-1136-invalid_new_order_resp_type",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Invalid newOrderRespType.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "20xx - Processing Issues",
+      "level": 2,
+      "id": "20xx---processing-issues",
+      "blocks": []
+    },
+    {
+      "title": "-2010 NEW_ORDER_REJECTED",
+      "level": 3,
+      "id": "-2010-new_order_rejected",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "NEW_ORDER_REJECTED",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-2011 CANCEL_REJECTED",
+      "level": 3,
+      "id": "-2011-cancel_rejected",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "CANCEL_REJECTED",
+              "blocks": []
+            },
+            {
+              "text": "Cancel request failure as open order not found in the orderbook: \"Unknown order sent\".",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-2012 CANCEL_ALL_FAIL",
+      "level": 3,
+      "id": "-2012-cancel_all_fail",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Batch cancel failure.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-2013 NO_SUCH_ORDER",
+      "level": 3,
+      "id": "-2013-no_such_order",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Order does not exist.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-2014 BAD_API_KEY_FMT",
+      "level": 3,
+      "id": "-2014-bad_api_key_fmt",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "API-key format invalid.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-2015 REJECTED_MBX_KEY",
+      "level": 3,
+      "id": "-2015-rejected_mbx_key",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Invalid API-key, IP, or permissions for action.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-2016 NO_TRADING_WINDOW",
+      "level": 3,
+      "id": "-2016-no_trading_window",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "No trading window could be found for the symbol. Try ticker/24hrs instead.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-2017 API_KEYS_LOCKED",
+      "level": 3,
+      "id": "-2017-api_keys_locked",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "API Keys are locked on this account.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-2018 BALANCE_NOT_SUFFICIENT",
+      "level": 3,
+      "id": "-2018-balance_not_sufficient",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Balance is insufficient.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-2019 MARGIN_NOT_SUFFICIEN",
+      "level": 3,
+      "id": "-2019-margin_not_sufficien",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Margin is insufficient.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-2020 UNABLE_TO_FILL",
+      "level": 3,
+      "id": "-2020-unable_to_fill",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Unable to fill.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-2021 ORDER_WOULD_IMMEDIATELY_TRIGGER",
+      "level": 3,
+      "id": "-2021-order_would_immediately_trigger",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Order would immediately trigger.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-2022 REDUCE_ONLY_REJECT",
+      "level": 3,
+      "id": "-2022-reduce_only_reject",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "ReduceOnly Order is rejected.",
+              "blocks": []
+            },
+            {
+              "text": "This indicates the new reduce-only order conflicts with existing open orders; cancel the existing order and resubmit the reduce-only order.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-2023 USER_IN_LIQUIDATION",
+      "level": 3,
+      "id": "-2023-user_in_liquidation",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "User in liquidation mode now.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-2024 POSITION_NOT_SUFFICIENT",
+      "level": 3,
+      "id": "-2024-position_not_sufficient",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Position is not sufficient.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-2025 MAX_OPEN_ORDER_EXCEEDED",
+      "level": 3,
+      "id": "-2025-max_open_order_exceeded",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Reach max open order limit.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-2026 REDUCE_ONLY_ORDER_TYPE_NOT_SUPPORTED",
+      "level": 3,
+      "id": "-2026-reduce_only_order_type_not_supported",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "This OrderType is not supported when reduceOnly.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-2027 MAX_LEVERAGE_RATIO",
+      "level": 3,
+      "id": "-2027-max_leverage_ratio",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Exceeded the maximum allowable position at current leverage.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-2028 MIN_LEVERAGE_RATIO",
+      "level": 3,
+      "id": "-2028-min_leverage_ratio",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Leverage is smaller than permitted: insufficient margin balance.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "40xx - Filters and other Issues",
+      "level": 2,
+      "id": "40xx---filters-and-other-issues",
+      "blocks": []
+    },
+    {
+      "title": "-4000 INVALID_ORDER_STATUS",
+      "level": 3,
+      "id": "-4000-invalid_order_status",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Invalid order status.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4001 PRICE_LESS_THAN_ZERO",
+      "level": 3,
+      "id": "-4001-price_less_than_zero",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Price less than 0.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4002 PRICE_GREATER_THAN_MAX_PRICE",
+      "level": 3,
+      "id": "-4002-price_greater_than_max_price",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Price greater than max price.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4003 QTY_LESS_THAN_ZERO",
+      "level": 3,
+      "id": "-4003-qty_less_than_zero",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Quantity less than zero.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4004 QTY_LESS_THAN_MIN_QTY",
+      "level": 3,
+      "id": "-4004-qty_less_than_min_qty",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Quantity less than min quantity.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4005 QTY_GREATER_THAN_MAX_QTY",
+      "level": 3,
+      "id": "-4005-qty_greater_than_max_qty",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Quantity greater than max quantity.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4006 STOP_PRICE_LESS_THAN_ZERO",
+      "level": 3,
+      "id": "-4006-stop_price_less_than_zero",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Stop price less than zero.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4007 STOP_PRICE_GREATER_THAN_MAX_PRICE",
+      "level": 3,
+      "id": "-4007-stop_price_greater_than_max_price",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Stop price greater than max price.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4008 TICK_SIZE_LESS_THAN_ZERO",
+      "level": 3,
+      "id": "-4008-tick_size_less_than_zero",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Tick size less than zero.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4009 MAX_PRICE_LESS_THAN_MIN_PRICE",
+      "level": 3,
+      "id": "-4009-max_price_less_than_min_price",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Max price less than min price.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4010 MAX_QTY_LESS_THAN_MIN_QTY",
+      "level": 3,
+      "id": "-4010-max_qty_less_than_min_qty",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Max qty less than min qty.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4011 STEP_SIZE_LESS_THAN_ZERO",
+      "level": 3,
+      "id": "-4011-step_size_less_than_zero",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Step size less than zero.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4012 MAX_NUM_ORDERS_LESS_THAN_ZERO",
+      "level": 3,
+      "id": "-4012-max_num_orders_less_than_zero",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Max mum orders less than zero.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4013 PRICE_LESS_THAN_MIN_PRICE",
+      "level": 3,
+      "id": "-4013-price_less_than_min_price",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Price less than min price.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4014 PRICE_NOT_INCREASED_BY_TICK_SIZE",
+      "level": 3,
+      "id": "-4014-price_not_increased_by_tick_size",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Price not increased by tick size.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4015 INVALID_CL_ORD_ID_LEN",
+      "level": 3,
+      "id": "-4015-invalid_cl_ord_id_len",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Client order id is not valid.",
+              "blocks": []
+            },
+            {
+              "text": "Client order id length should not be more than 36 chars",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4016 PRICE_HIGHTER_THAN_MULTIPLIER_UP",
+      "level": 3,
+      "id": "-4016-price_highter_than_multiplier_up",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Price is higher than mark price multiplier cap.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4017 MULTIPLIER_UP_LESS_THAN_ZERO",
+      "level": 3,
+      "id": "-4017-multiplier_up_less_than_zero",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Multiplier up less than zero.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4018 MULTIPLIER_DOWN_LESS_THAN_ZERO",
+      "level": 3,
+      "id": "-4018-multiplier_down_less_than_zero",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Multiplier down less than zero.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4019 COMPOSITE_SCALE_OVERFLOW",
+      "level": 3,
+      "id": "-4019-composite_scale_overflow",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Composite scale too large.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4020 TARGET_STRATEGY_INVALID",
+      "level": 3,
+      "id": "-4020-target_strategy_invalid",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Target strategy invalid for orderType '%s',reduceOnly '%b'.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4021 INVALID_DEPTH_LIMIT",
+      "level": 3,
+      "id": "-4021-invalid_depth_limit",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Invalid depth limit.",
+              "blocks": []
+            },
+            {
+              "text": "'%s' is not valid depth limit.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4022 WRONG_MARKET_STATUS",
+      "level": 3,
+      "id": "-4022-wrong_market_status",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "market status sent is not valid.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4023 QTY_NOT_INCREASED_BY_STEP_SIZE",
+      "level": 3,
+      "id": "-4023-qty_not_increased_by_step_size",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Qty not increased by step size.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4024 PRICE_LOWER_THAN_MULTIPLIER_DOWN",
+      "level": 3,
+      "id": "-4024-price_lower_than_multiplier_down",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Price is lower than mark price multiplier floor.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4025 MULTIPLIER_DECIMAL_LESS_THAN_ZERO",
+      "level": 3,
+      "id": "-4025-multiplier_decimal_less_than_zero",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Multiplier decimal less than zero.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4026 COMMISSION_INVALID",
+      "level": 3,
+      "id": "-4026-commission_invalid",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Commission invalid.",
+              "blocks": []
+            },
+            {
+              "text": "`%s` less than zero.",
+              "blocks": []
+            },
+            {
+              "text": "`%s` absolute value greater than `%s`",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4027 INVALID_ACCOUNT_TYPE",
+      "level": 3,
+      "id": "-4027-invalid_account_type",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Invalid account type.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4028 INVALID_LEVERAGE",
+      "level": 3,
+      "id": "-4028-invalid_leverage",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Invalid leverage",
+              "blocks": []
+            },
+            {
+              "text": "Leverage `%s` is not valid",
+              "blocks": []
+            },
+            {
+              "text": "Leverage `%s` already exist with `%s`",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4029 INVALID_TICK_SIZE_PRECISION",
+      "level": 3,
+      "id": "-4029-invalid_tick_size_precision",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Tick size precision is invalid.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4030 INVALID_STEP_SIZE_PRECISION",
+      "level": 3,
+      "id": "-4030-invalid_step_size_precision",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Step size precision is invalid.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4031 INVALID_WORKING_TYPE",
+      "level": 3,
+      "id": "-4031-invalid_working_type",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Invalid parameter working type",
+              "blocks": []
+            },
+            {
+              "text": "Invalid parameter working type: `%s`",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4032 EXCEED_MAX_CANCEL_ORDER_SIZE",
+      "level": 3,
+      "id": "-4032-exceed_max_cancel_order_size",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Exceed maximum cancel order size.",
+              "blocks": []
+            },
+            {
+              "text": "Invalid parameter working type: `%s`",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4033 INSURANCE_ACCOUNT_NOT_FOUND",
+      "level": 3,
+      "id": "-4033-insurance_account_not_found",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Insurance account not found.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4044 INVALID_BALANCE_TYPE",
+      "level": 3,
+      "id": "-4044-invalid_balance_type",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Balance Type is invalid.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4045 MAX_STOP_ORDER_EXCEEDED",
+      "level": 3,
+      "id": "-4045-max_stop_order_exceeded",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Reach max stop order limit.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4046 NO_NEED_TO_CHANGE_MARGIN_TYPE",
+      "level": 3,
+      "id": "-4046-no_need_to_change_margin_type",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "No need to change margin type.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4047 THERE_EXISTS_OPEN_ORDERS",
+      "level": 3,
+      "id": "-4047-there_exists_open_orders",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Margin type cannot be changed if there exists open orders.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4048 THERE_EXISTS_QUANTITY",
+      "level": 3,
+      "id": "-4048-there_exists_quantity",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Margin type cannot be changed if there exists position.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4049 ADD_ISOLATED_MARGIN_REJECT",
+      "level": 3,
+      "id": "-4049-add_isolated_margin_reject",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Add margin only support for isolated position.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4050 CROSS_BALANCE_INSUFFICIENT",
+      "level": 3,
+      "id": "-4050-cross_balance_insufficient",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Cross balance insufficient.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4051 ISOLATED_BALANCE_INSUFFICIENT",
+      "level": 3,
+      "id": "-4051-isolated_balance_insufficient",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Isolated balance insufficient.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4052 NO_NEED_TO_CHANGE_AUTO_ADD_MARGIN",
+      "level": 3,
+      "id": "-4052-no_need_to_change_auto_add_margin",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "No need to change auto add margin.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4053 AUTO_ADD_CROSSED_MARGIN_REJECT",
+      "level": 3,
+      "id": "-4053-auto_add_crossed_margin_reject",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Auto add margin only support for isolated position.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4054 ADD_ISOLATED_MARGIN_NO_POSITION_REJECT",
+      "level": 3,
+      "id": "-4054-add_isolated_margin_no_position_reject",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Cannot add position margin: position is 0.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4055 AMOUNT_MUST_BE_POSITIVE",
+      "level": 3,
+      "id": "-4055-amount_must_be_positive",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Amount must be positive.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4056 INVALID_API_KEY_TYPE",
+      "level": 3,
+      "id": "-4056-invalid_api_key_type",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Invalid api key type.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4057 INVALID_RSA_PUBLIC_KEY",
+      "level": 3,
+      "id": "-4057-invalid_rsa_public_key",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Invalid api public key",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4058 MAX_PRICE_TOO_LARGE",
+      "level": 3,
+      "id": "-4058-max_price_too_large",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "maxPrice and priceDecimal too large,please check.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4059 NO_NEED_TO_CHANGE_POSITION_SIDE",
+      "level": 3,
+      "id": "-4059-no_need_to_change_position_side",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "No need to change position side.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4060 INVALID_POSITION_SIDE",
+      "level": 3,
+      "id": "-4060-invalid_position_side",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Invalid position side.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4061 POSITION_SIDE_NOT_MATCH",
+      "level": 3,
+      "id": "-4061-position_side_not_match",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Order's position side does not match user's setting.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4062 REDUCE_ONLY_CONFLICT",
+      "level": 3,
+      "id": "-4062-reduce_only_conflict",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Invalid or improper reduceOnly value.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4063 INVALID_OPTIONS_REQUEST_TYPE",
+      "level": 3,
+      "id": "-4063-invalid_options_request_type",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Invalid options request type",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4064 INVALID_OPTIONS_TIME_FRAME",
+      "level": 3,
+      "id": "-4064-invalid_options_time_frame",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Invalid options time frame",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4065 INVALID_OPTIONS_AMOUNT",
+      "level": 3,
+      "id": "-4065-invalid_options_amount",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Invalid options amount",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4066 INVALID_OPTIONS_EVENT_TYPE",
+      "level": 3,
+      "id": "-4066-invalid_options_event_type",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Invalid options event type",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4067 POSITION_SIDE_CHANGE_EXISTS_OPEN_ORDERS",
+      "level": 3,
+      "id": "-4067-position_side_change_exists_open_orders",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Position side cannot be changed if there exists open orders.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4068 POSITION_SIDE_CHANGE_EXISTS_QUANTITY",
+      "level": 3,
+      "id": "-4068-position_side_change_exists_quantity",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Position side cannot be changed if there exists position.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4069 INVALID_OPTIONS_PREMIUM_FEE",
+      "level": 3,
+      "id": "-4069-invalid_options_premium_fee",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Invalid options premium fee",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4070 INVALID_CL_OPTIONS_ID_LEN",
+      "level": 3,
+      "id": "-4070-invalid_cl_options_id_len",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Client options id is not valid.",
+              "blocks": []
+            },
+            {
+              "text": "Client options id length should be less than 32 chars",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4071 INVALID_OPTIONS_DIRECTION",
+      "level": 3,
+      "id": "-4071-invalid_options_direction",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Invalid options direction",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4072 OPTIONS_PREMIUM_NOT_UPDATE",
+      "level": 3,
+      "id": "-4072-options_premium_not_update",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "premium fee is not updated, reject order",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4073 OPTIONS_PREMIUM_INPUT_LESS_THAN_ZERO",
+      "level": 3,
+      "id": "-4073-options_premium_input_less_than_zero",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "input premium fee is less than 0, reject order",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4074 OPTIONS_AMOUNT_BIGGER_THAN_UPPER",
+      "level": 3,
+      "id": "-4074-options_amount_bigger_than_upper",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Order amount is bigger than upper boundary or less than 0, reject order",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4075 OPTIONS_PREMIUM_OUTPUT_ZERO",
+      "level": 3,
+      "id": "-4075-options_premium_output_zero",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "output premium fee is less than 0, reject order",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4076 OPTIONS_PREMIUM_TOO_DIFF",
+      "level": 3,
+      "id": "-4076-options_premium_too_diff",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "original fee is too much higher than last fee",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4077 OPTIONS_PREMIUM_REACH_LIMIT",
+      "level": 3,
+      "id": "-4077-options_premium_reach_limit",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "place order amount has reached to limit, reject order",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4078 OPTIONS_COMMON_ERROR",
+      "level": 3,
+      "id": "-4078-options_common_error",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "options internal error",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4079 INVALID_OPTIONS_ID",
+      "level": 3,
+      "id": "-4079-invalid_options_id",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "invalid options id",
+              "blocks": []
+            },
+            {
+              "text": "invalid options id: %s",
+              "blocks": []
+            },
+            {
+              "text": "duplicate options id %d for user %d",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4080 OPTIONS_USER_NOT_FOUND",
+      "level": 3,
+      "id": "-4080-options_user_not_found",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "user not found",
+              "blocks": []
+            },
+            {
+              "text": "user not found with id: %s",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4081 OPTIONS_NOT_FOUND",
+      "level": 3,
+      "id": "-4081-options_not_found",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "options not found",
+              "blocks": []
+            },
+            {
+              "text": "options not found with id: %s",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4082 INVALID_BATCH_PLACE_ORDER_SIZE",
+      "level": 3,
+      "id": "-4082-invalid_batch_place_order_size",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Invalid number of batch place orders.",
+              "blocks": []
+            },
+            {
+              "text": "Invalid number of batch place orders: %s",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4083 PLACE_BATCH_ORDERS_FAIL",
+      "level": 3,
+      "id": "-4083-place_batch_orders_fail",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Fail to place batch orders.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4084 UPCOMING_METHOD",
+      "level": 3,
+      "id": "-4084-upcoming_method",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Method is not allowed currently. Upcoming soon.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4085 INVALID_NOTIONAL_LIMIT_COEF",
+      "level": 3,
+      "id": "-4085-invalid_notional_limit_coef",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Invalid notional limit coefficient",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4086 INVALID_PRICE_SPREAD_THRESHOLD",
+      "level": 3,
+      "id": "-4086-invalid_price_spread_threshold",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Invalid price spread threshold",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4087 REDUCE_ONLY_ORDER_PERMISSION",
+      "level": 3,
+      "id": "-4087-reduce_only_order_permission",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "User can only place reduce only order",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4088 NO_PLACE_ORDER_PERMISSION",
+      "level": 3,
+      "id": "-4088-no_place_order_permission",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "User can not place order currently",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4104 INVALID_CONTRACT_TYPE",
+      "level": 3,
+      "id": "-4104-invalid_contract_type",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Invalid contract type",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4109 INACTIVE_ACCOUNT",
+      "level": 3,
+      "id": "-4109-inactive_account",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Inactive account",
+              "blocks": []
+            },
+            {
+              "text": "Transfer any amount of asset to future wallet to reactive",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4114 INVALID_CLIENT_TRAN_ID_LEN",
+      "level": 3,
+      "id": "-4114-invalid_client_tran_id_len",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "clientTranId is not valid",
+              "blocks": []
+            },
+            {
+              "text": "Client tran id length should be less than 64 chars",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4115 DUPLICATED_CLIENT_TRAN_ID",
+      "level": 3,
+      "id": "-4115-duplicated_client_tran_id",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "clientTranId is duplicated",
+              "blocks": []
+            },
+            {
+              "text": "Client tran id should be unique within 7 days",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4116 DUPLICATED_CLIENT_ORDER_ID",
+      "level": 3,
+      "id": "-4116-duplicated_client_order_id",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "clientOrderId is duplicated",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4117 STOP_ORDER_TRIGGERING",
+      "level": 3,
+      "id": "-4117-stop_order_triggering",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "stop order is triggering",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4118 REDUCE_ONLY_MARGIN_CHECK_FAILED",
+      "level": 3,
+      "id": "-4118-reduce_only_margin_check_failed",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "ReduceOnly Order Failed. Please check your existing position and open orders",
+              "blocks": []
+            },
+            {
+              "text": "This indicates that the new reduce-only order, combined with an existing same-side open order, would create an opposite-side position and lead to insufficient margin; please cancel the open order and try again.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4120 STOP_ORDER_SWITCH_ALGO",
+      "level": 3,
+      "id": "-4120-stop_order_switch_algo",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Order type not supported for this endpoint. Please use the Algo Order API endpoints instead.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4131 MARKET_ORDER_REJECT",
+      "level": 3,
+      "id": "-4131-market_order_reject",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "The counterparty's best price does not meet the PERCENT_PRICE filter limit",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4135 INVALID_ACTIVATION_PRICE",
+      "level": 3,
+      "id": "-4135-invalid_activation_price",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Invalid activation price",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4137 QUANTITY_EXISTS_WITH_CLOSE_POSITION",
+      "level": 3,
+      "id": "-4137-quantity_exists_with_close_position",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Quantity must be zero with closePosition equals true",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4138 REDUCE_ONLY_MUST_BE_TRUE",
+      "level": 3,
+      "id": "-4138-reduce_only_must_be_true",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Reduce only must be true with closePosition equals true",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4139 ORDER_TYPE_CANNOT_BE_MKT",
+      "level": 3,
+      "id": "-4139-order_type_cannot_be_mkt",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Order type can not be market if it's unable to cancel",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4140 INVALID_OPENING_POSITION_STATUS",
+      "level": 3,
+      "id": "-4140-invalid_opening_position_status",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Invalid symbol status for opening position",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4141 SYMBOL_ALREADY_CLOSED",
+      "level": 3,
+      "id": "-4141-symbol_already_closed",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Symbol is closed",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4142 STRATEGY_INVALID_TRIGGER_PRICE",
+      "level": 3,
+      "id": "-4142-strategy_invalid_trigger_price",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "REJECT: take profit or stop order will be triggered immediately",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4144 INVALID_PAIR",
+      "level": 3,
+      "id": "-4144-invalid_pair",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Invalid pair",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4161 ISOLATED_LEVERAGE_REJECT_WITH_POSITION",
+      "level": 3,
+      "id": "-4161-isolated_leverage_reject_with_position",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Leverage reduction is not supported in Isolated Margin Mode with open positions",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4164 MIN_NOTIONAL",
+      "level": 3,
+      "id": "-4164-min_notional",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Order's notional must be no smaller than 5.0 (unless you choose reduce only)",
+              "blocks": []
+            },
+            {
+              "text": "Order's notional must be no smaller than %s (unless you choose reduce only)",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4165 INVALID_TIME_INTERVAL",
+      "level": 3,
+      "id": "-4165-invalid_time_interval",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Invalid time interval",
+              "blocks": []
+            },
+            {
+              "text": "Maximum time interval is %s days",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4167 ISOLATED_REJECT_WITH_JOINT_MARGIN",
+      "level": 3,
+      "id": "-4167-isolated_reject_with_joint_margin",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Unable to adjust to Multi-Assets mode with symbols of USDⓈ-M Futures under isolated-margin mode.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4168 JOINT_MARGIN_REJECT_WITH_ISOLATED",
+      "level": 3,
+      "id": "-4168-joint_margin_reject_with_isolated",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Unable to adjust to isolated-margin mode under the Multi-Assets mode.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4169 JOINT_MARGIN_REJECT_WITH_MB",
+      "level": 3,
+      "id": "-4169-joint_margin_reject_with_mb",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Unable to adjust Multi-Assets Mode with insufficient margin balance in USDⓈ-M Futures.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4170 JOINT_MARGIN_REJECT_WITH_OPEN_ORDER",
+      "level": 3,
+      "id": "-4170-joint_margin_reject_with_open_order",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Unable to adjust Multi-Assets Mode with open orders in USDⓈ-M Futures.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4171 NO_NEED_TO_CHANGE_JOINT_MARGIN",
+      "level": 3,
+      "id": "-4171-no_need_to_change_joint_margin",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Adjusted asset mode is currently set and does not need to be adjusted repeatedly.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4172 JOINT_MARGIN_REJECT_WITH_NEGATIVE_BALANCE",
+      "level": 3,
+      "id": "-4172-joint_margin_reject_with_negative_balance",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Unable to adjust Multi-Assets Mode with a negative wallet balance of margin available asset in USDⓈ-M Futures account.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4183 ISOLATED_REJECT_WITH_JOINT_MARGIN",
+      "level": 3,
+      "id": "-4183-isolated_reject_with_joint_margin",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Price is higher than stop price multiplier cap.",
+              "blocks": []
+            },
+            {
+              "text": "Limit price can't be higher than %s.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4184 PRICE_LOWER_THAN_STOP_MULTIPLIER_DOWN",
+      "level": 3,
+      "id": "-4184-price_lower_than_stop_multiplier_down",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Price is lower than stop price multiplier floor.",
+              "blocks": []
+            },
+            {
+              "text": "Limit price can't be lower than %s.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4192 COOLING_OFF_PERIOD",
+      "level": 3,
+      "id": "-4192-cooling_off_period",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Trade forbidden due to Cooling-off Period.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4202 ADJUST_LEVERAGE_KYC_FAILED",
+      "level": 3,
+      "id": "-4202-adjust_leverage_kyc_failed",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Intermediate Personal Verification is required for adjusting leverage over 20x",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4203 ADJUST_LEVERAGE_ONE_MONTH_FAILED",
+      "level": 3,
+      "id": "-4203-adjust_leverage_one_month_failed",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "More than 20x leverage is available one month after account registration.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4205 ADJUST_LEVERAGE_X_DAYS_FAILED",
+      "level": 3,
+      "id": "-4205-adjust_leverage_x_days_failed",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "More than 20x leverage is available %s days after Futures account registration.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4206 ADJUST_LEVERAGE_KYC_LIMIT",
+      "level": 3,
+      "id": "-4206-adjust_leverage_kyc_limit",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Users in this country has limited adjust leverage.",
+              "blocks": []
+            },
+            {
+              "text": "Users in your location/country can only access a maximum leverage of %s",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4208 ADJUST_LEVERAGE_ACCOUNT_SYMBOL_FAILED",
+      "level": 3,
+      "id": "-4208-adjust_leverage_account_symbol_failed",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Current symbol leverage cannot exceed 20 when using position limit adjustment service.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4209 ADJUST_LEVERAGE_SYMBOL_FAILED",
+      "level": 3,
+      "id": "-4209-adjust_leverage_symbol_failed",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "The max leverage of Symbol is 20x",
+              "blocks": []
+            },
+            {
+              "text": "Leverage adjustment failed. Current symbol max leverage limit is %sx",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4210 STOP_PRICE_HIGHER_THAN_PRICE_MULTIPLIER_LIMIT",
+      "level": 3,
+      "id": "-4210-stop_price_higher_than_price_multiplier_limit",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Stop price is higher than price multiplier cap.",
+              "blocks": []
+            },
+            {
+              "text": "Stop price can't be higher than %s",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4211 STOP_PRICE_LOWER_THAN_PRICE_MULTIPLIER_LIMIT",
+      "level": 3,
+      "id": "-4211-stop_price_lower_than_price_multiplier_limit",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Stop price is lower than price multiplier floor.",
+              "blocks": []
+            },
+            {
+              "text": "Stop price can't be lower than %s",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4400 TRADING_QUANTITATIVE_RULE",
+      "level": 3,
+      "id": "-4400-trading_quantitative_rule",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Futures Trading Quantitative Rules violated, only reduceOnly order is allowed, please try again later.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4401 LARGE_POSITION_SYM_RULE",
+      "level": 3,
+      "id": "-4401-large_position_sym_rule",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Futures Trading Risk Control Rules of large position holding violated, only reduceOnly order is allowed, please reduce the position. .",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4402 COMPLIANCE_BLACK_SYMBOL_RESTRICTION",
+      "level": 3,
+      "id": "-4402-compliance_black_symbol_restriction",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Dear user, as per our Terms of Use and compliance with local regulations, this feature is currently not available in your region.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-4403 ADJUST_LEVERAGE_COMPLIANCE_FAILED",
+      "level": 3,
+      "id": "-4403-adjust_leverage_compliance_failed",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Dear user, as per our Terms of Use and compliance with local regulations, the leverage can only up to 10x in your region",
+              "blocks": []
+            },
+            {
+              "text": "Dear user, as per our Terms of Use and compliance with local regulations, the leverage can only up to %sx in your region",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "50xx - Order Execution Issues",
+      "level": 2,
+      "id": "50xx---order-execution-issues",
+      "blocks": []
+    },
+    {
+      "title": "-5021 FOK_ORDER_REJECT",
+      "level": 3,
+      "id": "-5021-fok_order_reject",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Due to the order could not be filled immediately, the FOK order has been rejected.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-5022 GTX_ORDER_REJECT",
+      "level": 3,
+      "id": "-5022-gtx_order_reject",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Due to the order could not be executed as maker, the Post Only order will be rejected.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-5024 MOVE_ORDER_NOT_ALLOWED_SYMBOL_REASON",
+      "level": 3,
+      "id": "-5024-move_order_not_allowed_symbol_reason",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Symbol is not in trading status. Order amendment is not permitted.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-5025 LIMIT_ORDER_ONLY",
+      "level": 3,
+      "id": "-5025-limit_order_only",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Only limit order is supported.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-5026 Exceed_Maximum_Modify_Order_Limit",
+      "level": 3,
+      "id": "-5026-exceed_maximum_modify_order_limit",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Exceed maximum modify order limit.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-5027 SAME_ORDER",
+      "level": 3,
+      "id": "-5027-same_order",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "No need to modify the order.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-5028 ME_RECVWINDOW_REJECT",
+      "level": 3,
+      "id": "-5028-me_recvwindow_reject",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Timestamp for this request is outside of the ME recvWindow.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-5029 MODIFICATION_MIN_NOTIONAL",
+      "level": 3,
+      "id": "-5029-modification_min_notional",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Order's notional must be no smaller than %s",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-5037 INVALID_PRICE_MATCH",
+      "level": 3,
+      "id": "-5037-invalid_price_match",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Invalid price match",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-5038 UNSUPPORTED_ORDER_TYPE_PRICE_MATCH",
+      "level": 3,
+      "id": "-5038-unsupported_order_type_price_match",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Price match only supports order type: LIMIT, STOP AND TAKE_PROFIT",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-5039 INVALID_SELF_TRADE_PREVENTION_MODE",
+      "level": 3,
+      "id": "-5039-invalid_self_trade_prevention_mode",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "Invalid self trade prevention mode",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-5040 FUTURE_GOOD_TILL_DATE",
+      "level": 3,
+      "id": "-5040-future_good_till_date",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "The goodTillDate timestamp must be greater than the current time plus 600 seconds and smaller than 253402300799000 (UTC 9999-12-31 23:59:59)",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-5041 BBO_ORDER_REJECT",
+      "level": 3,
+      "id": "-5041-bbo_order_reject",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "No depth matches this BBO order",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "-5043 Existing_Pending_Modification",
+      "level": 3,
+      "id": "-5043-existing_pending_modification",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "text": "A pending modification already exists for this order.",
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "protocol": "reference",
+  "category": "usds-margined-futures",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "error-code.html"
+  ],
+  "api_summary": {}
+}

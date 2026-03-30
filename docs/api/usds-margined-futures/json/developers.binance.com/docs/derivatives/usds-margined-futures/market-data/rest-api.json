@@ -1,0 +1,91 @@
+{
+  "title": "Test Connectivity",
+  "meta_description": "API Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "API Description",
+      "level": 2,
+      "id": "api-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Test connectivity to the Rest API."
+        }
+      ]
+    },
+    {
+      "title": "HTTP Request",
+      "level": 2,
+      "id": "http-request",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "GET `/fapi/v1/ping`"
+        }
+      ]
+    },
+    {
+      "title": "Request Weight",
+      "level": 2,
+      "id": "request-weight",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "1"
+        }
+      ]
+    },
+    {
+      "title": "Request Parameters",
+      "level": 2,
+      "id": "request-parameters",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "NONE"
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "json",
+          "json": {}
+        }
+      ]
+    }
+  ],
+  "protocol": "rest",
+  "category": "market-data",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "market-data",
+    "rest-api.html"
+  ],
+  "api_summary": {
+    "description": "Test connectivity to the Rest API.",
+    "http_method": "GET",
+    "path": "`/fapi/v1/ping`",
+    "http_request": "GET `/fapi/v1/ping`",
+    "request_weight": "1",
+    "request_parameters_tables": [],
+    "request_parameters_text": [
+      "NONE"
+    ],
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "json",
+        "json": {}
+      }
+    ]
+  }
+}

@@ -1,0 +1,133 @@
+{
+  "title": "Query User Rate Limit (USER_DATA)",
+  "meta_description": "API Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "API Description",
+      "level": 2,
+      "id": "api-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Query User Rate Limit"
+        }
+      ]
+    },
+    {
+      "title": "HTTP Request",
+      "level": 2,
+      "id": "http-request",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "GET `/fapi/v1/rateLimit/order`"
+        }
+      ]
+    },
+    {
+      "title": "Request Weight",
+      "level": 2,
+      "id": "request-weight",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "1"
+        }
+      ]
+    },
+    {
+      "title": "Request Parameters",
+      "level": 2,
+      "id": "request-parameters",
+      "blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "Name",
+            "Type",
+            "Mandatory",
+            "Description"
+          ],
+          "rows": [
+            [
+              "recvWindow",
+              "LONG",
+              "NO",
+              ""
+            ],
+            [
+              "timestamp",
+              "LONG",
+              "YES",
+              ""
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "[\n{\n\"rateLimitType\": \"ORDERS\",\n\"interval\": \"SECOND\",\n\"intervalNum\": 10,\n\"limit\": 10000,\n},\n{\n\"rateLimitType\": \"ORDERS\",\n\"interval\": \"MINUTE\",\n\"intervalNum\": 1,\n\"limit\": 20000,\n}\n]"
+        }
+      ]
+    }
+  ],
+  "protocol": "rest",
+  "category": "rest-api",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "account",
+    "rest-api",
+    "Query-Rate-Limit.html"
+  ],
+  "api_summary": {
+    "description": "Query User Rate Limit",
+    "http_method": "GET",
+    "path": "`/fapi/v1/rateLimit/order`",
+    "http_request": "GET `/fapi/v1/rateLimit/order`",
+    "request_weight": "1",
+    "request_parameters_tables": [
+      {
+        "type": "table",
+        "headers": [
+          "Name",
+          "Type",
+          "Mandatory",
+          "Description"
+        ],
+        "rows": [
+          [
+            "recvWindow",
+            "LONG",
+            "NO",
+            ""
+          ],
+          [
+            "timestamp",
+            "LONG",
+            "YES",
+            ""
+          ]
+        ]
+      }
+    ],
+    "request_parameters_text": [],
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "[\n{\n\"rateLimitType\": \"ORDERS\",\n\"interval\": \"SECOND\",\n\"intervalNum\": 10,\n\"limit\": 10000,\n},\n{\n\"rateLimitType\": \"ORDERS\",\n\"interval\": \"MINUTE\",\n\"intervalNum\": 1,\n\"limit\": 20000,\n}\n]"
+      }
+    ]
+  }
+}

@@ -1,0 +1,167 @@
+{
+  "title": "Symbol Order Book Ticker",
+  "meta_description": "API Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "API Description",
+      "level": 2,
+      "id": "api-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Best price/qty on the order book for a symbol or symbols."
+        }
+      ]
+    },
+    {
+      "title": "HTTP Request",
+      "level": 2,
+      "id": "http-request",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "GET `/fapi/v1/ticker/bookTicker`"
+        },
+        {
+          "type": "paragraph",
+          "text": "Note:"
+        },
+        {
+          "type": "blockquote",
+          "text": "Retail Price Improvement(RPI) orders are not visible and excluded in the response message."
+        }
+      ]
+    },
+    {
+      "title": "Request Weight",
+      "level": 2,
+      "id": "request-weight",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "2 for a single symbol; 5 when the symbol parameter is omitted"
+        }
+      ]
+    },
+    {
+      "title": "Request Parameters",
+      "level": 2,
+      "id": "request-parameters",
+      "blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "Name",
+            "Type",
+            "Mandatory",
+            "Description"
+          ],
+          "rows": [
+            [
+              "symbol",
+              "STRING",
+              "NO",
+              ""
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "text": "If the symbol is not sent, bookTickers for all symbols will be returned in an array. The field `X-MBX-USED-WEIGHT-1M` in response header is not accurate from this endpoint, please ignore."
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "javascript",
+          "text": "{\n\"symbol\": \"BTCUSDT\",\n\"bidPrice\": \"4.00000000\",\n\"bidQty\": \"431.00000000\",\n\"askPrice\": \"4.00000200\",\n\"askQty\": \"9.00000000\",\n\"time\": 1589437530011 // Transaction time\n}"
+        },
+        {
+          "type": "blockquote",
+          "text": "OR"
+        },
+        {
+          "type": "code",
+          "language": "json",
+          "json": [
+            {
+              "symbol": "BTCUSDT",
+              "bidPrice": "4.00000000",
+              "bidQty": "431.00000000",
+              "askPrice": "4.00000200",
+              "askQty": "9.00000000",
+              "time": 1589437530011
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "protocol": "rest",
+  "category": "rest-api",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "market-data",
+    "rest-api",
+    "Symbol-Order-Book-Ticker.html"
+  ],
+  "api_summary": {
+    "description": "Best price/qty on the order book for a symbol or symbols.",
+    "http_method": "GET",
+    "path": "`/fapi/v1/ticker/bookTicker`",
+    "http_request": "GET `/fapi/v1/ticker/bookTicker`",
+    "request_weight": "2 for a single symbol; 5 when the symbol parameter is omitted",
+    "request_parameters_tables": [
+      {
+        "type": "table",
+        "headers": [
+          "Name",
+          "Type",
+          "Mandatory",
+          "Description"
+        ],
+        "rows": [
+          [
+            "symbol",
+            "STRING",
+            "NO",
+            ""
+          ]
+        ]
+      }
+    ],
+    "request_parameters_text": [
+      "If the symbol is not sent, bookTickers for all symbols will be returned in an array. The field `X-MBX-USED-WEIGHT-1M` in response header is not accurate from this endpoint, please ignore."
+    ],
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "javascript",
+        "text": "{\n\"symbol\": \"BTCUSDT\",\n\"bidPrice\": \"4.00000000\",\n\"bidQty\": \"431.00000000\",\n\"askPrice\": \"4.00000200\",\n\"askQty\": \"9.00000000\",\n\"time\": 1589437530011 // Transaction time\n}"
+      },
+      {
+        "type": "code",
+        "language": "json",
+        "json": [
+          {
+            "symbol": "BTCUSDT",
+            "bidPrice": "4.00000000",
+            "bidQty": "431.00000000",
+            "askPrice": "4.00000200",
+            "askQty": "9.00000000",
+            "time": 1589437530011
+          }
+        ]
+      }
+    ]
+  }
+}

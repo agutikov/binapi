@@ -1,0 +1,137 @@
+{
+  "protocol": "reference",
+  "pages": [
+    {
+      "title": "Public Endpoints Info",
+      "protocol": "reference",
+      "category": "usds-margined-futures",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.json",
+      "http_method": null,
+      "path": null,
+      "method": null,
+      "stream_name": null,
+      "event_name": null
+    },
+    {
+      "title": "Accept the offered quote (USER_DATA)",
+      "protocol": "reference",
+      "category": "convert",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/convert/Accept-Quote.json",
+      "http_method": "POST",
+      "path": "`/fapi/v1/convert/acceptQuote`",
+      "method": null,
+      "stream_name": null,
+      "event_name": null
+    },
+    {
+      "title": "Order status(USER_DATA)",
+      "protocol": "reference",
+      "category": "convert",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/convert/Order-Status.json",
+      "http_method": "GET",
+      "path": "`/fapi/v1/convert/orderStatus`",
+      "method": null,
+      "stream_name": null,
+      "event_name": null
+    },
+    {
+      "title": "Send Quote Request(USER_DATA)",
+      "protocol": "reference",
+      "category": "convert",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/convert/Send-quote-request.json",
+      "http_method": "POST",
+      "path": "`/fapi/v1/convert/getQuote`",
+      "method": null,
+      "stream_name": null,
+      "event_name": null
+    },
+    {
+      "title": "List All Convert Pairs",
+      "protocol": "reference",
+      "category": "usds-margined-futures",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/convert.json",
+      "http_method": "GET",
+      "path": "`/fapi/v1/convert/exchangeInfo`",
+      "method": null,
+      "stream_name": null,
+      "event_name": null
+    },
+    {
+      "title": "Error Codes",
+      "protocol": "reference",
+      "category": "usds-margined-futures",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/error-code.json",
+      "http_method": null,
+      "path": null,
+      "method": null,
+      "stream_name": null,
+      "event_name": null
+    },
+    {
+      "title": "Self Trade Prevention (STP) FAQ",
+      "protocol": "reference",
+      "category": "faq",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/faq/stp-faq.json",
+      "http_method": null,
+      "path": null,
+      "method": null,
+      "stream_name": null,
+      "event_name": null
+    },
+    {
+      "title": "General Info",
+      "protocol": "reference",
+      "category": "usds-margined-futures",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/general-info.json",
+      "http_method": null,
+      "path": null,
+      "method": null,
+      "stream_name": null,
+      "event_name": null
+    },
+    {
+      "title": "Classic Portfolio Margin Account Information (USER_DATA)",
+      "protocol": "reference",
+      "category": "usds-margined-futures",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/portfolio-margin-endpoints.json",
+      "http_method": "GET",
+      "path": "`/fapi/v1/pmAccountInfo`",
+      "method": null,
+      "stream_name": null,
+      "event_name": null
+    },
+    {
+      "title": "User Data Streams Connect",
+      "protocol": "reference",
+      "category": "usds-margined-futures",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams.json",
+      "http_method": null,
+      "path": null,
+      "method": null,
+      "stream_name": null,
+      "event_name": null
+    },
+    {
+      "title": "WebSocket API General Info",
+      "protocol": "reference",
+      "category": "usds-margined-futures",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/websocket-api-general-info.json",
+      "http_method": null,
+      "path": null,
+      "method": null,
+      "stream_name": null,
+      "event_name": null
+    },
+    {
+      "title": "Websocket Market Streams",
+      "protocol": "reference",
+      "category": "usds-margined-futures",
+      "output_file": "developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams.json",
+      "http_method": null,
+      "path": null,
+      "method": null,
+      "stream_name": null,
+      "event_name": null
+    }
+  ]
+}

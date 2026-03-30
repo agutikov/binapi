@@ -1,0 +1,209 @@
+{
+  "title": "Basis",
+  "meta_description": "API Description",
+  "intro_blocks": [],
+  "sections": [
+    {
+      "title": "API Description",
+      "level": 2,
+      "id": "api-description",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Query future basis"
+        }
+      ]
+    },
+    {
+      "title": "HTTP Request",
+      "level": 2,
+      "id": "http-request",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "GET `/futures/data/basis`"
+        }
+      ]
+    },
+    {
+      "title": "Request Weight",
+      "level": 2,
+      "id": "request-weight",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "0"
+        }
+      ]
+    },
+    {
+      "title": "Request Parameters",
+      "level": 2,
+      "id": "request-parameters",
+      "blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "Name",
+            "Type",
+            "Mandatory",
+            "Description"
+          ],
+          "rows": [
+            [
+              "pair",
+              "STRING",
+              "YES",
+              "BTCUSDT"
+            ],
+            [
+              "contractType",
+              "ENUM",
+              "YES",
+              "CURRENT_QUARTER, NEXT_QUARTER, PERPETUAL"
+            ],
+            [
+              "period",
+              "ENUM",
+              "YES",
+              "\"5m\",\"15m\",\"30m\",\"1h\",\"2h\",\"4h\",\"6h\",\"12h\",\"1d\""
+            ],
+            [
+              "limit",
+              "LONG",
+              "YES",
+              "Default 30,Max 500"
+            ],
+            [
+              "startTime",
+              "LONG",
+              "NO",
+              ""
+            ],
+            [
+              "endTime",
+              "LONG",
+              "NO",
+              ""
+            ]
+          ]
+        },
+        {
+          "type": "blockquote",
+          "text": "If startTime and endTime are not sent, the most recent data is returned. Only the data of the latest 30 days is available."
+        }
+      ]
+    },
+    {
+      "title": "Response Example",
+      "level": 2,
+      "id": "response-example",
+      "blocks": [
+        {
+          "type": "code",
+          "language": "json",
+          "json": [
+            {
+              "indexPrice": "34400.15945055",
+              "contractType": "PERPETUAL",
+              "basisRate": "0.0004",
+              "futuresPrice": "34414.10",
+              "annualizedBasisRate": "",
+              "basis": "13.94054945",
+              "pair": "BTCUSDT",
+              "timestamp": 1698742800000
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "protocol": "rest",
+  "category": "rest-api",
+  "path_parts": [
+    "developers.binance.com",
+    "docs",
+    "derivatives",
+    "usds-margined-futures",
+    "market-data",
+    "rest-api",
+    "Basis.html"
+  ],
+  "api_summary": {
+    "description": "Query future basis",
+    "http_method": "GET",
+    "path": "`/futures/data/basis`",
+    "http_request": "GET `/futures/data/basis`",
+    "request_weight": "0",
+    "request_parameters_tables": [
+      {
+        "type": "table",
+        "headers": [
+          "Name",
+          "Type",
+          "Mandatory",
+          "Description"
+        ],
+        "rows": [
+          [
+            "pair",
+            "STRING",
+            "YES",
+            "BTCUSDT"
+          ],
+          [
+            "contractType",
+            "ENUM",
+            "YES",
+            "CURRENT_QUARTER, NEXT_QUARTER, PERPETUAL"
+          ],
+          [
+            "period",
+            "ENUM",
+            "YES",
+            "\"5m\",\"15m\",\"30m\",\"1h\",\"2h\",\"4h\",\"6h\",\"12h\",\"1d\""
+          ],
+          [
+            "limit",
+            "LONG",
+            "YES",
+            "Default 30,Max 500"
+          ],
+          [
+            "startTime",
+            "LONG",
+            "NO",
+            ""
+          ],
+          [
+            "endTime",
+            "LONG",
+            "NO",
+            ""
+          ]
+        ]
+      }
+    ],
+    "request_parameters_text": [
+      "If startTime and endTime are not sent, the most recent data is returned. Only the data of the latest 30 days is available."
+    ],
+    "response_code_blocks": [
+      {
+        "type": "code",
+        "language": "json",
+        "json": [
+          {
+            "indexPrice": "34400.15945055",
+            "contractType": "PERPETUAL",
+            "basisRate": "0.0004",
+            "futuresPrice": "34414.10",
+            "annualizedBasisRate": "",
+            "basis": "13.94054945",
+            "pair": "BTCUSDT",
+            "timestamp": 1698742800000
+          }
+        ]
+      }
+    ]
+  }
+}
