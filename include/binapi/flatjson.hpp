@@ -1193,7 +1193,7 @@ inline std::size_t fj_get_tokens(const fj_token<Iterator> *toks, std::size_t num
 
 /*************************************************************************************************/
 
-static void tokens_to_stream_cb_0(void *userdata, const char *ptr, std::size_t len) {
+[[maybe_unused]] static void tokens_to_stream_cb_0(void *userdata, const char *ptr, std::size_t len) {
     auto *stream = static_cast<std::FILE*>(userdata);
     std::fwrite(ptr, len, 1, stream);
 }

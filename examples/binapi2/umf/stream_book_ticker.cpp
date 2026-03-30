@@ -22,6 +22,10 @@ int main() {
         return 1;
     }
 
-    streams.close();
+    if (auto closed = streams.close(); !closed) {
+        std::cerr << closed.err.message << '\n';
+        return 1;
+    }
+
     return 0;
 }

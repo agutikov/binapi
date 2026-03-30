@@ -24,6 +24,10 @@ int main() {
     }
 
     std::cout << "status=" << result->status << '\n';
-    client.close();
+    if (auto closed = client.close(); !closed) {
+        std::cerr << closed.err.message << '\n';
+        return 1;
+    }
+
     return 0;
 }
