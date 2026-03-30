@@ -1,10 +1,13 @@
 #include <binapi2/umf/streams/user_streams.hpp>
 
+#include <boost/asio/post.hpp>
+
 #include <glaze/glaze.hpp>
 
 namespace binapi2::umf::streams {
 
-user_streams::user_streams(boost::asio::io_context& io_context, config cfg) : transport_(io_context, cfg), cfg_(std::move(cfg))
+user_streams::user_streams(boost::asio::io_context& io_context, config cfg) :
+    io_context_(io_context), transport_(io_context, cfg), cfg_(std::move(cfg))
 {
 }
 
@@ -13,6 +16,12 @@ user_streams::connect(const std::string& listen_key)
 {
     const auto target = cfg_.stream_base_target + "/" + listen_key;
     return transport_.connect(cfg_.stream_host, cfg_.stream_port, target);
+}
+
+void
+user_streams::connect(const std::string& listen_key, void_callback callback)
+{
+    boost::asio::post(io_context_, [this, listen_key, callback = std::move(callback)]() mutable { callback(connect(listen_key)); });
 }
 
 result<void>
@@ -61,10 +70,37 @@ user_streams::read_loop(account_update_handler account_handler,
     });
 }
 
+void
+user_streams::read_loop(account_update_handler account_handler,
+                        order_trade_update_handler order_handler,
+                        margin_call_handler margin_handler,
+                        listen_key_expired_handler listen_key_expired,
+                        void_callback callback)
+{
+    boost::asio::post(io_context_,
+                      [this,
+                       account_handler = std::move(account_handler),
+                       order_handler = std::move(order_handler),
+                       margin_handler = std::move(margin_handler),
+                       listen_key_expired = std::move(listen_key_expired),
+                       callback = std::move(callback)]() mutable {
+                          callback(read_loop(std::move(account_handler),
+                                             std::move(order_handler),
+                                             std::move(margin_handler),
+                                             std::move(listen_key_expired)));
+                      });
+}
+
 result<void>
 user_streams::close()
 {
     return transport_.close();
+}
+
+void
+user_streams::close(void_callback callback)
+{
+    boost::asio::post(io_context_, [this, callback = std::move(callback)]() mutable { callback(close()); });
 }
 
 } // namespace binapi2::umf::streams

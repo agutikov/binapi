@@ -6,6 +6,8 @@
 
 #include <glaze/glaze.hpp>
 
+#include <boost/asio/post.hpp>
+
 namespace binapi2::umf::websocket_api {
 
 namespace {
@@ -128,6 +130,12 @@ client::connect()
     return transport_.connect(cfg_.websocket_api_host, cfg_.websocket_api_port, cfg_.websocket_api_target);
 }
 
+void
+client::connect(callback_type<void> callback)
+{
+    boost::asio::post(io_context_, [this, callback = std::move(callback)]() mutable { callback(connect()); });
+}
+
 std::string
 client::next_id()
 {
@@ -158,10 +166,22 @@ client::session_logon()
     return send_rpc<types::session_logon_result>(transport_, request.id, session_logon_method, request.params);
 }
 
+void
+client::session_logon(callback_type<types::websocket_api_response<types::session_logon_result>> callback)
+{
+    boost::asio::post(io_context_, [this, callback = std::move(callback)]() mutable { callback(session_logon()); });
+}
+
 result<types::websocket_api_response<types::account_information>>
 client::account_status()
 {
     return send_rpc<types::account_information>(transport_, next_id(), account_status_method, make_signed_request_base(cfg_));
+}
+
+void
+client::account_status(callback_type<types::websocket_api_response<types::account_information>> callback)
+{
+    boost::asio::post(io_context_, [this, callback = std::move(callback)]() mutable { callback(account_status()); });
 }
 
 result<types::websocket_api_response<std::vector<types::futures_account_balance>>>
@@ -169,6 +189,12 @@ client::account_balance()
 {
     return send_rpc<std::vector<types::futures_account_balance>>(
         transport_, next_id(), account_balance_method, make_signed_request_base(cfg_));
+}
+
+void
+client::account_balance(callback_type<types::websocket_api_response<std::vector<types::futures_account_balance>>> callback)
+{
+    boost::asio::post(io_context_, [this, callback = std::move(callback)]() mutable { callback(account_balance()); });
 }
 
 result<types::websocket_api_response<types::order_response>>
@@ -191,6 +217,13 @@ client::new_order(const types::new_order_request& request)
     return send_rpc<types::order_response>(transport_, next_id(), order_place_method, params);
 }
 
+void
+client::new_order(const types::new_order_request& request,
+                  callback_type<types::websocket_api_response<types::order_response>> callback)
+{
+    boost::asio::post(io_context_, [this, request, callback = std::move(callback)]() mutable { callback(new_order(request)); });
+}
+
 result<types::websocket_api_response<types::order_response>>
 client::query_order(const types::query_order_request& request)
 {
@@ -204,6 +237,13 @@ client::query_order(const types::query_order_request& request)
     params.orderId = request.orderId;
     params.origClientOrderId = request.origClientOrderId;
     return send_rpc<types::order_response>(transport_, next_id(), order_status_method, params);
+}
+
+void
+client::query_order(const types::query_order_request& request,
+                    callback_type<types::websocket_api_response<types::order_response>> callback)
+{
+    boost::asio::post(io_context_, [this, request, callback = std::move(callback)]() mutable { callback(query_order(request)); });
 }
 
 result<types::websocket_api_response<types::order_response>>
@@ -221,6 +261,13 @@ client::cancel_order(const types::cancel_order_request& request)
     return send_rpc<types::order_response>(transport_, next_id(), order_cancel_method, params);
 }
 
+void
+client::cancel_order(const types::cancel_order_request& request,
+                     callback_type<types::websocket_api_response<types::order_response>> callback)
+{
+    boost::asio::post(io_context_, [this, request, callback = std::move(callback)]() mutable { callback(cancel_order(request)); });
+}
+
 result<types::websocket_api_response<types::book_ticker>>
 client::book_ticker(const types::book_ticker_request& request)
 {
@@ -228,10 +275,23 @@ client::book_ticker(const types::book_ticker_request& request)
         transport_, next_id(), ticker_book_method, types::websocket_api_book_ticker_request{ request.symbol });
 }
 
+void
+client::book_ticker(const types::book_ticker_request& request,
+                    callback_type<types::websocket_api_response<types::book_ticker>> callback)
+{
+    boost::asio::post(io_context_, [this, request, callback = std::move(callback)]() mutable { callback(book_ticker(request)); });
+}
+
 result<void>
 client::close()
 {
     return transport_.close();
+}
+
+void
+client::close(callback_type<void> callback)
+{
+    boost::asio::post(io_context_, [this, callback = std::move(callback)]() mutable { callback(close()); });
 }
 
 } // namespace binapi2::umf::websocket_api

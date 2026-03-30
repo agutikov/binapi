@@ -3,6 +3,7 @@
 #include <binapi2/umf/result.hpp>
 #include <binapi2/umf/types/account.hpp>
 
+#include <functional>
 #include <vector>
 
 namespace binapi2::umf {
@@ -14,11 +15,17 @@ namespace binapi2::umf::rest {
 class account_service
 {
 public:
+    template<typename T>
+    using callback_type = std::function<void(result<T>)>;
+
     explicit account_service(client& owner) noexcept;
 
     [[nodiscard]] result<types::account_information> account_information();
+    void account_information(callback_type<types::account_information> callback);
     [[nodiscard]] result<std::vector<types::futures_account_balance>> balances();
+    void balances(callback_type<std::vector<types::futures_account_balance>> callback);
     [[nodiscard]] result<std::vector<types::position_risk>> position_risk(const types::position_risk_request& request = {});
+    void position_risk(const types::position_risk_request& request, callback_type<std::vector<types::position_risk>> callback);
 
 private:
     client& owner_;
