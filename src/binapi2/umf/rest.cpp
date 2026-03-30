@@ -83,6 +83,80 @@ result<std::vector<types::aggregate_trade>> market_data_service::aggregate_trade
         aggregate_trades_endpoint.method, std::string{aggregate_trades_endpoint.path}, query, aggregate_trades_endpoint.signed_request);
 }
 
+result<std::vector<types::kline>> market_data_service::klines(const types::kline_request &request) {
+    query_map query{{"symbol", request.symbol}, {"interval", to_string(request.interval)}};
+    if (request.startTime) {
+        query["startTime"] = std::to_string(*request.startTime);
+    }
+    if (request.endTime) {
+        query["endTime"] = std::to_string(*request.endTime);
+    }
+    if (request.limit) {
+        query["limit"] = std::to_string(*request.limit);
+    }
+    return owner_.execute<std::vector<types::kline>>(klines_endpoint.method, std::string{klines_endpoint.path}, query, klines_endpoint.signed_request);
+}
+
+result<std::vector<types::kline>> market_data_service::continuous_klines(const types::continuous_kline_request &request) {
+    query_map query{{"pair", request.pair}, {"contractType", to_string(request.contractType)}, {"interval", to_string(request.interval)}};
+    if (request.startTime) {
+        query["startTime"] = std::to_string(*request.startTime);
+    }
+    if (request.endTime) {
+        query["endTime"] = std::to_string(*request.endTime);
+    }
+    if (request.limit) {
+        query["limit"] = std::to_string(*request.limit);
+    }
+    return owner_.execute<std::vector<types::kline>>(
+        continuous_klines_endpoint.method, std::string{continuous_klines_endpoint.path}, query, continuous_klines_endpoint.signed_request);
+}
+
+result<std::vector<types::kline>> market_data_service::index_price_klines(const types::index_price_kline_request &request) {
+    query_map query{{"pair", request.pair}, {"interval", to_string(request.interval)}};
+    if (request.startTime) {
+        query["startTime"] = std::to_string(*request.startTime);
+    }
+    if (request.endTime) {
+        query["endTime"] = std::to_string(*request.endTime);
+    }
+    if (request.limit) {
+        query["limit"] = std::to_string(*request.limit);
+    }
+    return owner_.execute<std::vector<types::kline>>(
+        index_price_klines_endpoint.method, std::string{index_price_klines_endpoint.path}, query, index_price_klines_endpoint.signed_request);
+}
+
+result<std::vector<types::kline>> market_data_service::mark_price_klines(const types::kline_request &request) {
+    query_map query{{"symbol", request.symbol}, {"interval", to_string(request.interval)}};
+    if (request.startTime) {
+        query["startTime"] = std::to_string(*request.startTime);
+    }
+    if (request.endTime) {
+        query["endTime"] = std::to_string(*request.endTime);
+    }
+    if (request.limit) {
+        query["limit"] = std::to_string(*request.limit);
+    }
+    return owner_.execute<std::vector<types::kline>>(
+        mark_price_klines_endpoint.method, std::string{mark_price_klines_endpoint.path}, query, mark_price_klines_endpoint.signed_request);
+}
+
+result<std::vector<types::kline>> market_data_service::premium_index_klines(const types::kline_request &request) {
+    query_map query{{"symbol", request.symbol}, {"interval", to_string(request.interval)}};
+    if (request.startTime) {
+        query["startTime"] = std::to_string(*request.startTime);
+    }
+    if (request.endTime) {
+        query["endTime"] = std::to_string(*request.endTime);
+    }
+    if (request.limit) {
+        query["limit"] = std::to_string(*request.limit);
+    }
+    return owner_.execute<std::vector<types::kline>>(
+        premium_index_klines_endpoint.method, std::string{premium_index_klines_endpoint.path}, query, premium_index_klines_endpoint.signed_request);
+}
+
 result<types::book_ticker> market_data_service::book_ticker(const types::book_ticker_request &request) {
     query_map query;
     if (request.symbol) {

@@ -21,6 +21,11 @@ class market_data_service {
     [[nodiscard]] result<types::order_book_response> order_book(const types::order_book_request &request);
     [[nodiscard]] result<std::vector<types::recent_trade>> recent_trades(const types::recent_trades_request &request);
     [[nodiscard]] result<std::vector<types::aggregate_trade>> aggregate_trades(const types::aggregate_trades_request &request);
+    [[nodiscard]] result<std::vector<types::kline>> klines(const types::kline_request &request);
+    [[nodiscard]] result<std::vector<types::kline>> continuous_klines(const types::continuous_kline_request &request);
+    [[nodiscard]] result<std::vector<types::kline>> index_price_klines(const types::index_price_kline_request &request);
+    [[nodiscard]] result<std::vector<types::kline>> mark_price_klines(const types::kline_request &request);
+    [[nodiscard]] result<std::vector<types::kline>> premium_index_klines(const types::kline_request &request);
     [[nodiscard]] result<types::book_ticker> book_ticker(const types::book_ticker_request &request);
     [[nodiscard]] result<std::vector<types::book_ticker>> book_tickers();
     [[nodiscard]] result<types::price_ticker> price_ticker(const types::price_ticker_request &request);

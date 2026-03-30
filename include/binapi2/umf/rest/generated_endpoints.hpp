@@ -24,6 +24,11 @@ inline constexpr endpoint_metadata exchange_info_endpoint{"exchange_info", boost
 inline constexpr endpoint_metadata order_book_endpoint{"order_book", boost::beast::http::verb::get, "/fapi/v1/depth", types::security_type::none, false, false, false};
 inline constexpr endpoint_metadata recent_trades_endpoint{"recent_trades", boost::beast::http::verb::get, "/fapi/v1/trades", types::security_type::none, false, false, false};
 inline constexpr endpoint_metadata aggregate_trades_endpoint{"aggregate_trades", boost::beast::http::verb::get, "/fapi/v1/aggTrades", types::security_type::none, false, false, false};
+inline constexpr endpoint_metadata klines_endpoint{"klines", boost::beast::http::verb::get, "/fapi/v1/klines", types::security_type::none, false, false, false};
+inline constexpr endpoint_metadata continuous_klines_endpoint{"continuous_klines", boost::beast::http::verb::get, "/fapi/v1/continuousKlines", types::security_type::none, false, false, false};
+inline constexpr endpoint_metadata index_price_klines_endpoint{"index_price_klines", boost::beast::http::verb::get, "/fapi/v1/indexPriceKlines", types::security_type::none, false, false, false};
+inline constexpr endpoint_metadata mark_price_klines_endpoint{"mark_price_klines", boost::beast::http::verb::get, "/fapi/v1/markPriceKlines", types::security_type::none, false, false, false};
+inline constexpr endpoint_metadata premium_index_klines_endpoint{"premium_index_klines", boost::beast::http::verb::get, "/fapi/v1/premiumIndexKlines", types::security_type::none, false, false, false};
 inline constexpr endpoint_metadata book_ticker_endpoint{"book_ticker", boost::beast::http::verb::get, "/fapi/v1/ticker/bookTicker", types::security_type::none, false, false, false};
 inline constexpr endpoint_metadata price_ticker_endpoint{"price_ticker", boost::beast::http::verb::get, "/fapi/v1/ticker/price", types::security_type::none, false, false, false};
 inline constexpr endpoint_metadata ticker_24hr_endpoint{"ticker_24hr", boost::beast::http::verb::get, "/fapi/v1/ticker/24hr", types::security_type::none, false, false, false};

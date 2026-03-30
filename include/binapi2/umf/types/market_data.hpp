@@ -1,6 +1,7 @@
 #pragma once
 
 #include <binapi2/umf/types/common.hpp>
+#include <binapi2/umf/types/enums.hpp>
 
 #include <glaze/glaze.hpp>
 
@@ -67,6 +68,46 @@ struct historical_trades_request {
     std::string symbol{};
     std::optional<int> limit{};
     std::optional<std::uint64_t> fromId{};
+};
+
+struct kline_request {
+    std::string symbol{};
+    kline_interval interval{kline_interval::m1};
+    std::optional<std::uint64_t> startTime{};
+    std::optional<std::uint64_t> endTime{};
+    std::optional<int> limit{};
+};
+
+struct continuous_kline_request {
+    std::string pair{};
+    contract_type contractType{contract_type::perpetual};
+    kline_interval interval{kline_interval::m1};
+    std::optional<std::uint64_t> startTime{};
+    std::optional<std::uint64_t> endTime{};
+    std::optional<int> limit{};
+};
+
+struct index_price_kline_request {
+    std::string pair{};
+    kline_interval interval{kline_interval::m1};
+    std::optional<std::uint64_t> startTime{};
+    std::optional<std::uint64_t> endTime{};
+    std::optional<int> limit{};
+};
+
+struct kline {
+    std::uint64_t openTime{};
+    std::string open{};
+    std::string high{};
+    std::string low{};
+    std::string close{};
+    std::string volume{};
+    std::uint64_t closeTime{};
+    std::string quoteAssetVolume{};
+    std::uint64_t numberOfTrades{};
+    std::string takerBuyBaseAssetVolume{};
+    std::string takerBuyQuoteAssetVolume{};
+    std::string ignore{};
 };
 
 struct book_ticker_request {
@@ -179,6 +220,25 @@ struct glz::meta<binapi2::umf::types::aggregate_trade> {
         "l", &T::l,
         "T", &T::T,
         "m", &T::m
+    );
+};
+
+template <>
+struct glz::meta<binapi2::umf::types::kline> {
+    using T = binapi2::umf::types::kline;
+    static constexpr auto value = array(
+        &T::openTime,
+        &T::open,
+        &T::high,
+        &T::low,
+        &T::close,
+        &T::volume,
+        &T::closeTime,
+        &T::quoteAssetVolume,
+        &T::numberOfTrades,
+        &T::takerBuyBaseAssetVolume,
+        &T::takerBuyQuoteAssetVolume,
+        &T::ignore
     );
 };
 

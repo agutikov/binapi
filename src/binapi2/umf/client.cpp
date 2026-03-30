@@ -84,6 +84,7 @@ template result<types::exchange_info_response> client::execute<types::exchange_i
 template result<types::order_book_response> client::execute<types::order_book_response>(boost::beast::http::verb, const std::string &, const query_map &, bool);
 template result<std::vector<types::recent_trade>> client::execute<std::vector<types::recent_trade>>(boost::beast::http::verb, const std::string &, const query_map &, bool);
 template result<std::vector<types::aggregate_trade>> client::execute<std::vector<types::aggregate_trade>>(boost::beast::http::verb, const std::string &, const query_map &, bool);
+template result<std::vector<types::kline>> client::execute<std::vector<types::kline>>(boost::beast::http::verb, const std::string &, const query_map &, bool);
 template result<types::book_ticker> client::execute<types::book_ticker>(boost::beast::http::verb, const std::string &, const query_map &, bool);
 template result<std::vector<types::book_ticker>> client::execute<std::vector<types::book_ticker>>(boost::beast::http::verb, const std::string &, const query_map &, bool);
 template result<types::price_ticker> client::execute<types::price_ticker>(boost::beast::http::verb, const std::string &, const query_map &, bool);
