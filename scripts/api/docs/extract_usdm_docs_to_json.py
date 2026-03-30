@@ -497,7 +497,6 @@ def extract_docs(input_dir: Path, output_dir: Path) -> None:
     write_json(
         output_dir / "manifest.json",
         {
-            "output_dir": str(output_dir),
             "page_count": len(catalog),
             "pages": catalog,
         },

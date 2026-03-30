@@ -6,7 +6,7 @@ Implement a new USD-M Futures client library under [`include/binapi2/umf`](/incl
 
 The new library should stay parallel to the original Spot-focused [`binapi`](/) design from [`/README.md`](/README.md:1) and [`/CMakeLists.txt`](/CMakeLists.txt:1), keep the networking stack centered on Boost.Asio and Boost.Beast, but replace flat JSON document handling with Glaze-based full C++ object serialization and parsing.
 
-The implementation scope includes the entire USD-M Futures docs tree under [`/docs/api/usds-margined-futures/md/developers.binance.com/docs/derivatives/usds-margined-futures`](/docs/api/usds-margined-futures/md/developers.binance.com/docs/derivatives/usds-margined-futures), including REST APIs, websocket API request-response RPC, websocket market streams, user-data streams, and Convert.
+The implementation scope includes the entire USD-M Futures docs tree under [`/docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures`](/docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures), including REST APIs, websocket API request-response RPC, websocket market streams, user-data streams, and Convert.
 
 ## Scope boundaries
 
@@ -306,15 +306,15 @@ The full scope is too large for a single handwritten pass without structure. Imp
 ### 7. Endpoint and stream rollout
 
 - cover all docs sections in this order:
-  - [`market-data/rest-api`](/docs/api/usds-margined-futures/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api)
-  - [`websocket-market-streams`](/docs/api/usds-margined-futures/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams)
-  - [`user-data-streams`](/docs/api/usds-margined-futures/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams)
-  - [`account/rest-api`](/docs/api/usds-margined-futures/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api)
-  - [`trade/rest-api`](/docs/api/usds-margined-futures/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api)
-  - [`account/websocket-api`](/docs/api/usds-margined-futures/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/websocket-api)
-  - [`trade/websocket-api`](/docs/api/usds-margined-futures/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/websocket-api)
-  - [`market-data/websocket-api`](/docs/api/usds-margined-futures/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/websocket-api)
-  - [`convert`](/docs/api/usds-margined-futures/md/developers.binance.com/docs/derivatives/usds-margined-futures/convert)
+  - [`market-data/rest-api`](/docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api)
+  - [`websocket-market-streams`](/docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams)
+  - [`user-data-streams`](/docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams)
+  - [`account/rest-api`](/docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api)
+  - [`trade/rest-api`](/docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api)
+  - [`account/websocket-api`](/docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/websocket-api)
+  - [`trade/websocket-api`](/docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/websocket-api)
+  - [`market-data/websocket-api`](/docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/websocket-api)
+  - [`convert`](/docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/convert)
 
 ### 8. Examples
 
