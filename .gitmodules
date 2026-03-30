@@ -1,0 +1,3 @@
+[submodule "docs/api/binance-api-postman"]
+	path = docs/api/binance-api-postman
+	url = https://github.com/binance/binance-api-postman.git
