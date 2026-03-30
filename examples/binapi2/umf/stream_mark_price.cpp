@@ -2,16 +2,18 @@
 
 #include <iostream>
 
-int main() {
+int
+main()
+{
     boost::asio::io_context io;
-    binapi2::umf::streams::market_streams streams{io, {}};
+    binapi2::umf::streams::market_streams streams{ io, {} };
 
-    if (auto connected = streams.connect_mark_price({.symbol = "btcusdt", .every_1s = true}); !connected) {
+    if (auto connected = streams.connect_mark_price({ .symbol = "btcusdt", .every_1s = true }); !connected) {
         std::cerr << connected.err.message << '\n';
         return 1;
     }
 
-    auto loop = streams.read_mark_price_loop([](const binapi2::umf::types::mark_price_stream_event &event) {
+    auto loop = streams.read_mark_price_loop([](const binapi2::umf::types::mark_price_stream_event& event) {
         std::cout << event.s << ' ' << event.p << ' ' << event.r << '\n';
         return false;
     });

@@ -4,6 +4,7 @@
 
 namespace binapi2::umf::transport {
 
-boost::asio::ssl::context make_ssl_context();
+boost::asio::ssl::context
+make_ssl_context();
 
 } // namespace binapi2::umf::transport

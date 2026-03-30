@@ -15,30 +15,32 @@
 
 #include <iostream>
 
-int main() {
+int
+main()
+{
     boost::asio::io_context ioctx;
     binapi::rest::api api{
-        ioctx
-        ,"api.binance.com"
-        ,"443"
-        ,"" // can be empty for non USER_DATA reqs
-        ,"" // can be empty for non USER_DATA reqs
-        ,10000 // recvWindow
+        ioctx,
+        "api.binance.com",
+        "443",
+        "" // can be empty for non USER_DATA reqs
+        ,
+        "" // can be empty for non USER_DATA reqs
+        ,
+        10000 // recvWindow
     };
 
-    api.price("BTCUSDT",
-        [](const char *fl, int ec, std::string emsg, auto res) {
-            if ( ec ) {
-                std::cerr << "get price error: fl=" << fl << ", ec=" << ec << ", emsg=" << emsg << std::endl;
+    api.price("BTCUSDT", [](const char* fl, int ec, std::string emsg, auto res) {
+        if (ec) {
+            std::cerr << "get price error: fl=" << fl << ", ec=" << ec << ", emsg=" << emsg << std::endl;
 
-                return false;
-            }
-
-            std::cout << "price: " << res << std::endl;
-
-            return true;
+            return false;
         }
-    );
+
+        std::cout << "price: " << res << std::endl;
+
+        return true;
+    });
 
     ioctx.run();
 

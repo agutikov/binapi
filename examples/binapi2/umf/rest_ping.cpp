@@ -4,9 +4,11 @@
 
 #include <iostream>
 
-int main() {
+int
+main()
+{
     boost::asio::io_context io;
-    binapi2::umf::client client{io, {}};
+    binapi2::umf::client client{ io, {} };
 
     const auto result = client.market_data.ping();
     if (!result) {

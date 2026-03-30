@@ -9,9 +9,11 @@
 
 namespace binapi2::umf::types {
 
-struct empty_response {};
+struct empty_response
+{};
 
-struct rate_limit {
+struct rate_limit
+{
     std::string rateLimitType{};
     std::string interval{};
     int intervalNum{};
@@ -19,21 +21,25 @@ struct rate_limit {
     std::optional<int> count{};
 };
 
-struct server_time_response {
+struct server_time_response
+{
     std::uint64_t serverTime{};
 };
 
-struct binance_error_document {
+struct binance_error_document
+{
     int code{};
     std::string msg{};
 };
 
-struct price_level {
+struct price_level
+{
     std::string price{};
     std::string quantity{};
 };
 
-struct symbol_info {
+struct symbol_info
+{
     std::string symbol{};
     std::string pair{};
     std::string contractType{};
@@ -43,82 +49,96 @@ struct symbol_info {
     std::string marginAsset{};
 };
 
-struct exchange_info_response {
+struct exchange_info_response
+{
     std::string timezone{};
     std::uint64_t serverTime{};
     std::vector<rate_limit> rateLimits{};
     std::vector<symbol_info> symbols{};
 };
 
-struct listen_key_response {
+struct listen_key_response
+{
     std::string listenKey{};
 };
 
 } // namespace binapi2::umf::types
 
-template <>
-struct glz::meta<binapi2::umf::types::empty_response> {
+template<>
+struct glz::meta<binapi2::umf::types::empty_response>
+{
     using T = binapi2::umf::types::empty_response;
     static constexpr auto value = object();
 };
 
-template <>
-struct glz::meta<binapi2::umf::types::rate_limit> {
+template<>
+struct glz::meta<binapi2::umf::types::rate_limit>
+{
     using T = binapi2::umf::types::rate_limit;
-    static constexpr auto value = object(
-        "rateLimitType", &T::rateLimitType,
-        "interval", &T::interval,
-        "intervalNum", &T::intervalNum,
-        "limit", &T::limit,
-        "count", &T::count
-    );
+    static constexpr auto value = object("rateLimitType",
+                                         &T::rateLimitType,
+                                         "interval",
+                                         &T::interval,
+                                         "intervalNum",
+                                         &T::intervalNum,
+                                         "limit",
+                                         &T::limit,
+                                         "count",
+                                         &T::count);
 };
 
-template <>
-struct glz::meta<binapi2::umf::types::server_time_response> {
+template<>
+struct glz::meta<binapi2::umf::types::server_time_response>
+{
     using T = binapi2::umf::types::server_time_response;
     static constexpr auto value = object("serverTime", &T::serverTime);
 };
 
-template <>
-struct glz::meta<binapi2::umf::types::binance_error_document> {
+template<>
+struct glz::meta<binapi2::umf::types::binance_error_document>
+{
     using T = binapi2::umf::types::binance_error_document;
     static constexpr auto value = object("code", &T::code, "msg", &T::msg);
 };
 
-template <>
-struct glz::meta<binapi2::umf::types::price_level> {
+template<>
+struct glz::meta<binapi2::umf::types::price_level>
+{
     using T = binapi2::umf::types::price_level;
     static constexpr auto value = array(&T::price, &T::quantity);
 };
 
-template <>
-struct glz::meta<binapi2::umf::types::symbol_info> {
+template<>
+struct glz::meta<binapi2::umf::types::symbol_info>
+{
     using T = binapi2::umf::types::symbol_info;
-    static constexpr auto value = object(
-        "symbol", &T::symbol,
-        "pair", &T::pair,
-        "contractType", &T::contractType,
-        "status", &T::status,
-        "baseAsset", &T::baseAsset,
-        "quoteAsset", &T::quoteAsset,
-        "marginAsset", &T::marginAsset
-    );
+    static constexpr auto value = object("symbol",
+                                         &T::symbol,
+                                         "pair",
+                                         &T::pair,
+                                         "contractType",
+                                         &T::contractType,
+                                         "status",
+                                         &T::status,
+                                         "baseAsset",
+                                         &T::baseAsset,
+                                         "quoteAsset",
+                                         &T::quoteAsset,
+                                         "marginAsset",
+                                         &T::marginAsset);
 };
 
-template <>
-struct glz::meta<binapi2::umf::types::exchange_info_response> {
+template<>
+struct glz::meta<binapi2::umf::types::exchange_info_response>
+{
     using T = binapi2::umf::types::exchange_info_response;
-    static constexpr auto value = object(
-        "timezone", &T::timezone,
-        "serverTime", &T::serverTime,
-        "rateLimits", &T::rateLimits,
-        "symbols", &T::symbols
-    );
+    static constexpr auto value =
+        object("timezone", &T::timezone, "serverTime", &T::serverTime, "rateLimits", &T::rateLimits, "symbols", &T::symbols);
 };
 
-template <>
-struct glz::meta<binapi2::umf::types::listen_key_response> {
+template<>
+struct glz::meta<binapi2::umf::types::listen_key_response>
+{
     using T = binapi2::umf::types::listen_key_response;
     static constexpr auto value = object("listenKey", &T::listenKey);
 };

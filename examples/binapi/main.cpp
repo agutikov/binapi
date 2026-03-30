@@ -9,51 +9,52 @@
 // Copyright (c) 2019-2021 niXman (github dot nixman dog pm.me). All rights reserved.
 // ----------------------------------------------------------------------------
 
-#include "binapi/websocket.hpp"
 #include "binapi/api.hpp"
+#include "binapi/flatjson.hpp"
 #include "binapi/pairslist.hpp"
 #include "binapi/reports.hpp"
-#include "binapi/flatjson.hpp"
+#include "binapi/websocket.hpp"
 
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/steady_timer.hpp>
 
-#include <iostream>
-#include <fstream>
 #include <binapi/errors.hpp>
+#include <fstream>
+#include <iostream>
 
 /*************************************************************************************************/
 
-std::string read_file(const char *fname) {
+std::string
+read_file(const char* fname)
+{
     std::ifstream file(fname);
     assert(file);
 
-    std::string res{
-         (std::istreambuf_iterator<char>(file))
-        ,(std::istreambuf_iterator<char>())
-    };
+    std::string res{ (std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>()) };
 
     return res;
 }
 
 /*************************************************************************************************/
 
-#define PRINT_IF_ERROR(res) \
-    if ( !static_cast<bool>(res) ) { \
-        std::cout << __FILE__ << "(" << __LINE__ << "): msg=" << res.errmsg << std::endl; \
+#define PRINT_IF_ERROR(res)                                                                                                    \
+    if (!static_cast<bool>(res)) {                                                                                             \
+        std::cout << __FILE__ << "(" << __LINE__ << "): msg=" << res.errmsg << std::endl;                                      \
     }
 
 /*************************************************************************************************/
 
-#define BREAK_IF_ERROR(res) \
-    PRINT_IF_ERROR(res); \
-    if ( !res ) { \
-        return EXIT_FAILURE; \
+#define BREAK_IF_ERROR(res)                                                                                                    \
+    PRINT_IF_ERROR(res);                                                                                                       \
+    if (!res) {                                                                                                                \
+        return EXIT_FAILURE;                                                                                                   \
     }
 
 /*************************************************************************************************/
 
-int main(int argc, char **argv) {
+int
+main(int argc, char** argv)
+{
     assert(argc == 3);
     const std::string pk = argv[1];
     const std::string sk = argv[2];
@@ -63,26 +64,19 @@ int main(int argc, char **argv) {
     boost::asio::io_context ioctx;
     binapi::ws::websockets wsp(ioctx, "stream.binance.com", "9443");
 
-    binapi::rest::api api(
-         ioctx
-        ,"api.binance.com"
-        ,"443"
-        ,pk
-        ,sk
-        ,10000
-    );
+    binapi::rest::api api(ioctx, "api.binance.com", "443", pk, sk, 10000);
 
-    static const char *testpair = "BNBUSDT";
+    static const char* testpair = "BNBUSDT";
 
     /** */
     {
         const std::string accinfo_str = read_file("accinfo.json");
         const std::string exinfo_str = read_file("exinfo.json");
 
-        const flatjson::fjson exinfo_json{exinfo_str.c_str(), exinfo_str.size()};
+        const flatjson::fjson exinfo_json{ exinfo_str.c_str(), exinfo_str.size() };
         binapi::rest::exchange_info_t exinfo = binapi::rest::exchange_info_t::construct(exinfo_json);
 
-        const flatjson::fjson accinfo_json{accinfo_str.c_str(), accinfo_str.size()};
+        const flatjson::fjson accinfo_json{ accinfo_str.c_str(), accinfo_str.size() };
         binapi::rest::account_info_t accinfo = binapi::rest::account_info_t::construct(accinfo_json);
 
         auto pairs0 = binapi::process_pairs("BTCUSDT", "", exinfo);
@@ -94,16 +88,17 @@ int main(int argc, char **argv) {
         auto pairs2 = binapi::process_pairs("*USDT", "BTCUSDT,BNBUSDT", exinfo);
         assert(pairs2.size() == 156 && pairs2.count("BTCUSDT") == 0 && pairs2.count("BNBUSDT") == 0);
 
-        static const auto trades_report_cb = [](const binapi::rest::order_info_t &o){
+        static const auto trades_report_cb = [](const binapi::rest::order_info_t& o) {
             std::cout << o.symbol << " - " << o.orderId << std::endl;
         };
         std::cout << "******************** BALANCE REPORT *********************************" << std::endl;
         binapi::make_balance_report(std::cout, api, accinfo, exinfo);
         std::cout << std::endl;
         std::cout << "********************* TRADES REPORT *********************************" << std::endl;
-//        binapi::make_trades_report(std::cout, api, accinfo, exinfo, {"ETHUSDT"}, trades_report_cb);
-//        binapi::make_trades_report(std::cout, api, accinfo, exinfo, {"*USDT"}, trades_report_cb, 0, "2018-11-12 17:38:29"); // "2018-11-12 17:38:29"
-        binapi::make_trades_report_for_last_day(std::cout, api, accinfo, exinfo, {"ETHUSDT"}, trades_report_cb);
+        //        binapi::make_trades_report(std::cout, api, accinfo, exinfo, {"ETHUSDT"}, trades_report_cb);
+        //        binapi::make_trades_report(std::cout, api, accinfo, exinfo, {"*USDT"}, trades_report_cb, 0, "2018-11-12
+        //        17:38:29"); // "2018-11-12 17:38:29"
+        binapi::make_trades_report_for_last_day(std::cout, api, accinfo, exinfo, { "ETHUSDT" }, trades_report_cb);
 
         std::cout << std::endl;
         std::cout << "******************* OPEN ORDERS REPORT ******************************" << std::endl;
@@ -114,12 +109,10 @@ int main(int argc, char **argv) {
     /** */
 
     auto account = api.account_info();
-    if ( ! binapi::rest::e_error_equal(account.ec, binapi::rest::e_error::OK) ) {
-        std::cout
-        << "account_error: ec=" << account.ec
-        << ", ename=" << binapi::rest::e_error_to_string(account.ec)
-        << ", emsg=" << account.errmsg
-        << std::endl << std::endl;
+    if (!binapi::rest::e_error_equal(account.ec, binapi::rest::e_error::OK)) {
+        std::cout << "account_error: ec=" << account.ec << ", ename=" << binapi::rest::e_error_to_string(account.ec)
+                  << ", emsg=" << account.errmsg << std::endl
+                  << std::endl;
 
         return EXIT_FAILURE;
     } else {
@@ -187,98 +180,98 @@ int main(int argc, char **argv) {
     BREAK_IF_ERROR(mytrades);
     std::cout << "mytrades=" << mytrades.v << std::endl << std::endl;
 
-//    auto neworder = api.new_order(
-//         "BNBUSDT"
-//        ,binapi::e_side::buy
-//        ,binapi::e_type::limit
-//        ,binapi::e_time::GTC
-//        ,binapi::e_trade_resp_type::FULL
-//        ,"0.1"
-//        ,"0"
-//        ,nullptr
-//        ,nullptr
-//        ,nullptr
-//    );
-//    BREAK_IF_ERROR(neworder);
-//    std::cout << "neworder=" << neworder.v << std::endl << std::endl;
+    //    auto neworder = api.new_order(
+    //         "BNBUSDT"
+    //        ,binapi::e_side::buy
+    //        ,binapi::e_type::limit
+    //        ,binapi::e_time::GTC
+    //        ,binapi::e_trade_resp_type::FULL
+    //        ,"0.1"
+    //        ,"0"
+    //        ,nullptr
+    //        ,nullptr
+    //        ,nullptr
+    //    );
+    //    BREAK_IF_ERROR(neworder);
+    //    std::cout << "neworder=" << neworder.v << std::endl << std::endl;
 
-//    auto cancelorder = api.cancel_order("BNBUSDT", 1, nullptr, nullptr);
-//    BREAK_IF_ERROR(cancelorder);
-//    std::cout << "cancelorder=" << cancelorder.v << std::endl << std::endl;
-//
+    //    auto cancelorder = api.cancel_order("BNBUSDT", 1, nullptr, nullptr);
+    //    BREAK_IF_ERROR(cancelorder);
+    //    std::cout << "cancelorder=" << cancelorder.v << std::endl << std::endl;
+    //
     auto start_uds = api.start_user_data_stream();
     BREAK_IF_ERROR(start_uds);
     std::cout << "start_uds=" << start_uds.v << std::endl << std::endl;
 
-    auto user_data_stream = wsp.userdata(start_uds.v.listenKey.c_str(),
-        [](const char *fl, int ec, std::string errmsg, binapi::userdata::account_update_t msg) -> bool {
-             if ( ec ) {
-                 std::cout << "account update: fl=" << fl << ", ec=" << ec << ", errmsg: " << errmsg << ", msg: " << msg << std::endl;
-                 return false;
-             }
+    auto user_data_stream = wsp.userdata(
+        start_uds.v.listenKey.c_str(),
+        [](const char* fl, int ec, std::string errmsg, binapi::userdata::account_update_t msg) -> bool {
+            if (ec) {
+                std::cout << "account update: fl=" << fl << ", ec=" << ec << ", errmsg: " << errmsg << ", msg: " << msg
+                          << std::endl;
+                return false;
+            }
 
-             std::cout << "account update:\n" << msg << std::endl;
-             return true;
-        }
-        ,[](const char *fl, int ec, std::string errmsg, binapi::userdata::balance_update_t msg) -> bool {
-            if ( ec ) {
-                std::cout << "balance update: fl=" << fl << ", ec=" << ec << ", errmsg: " << errmsg << ", msg: " << msg << std::endl;
+            std::cout << "account update:\n" << msg << std::endl;
+            return true;
+        },
+        [](const char* fl, int ec, std::string errmsg, binapi::userdata::balance_update_t msg) -> bool {
+            if (ec) {
+                std::cout << "balance update: fl=" << fl << ", ec=" << ec << ", errmsg: " << errmsg << ", msg: " << msg
+                          << std::endl;
                 return false;
             }
 
             std::cout << "balance update:\n" << msg << std::endl;
             return true;
-        }
-        ,[](const char *fl, int ec, std::string errmsg, binapi::userdata::order_update_t msg) -> bool {
-            if ( ec ) {
-                std::cout << "order update: fl=" << fl << ", ec=" << ec << ", errmsg: " << errmsg << ", msg: " << msg << std::endl;
+        },
+        [](const char* fl, int ec, std::string errmsg, binapi::userdata::order_update_t msg) -> bool {
+            if (ec) {
+                std::cout << "order update: fl=" << fl << ", ec=" << ec << ", errmsg: " << errmsg << ", msg: " << msg
+                          << std::endl;
                 return false;
             }
 
             std::cout << "order update:\n" << msg << std::endl;
             return true;
-        }
-    );
-    wsp.diff_depth(testpair, binapi::e_freq::_100ms,
-        [](const char *fl, int ec, std::string errmsg, binapi::ws::diff_depths_t msg) -> bool {
-            if ( ec ) {
-                std::cout << "subscribe_depth(): fl=" << fl << ", ec=" << ec << ", errmsg: " << errmsg << ", msg: " << msg << std::endl;
-                return false;
-            }
+        });
+    wsp.diff_depth(testpair,
+                   binapi::e_freq::_100ms,
+                   [](const char* fl, int ec, std::string errmsg, binapi::ws::diff_depths_t msg) -> bool {
+                       if (ec) {
+                           std::cout << "subscribe_depth(): fl=" << fl << ", ec=" << ec << ", errmsg: " << errmsg
+                                     << ", msg: " << msg << std::endl;
+                           return false;
+                       }
 
-            std::cout << "depth: " << msg << std::endl;
-            return true;
+                       std::cout << "depth: " << msg << std::endl;
+                       return true;
+                   });
+    wsp.trade(testpair, [](const char* fl, int ec, std::string errmsg, binapi::ws::trade_t msg) -> bool {
+        if (ec) {
+            std::cout << "subscribe_trade(): fl=" << fl << ", ec=" << ec << ", errmsg: " << errmsg << ", msg: " << msg
+                      << std::endl;
+            return false;
         }
-    );
-    wsp.trade(testpair,
-        [](const char *fl, int ec, std::string errmsg, binapi::ws::trade_t msg) -> bool {
-            if ( ec ) {
-                std::cout << "subscribe_trade(): fl=" << fl << ", ec=" << ec << ", errmsg: " << errmsg << ", msg: " << msg << std::endl;
-                return false;
-            }
 
-            std::cout << "trade: " << msg << std::endl;
-            return true;
-        }
-    );
+        std::cout << "trade: " << msg << std::endl;
+        return true;
+    });
 
-    boost::asio::steady_timer unsubscribe_timer{ioctx};
-    unsubscribe_timer.expires_after(std::chrono::seconds{20});
-    unsubscribe_timer.async_wait(
-        [user_data_stream, &wsp]
-        (const boost::system::error_code &) {
-            std::cout << "unsubscribe userdata stream" << std::endl;
-            wsp.unsubscribe(user_data_stream);
-        }
-    );
+    boost::asio::steady_timer unsubscribe_timer{ ioctx };
+    unsubscribe_timer.expires_after(std::chrono::seconds{ 20 });
+    unsubscribe_timer.async_wait([user_data_stream, &wsp](const boost::system::error_code&) {
+        std::cout << "unsubscribe userdata stream" << std::endl;
+        wsp.unsubscribe(user_data_stream);
+    });
 
     auto ping_uds = api.ping_user_data_stream(start_uds.v.listenKey);
     BREAK_IF_ERROR(ping_uds);
     std::cout << "ping_uds=" << ping_uds.v << std::endl << std::endl;
 
-////    auto close_uds = api.close_user_data_stream(start_uds.v.listenKey);
-////    BREAK_IF_ERROR(close_uds);
-////    std::cout << "close_uds=" << close_uds.v << std::endl << std::endl;
+    ////    auto close_uds = api.close_user_data_stream(start_uds.v.listenKey);
+    ////    BREAK_IF_ERROR(close_uds);
+    ////    std::cout << "close_uds=" << close_uds.v << std::endl << std::endl;
 
     ioctx.run();
 

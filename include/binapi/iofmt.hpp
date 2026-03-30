@@ -16,7 +16,7 @@
 
 namespace binapi {
 
-constexpr std::ios_base::fmtflags iofmt = std::ios_base::fixed|std::ios_base::showpoint|std::ios_base::showbase;
+constexpr std::ios_base::fmtflags iofmt = std::ios_base::fixed | std::ios_base::showpoint | std::ios_base::showbase;
 
 } // ns binapi
 

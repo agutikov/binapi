@@ -14,38 +14,44 @@
 
 namespace binapi2::umf::types {
 
-struct websocket_api_error {
+struct websocket_api_error
+{
     int code{};
     std::string msg{};
 };
 
-struct session_logon_request {
+struct session_logon_request
+{
     std::string apiKey{};
     std::uint64_t timestamp{};
     std::uint64_t recvWindow{};
     std::string signature{};
 };
 
-struct websocket_api_status {
+struct websocket_api_status
+{
     int status{};
     std::string id{};
 };
 
-struct session_logon_result {
+struct session_logon_result
+{
     std::optional<std::string> apiKey{};
     std::optional<bool> authorizedSinceConnect{};
     std::optional<bool> returnRateLimits{};
     std::optional<std::string> serverTime{};
 };
 
-struct websocket_api_signed_request {
+struct websocket_api_signed_request
+{
     std::string apiKey{};
     std::uint64_t timestamp{};
     std::optional<std::uint64_t> recvWindow{};
     std::string signature{};
 };
 
-struct websocket_api_order_place_request : websocket_api_signed_request {
+struct websocket_api_order_place_request : websocket_api_signed_request
+{
     std::string symbol{};
     std::string side{};
     std::string type{};
@@ -56,24 +62,28 @@ struct websocket_api_order_place_request : websocket_api_signed_request {
     std::optional<std::string> stopPrice{};
 };
 
-struct websocket_api_order_query_request : websocket_api_signed_request {
+struct websocket_api_order_query_request : websocket_api_signed_request
+{
     std::string symbol{};
     std::optional<std::uint64_t> orderId{};
     std::optional<std::string> origClientOrderId{};
 };
 
-struct websocket_api_order_cancel_request : websocket_api_signed_request {
+struct websocket_api_order_cancel_request : websocket_api_signed_request
+{
     std::string symbol{};
     std::optional<std::uint64_t> orderId{};
     std::optional<std::string> origClientOrderId{};
 };
 
-struct websocket_api_book_ticker_request {
+struct websocket_api_book_ticker_request
+{
     std::optional<std::string> symbol{};
 };
 
-template <typename T>
-struct websocket_api_response {
+template<typename T>
+struct websocket_api_response
+{
     std::string id{};
     int status{};
     std::optional<T> result{};
@@ -83,106 +93,124 @@ struct websocket_api_response {
 
 } // namespace binapi2::umf::types
 
-template <>
-struct glz::meta<binapi2::umf::types::websocket_api_error> {
+template<>
+struct glz::meta<binapi2::umf::types::websocket_api_error>
+{
     using T = binapi2::umf::types::websocket_api_error;
     static constexpr auto value = object("code", &T::code, "msg", &T::msg);
 };
 
-template <>
-struct glz::meta<binapi2::umf::types::session_logon_request> {
+template<>
+struct glz::meta<binapi2::umf::types::session_logon_request>
+{
     using T = binapi2::umf::types::session_logon_request;
-    static constexpr auto value = object(
-        "apiKey", &T::apiKey,
-        "timestamp", &T::timestamp,
-        "recvWindow", &T::recvWindow,
-        "signature", &T::signature
-    );
+    static constexpr auto value =
+        object("apiKey", &T::apiKey, "timestamp", &T::timestamp, "recvWindow", &T::recvWindow, "signature", &T::signature);
 };
 
-template <>
-struct glz::meta<binapi2::umf::types::session_logon_result> {
+template<>
+struct glz::meta<binapi2::umf::types::session_logon_result>
+{
     using T = binapi2::umf::types::session_logon_result;
-    static constexpr auto value = object(
-        "apiKey", &T::apiKey,
-        "authorizedSinceConnect", &T::authorizedSinceConnect,
-        "returnRateLimits", &T::returnRateLimits,
-        "serverTime", &T::serverTime
-    );
+    static constexpr auto value = object("apiKey",
+                                         &T::apiKey,
+                                         "authorizedSinceConnect",
+                                         &T::authorizedSinceConnect,
+                                         "returnRateLimits",
+                                         &T::returnRateLimits,
+                                         "serverTime",
+                                         &T::serverTime);
 };
 
-template <>
-struct glz::meta<binapi2::umf::types::websocket_api_signed_request> {
+template<>
+struct glz::meta<binapi2::umf::types::websocket_api_signed_request>
+{
     using T = binapi2::umf::types::websocket_api_signed_request;
-    static constexpr auto value = object(
-        "apiKey", &T::apiKey,
-        "timestamp", &T::timestamp,
-        "recvWindow", &T::recvWindow,
-        "signature", &T::signature
-    );
+    static constexpr auto value =
+        object("apiKey", &T::apiKey, "timestamp", &T::timestamp, "recvWindow", &T::recvWindow, "signature", &T::signature);
 };
 
-template <>
-struct glz::meta<binapi2::umf::types::websocket_api_order_place_request> {
+template<>
+struct glz::meta<binapi2::umf::types::websocket_api_order_place_request>
+{
     using T = binapi2::umf::types::websocket_api_order_place_request;
-    static constexpr auto value = object(
-        "apiKey", &T::apiKey,
-        "timestamp", &T::timestamp,
-        "recvWindow", &T::recvWindow,
-        "signature", &T::signature,
-        "symbol", &T::symbol,
-        "side", &T::side,
-        "type", &T::type,
-        "timeInForce", &T::timeInForce,
-        "quantity", &T::quantity,
-        "price", &T::price,
-        "newClientOrderId", &T::newClientOrderId,
-        "stopPrice", &T::stopPrice
-    );
+    static constexpr auto value = object("apiKey",
+                                         &T::apiKey,
+                                         "timestamp",
+                                         &T::timestamp,
+                                         "recvWindow",
+                                         &T::recvWindow,
+                                         "signature",
+                                         &T::signature,
+                                         "symbol",
+                                         &T::symbol,
+                                         "side",
+                                         &T::side,
+                                         "type",
+                                         &T::type,
+                                         "timeInForce",
+                                         &T::timeInForce,
+                                         "quantity",
+                                         &T::quantity,
+                                         "price",
+                                         &T::price,
+                                         "newClientOrderId",
+                                         &T::newClientOrderId,
+                                         "stopPrice",
+                                         &T::stopPrice);
 };
 
-template <>
-struct glz::meta<binapi2::umf::types::websocket_api_order_query_request> {
+template<>
+struct glz::meta<binapi2::umf::types::websocket_api_order_query_request>
+{
     using T = binapi2::umf::types::websocket_api_order_query_request;
-    static constexpr auto value = object(
-        "apiKey", &T::apiKey,
-        "timestamp", &T::timestamp,
-        "recvWindow", &T::recvWindow,
-        "signature", &T::signature,
-        "symbol", &T::symbol,
-        "orderId", &T::orderId,
-        "origClientOrderId", &T::origClientOrderId
-    );
+    static constexpr auto value = object("apiKey",
+                                         &T::apiKey,
+                                         "timestamp",
+                                         &T::timestamp,
+                                         "recvWindow",
+                                         &T::recvWindow,
+                                         "signature",
+                                         &T::signature,
+                                         "symbol",
+                                         &T::symbol,
+                                         "orderId",
+                                         &T::orderId,
+                                         "origClientOrderId",
+                                         &T::origClientOrderId);
 };
 
-template <>
-struct glz::meta<binapi2::umf::types::websocket_api_order_cancel_request> {
+template<>
+struct glz::meta<binapi2::umf::types::websocket_api_order_cancel_request>
+{
     using T = binapi2::umf::types::websocket_api_order_cancel_request;
-    static constexpr auto value = object(
-        "apiKey", &T::apiKey,
-        "timestamp", &T::timestamp,
-        "recvWindow", &T::recvWindow,
-        "signature", &T::signature,
-        "symbol", &T::symbol,
-        "orderId", &T::orderId,
-        "origClientOrderId", &T::origClientOrderId
-    );
+    static constexpr auto value = object("apiKey",
+                                         &T::apiKey,
+                                         "timestamp",
+                                         &T::timestamp,
+                                         "recvWindow",
+                                         &T::recvWindow,
+                                         "signature",
+                                         &T::signature,
+                                         "symbol",
+                                         &T::symbol,
+                                         "orderId",
+                                         &T::orderId,
+                                         "origClientOrderId",
+                                         &T::origClientOrderId);
 };
 
-template <>
-struct glz::meta<binapi2::umf::types::websocket_api_book_ticker_request> {
+template<>
+struct glz::meta<binapi2::umf::types::websocket_api_book_ticker_request>
+{
     using T = binapi2::umf::types::websocket_api_book_ticker_request;
     static constexpr auto value = object("symbol", &T::symbol);
 };
 
-template <typename T>
-struct glz::meta<binapi2::umf::types::websocket_api_response<T>> {
+template<typename T>
+struct glz::meta<binapi2::umf::types::websocket_api_response<T>>
+{
     using U = binapi2::umf::types::websocket_api_response<T>;
-    static constexpr auto value = object(
-        "id", &U::id,
-        "status", &U::status,
-        "result", &U::result,
-        "rateLimits", &U::rateLimits,
-        "error", &U::error
-    );
+    static constexpr auto value =
+        object("id", &U::id, "status", &U::status, "result", &U::result, "rateLimits", &U::rateLimits, "error", &U::error);
 };

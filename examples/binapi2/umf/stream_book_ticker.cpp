@@ -4,16 +4,18 @@
 
 #include <iostream>
 
-int main() {
+int
+main()
+{
     boost::asio::io_context io;
-    binapi2::umf::streams::market_streams streams{io, {}};
+    binapi2::umf::streams::market_streams streams{ io, {} };
 
-    if (auto connected = streams.connect_book_ticker({.symbol = "btcusdt"}); !connected) {
+    if (auto connected = streams.connect_book_ticker({ .symbol = "btcusdt" }); !connected) {
         std::cerr << connected.err.message << '\n';
         return 1;
     }
 
-    auto loop = streams.read_book_ticker_loop([](const binapi2::umf::types::book_ticker_stream_event &event) {
+    auto loop = streams.read_book_ticker_loop([](const binapi2::umf::types::book_ticker_stream_event& event) {
         std::cout << event.s << ' ' << event.b << ' ' << event.a << '\n';
         return false;
     });

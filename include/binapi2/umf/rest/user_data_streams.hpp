@@ -9,16 +9,17 @@ class client;
 
 namespace binapi2::umf::rest {
 
-class user_data_stream_service {
-  public:
-    explicit user_data_stream_service(client &owner) noexcept;
+class user_data_stream_service
+{
+public:
+    explicit user_data_stream_service(client& owner) noexcept;
 
     [[nodiscard]] result<types::listen_key_response> start();
     [[nodiscard]] result<types::listen_key_response> keepalive();
     [[nodiscard]] result<types::empty_response> close();
 
-  private:
-    client &owner_;
+private:
+    client& owner_;
 };
 
 } // namespace binapi2::umf::rest

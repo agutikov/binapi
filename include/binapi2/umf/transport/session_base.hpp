@@ -6,14 +6,14 @@
 
 namespace binapi2::umf::transport {
 
-class session_base {
-  public:
-    explicit session_base(config cfg)
-        : cfg_(std::move(cfg)) {}
+class session_base
+{
+public:
+    explicit session_base(config cfg) : cfg_(std::move(cfg)) {}
 
     virtual ~session_base() = default;
 
-  protected:
+protected:
     config cfg_;
 };
 

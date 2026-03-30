@@ -11,10 +11,11 @@
 
 namespace binapi2::umf::types {
 
-struct new_order_request {
+struct new_order_request
+{
     std::string symbol{};
-    order_side side{order_side::buy};
-    order_type type{order_type::limit};
+    order_side side{ order_side::buy };
+    order_type type{ order_type::limit };
     std::optional<time_in_force> timeInForce{};
     std::string quantity{};
     std::optional<std::string> price{};
@@ -22,7 +23,8 @@ struct new_order_request {
     std::optional<std::string> stopPrice{};
 };
 
-struct order_response {
+struct order_response
+{
     std::string clientOrderId{};
     std::string cumQty{};
     std::string cumQuote{};
@@ -51,9 +53,10 @@ struct order_response {
     std::optional<std::uint64_t> updateTime{};
 };
 
-struct modify_order_request {
+struct modify_order_request
+{
     std::string symbol{};
-    order_side side{order_side::buy};
+    order_side side{ order_side::buy };
     std::string quantity{};
     std::string price{};
     std::optional<std::uint64_t> orderId{};
@@ -61,13 +64,15 @@ struct modify_order_request {
     std::optional<std::string> priceMatch{};
 };
 
-struct cancel_order_request {
+struct cancel_order_request
+{
     std::string symbol{};
     std::optional<std::uint64_t> orderId{};
     std::optional<std::string> origClientOrderId{};
 };
 
-struct query_order_request {
+struct query_order_request
+{
     std::string symbol{};
     std::optional<std::uint64_t> orderId{};
     std::optional<std::string> origClientOrderId{};
@@ -75,35 +80,60 @@ struct query_order_request {
 
 } // namespace binapi2::umf::types
 
-template <>
-struct glz::meta<binapi2::umf::types::order_response> {
+template<>
+struct glz::meta<binapi2::umf::types::order_response>
+{
     using T = binapi2::umf::types::order_response;
-    static constexpr auto value = object(
-        "clientOrderId", &T::clientOrderId,
-        "cumQty", &T::cumQty,
-        "cumQuote", &T::cumQuote,
-        "executedQty", &T::executedQty,
-        "cumBase", &T::cumBase,
-        "orderId", &T::orderId,
-        "avgPrice", &T::avgPrice,
-        "origQty", &T::origQty,
-        "pair", &T::pair,
-        "price", &T::price,
-        "reduceOnly", &T::reduceOnly,
-        "side", &T::side,
-        "positionSide", &T::positionSide,
-        "status", &T::status,
-        "stopPrice", &T::stopPrice,
-        "closePosition", &T::closePosition,
-        "symbol", &T::symbol,
-        "timeInForce", &T::timeInForce,
-        "type", &T::type,
-        "workingType", &T::workingType,
-        "priceProtect", &T::priceProtect,
-        "origType", &T::origType,
-        "priceMatch", &T::priceMatch,
-        "selfTradePreventionMode", &T::selfTradePreventionMode,
-        "goodTillDate", &T::goodTillDate,
-        "updateTime", &T::updateTime
-    );
+    static constexpr auto value = object("clientOrderId",
+                                         &T::clientOrderId,
+                                         "cumQty",
+                                         &T::cumQty,
+                                         "cumQuote",
+                                         &T::cumQuote,
+                                         "executedQty",
+                                         &T::executedQty,
+                                         "cumBase",
+                                         &T::cumBase,
+                                         "orderId",
+                                         &T::orderId,
+                                         "avgPrice",
+                                         &T::avgPrice,
+                                         "origQty",
+                                         &T::origQty,
+                                         "pair",
+                                         &T::pair,
+                                         "price",
+                                         &T::price,
+                                         "reduceOnly",
+                                         &T::reduceOnly,
+                                         "side",
+                                         &T::side,
+                                         "positionSide",
+                                         &T::positionSide,
+                                         "status",
+                                         &T::status,
+                                         "stopPrice",
+                                         &T::stopPrice,
+                                         "closePosition",
+                                         &T::closePosition,
+                                         "symbol",
+                                         &T::symbol,
+                                         "timeInForce",
+                                         &T::timeInForce,
+                                         "type",
+                                         &T::type,
+                                         "workingType",
+                                         &T::workingType,
+                                         "priceProtect",
+                                         &T::priceProtect,
+                                         "origType",
+                                         &T::origType,
+                                         "priceMatch",
+                                         &T::priceMatch,
+                                         "selfTradePreventionMode",
+                                         &T::selfTradePreventionMode,
+                                         "goodTillDate",
+                                         &T::goodTillDate,
+                                         "updateTime",
+                                         &T::updateTime);
 };

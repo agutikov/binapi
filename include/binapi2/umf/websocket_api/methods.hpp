@@ -4,7 +4,8 @@
 
 namespace binapi2::umf::websocket_api {
 
-struct session_logon_call {
+struct session_logon_call
+{
     types::session_logon_request params{};
 };
 

@@ -8,46 +8,45 @@
 
 namespace binapi2::umf {
 
-template <typename T>
-struct result {
+template<typename T>
+struct result
+{
     std::optional<T> value{};
     error err{};
 
-    [[nodiscard]] explicit operator bool() const noexcept {
-        return err.code == error_code::none;
-    }
+    [[nodiscard]] explicit operator bool() const noexcept { return err.code == error_code::none; }
 
-    [[nodiscard]] T &operator*() noexcept { return *value; }
-    [[nodiscard]] const T &operator*() const noexcept { return *value; }
-    [[nodiscard]] T *operator->() noexcept { return std::addressof(*value); }
-    [[nodiscard]] const T *operator->() const noexcept { return std::addressof(*value); }
+    [[nodiscard]] T& operator*() noexcept { return *value; }
+    [[nodiscard]] const T& operator*() const noexcept { return *value; }
+    [[nodiscard]] T* operator->() noexcept { return std::addressof(*value); }
+    [[nodiscard]] const T* operator->() const noexcept { return std::addressof(*value); }
 
-    static result success(T v) {
+    static result success(T v)
+    {
         result r;
         r.value = std::move(v);
         return r;
     }
 
-    static result failure(error e) {
+    static result failure(error e)
+    {
         result r;
         r.err = std::move(e);
         return r;
     }
 };
 
-template <>
-struct result<void> {
+template<>
+struct result<void>
+{
     error err{};
 
-    [[nodiscard]] explicit operator bool() const noexcept {
-        return err.code == error_code::none;
-    }
+    [[nodiscard]] explicit operator bool() const noexcept { return err.code == error_code::none; }
 
-    static result success() {
-        return {};
-    }
+    static result success() { return {}; }
 
-    static result failure(error e) {
+    static result failure(error e)
+    {
         result r;
         r.err = std::move(e);
         return r;
