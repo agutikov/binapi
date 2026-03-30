@@ -4,3 +4,6 @@
 [submodule "docs/api/binance-spot-api-docs"]
 	path = docs/api/binance-spot-api-docs
 	url = https://github.com/binance/binance-spot-api-docs.git
+[submodule "deps/glaze"]
+	path = deps/glaze
+	url = https://github.com/stephenberry/glaze.git
