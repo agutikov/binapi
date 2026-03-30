@@ -42,6 +42,31 @@ struct recent_trade {
     std::string quoteQty{};
     std::uint64_t time{};
     bool isBuyerMaker{};
+    std::optional<bool> isRPITrade{};
+};
+
+struct aggregate_trades_request {
+    std::string symbol{};
+    std::optional<std::uint64_t> fromId{};
+    std::optional<std::uint64_t> startTime{};
+    std::optional<std::uint64_t> endTime{};
+    std::optional<int> limit{};
+};
+
+struct aggregate_trade {
+    std::uint64_t a{};
+    std::string p{};
+    std::string q{};
+    std::uint64_t f{};
+    std::uint64_t l{};
+    std::uint64_t T{};
+    bool m{};
+};
+
+struct historical_trades_request {
+    std::string symbol{};
+    std::optional<int> limit{};
+    std::optional<std::uint64_t> fromId{};
 };
 
 struct book_ticker_request {
@@ -138,7 +163,22 @@ struct glz::meta<binapi2::umf::types::recent_trade> {
         "qty", &T::qty,
         "quoteQty", &T::quoteQty,
         "time", &T::time,
-        "isBuyerMaker", &T::isBuyerMaker
+        "isBuyerMaker", &T::isBuyerMaker,
+        "isRPITrade", &T::isRPITrade
+    );
+};
+
+template <>
+struct glz::meta<binapi2::umf::types::aggregate_trade> {
+    using T = binapi2::umf::types::aggregate_trade;
+    static constexpr auto value = object(
+        "a", &T::a,
+        "p", &T::p,
+        "q", &T::q,
+        "f", &T::f,
+        "l", &T::l,
+        "T", &T::T,
+        "m", &T::m
     );
 };
 

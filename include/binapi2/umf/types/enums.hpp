@@ -6,6 +6,7 @@ namespace binapi2::umf::types {
 
 enum class security_type {
     none,
+    market_data,
     user_stream,
     user_data,
     trade,
@@ -35,6 +36,7 @@ enum class time_in_force {
 [[nodiscard]] inline std::string to_string(security_type value) {
     switch (value) {
         case security_type::none: return "none";
+        case security_type::market_data: return "market_data";
         case security_type::user_stream: return "user_stream";
         case security_type::user_data: return "user_data";
         case security_type::trade: return "trade";

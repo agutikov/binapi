@@ -65,6 +65,24 @@ result<std::vector<types::recent_trade>> market_data_service::recent_trades(cons
     return owner_.execute<std::vector<types::recent_trade>>(recent_trades_endpoint.method, std::string{recent_trades_endpoint.path}, query, recent_trades_endpoint.signed_request);
 }
 
+result<std::vector<types::aggregate_trade>> market_data_service::aggregate_trades(const types::aggregate_trades_request &request) {
+    query_map query{{"symbol", request.symbol}};
+    if (request.fromId) {
+        query["fromId"] = std::to_string(*request.fromId);
+    }
+    if (request.startTime) {
+        query["startTime"] = std::to_string(*request.startTime);
+    }
+    if (request.endTime) {
+        query["endTime"] = std::to_string(*request.endTime);
+    }
+    if (request.limit) {
+        query["limit"] = std::to_string(*request.limit);
+    }
+    return owner_.execute<std::vector<types::aggregate_trade>>(
+        aggregate_trades_endpoint.method, std::string{aggregate_trades_endpoint.path}, query, aggregate_trades_endpoint.signed_request);
+}
+
 result<types::book_ticker> market_data_service::book_ticker(const types::book_ticker_request &request) {
     query_map query;
     if (request.symbol) {
@@ -116,6 +134,18 @@ result<std::vector<types::mark_price>> market_data_service::mark_prices() {
 result<types::open_interest> market_data_service::open_interest(const types::open_interest_request &request) {
     return owner_.execute<types::open_interest>(
         open_interest_endpoint.method, std::string{open_interest_endpoint.path}, {{"symbol", request.symbol}}, open_interest_endpoint.signed_request);
+}
+
+result<std::vector<types::recent_trade>> market_data_service::historical_trades(const types::historical_trades_request &request) {
+    query_map query{{"symbol", request.symbol}};
+    if (request.limit) {
+        query["limit"] = std::to_string(*request.limit);
+    }
+    if (request.fromId) {
+        query["fromId"] = std::to_string(*request.fromId);
+    }
+    return owner_.execute<std::vector<types::recent_trade>>(
+        historical_trades_endpoint.method, std::string{historical_trades_endpoint.path}, query, historical_trades_endpoint.signed_request);
 }
 
 trade_service::trade_service(binapi2::umf::client &owner) noexcept

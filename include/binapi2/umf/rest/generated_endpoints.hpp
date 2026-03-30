@@ -23,11 +23,13 @@ inline constexpr endpoint_metadata server_time_endpoint{"server_time", boost::be
 inline constexpr endpoint_metadata exchange_info_endpoint{"exchange_info", boost::beast::http::verb::get, "/fapi/v1/exchangeInfo", types::security_type::none, false, false, false};
 inline constexpr endpoint_metadata order_book_endpoint{"order_book", boost::beast::http::verb::get, "/fapi/v1/depth", types::security_type::none, false, false, false};
 inline constexpr endpoint_metadata recent_trades_endpoint{"recent_trades", boost::beast::http::verb::get, "/fapi/v1/trades", types::security_type::none, false, false, false};
+inline constexpr endpoint_metadata aggregate_trades_endpoint{"aggregate_trades", boost::beast::http::verb::get, "/fapi/v1/aggTrades", types::security_type::none, false, false, false};
 inline constexpr endpoint_metadata book_ticker_endpoint{"book_ticker", boost::beast::http::verb::get, "/fapi/v1/ticker/bookTicker", types::security_type::none, false, false, false};
 inline constexpr endpoint_metadata price_ticker_endpoint{"price_ticker", boost::beast::http::verb::get, "/fapi/v1/ticker/price", types::security_type::none, false, false, false};
 inline constexpr endpoint_metadata ticker_24hr_endpoint{"ticker_24hr", boost::beast::http::verb::get, "/fapi/v1/ticker/24hr", types::security_type::none, false, false, false};
 inline constexpr endpoint_metadata mark_price_endpoint{"mark_price", boost::beast::http::verb::get, "/fapi/v1/premiumIndex", types::security_type::none, false, false, false};
 inline constexpr endpoint_metadata open_interest_endpoint{"open_interest", boost::beast::http::verb::get, "/fapi/v1/openInterest", types::security_type::none, false, false, false};
+inline constexpr endpoint_metadata historical_trades_endpoint{"historical_trades", boost::beast::http::verb::get, "/fapi/v1/historicalTrades", types::security_type::market_data, false, false, false};
 inline constexpr endpoint_metadata account_information_endpoint{"account_information", boost::beast::http::verb::get, "/fapi/v3/account", types::security_type::user_data, true, true, true};
 inline constexpr endpoint_metadata account_balances_endpoint{"account_balances", boost::beast::http::verb::get, "/fapi/v3/balance", types::security_type::user_data, true, true, true};
 inline constexpr endpoint_metadata position_risk_endpoint{"position_risk", boost::beast::http::verb::get, "/fapi/v2/positionRisk", types::security_type::user_data, true, true, true};

@@ -20,6 +20,7 @@ class market_data_service {
     [[nodiscard]] result<types::exchange_info_response> exchange_info(const types::exchange_info_request &request = {});
     [[nodiscard]] result<types::order_book_response> order_book(const types::order_book_request &request);
     [[nodiscard]] result<std::vector<types::recent_trade>> recent_trades(const types::recent_trades_request &request);
+    [[nodiscard]] result<std::vector<types::aggregate_trade>> aggregate_trades(const types::aggregate_trades_request &request);
     [[nodiscard]] result<types::book_ticker> book_ticker(const types::book_ticker_request &request);
     [[nodiscard]] result<std::vector<types::book_ticker>> book_tickers();
     [[nodiscard]] result<types::price_ticker> price_ticker(const types::price_ticker_request &request);
@@ -29,6 +30,7 @@ class market_data_service {
     [[nodiscard]] result<types::mark_price> mark_price(const types::mark_price_request &request);
     [[nodiscard]] result<std::vector<types::mark_price>> mark_prices();
     [[nodiscard]] result<types::open_interest> open_interest(const types::open_interest_request &request);
+    [[nodiscard]] result<std::vector<types::recent_trade>> historical_trades(const types::historical_trades_request &request);
 
   private:
     client &owner_;
