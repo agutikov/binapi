@@ -1,0 +1,63 @@
+set(BINAPI2_UMF_HEADERS
+    ${CMAKE_SOURCE_DIR}/include/binapi2/umf/client.hpp
+    ${CMAKE_SOURCE_DIR}/include/binapi2/umf/config.hpp
+    ${CMAKE_SOURCE_DIR}/include/binapi2/umf/error.hpp
+    ${CMAKE_SOURCE_DIR}/include/binapi2/umf/result.hpp
+    ${CMAKE_SOURCE_DIR}/include/binapi2/umf/signing.hpp
+    ${CMAKE_SOURCE_DIR}/include/binapi2/umf/time.hpp
+    ${CMAKE_SOURCE_DIR}/include/binapi2/umf/rest/account.hpp
+    ${CMAKE_SOURCE_DIR}/include/binapi2/umf/rest/generated_endpoints.hpp
+    ${CMAKE_SOURCE_DIR}/include/binapi2/umf/rest/market_data.hpp
+    ${CMAKE_SOURCE_DIR}/include/binapi2/umf/rest/trade.hpp
+    ${CMAKE_SOURCE_DIR}/include/binapi2/umf/rest/user_data_streams.hpp
+    ${CMAKE_SOURCE_DIR}/include/binapi2/umf/streams/market_streams.hpp
+    ${CMAKE_SOURCE_DIR}/include/binapi2/umf/streams/subscriptions.hpp
+    ${CMAKE_SOURCE_DIR}/include/binapi2/umf/streams/user_streams.hpp
+    ${CMAKE_SOURCE_DIR}/include/binapi2/umf/transport/http_client.hpp
+    ${CMAKE_SOURCE_DIR}/include/binapi2/umf/transport/session_base.hpp
+    ${CMAKE_SOURCE_DIR}/include/binapi2/umf/transport/ssl_context.hpp
+    ${CMAKE_SOURCE_DIR}/include/binapi2/umf/transport/websocket_client.hpp
+    ${CMAKE_SOURCE_DIR}/include/binapi2/umf/types/common.hpp
+    ${CMAKE_SOURCE_DIR}/include/binapi2/umf/types/account.hpp
+    ${CMAKE_SOURCE_DIR}/include/binapi2/umf/types/enums.hpp
+    ${CMAKE_SOURCE_DIR}/include/binapi2/umf/types/market_data.hpp
+    ${CMAKE_SOURCE_DIR}/include/binapi2/umf/types/streams.hpp
+    ${CMAKE_SOURCE_DIR}/include/binapi2/umf/types/trade.hpp
+    ${CMAKE_SOURCE_DIR}/include/binapi2/umf/types/websocket_api.hpp
+    ${CMAKE_SOURCE_DIR}/include/binapi2/umf/websocket_api/client.hpp
+    ${CMAKE_SOURCE_DIR}/include/binapi2/umf/websocket_api/generated_methods.hpp
+    ${CMAKE_SOURCE_DIR}/include/binapi2/umf/websocket_api/methods.hpp
+)
+
+set(BINAPI2_UMF_SOURCES
+    client.cpp
+    rest.cpp
+    signing.cpp
+    transport/http_client.cpp
+    transport/ssl_context.cpp
+    transport/websocket_client.cpp
+    websocket_api/client.cpp
+    streams/market_streams.cpp
+    streams/user_streams.cpp
+)
+
+add_library(
+    binapi2_umf STATIC
+    ${BINAPI2_UMF_SOURCES}
+    ${BINAPI2_UMF_HEADERS}
+)
+
+target_include_directories(binapi2_umf
+    PUBLIC
+        ${CMAKE_SOURCE_DIR}/include
+)
+
+target_link_libraries(
+    binapi2_umf
+    PUBLIC
+        glaze::glaze
+        ZLIB::ZLIB
+        OpenSSL::Crypto
+        OpenSSL::SSL
+        Threads::Threads
+)
