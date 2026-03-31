@@ -13,6 +13,8 @@
 #include <boost/asio/io_context.hpp>
 
 #include <functional>
+#include <string>
+#include <vector>
 
 namespace binapi2::fapi::streams {
 
@@ -31,6 +33,12 @@ public:
     using kline_handler = std::function<bool(const types::kline_stream_event&)>;
     using liquidation_order_handler = std::function<bool(const types::liquidation_order_stream_event&)>;
     using continuous_contract_kline_handler = std::function<bool(const types::continuous_contract_kline_stream_event&)>;
+    using all_market_mark_price_handler = std::function<bool(const types::all_market_mark_price_stream_event&)>;
+    using composite_index_handler = std::function<bool(const types::composite_index_stream_event&)>;
+    using contract_info_handler = std::function<bool(const types::contract_info_stream_event&)>;
+    using asset_index_handler = std::function<bool(const types::asset_index_stream_event&)>;
+    using all_asset_index_handler = std::function<bool(const types::all_asset_index_stream_event&)>;
+    using trading_session_handler = std::function<bool(const types::trading_session_stream_event&)>;
 
     market_streams(boost::asio::io_context& io_context, config cfg);
 
@@ -90,6 +98,39 @@ public:
     void read_kline_loop(kline_handler handler, void_callback callback);
     [[nodiscard]] result<void> read_continuous_contract_kline_loop(continuous_contract_kline_handler handler);
     void read_continuous_contract_kline_loop(continuous_contract_kline_handler handler, void_callback callback);
+    [[nodiscard]] result<void> connect_all_market_mark_price(const all_market_mark_price_subscription& subscription = {});
+    void connect_all_market_mark_price(const all_market_mark_price_subscription& subscription, void_callback callback);
+    [[nodiscard]] result<void> connect_composite_index(const composite_index_subscription& subscription);
+    void connect_composite_index(const composite_index_subscription& subscription, void_callback callback);
+    [[nodiscard]] result<void> connect_contract_info(const contract_info_subscription& subscription = {});
+    void connect_contract_info(const contract_info_subscription& subscription, void_callback callback);
+    [[nodiscard]] result<void> connect_asset_index(const asset_index_subscription& subscription);
+    void connect_asset_index(const asset_index_subscription& subscription, void_callback callback);
+    [[nodiscard]] result<void> connect_all_asset_index(const all_asset_index_subscription& subscription = {});
+    void connect_all_asset_index(const all_asset_index_subscription& subscription, void_callback callback);
+    [[nodiscard]] result<void> connect_trading_session(const trading_session_subscription& subscription = {});
+    void connect_trading_session(const trading_session_subscription& subscription, void_callback callback);
+    [[nodiscard]] result<void> connect_rpi_diff_book_depth(const rpi_diff_book_depth_subscription& subscription);
+    void connect_rpi_diff_book_depth(const rpi_diff_book_depth_subscription& subscription, void_callback callback);
+    [[nodiscard]] result<void> read_all_market_mark_price_loop(all_market_mark_price_handler handler);
+    void read_all_market_mark_price_loop(all_market_mark_price_handler handler, void_callback callback);
+    [[nodiscard]] result<void> read_composite_index_loop(composite_index_handler handler);
+    void read_composite_index_loop(composite_index_handler handler, void_callback callback);
+    [[nodiscard]] result<void> read_contract_info_loop(contract_info_handler handler);
+    void read_contract_info_loop(contract_info_handler handler, void_callback callback);
+    [[nodiscard]] result<void> read_asset_index_loop(asset_index_handler handler);
+    void read_asset_index_loop(asset_index_handler handler, void_callback callback);
+    [[nodiscard]] result<void> read_all_asset_index_loop(all_asset_index_handler handler);
+    void read_all_asset_index_loop(all_asset_index_handler handler, void_callback callback);
+    [[nodiscard]] result<void> read_trading_session_loop(trading_session_handler handler);
+    void read_trading_session_loop(trading_session_handler handler, void_callback callback);
+    [[nodiscard]] result<void> read_rpi_diff_book_depth_loop(depth_handler handler);
+    void read_rpi_diff_book_depth_loop(depth_handler handler, void_callback callback);
+    [[nodiscard]] result<void> connect_combined(const std::string& target = "/stream");
+    void connect_combined(const std::string& target, void_callback callback);
+    [[nodiscard]] result<void> subscribe(const std::vector<std::string>& streams);
+    [[nodiscard]] result<void> unsubscribe(const std::vector<std::string>& streams);
+    [[nodiscard]] result<std::vector<std::string>> list_subscriptions();
     [[nodiscard]] result<void> close();
     void close(void_callback callback);
 

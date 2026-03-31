@@ -467,6 +467,322 @@ market_streams::read_continuous_contract_kline_loop(continuous_contract_kline_ha
 }
 
 result<void>
+market_streams::connect_all_market_mark_price(const all_market_mark_price_subscription& subscription)
+{
+    const auto suffix = subscription.every_1s ? "/!markPrice@arr@1s" : "/!markPrice@arr";
+    const auto target = cfg_.stream_base_target + suffix;
+    return transport_.connect(cfg_.stream_host, cfg_.stream_port, target);
+}
+
+void
+market_streams::connect_all_market_mark_price(const all_market_mark_price_subscription& subscription, void_callback callback)
+{
+    boost::asio::post(io_context_, [this, subscription, callback = std::move(callback)]() mutable {
+        callback(connect_all_market_mark_price(subscription));
+    });
+}
+
+result<void>
+market_streams::connect_composite_index(const composite_index_subscription& subscription)
+{
+    if (subscription.symbol.empty()) {
+        return invalid_subscription("composite index stream requires a symbol");
+    }
+    const auto target = cfg_.stream_base_target + "/" + subscription.symbol + "@compositeIndex";
+    return transport_.connect(cfg_.stream_host, cfg_.stream_port, target);
+}
+
+void
+market_streams::connect_composite_index(const composite_index_subscription& subscription, void_callback callback)
+{
+    boost::asio::post(io_context_, [this, subscription, callback = std::move(callback)]() mutable {
+        callback(connect_composite_index(subscription));
+    });
+}
+
+result<void>
+market_streams::connect_contract_info(const contract_info_subscription&)
+{
+    const auto target = cfg_.stream_base_target + "/!contractInfo";
+    return transport_.connect(cfg_.stream_host, cfg_.stream_port, target);
+}
+
+void
+market_streams::connect_contract_info(const contract_info_subscription& subscription, void_callback callback)
+{
+    boost::asio::post(io_context_, [this, subscription, callback = std::move(callback)]() mutable {
+        callback(connect_contract_info(subscription));
+    });
+}
+
+result<void>
+market_streams::connect_asset_index(const asset_index_subscription& subscription)
+{
+    if (subscription.symbol.empty()) {
+        return invalid_subscription("asset index stream requires a symbol");
+    }
+    const auto target = cfg_.stream_base_target + "/" + subscription.symbol + "@assetIndex";
+    return transport_.connect(cfg_.stream_host, cfg_.stream_port, target);
+}
+
+void
+market_streams::connect_asset_index(const asset_index_subscription& subscription, void_callback callback)
+{
+    boost::asio::post(io_context_, [this, subscription, callback = std::move(callback)]() mutable {
+        callback(connect_asset_index(subscription));
+    });
+}
+
+result<void>
+market_streams::connect_all_asset_index(const all_asset_index_subscription&)
+{
+    const auto target = cfg_.stream_base_target + "/!assetIndex@arr";
+    return transport_.connect(cfg_.stream_host, cfg_.stream_port, target);
+}
+
+void
+market_streams::connect_all_asset_index(const all_asset_index_subscription& subscription, void_callback callback)
+{
+    boost::asio::post(io_context_, [this, subscription, callback = std::move(callback)]() mutable {
+        callback(connect_all_asset_index(subscription));
+    });
+}
+
+result<void>
+market_streams::connect_trading_session(const trading_session_subscription&)
+{
+    const auto target = cfg_.stream_base_target + "/tradingSession";
+    return transport_.connect(cfg_.stream_host, cfg_.stream_port, target);
+}
+
+void
+market_streams::connect_trading_session(const trading_session_subscription& subscription, void_callback callback)
+{
+    boost::asio::post(io_context_, [this, subscription, callback = std::move(callback)]() mutable {
+        callback(connect_trading_session(subscription));
+    });
+}
+
+result<void>
+market_streams::connect_rpi_diff_book_depth(const rpi_diff_book_depth_subscription& subscription)
+{
+    if (subscription.symbol.empty()) {
+        return invalid_subscription("RPI diff book depth stream requires a symbol");
+    }
+    const auto target = cfg_.stream_base_target + "/" + subscription.symbol + "@rpiDepth@500ms";
+    return transport_.connect(cfg_.stream_host, cfg_.stream_port, target);
+}
+
+void
+market_streams::connect_rpi_diff_book_depth(const rpi_diff_book_depth_subscription& subscription, void_callback callback)
+{
+    boost::asio::post(io_context_, [this, subscription, callback = std::move(callback)]() mutable {
+        callback(connect_rpi_diff_book_depth(subscription));
+    });
+}
+
+result<void>
+market_streams::read_all_market_mark_price_loop(all_market_mark_price_handler handler)
+{
+    return read_stream_loop<types::all_market_mark_price_stream_event>(transport_, std::move(handler));
+}
+
+void
+market_streams::read_all_market_mark_price_loop(all_market_mark_price_handler handler, void_callback callback)
+{
+    boost::asio::post(io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
+        callback(read_all_market_mark_price_loop(std::move(handler)));
+    });
+}
+
+result<void>
+market_streams::read_composite_index_loop(composite_index_handler handler)
+{
+    return read_stream_loop<types::composite_index_stream_event>(transport_, std::move(handler));
+}
+
+void
+market_streams::read_composite_index_loop(composite_index_handler handler, void_callback callback)
+{
+    boost::asio::post(io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
+        callback(read_composite_index_loop(std::move(handler)));
+    });
+}
+
+result<void>
+market_streams::read_contract_info_loop(contract_info_handler handler)
+{
+    return read_stream_loop<types::contract_info_stream_event>(transport_, std::move(handler));
+}
+
+void
+market_streams::read_contract_info_loop(contract_info_handler handler, void_callback callback)
+{
+    boost::asio::post(io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
+        callback(read_contract_info_loop(std::move(handler)));
+    });
+}
+
+result<void>
+market_streams::read_asset_index_loop(asset_index_handler handler)
+{
+    return read_stream_loop<types::asset_index_stream_event>(transport_, std::move(handler));
+}
+
+void
+market_streams::read_asset_index_loop(asset_index_handler handler, void_callback callback)
+{
+    boost::asio::post(io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
+        callback(read_asset_index_loop(std::move(handler)));
+    });
+}
+
+result<void>
+market_streams::read_all_asset_index_loop(all_asset_index_handler handler)
+{
+    return read_stream_loop<types::all_asset_index_stream_event>(transport_, std::move(handler));
+}
+
+void
+market_streams::read_all_asset_index_loop(all_asset_index_handler handler, void_callback callback)
+{
+    boost::asio::post(io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
+        callback(read_all_asset_index_loop(std::move(handler)));
+    });
+}
+
+result<void>
+market_streams::read_trading_session_loop(trading_session_handler handler)
+{
+    return read_stream_loop<types::trading_session_stream_event>(transport_, std::move(handler));
+}
+
+void
+market_streams::read_trading_session_loop(trading_session_handler handler, void_callback callback)
+{
+    boost::asio::post(io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
+        callback(read_trading_session_loop(std::move(handler)));
+    });
+}
+
+result<void>
+market_streams::read_rpi_diff_book_depth_loop(depth_handler handler)
+{
+    return read_stream_loop<types::depth_stream_event>(transport_, std::move(handler));
+}
+
+void
+market_streams::read_rpi_diff_book_depth_loop(depth_handler handler, void_callback callback)
+{
+    boost::asio::post(io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
+        callback(read_rpi_diff_book_depth_loop(std::move(handler)));
+    });
+}
+
+result<void>
+market_streams::connect_combined(const std::string& target)
+{
+    return transport_.connect(cfg_.stream_host, cfg_.stream_port, target);
+}
+
+void
+market_streams::connect_combined(const std::string& target, void_callback callback)
+{
+    boost::asio::post(io_context_,
+                      [this, target, callback = std::move(callback)]() mutable { callback(connect_combined(target)); });
+}
+
+result<void>
+market_streams::subscribe(const std::vector<std::string>& streams)
+{
+    struct subscribe_request
+    {
+        std::string method{ "SUBSCRIBE" };
+        std::vector<std::string> params{};
+        unsigned int id{ 1 };
+    };
+
+    subscribe_request request;
+    request.params = streams;
+    auto payload = glz::write_json(request);
+    if (!payload) {
+        return result<void>::failure({ error_code::json, 0, 0, "failed to serialize subscribe request", {} });
+    }
+    auto write_result = transport_.write_text(*payload);
+    if (!write_result) {
+        return result<void>::failure(write_result.err);
+    }
+    auto raw = transport_.read_text();
+    if (!raw) {
+        return result<void>::failure(raw.err);
+    }
+    return result<void>::success();
+}
+
+result<void>
+market_streams::unsubscribe(const std::vector<std::string>& streams)
+{
+    struct unsubscribe_request
+    {
+        std::string method{ "UNSUBSCRIBE" };
+        std::vector<std::string> params{};
+        unsigned int id{ 2 };
+    };
+
+    unsubscribe_request request;
+    request.params = streams;
+    auto payload = glz::write_json(request);
+    if (!payload) {
+        return result<void>::failure({ error_code::json, 0, 0, "failed to serialize unsubscribe request", {} });
+    }
+    auto write_result = transport_.write_text(*payload);
+    if (!write_result) {
+        return result<void>::failure(write_result.err);
+    }
+    auto raw = transport_.read_text();
+    if (!raw) {
+        return result<void>::failure(raw.err);
+    }
+    return result<void>::success();
+}
+
+result<std::vector<std::string>>
+market_streams::list_subscriptions()
+{
+    struct list_request
+    {
+        std::string method{ "LIST_SUBSCRIPTIONS" };
+        unsigned int id{ 3 };
+    };
+
+    list_request request;
+    auto payload = glz::write_json(request);
+    if (!payload) {
+        return result<std::vector<std::string>>::failure(
+            { error_code::json, 0, 0, "failed to serialize list subscriptions request", {} });
+    }
+    auto write_result = transport_.write_text(*payload);
+    if (!write_result) {
+        return result<std::vector<std::string>>::failure(write_result.err);
+    }
+    auto raw = transport_.read_text();
+    if (!raw) {
+        return result<std::vector<std::string>>::failure(raw.err);
+    }
+    struct list_response
+    {
+        std::vector<std::string> result{};
+        unsigned int id{};
+    };
+    list_response response{};
+    if (auto ec = glz::read_json(response, *raw)) {
+        return result<std::vector<std::string>>::failure(
+            { error_code::json, 0, 0, glz::format_error(ec, *raw), *raw });
+    }
+    return result<std::vector<std::string>>::success(std::move(response.result));
+}
+
+result<void>
 market_streams::close()
 {
     return transport_.close();

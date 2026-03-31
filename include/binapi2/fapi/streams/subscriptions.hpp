@@ -83,4 +83,36 @@ struct continuous_contract_kline_subscription
     types::kline_interval interval{ types::kline_interval::m1 };
 };
 
+struct all_market_mark_price_subscription
+{
+    bool every_1s{ false };
+};
+
+struct composite_index_subscription
+{
+    std::string symbol{};
+};
+
+struct contract_info_subscription
+{
+};
+
+struct asset_index_subscription
+{
+    std::string symbol{};
+};
+
+struct all_asset_index_subscription
+{
+};
+
+struct trading_session_subscription
+{
+};
+
+struct rpi_diff_book_depth_subscription
+{
+    std::string symbol{};
+};
+
 } // namespace binapi2::fapi::streams

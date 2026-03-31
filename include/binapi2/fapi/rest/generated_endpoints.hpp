@@ -181,5 +181,51 @@ inline constexpr endpoint_metadata cancel_order_endpoint{
 inline constexpr endpoint_metadata query_order_endpoint{
     "query_order", boost::beast::http::verb::get, "/fapi/v1/order", types::security_type::trade, true, true, true
 };
+inline constexpr endpoint_metadata basis_endpoint{
+    "basis", boost::beast::http::verb::get, "/futures/data/basis", types::security_type::none, false, false, false
+};
+inline constexpr endpoint_metadata price_ticker_v2_endpoint{
+    "price_ticker_v2", boost::beast::http::verb::get, "/fapi/v2/ticker/price", types::security_type::none, false, false, false
+};
+inline constexpr endpoint_metadata delivery_price_endpoint{
+    "delivery_price", boost::beast::http::verb::get, "/futures/data/delivery-price", types::security_type::none, false, false, false
+};
+inline constexpr endpoint_metadata composite_index_info_endpoint{ "composite_index_info",
+                                                                  boost::beast::http::verb::get,
+                                                                  "/fapi/v1/indexInfo",
+                                                                  types::security_type::none,
+                                                                  false,
+                                                                  false,
+                                                                  false };
+inline constexpr endpoint_metadata index_constituents_endpoint{ "index_constituents",
+                                                                boost::beast::http::verb::get,
+                                                                "/fapi/v1/constituents",
+                                                                types::security_type::none,
+                                                                false,
+                                                                false,
+                                                                false };
+inline constexpr endpoint_metadata asset_index_endpoint{
+    "asset_index", boost::beast::http::verb::get, "/fapi/v1/assetIndex", types::security_type::none, false, false, false
+};
+inline constexpr endpoint_metadata insurance_fund_endpoint{ "insurance_fund",
+                                                            boost::beast::http::verb::get,
+                                                            "/fapi/v1/insuranceBalance",
+                                                            types::security_type::none,
+                                                            false,
+                                                            false,
+                                                            false };
+inline constexpr endpoint_metadata adl_risk_endpoint{
+    "adl_risk", boost::beast::http::verb::get, "/fapi/v1/symbolAdlRisk", types::security_type::none, false, false, false
+};
+inline constexpr endpoint_metadata rpi_depth_endpoint{
+    "rpi_depth", boost::beast::http::verb::get, "/fapi/v1/rpiDepth", types::security_type::none, false, false, false
+};
+inline constexpr endpoint_metadata trading_schedule_endpoint{ "trading_schedule",
+                                                              boost::beast::http::verb::get,
+                                                              "/fapi/v1/tradingSchedule",
+                                                              types::security_type::none,
+                                                              false,
+                                                              false,
+                                                              false };
 
 } // namespace binapi2::fapi::rest

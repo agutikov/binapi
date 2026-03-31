@@ -96,6 +96,82 @@ user_streams::read_loop(account_update_handler account_handler,
                       });
 }
 
+namespace {
+
+bool
+match_event(const std::string& payload, const char* event_name)
+{
+    std::string with_space = std::string("\"e\": \"") + event_name + "\"";
+    std::string without_space = std::string("\"e\":\"") + event_name + "\"";
+    return payload.find(with_space) != std::string::npos || payload.find(without_space) != std::string::npos;
+}
+
+template<typename Event, typename Handler>
+bool
+try_dispatch(const std::string& payload, const char* event_name, const Handler& handler)
+{
+    if (!handler) {
+        return false;
+    }
+    if (!match_event(payload, event_name)) {
+        return false;
+    }
+    Event event{};
+    if (glz::read_json(event, payload)) {
+        return false;
+    }
+    handler(event);
+    return true;
+}
+
+} // namespace
+
+result<void>
+user_streams::read_loop(const handlers& h)
+{
+    return transport_.run_read_loop([h](const std::string& payload) {
+        if (try_dispatch<types::account_update_event>(payload, "ACCOUNT_UPDATE", h.on_account_update)) {
+            return true;
+        }
+        if (try_dispatch<types::order_trade_update_event>(payload, "ORDER_TRADE_UPDATE", h.on_order_trade_update)) {
+            return true;
+        }
+        if (try_dispatch<types::margin_call_event>(payload, "MARGIN_CALL", h.on_margin_call)) {
+            return true;
+        }
+        if (try_dispatch<types::listen_key_expired_event>(payload, "listenKeyExpired", h.on_listen_key_expired)) {
+            return true;
+        }
+        if (try_dispatch<types::account_config_update_event>(payload, "ACCOUNT_CONFIG_UPDATE", h.on_account_config_update)) {
+            return true;
+        }
+        if (try_dispatch<types::trade_lite_event>(payload, "TRADE_LITE", h.on_trade_lite)) {
+            return true;
+        }
+        if (try_dispatch<types::algo_order_update_event>(payload, "ALGO_UPDATE", h.on_algo_order_update)) {
+            return true;
+        }
+        if (try_dispatch<types::conditional_order_trigger_reject_event>(
+                payload, "CONDITIONAL_ORDER_TRIGGER_REJECT", h.on_conditional_order_reject)) {
+            return true;
+        }
+        if (try_dispatch<types::grid_update_event>(payload, "GRID_UPDATE", h.on_grid_update)) {
+            return true;
+        }
+        if (try_dispatch<types::strategy_update_event>(payload, "STRATEGY_UPDATE", h.on_strategy_update)) {
+            return true;
+        }
+        return true;
+    });
+}
+
+void
+user_streams::read_loop(const handlers& h, void_callback callback)
+{
+    boost::asio::post(io_context_,
+                      [this, h, callback = std::move(callback)]() mutable { callback(read_loop(h)); });
+}
+
 result<void>
 user_streams::close()
 {

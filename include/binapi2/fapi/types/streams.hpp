@@ -48,11 +48,14 @@ struct mark_price_stream_event
     std::uint64_t E{};
     std::string s{};
     std::string p{};
+    std::optional<std::string> ap{};
     std::string i{};
     std::string P{};
     std::string r{};
     std::uint64_t T{};
 };
+
+using all_market_mark_price_stream_event = std::vector<mark_price_stream_event>;
 
 struct depth_stream_event
 {
@@ -186,6 +189,76 @@ struct continuous_contract_kline_stream_event
     continuous_contract_kline_stream_data k{};
 };
 
+struct composite_index_constituent
+{
+    std::string b{};
+    std::string q{};
+    std::string w{};
+    std::string W{};
+    std::string i{};
+};
+
+struct composite_index_stream_event
+{
+    std::string e{};
+    std::uint64_t E{};
+    std::string s{};
+    std::string p{};
+    std::optional<std::string> C{};
+    std::vector<composite_index_constituent> c{};
+};
+
+struct contract_info_bracket
+{
+    int bs{};
+    double bnf{};
+    double bnc{};
+    double mmr{};
+    double cf{};
+    int mi{};
+    int ma{};
+};
+
+struct contract_info_stream_event
+{
+    std::string e{};
+    std::uint64_t E{};
+    std::string s{};
+    std::string ps{};
+    std::string ct{};
+    std::uint64_t dt{};
+    std::uint64_t ot{};
+    std::string cs{};
+    std::optional<std::vector<contract_info_bracket>> bks{};
+};
+
+struct asset_index_stream_event
+{
+    std::string e{};
+    std::uint64_t E{};
+    std::string s{};
+    std::string i{};
+    std::string b{};
+    std::string a{};
+    std::string B{};
+    std::string A{};
+    std::string q{};
+    std::string g{};
+    std::string Q{};
+    std::string G{};
+};
+
+using all_asset_index_stream_event = std::vector<asset_index_stream_event>;
+
+struct trading_session_stream_event
+{
+    std::string e{};
+    std::uint64_t E{};
+    std::uint64_t t{};
+    std::uint64_t T{};
+    std::string S{};
+};
+
 struct account_update_balance
 {
     std::string a{};
@@ -272,6 +345,135 @@ struct listen_key_expired_event
     std::string listenKey{};
 };
 
+struct account_config_leverage
+{
+    std::string s{};
+    int l{};
+};
+
+struct account_config_multi_assets
+{
+    bool j{};
+};
+
+struct account_config_update_event
+{
+    std::string e{};
+    std::uint64_t E{};
+    std::uint64_t T{};
+    std::optional<account_config_leverage> ac{};
+    std::optional<account_config_multi_assets> ai{};
+};
+
+struct trade_lite_event
+{
+    std::string e{};
+    std::uint64_t E{};
+    std::uint64_t T{};
+    std::string s{};
+    std::string q{};
+    std::string p{};
+    bool m{};
+    std::string c{};
+    std::string S{};
+    std::string L{};
+    std::string l{};
+    std::uint64_t t{};
+    std::uint64_t i{};
+};
+
+struct algo_order_update_data
+{
+    std::string caid{};
+    std::uint64_t aid{};
+    std::string at{};
+    std::string o{};
+    std::string s{};
+    std::string S{};
+    std::string ps{};
+    std::string f{};
+    std::string q{};
+    std::string X{};
+    std::optional<std::string> ai{};
+    std::optional<std::string> ap{};
+    std::optional<std::string> aq{};
+    std::optional<std::string> act{};
+    std::optional<std::string> tp{};
+    std::optional<std::string> p{};
+    std::optional<std::string> V{};
+    std::optional<std::string> wt{};
+    std::optional<std::string> pm{};
+    std::optional<bool> cp{};
+    std::optional<bool> pP{};
+    std::optional<bool> R{};
+    std::optional<std::uint64_t> tt{};
+    std::optional<std::uint64_t> gtd{};
+    std::optional<std::string> rm{};
+};
+
+struct algo_order_update_event
+{
+    std::string e{};
+    std::uint64_t T{};
+    std::uint64_t E{};
+    algo_order_update_data o{};
+};
+
+struct conditional_order_reject_data
+{
+    std::string s{};
+    std::uint64_t i{};
+    std::string r{};
+};
+
+struct conditional_order_trigger_reject_event
+{
+    std::string e{};
+    std::uint64_t E{};
+    std::uint64_t T{};
+    conditional_order_reject_data or_{};
+};
+
+struct grid_update_data
+{
+    std::uint64_t si{};
+    std::string st{};
+    std::string ss{};
+    std::string s{};
+    std::string r{};
+    std::string up{};
+    std::string uq{};
+    std::string uf{};
+    std::string mp{};
+    std::uint64_t ut{};
+};
+
+struct grid_update_event
+{
+    std::string e{};
+    std::uint64_t T{};
+    std::uint64_t E{};
+    grid_update_data gu{};
+};
+
+struct strategy_update_data
+{
+    std::uint64_t si{};
+    std::string st{};
+    std::string ss{};
+    std::string s{};
+    std::uint64_t ut{};
+    int c{};
+};
+
+struct strategy_update_event
+{
+    std::string e{};
+    std::uint64_t T{};
+    std::uint64_t E{};
+    strategy_update_data su{};
+};
+
 } // namespace binapi2::fapi::types
 
 template<>
@@ -313,7 +515,7 @@ struct glz::meta<binapi2::fapi::types::mark_price_stream_event>
 {
     using T = binapi2::fapi::types::mark_price_stream_event;
     static constexpr auto value =
-        object("e", &T::e, "E", &T::E, "s", &T::s, "p", &T::p, "i", &T::i, "P", &T::P, "r", &T::r, "T", &T::T);
+        object("e", &T::e, "E", &T::E, "s", &T::s, "p", &T::p, "ap", &T::ap, "i", &T::i, "P", &T::P, "r", &T::r, "T", &T::T);
 };
 
 template<>
@@ -585,4 +787,264 @@ struct glz::meta<binapi2::fapi::types::listen_key_expired_event>
 {
     using T = binapi2::fapi::types::listen_key_expired_event;
     static constexpr auto value = object("e", &T::e, "E", &T::E, "T", &T::T, "listenKey", &T::listenKey);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::composite_index_constituent>
+{
+    using T = binapi2::fapi::types::composite_index_constituent;
+    static constexpr auto value = object("b", &T::b, "q", &T::q, "w", &T::w, "W", &T::W, "i", &T::i);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::composite_index_stream_event>
+{
+    using T = binapi2::fapi::types::composite_index_stream_event;
+    static constexpr auto value = object("e", &T::e, "E", &T::E, "s", &T::s, "p", &T::p, "C", &T::C, "c", &T::c);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::contract_info_bracket>
+{
+    using T = binapi2::fapi::types::contract_info_bracket;
+    static constexpr auto value =
+        object("bs", &T::bs, "bnf", &T::bnf, "bnc", &T::bnc, "mmr", &T::mmr, "cf", &T::cf, "mi", &T::mi, "ma", &T::ma);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::contract_info_stream_event>
+{
+    using T = binapi2::fapi::types::contract_info_stream_event;
+    static constexpr auto value = object("e",
+                                         &T::e,
+                                         "E",
+                                         &T::E,
+                                         "s",
+                                         &T::s,
+                                         "ps",
+                                         &T::ps,
+                                         "ct",
+                                         &T::ct,
+                                         "dt",
+                                         &T::dt,
+                                         "ot",
+                                         &T::ot,
+                                         "cs",
+                                         &T::cs,
+                                         "bks",
+                                         &T::bks);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::asset_index_stream_event>
+{
+    using T = binapi2::fapi::types::asset_index_stream_event;
+    static constexpr auto value = object("e",
+                                         &T::e,
+                                         "E",
+                                         &T::E,
+                                         "s",
+                                         &T::s,
+                                         "i",
+                                         &T::i,
+                                         "b",
+                                         &T::b,
+                                         "a",
+                                         &T::a,
+                                         "B",
+                                         &T::B,
+                                         "A",
+                                         &T::A,
+                                         "q",
+                                         &T::q,
+                                         "g",
+                                         &T::g,
+                                         "Q",
+                                         &T::Q,
+                                         "G",
+                                         &T::G);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::trading_session_stream_event>
+{
+    using T = binapi2::fapi::types::trading_session_stream_event;
+    static constexpr auto value = object("e", &T::e, "E", &T::E, "t", &T::t, "T", &T::T, "S", &T::S);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::account_config_leverage>
+{
+    using T = binapi2::fapi::types::account_config_leverage;
+    static constexpr auto value = object("s", &T::s, "l", &T::l);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::account_config_multi_assets>
+{
+    using T = binapi2::fapi::types::account_config_multi_assets;
+    static constexpr auto value = object("j", &T::j);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::account_config_update_event>
+{
+    using T = binapi2::fapi::types::account_config_update_event;
+    static constexpr auto value = object("e", &T::e, "E", &T::E, "T", &T::T, "ac", &T::ac, "ai", &T::ai);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::trade_lite_event>
+{
+    using T = binapi2::fapi::types::trade_lite_event;
+    static constexpr auto value = object("e",
+                                         &T::e,
+                                         "E",
+                                         &T::E,
+                                         "T",
+                                         &T::T,
+                                         "s",
+                                         &T::s,
+                                         "q",
+                                         &T::q,
+                                         "p",
+                                         &T::p,
+                                         "m",
+                                         &T::m,
+                                         "c",
+                                         &T::c,
+                                         "S",
+                                         &T::S,
+                                         "L",
+                                         &T::L,
+                                         "l",
+                                         &T::l,
+                                         "t",
+                                         &T::t,
+                                         "i",
+                                         &T::i);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::algo_order_update_data>
+{
+    using T = binapi2::fapi::types::algo_order_update_data;
+    static constexpr auto value = object("caid",
+                                         &T::caid,
+                                         "aid",
+                                         &T::aid,
+                                         "at",
+                                         &T::at,
+                                         "o",
+                                         &T::o,
+                                         "s",
+                                         &T::s,
+                                         "S",
+                                         &T::S,
+                                         "ps",
+                                         &T::ps,
+                                         "f",
+                                         &T::f,
+                                         "q",
+                                         &T::q,
+                                         "X",
+                                         &T::X,
+                                         "ai",
+                                         &T::ai,
+                                         "ap",
+                                         &T::ap,
+                                         "aq",
+                                         &T::aq,
+                                         "act",
+                                         &T::act,
+                                         "tp",
+                                         &T::tp,
+                                         "p",
+                                         &T::p,
+                                         "V",
+                                         &T::V,
+                                         "wt",
+                                         &T::wt,
+                                         "pm",
+                                         &T::pm,
+                                         "cp",
+                                         &T::cp,
+                                         "pP",
+                                         &T::pP,
+                                         "R",
+                                         &T::R,
+                                         "tt",
+                                         &T::tt,
+                                         "gtd",
+                                         &T::gtd,
+                                         "rm",
+                                         &T::rm);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::algo_order_update_event>
+{
+    using T = binapi2::fapi::types::algo_order_update_event;
+    static constexpr auto value = object("e", &T::e, "T", &T::T, "E", &T::E, "o", &T::o);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::conditional_order_reject_data>
+{
+    using T = binapi2::fapi::types::conditional_order_reject_data;
+    static constexpr auto value = object("s", &T::s, "i", &T::i, "r", &T::r);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::conditional_order_trigger_reject_event>
+{
+    using T = binapi2::fapi::types::conditional_order_trigger_reject_event;
+    static constexpr auto value = object("e", &T::e, "E", &T::E, "T", &T::T, "or", &T::or_);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::grid_update_data>
+{
+    using T = binapi2::fapi::types::grid_update_data;
+    static constexpr auto value = object("si",
+                                         &T::si,
+                                         "st",
+                                         &T::st,
+                                         "ss",
+                                         &T::ss,
+                                         "s",
+                                         &T::s,
+                                         "r",
+                                         &T::r,
+                                         "up",
+                                         &T::up,
+                                         "uq",
+                                         &T::uq,
+                                         "uf",
+                                         &T::uf,
+                                         "mp",
+                                         &T::mp,
+                                         "ut",
+                                         &T::ut);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::grid_update_event>
+{
+    using T = binapi2::fapi::types::grid_update_event;
+    static constexpr auto value = object("e", &T::e, "T", &T::T, "E", &T::E, "gu", &T::gu);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::strategy_update_data>
+{
+    using T = binapi2::fapi::types::strategy_update_data;
+    static constexpr auto value = object("si", &T::si, "st", &T::st, "ss", &T::ss, "s", &T::s, "ut", &T::ut, "c", &T::c);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::strategy_update_event>
+{
+    using T = binapi2::fapi::types::strategy_update_event;
+    static constexpr auto value = object("e", &T::e, "T", &T::T, "E", &T::E, "su", &T::su);
 };

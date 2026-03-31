@@ -10,6 +10,7 @@
 #include <glaze/glaze.hpp>
 
 #include <cstdint>
+#include <map>
 #include <optional>
 #include <string>
 #include <vector>
@@ -271,6 +272,150 @@ struct taker_buy_sell_volume_entry
     std::uint64_t timestamp{};
 };
 
+struct basis_request
+{
+    std::string pair{};
+    contract_type contractType{ contract_type::perpetual };
+    futures_data_period period{ futures_data_period::m5 };
+    std::optional<int> limit{};
+    std::optional<std::uint64_t> startTime{};
+    std::optional<std::uint64_t> endTime{};
+};
+
+struct basis_entry
+{
+    std::string pair{};
+    std::string contractType{};
+    std::string basis{};
+    std::string basisRate{};
+    std::string futuresPrice{};
+    std::string indexPrice{};
+    std::string annualizedBasisRate{};
+    std::uint64_t timestamp{};
+};
+
+struct price_ticker_v2_request
+{
+    std::optional<std::string> symbol{};
+};
+
+struct delivery_price_request
+{
+    std::string pair{};
+};
+
+struct delivery_price_entry
+{
+    std::uint64_t deliveryTime{};
+    std::string deliveryPrice{};
+};
+
+struct composite_index_info_request
+{
+    std::optional<std::string> symbol{};
+};
+
+struct composite_index_base_asset
+{
+    std::string baseAsset{};
+    std::string quoteAsset{};
+    std::string weightInQuantity{};
+    std::string weightInPercentage{};
+};
+
+struct composite_index_info
+{
+    std::string symbol{};
+    std::uint64_t time{};
+    std::string component{};
+    std::vector<composite_index_base_asset> baseAssetList{};
+};
+
+struct index_constituents_request
+{
+    std::string symbol{};
+};
+
+struct index_constituent
+{
+    std::string exchange{};
+    std::string symbol{};
+    std::string price{};
+    std::string weight{};
+};
+
+struct index_constituents_response
+{
+    std::string symbol{};
+    std::uint64_t time{};
+    std::vector<index_constituent> constituents{};
+};
+
+struct asset_index_request
+{
+    std::optional<std::string> symbol{};
+};
+
+struct asset_index
+{
+    std::string symbol{};
+    std::uint64_t time{};
+    std::string index{};
+    std::string bidBuffer{};
+    std::string askBuffer{};
+    std::string bidRate{};
+    std::string askRate{};
+    std::string autoExchangeBidBuffer{};
+    std::string autoExchangeAskBuffer{};
+    std::string autoExchangeBidRate{};
+    std::string autoExchangeAskRate{};
+};
+
+struct insurance_fund_request
+{
+    std::optional<std::string> symbol{};
+};
+
+struct insurance_fund_asset
+{
+    std::string asset{};
+    std::string marginBalance{};
+    std::uint64_t updateTime{};
+};
+
+struct insurance_fund_response
+{
+    std::vector<std::string> symbols{};
+    std::vector<insurance_fund_asset> assets{};
+};
+
+struct adl_risk_request
+{
+    std::optional<std::string> symbol{};
+};
+
+struct adl_risk_entry
+{
+    std::string symbol{};
+    std::string adlRisk{};
+    std::uint64_t updateTime{};
+};
+
+struct rpi_depth_request
+{
+    std::string symbol{};
+    std::optional<int> limit{};
+};
+
+struct trading_schedule_request
+{};
+
+struct trading_schedule_response
+{
+    std::uint64_t updateTime{};
+    std::map<std::string, std::vector<std::string>> marketSchedules{};
+};
+
 } // namespace binapi2::fapi::types
 
 template<>
@@ -486,4 +631,132 @@ struct glz::meta<binapi2::fapi::types::taker_buy_sell_volume_entry>
     using T = binapi2::fapi::types::taker_buy_sell_volume_entry;
     static constexpr auto value =
         object("buySellRatio", &T::buySellRatio, "buyVol", &T::buyVol, "sellVol", &T::sellVol, "timestamp", &T::timestamp);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::basis_entry>
+{
+    using T = binapi2::fapi::types::basis_entry;
+    static constexpr auto value = object("pair",
+                                         &T::pair,
+                                         "contractType",
+                                         &T::contractType,
+                                         "basis",
+                                         &T::basis,
+                                         "basisRate",
+                                         &T::basisRate,
+                                         "futuresPrice",
+                                         &T::futuresPrice,
+                                         "indexPrice",
+                                         &T::indexPrice,
+                                         "annualizedBasisRate",
+                                         &T::annualizedBasisRate,
+                                         "timestamp",
+                                         &T::timestamp);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::delivery_price_entry>
+{
+    using T = binapi2::fapi::types::delivery_price_entry;
+    static constexpr auto value = object("deliveryTime", &T::deliveryTime, "deliveryPrice", &T::deliveryPrice);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::composite_index_base_asset>
+{
+    using T = binapi2::fapi::types::composite_index_base_asset;
+    static constexpr auto value = object("baseAsset",
+                                         &T::baseAsset,
+                                         "quoteAsset",
+                                         &T::quoteAsset,
+                                         "weightInQuantity",
+                                         &T::weightInQuantity,
+                                         "weightInPercentage",
+                                         &T::weightInPercentage);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::composite_index_info>
+{
+    using T = binapi2::fapi::types::composite_index_info;
+    static constexpr auto value = object("symbol",
+                                         &T::symbol,
+                                         "time",
+                                         &T::time,
+                                         "component",
+                                         &T::component,
+                                         "baseAssetList",
+                                         &T::baseAssetList);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::index_constituent>
+{
+    using T = binapi2::fapi::types::index_constituent;
+    static constexpr auto value =
+        object("exchange", &T::exchange, "symbol", &T::symbol, "price", &T::price, "weight", &T::weight);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::index_constituents_response>
+{
+    using T = binapi2::fapi::types::index_constituents_response;
+    static constexpr auto value = object("symbol", &T::symbol, "time", &T::time, "constituents", &T::constituents);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::asset_index>
+{
+    using T = binapi2::fapi::types::asset_index;
+    static constexpr auto value = object("symbol",
+                                         &T::symbol,
+                                         "time",
+                                         &T::time,
+                                         "index",
+                                         &T::index,
+                                         "bidBuffer",
+                                         &T::bidBuffer,
+                                         "askBuffer",
+                                         &T::askBuffer,
+                                         "bidRate",
+                                         &T::bidRate,
+                                         "askRate",
+                                         &T::askRate,
+                                         "autoExchangeBidBuffer",
+                                         &T::autoExchangeBidBuffer,
+                                         "autoExchangeAskBuffer",
+                                         &T::autoExchangeAskBuffer,
+                                         "autoExchangeBidRate",
+                                         &T::autoExchangeBidRate,
+                                         "autoExchangeAskRate",
+                                         &T::autoExchangeAskRate);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::insurance_fund_asset>
+{
+    using T = binapi2::fapi::types::insurance_fund_asset;
+    static constexpr auto value = object("asset", &T::asset, "marginBalance", &T::marginBalance, "updateTime", &T::updateTime);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::insurance_fund_response>
+{
+    using T = binapi2::fapi::types::insurance_fund_response;
+    static constexpr auto value = object("symbols", &T::symbols, "assets", &T::assets);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::adl_risk_entry>
+{
+    using T = binapi2::fapi::types::adl_risk_entry;
+    static constexpr auto value = object("symbol", &T::symbol, "adlRisk", &T::adlRisk, "updateTime", &T::updateTime);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::trading_schedule_response>
+{
+    using T = binapi2::fapi::types::trading_schedule_response;
+    static constexpr auto value = object("updateTime", &T::updateTime, "marketSchedules", &T::marketSchedules);
 };
