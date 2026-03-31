@@ -25,8 +25,12 @@ public:
     using book_ticker_handler = std::function<bool(const types::book_ticker_stream_event&)>;
     using depth_handler = std::function<bool(const types::depth_stream_event&)>;
     using mini_ticker_handler = std::function<bool(const types::mini_ticker_stream_event&)>;
+    using all_market_mini_ticker_handler = std::function<bool(const types::all_market_mini_ticker_stream_event&)>;
     using ticker_handler = std::function<bool(const types::ticker_stream_event&)>;
+    using all_market_ticker_handler = std::function<bool(const types::all_market_ticker_stream_event&)>;
     using kline_handler = std::function<bool(const types::kline_stream_event&)>;
+    using liquidation_order_handler = std::function<bool(const types::liquidation_order_stream_event&)>;
+    using continuous_contract_kline_handler = std::function<bool(const types::continuous_contract_kline_stream_event&)>;
 
     market_streams(boost::asio::io_context& io_context, config cfg);
 
@@ -40,10 +44,24 @@ public:
     void connect_diff_book_depth(const diff_book_depth_subscription& subscription, void_callback callback);
     [[nodiscard]] result<void> connect_mini_ticker(const mini_ticker_subscription& subscription);
     void connect_mini_ticker(const mini_ticker_subscription& subscription, void_callback callback);
+    [[nodiscard]] result<void> connect_all_market_mini_tickers(const all_market_mini_ticker_subscription& subscription = {});
+    void connect_all_market_mini_tickers(const all_market_mini_ticker_subscription& subscription, void_callback callback);
     [[nodiscard]] result<void> connect_ticker(const ticker_subscription& subscription);
     void connect_ticker(const ticker_subscription& subscription, void_callback callback);
+    [[nodiscard]] result<void> connect_all_market_tickers(const all_market_ticker_subscription& subscription = {});
+    void connect_all_market_tickers(const all_market_ticker_subscription& subscription, void_callback callback);
+    [[nodiscard]] result<void> connect_all_book_tickers(const all_book_ticker_subscription& subscription = {});
+    void connect_all_book_tickers(const all_book_ticker_subscription& subscription, void_callback callback);
+    [[nodiscard]] result<void> connect_liquidation_order(const liquidation_order_subscription& subscription);
+    void connect_liquidation_order(const liquidation_order_subscription& subscription, void_callback callback);
+    [[nodiscard]] result<void> connect_all_market_liquidation_orders(const all_market_liquidation_order_subscription& subscription = {});
+    void connect_all_market_liquidation_orders(const all_market_liquidation_order_subscription& subscription, void_callback callback);
+    [[nodiscard]] result<void> connect_partial_book_depth(const partial_book_depth_subscription& subscription);
+    void connect_partial_book_depth(const partial_book_depth_subscription& subscription, void_callback callback);
     [[nodiscard]] result<void> connect_kline(const kline_subscription& subscription);
     void connect_kline(const kline_subscription& subscription, void_callback callback);
+    [[nodiscard]] result<void> connect_continuous_contract_kline(const continuous_contract_kline_subscription& subscription);
+    void connect_continuous_contract_kline(const continuous_contract_kline_subscription& subscription, void_callback callback);
     [[nodiscard]] result<void> read_aggregate_trade_loop(aggregate_trade_handler handler);
     void read_aggregate_trade_loop(aggregate_trade_handler handler, void_callback callback);
     [[nodiscard]] result<void> read_mark_price_loop(mark_price_handler handler);
@@ -54,10 +72,24 @@ public:
     void read_diff_book_depth_loop(depth_handler handler, void_callback callback);
     [[nodiscard]] result<void> read_mini_ticker_loop(mini_ticker_handler handler);
     void read_mini_ticker_loop(mini_ticker_handler handler, void_callback callback);
+    [[nodiscard]] result<void> read_all_market_mini_tickers_loop(all_market_mini_ticker_handler handler);
+    void read_all_market_mini_tickers_loop(all_market_mini_ticker_handler handler, void_callback callback);
     [[nodiscard]] result<void> read_ticker_loop(ticker_handler handler);
     void read_ticker_loop(ticker_handler handler, void_callback callback);
+    [[nodiscard]] result<void> read_all_market_tickers_loop(all_market_ticker_handler handler);
+    void read_all_market_tickers_loop(all_market_ticker_handler handler, void_callback callback);
+    [[nodiscard]] result<void> read_all_book_tickers_loop(book_ticker_handler handler);
+    void read_all_book_tickers_loop(book_ticker_handler handler, void_callback callback);
+    [[nodiscard]] result<void> read_liquidation_order_loop(liquidation_order_handler handler);
+    void read_liquidation_order_loop(liquidation_order_handler handler, void_callback callback);
+    [[nodiscard]] result<void> read_all_market_liquidation_orders_loop(liquidation_order_handler handler);
+    void read_all_market_liquidation_orders_loop(liquidation_order_handler handler, void_callback callback);
+    [[nodiscard]] result<void> read_partial_book_depth_loop(depth_handler handler);
+    void read_partial_book_depth_loop(depth_handler handler, void_callback callback);
     [[nodiscard]] result<void> read_kline_loop(kline_handler handler);
     void read_kline_loop(kline_handler handler, void_callback callback);
+    [[nodiscard]] result<void> read_continuous_contract_kline_loop(continuous_contract_kline_handler handler);
+    void read_continuous_contract_kline_loop(continuous_contract_kline_handler handler, void_callback callback);
     [[nodiscard]] result<void> close();
     void close(void_callback callback);
 

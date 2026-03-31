@@ -226,6 +226,26 @@ Implementation references used for this status snapshot:
 - Implemented websocket stream coverage now includes aggregate trade, mark price, book ticker, diff depth, mini ticker, ticker, kline/candlestick, and four user-data event families.
 - Large gaps remain across Convert, portfolio margin, most account and trade endpoints, most WebSocket API methods, and most documented market streams.
 
+## Remaining implementation inventory
+
+- 2026-03-31: Prioritized remaining work after the completed mini-ticker, ticker, and kline market-stream slice:
+  - websocket market streams
+    - next adjacency slice: add the still-missing stream families that fit the existing direct subscription + typed read-loop pattern with minimal transport changes: all-market mini-tickers, all-market tickers, all-book-tickers, liquidation streams, partial book depth, and continuous-contract kline.
+    - after that: fill remaining market-stream helpers for composite-index, contract-info, multi-assets asset-index, trading-session, RPI diff depth, and all-market mark-price; leave local-order-book orchestration and live subscribe/unsubscribe control after the basic family coverage because those require session-behavior work beyond one-stream helpers.
+  - user data streams
+    - implement the remaining event payload decoders first: account-configuration update, algo-order update, conditional-order trigger reject, grid update, strategy update, and trade-lite.
+    - then add the WebSocket-API listen-key lifecycle methods documented in the user-data stream section.
+  - REST API
+    - highest-value remaining REST gaps are market-data endpoints that complete the public data surface with low auth complexity: basis, delivery price, composite index info, index constituents, multi-assets asset index, insurance fund balance, ADL risk, RPI order book, trading schedule, delist schedule, and separate v2 price ticker.
+    - next, finish the main authenticated trade/account workflow gaps before long-tail history downloads: batch order entry/modify/cancel, cancel-all and open-order queries, V3 position info, account config and symbol config, income history, leverage brackets, commission rate, mode/leverage/margin mutation endpoints, account trade list, force orders, and position-margin operations.
+    - last in REST priority: the download-id/download-link history endpoints, BNB burn controls, quantitative-rules, transfer/overview-page coverage, TradFi-perps, and portfolio-margin-specific work.
+  - websocket API RPC
+    - finish the obvious parity methods nearest to implemented RPC coverage first: ticker.price, order.modify, account.position, v2/account.position, and the missing explicit v2 account-status variant.
+    - then add algo-order RPC methods and remaining account/trade RPC methods after the REST/account type surface is broader.
+  - Convert API
+    - implement last as its own isolated slice: send quote request, accept quote, and order status, after the core REST/account/trade and websocket surfaces are substantially complete.
+- 2026-03-31: Recommended next incremental implementation slice: complete the adjacent websocket market-stream family expansion before leaving the rollout block in the governing plan, starting with all-market mini-tickers, all-market tickers, all-book-tickers, liquidation streams, partial book depth, and continuous-contract kline; this stays within the established [`market_streams`](include/binapi2/fapi/streams/market_streams.hpp) subscription/read-loop shape and avoids prematurely branching into later-phase user-data, REST-auth, or WebSocket-API RPC work.
+
 ## Research notes
 
 - 2026-03-31: Inspected [`plans/binapi2-fapi-implementation-plan.md`](plans/binapi2-fapi-implementation-plan.md), [`plans/status.md`](plans/status.md), [`include/binapi2/fapi/websocket_api/client.hpp`](include/binapi2/fapi/websocket_api/client.hpp), [`include/binapi2/fapi/websocket_api/generated_methods.hpp`](include/binapi2/fapi/websocket_api/generated_methods.hpp), [`include/binapi2/fapi/streams/market_streams.hpp`](include/binapi2/fapi/streams/market_streams.hpp), [`include/binapi2/fapi/types/streams.hpp`](include/binapi2/fapi/types/streams.hpp), and [`src/binapi2/fapi/streams/user_streams.cpp`](src/binapi2/fapi/streams/user_streams.cpp) to align plan order with current code surface.

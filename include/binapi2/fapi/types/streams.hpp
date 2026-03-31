@@ -80,6 +80,8 @@ struct mini_ticker_stream_event
     std::string q{};
 };
 
+using all_market_mini_ticker_stream_event = std::vector<mini_ticker_stream_event>;
+
 struct ticker_stream_event
 {
     std::string e{};
@@ -100,6 +102,30 @@ struct ticker_stream_event
     std::uint64_t F{};
     std::uint64_t L{};
     std::uint64_t n{};
+};
+
+using all_market_ticker_stream_event = std::vector<ticker_stream_event>;
+
+struct liquidation_order_stream_data
+{
+    std::string s{};
+    std::string S{};
+    std::string o{};
+    std::string f{};
+    std::string q{};
+    std::string p{};
+    std::string ap{};
+    std::string X{};
+    std::string l{};
+    std::string z{};
+    std::uint64_t T{};
+};
+
+struct liquidation_order_stream_event
+{
+    std::string e{};
+    std::uint64_t E{};
+    liquidation_order_stream_data o{};
 };
 
 struct kline_stream_data
@@ -129,6 +155,35 @@ struct kline_stream_event
     std::uint64_t E{};
     std::string s{};
     kline_stream_data k{};
+};
+
+struct continuous_contract_kline_stream_data
+{
+    std::uint64_t t{};
+    std::uint64_t T{};
+    std::string i{};
+    std::uint64_t f{};
+    std::uint64_t L{};
+    std::string o{};
+    std::string c{};
+    std::string h{};
+    std::string l{};
+    std::string v{};
+    std::uint64_t n{};
+    bool x{};
+    std::string q{};
+    std::string V{};
+    std::string Q{};
+    std::string B{};
+};
+
+struct continuous_contract_kline_stream_event
+{
+    std::string e{};
+    std::uint64_t E{};
+    std::string ps{};
+    std::string ct{};
+    continuous_contract_kline_stream_data k{};
 };
 
 struct account_update_balance
@@ -320,6 +375,41 @@ struct glz::meta<binapi2::fapi::types::ticker_stream_event>
 };
 
 template<>
+struct glz::meta<binapi2::fapi::types::liquidation_order_stream_data>
+{
+    using T = binapi2::fapi::types::liquidation_order_stream_data;
+    static constexpr auto value = object("s",
+                                         &T::s,
+                                         "S",
+                                         &T::S,
+                                         "o",
+                                         &T::o,
+                                         "f",
+                                         &T::f,
+                                         "q",
+                                         &T::q,
+                                         "p",
+                                         &T::p,
+                                         "ap",
+                                         &T::ap,
+                                         "X",
+                                         &T::X,
+                                         "l",
+                                         &T::l,
+                                         "z",
+                                         &T::z,
+                                         "T",
+                                         &T::T);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::liquidation_order_stream_event>
+{
+    using T = binapi2::fapi::types::liquidation_order_stream_event;
+    static constexpr auto value = object("e", &T::e, "E", &T::E, "o", &T::o);
+};
+
+template<>
 struct glz::meta<binapi2::fapi::types::kline_stream_data>
 {
     using T = binapi2::fapi::types::kline_stream_data;
@@ -364,6 +454,51 @@ struct glz::meta<binapi2::fapi::types::kline_stream_event>
 {
     using T = binapi2::fapi::types::kline_stream_event;
     static constexpr auto value = object("e", &T::e, "E", &T::E, "s", &T::s, "k", &T::k);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::continuous_contract_kline_stream_data>
+{
+    using T = binapi2::fapi::types::continuous_contract_kline_stream_data;
+    static constexpr auto value = object("t",
+                                         &T::t,
+                                         "T",
+                                         &T::T,
+                                         "i",
+                                         &T::i,
+                                         "f",
+                                         &T::f,
+                                         "L",
+                                         &T::L,
+                                         "o",
+                                         &T::o,
+                                         "c",
+                                         &T::c,
+                                         "h",
+                                         &T::h,
+                                         "l",
+                                         &T::l,
+                                         "v",
+                                         &T::v,
+                                         "n",
+                                         &T::n,
+                                         "x",
+                                         &T::x,
+                                         "q",
+                                         &T::q,
+                                         "V",
+                                         &T::V,
+                                         "Q",
+                                         &T::Q,
+                                         "B",
+                                         &T::B);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::continuous_contract_kline_stream_event>
+{
+    using T = binapi2::fapi::types::continuous_contract_kline_stream_event;
+    static constexpr auto value = object("e", &T::e, "E", &T::E, "ps", &T::ps, "ct", &T::ct, "k", &T::k);
 };
 
 template<>

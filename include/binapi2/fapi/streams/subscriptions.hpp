@@ -37,14 +37,49 @@ struct mini_ticker_subscription
     std::string symbol{};
 };
 
+struct all_market_mini_ticker_subscription
+{
+};
+
 struct ticker_subscription
 {
     std::string symbol{};
 };
 
+struct all_market_ticker_subscription
+{
+};
+
+struct all_book_ticker_subscription
+{
+};
+
+struct liquidation_order_subscription
+{
+    std::string symbol{};
+};
+
+struct all_market_liquidation_order_subscription
+{
+};
+
+struct partial_book_depth_subscription
+{
+    std::string symbol{};
+    int levels{ 5 };
+    std::string speed{ "250ms" };
+};
+
 struct kline_subscription
 {
     std::string symbol{};
+    types::kline_interval interval{ types::kline_interval::m1 };
+};
+
+struct continuous_contract_kline_subscription
+{
+    std::string pair{};
+    types::contract_type contract_type{ types::contract_type::perpetual };
     types::kline_interval interval{ types::kline_interval::m1 };
 };
 
