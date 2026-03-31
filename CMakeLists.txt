@@ -36,6 +36,6 @@ if (DEFINED ${BOOST_LIB_DIR})
 endif()
 
 add_subdirectory(src/binapi)
-add_subdirectory(src/binapi2/umf)
+add_subdirectory(src/binapi2/fapi)
 add_subdirectory(examples/binapi)
-add_subdirectory(examples/binapi2/umf)
+add_subdirectory(examples/binapi2/fapi)
