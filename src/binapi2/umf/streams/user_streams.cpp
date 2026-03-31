@@ -21,7 +21,8 @@ user_streams::connect(const std::string& listen_key)
 void
 user_streams::connect(const std::string& listen_key, void_callback callback)
 {
-    boost::asio::post(io_context_, [this, listen_key, callback = std::move(callback)]() mutable { callback(connect(listen_key)); });
+    boost::asio::post(io_context_,
+                      [this, listen_key, callback = std::move(callback)]() mutable { callback(connect(listen_key)); });
 }
 
 result<void>

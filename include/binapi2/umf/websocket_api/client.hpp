@@ -30,7 +30,8 @@ public:
     void account_balance(callback_type<types::websocket_api_response<std::vector<types::futures_account_balance>>> callback);
     [[nodiscard]] result<types::websocket_api_response<types::order_response>> new_order(
         const types::new_order_request& request);
-    void new_order(const types::new_order_request& request, callback_type<types::websocket_api_response<types::order_response>> callback);
+    void new_order(const types::new_order_request& request,
+                   callback_type<types::websocket_api_response<types::order_response>> callback);
     [[nodiscard]] result<types::websocket_api_response<types::order_response>> query_order(
         const types::query_order_request& request);
     void query_order(const types::query_order_request& request,

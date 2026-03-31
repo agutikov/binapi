@@ -462,6 +462,7 @@ struct api::impl
                                      on_resolve(ec, std::move(req), std::move(res));
                                  });
     }
+
     void on_resolve(const boost::system::error_code& ec, request_ptr req, boost::asio::ip::tcp::resolver::results_type results)
     {
         if (ec) {
@@ -488,6 +489,7 @@ struct api::impl
             [this, req = std::move(req), ssl_socket = std::move(ssl_socket)](
                 const boost::system::error_code& ec, auto) mutable { on_connect(ec, std::move(req), std::move(ssl_socket)); });
     }
+
     void on_connect(const boost::system::error_code& ec, request_ptr req, ssl_socket_ptr ssl_socket)
     {
         if (ec) {
@@ -505,6 +507,7 @@ struct api::impl
                 on_handshake(ec, std::move(req), std::move(ssl_socket));
             });
     }
+
     void on_handshake(const boost::system::error_code& ec, request_ptr req, ssl_socket_ptr ssl_socket)
     {
         if (ec) {
@@ -524,6 +527,7 @@ struct api::impl
                                             on_write(ec, std::move(req), std::move(ssl_socket), wr);
                                         });
     }
+
     void on_write(const boost::system::error_code& ec, request_ptr req, ssl_socket_ptr ssl_socket, std::size_t wr)
     {
         boost::ignore_unused(wr);
@@ -548,6 +552,7 @@ struct api::impl
                                            on_read(ec, std::move(resp), std::move(ssl_socket), rd);
                                        });
     }
+
     void on_read(const boost::system::error_code& ec, response_ptr resp, ssl_socket_ptr ssl_socket, std::size_t rd)
     {
         boost::ignore_unused(rd);
@@ -565,6 +570,7 @@ struct api::impl
                 on_shutdown(ec, std::move(resp), std::move(ssl_socket));
             });
     }
+
     void on_shutdown(const boost::system::error_code& ec, response_ptr resp, ssl_socket_ptr ssl_socket)
     {
         boost::ignore_unused(ec);
@@ -604,6 +610,7 @@ struct api::impl
     const std::string m_client_api_string;
 
     bool m_write_in_process;
+
     struct async_req_item
     {
         std::string target;
@@ -611,6 +618,7 @@ struct api::impl
         std::string data;
         detail::invoker_ptr invoker;
     };
+
     std::queue<async_req_item> m_async_requests;
     boost::asio::ssl::context m_ssl_ctx;
     boost::asio::ip::tcp::resolver m_resolver;

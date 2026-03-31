@@ -43,7 +43,8 @@ decode_response(const transport::http_response& response)
     } else {
         T value{};
         if (auto ec = glz::read_json(value, response.body)) {
-            return result<T>::failure({ error_code::json, response.status, 0, glz::format_error(ec, response.body), response.body });
+            return result<T>::failure(
+                { error_code::json, response.status, 0, glz::format_error(ec, response.body), response.body });
         }
         return result<T>::success(std::move(value));
     }
@@ -101,15 +102,14 @@ public:
                        bool signed_request,
                        callback_type<Response> callback)
     {
-        boost::asio::post(io_context_,
-                          [this,
-                           method,
-                           path = std::move(path),
-                           query = std::move(query),
-                           signed_request,
-                           callback = std::move(callback)]() mutable {
-                              callback(execute<Response>(method, path, query, signed_request));
-                          });
+        boost::asio::post(
+            io_context_,
+            [this,
+             method,
+             path = std::move(path),
+             query = std::move(query),
+             signed_request,
+             callback = std::move(callback)]() mutable { callback(execute<Response>(method, path, query, signed_request)); });
     }
 
     rest::account_service account;

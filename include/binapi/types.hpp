@@ -79,9 +79,11 @@ struct prices_t
     std::map<std::string, price_t> prices;
 
     bool is_valid_symbol(const std::string& sym) const { return is_valid_symbol(sym.c_str()); }
+
     bool is_valid_symbol(const char* sym) const;
 
     const price_t& get_by_symbol(const std::string& sym) const { return get_by_symbol(sym.c_str()); }
+
     const price_t& get_by_symbol(const char* sym) const;
 };
 
@@ -141,21 +143,25 @@ struct account_info_t
         static balance_t construct(const flatjson::fjson& json);
         friend std::ostream& operator<<(std::ostream& os, const balance_t& f);
     };
+
     std::map<std::string, balance_t> balances;
 
     const balance_t& get_balance(const std::string& symbol) const { return get_balance(symbol.c_str()); }
+
     const balance_t& get_balance(const char* symbol) const;
 
     const double_type& add_balance(const std::string& symbol, const double_type& amount)
     {
         return add_balance(symbol.c_str(), amount);
     }
+
     const double_type& add_balance(const char* symbol, const double_type& amount);
 
     const double_type& sub_balance(const std::string& symbol, const double_type& amount)
     {
         return sub_balance(symbol.c_str(), amount);
     }
+
     const double_type& sub_balance(const char* symbol, const double_type& amount);
 
     static account_info_t construct(const flatjson::fjson& json);
@@ -177,6 +183,7 @@ struct exchange_info_t
 
         friend std::ostream& operator<<(std::ostream& os, const rate_limit_t& f);
     };
+
     std::vector<rate_limit_t> rateLimits;
 
     struct symbol_t
@@ -204,6 +211,7 @@ struct exchange_info_t
 
                 friend std::ostream& operator<<(std::ostream& os, const price_t& f);
             };
+
             struct percent_price_t
             {
                 double_type multiplierUp;
@@ -212,6 +220,7 @@ struct exchange_info_t
 
                 friend std::ostream& operator<<(std::ostream& os, const percent_price_t& f);
             };
+
             struct percent_price_by_side_t
             {
                 double_type bidMultiplierUp;
@@ -220,6 +229,7 @@ struct exchange_info_t
                 double_type askMultiplierDown;
                 std::size_t avgPriceMins;
             };
+
             struct lot_size_t
             {
                 double_type minQty;
@@ -228,6 +238,7 @@ struct exchange_info_t
 
                 friend std::ostream& operator<<(std::ostream& os, const lot_size_t& f);
             };
+
             struct market_lot_size_t
             {
                 double_type minQty;
@@ -236,18 +247,21 @@ struct exchange_info_t
 
                 friend std::ostream& operator<<(std::ostream& os, const market_lot_size_t& f);
             };
+
             struct min_notional_t
             {
                 double_type minNotional;
 
                 friend std::ostream& operator<<(std::ostream& os, const min_notional_t& f);
             };
+
             struct iceberg_parts_t
             {
                 std::size_t limit;
 
                 friend std::ostream& operator<<(std::ostream& os, const iceberg_parts_t& f);
             };
+
             struct max_num_orders_t
             {
                 std::size_t maxNumOrders;
@@ -307,6 +321,7 @@ struct exchange_info_t
 
             friend std::ostream& operator<<(std::ostream& os, const filter_t& f);
         };
+
         std::vector<filter_t> filters;
 
         template<typename T>
@@ -323,25 +338,36 @@ struct exchange_info_t
         }
 
         const filter_t::price_t& get_filter_price() const { return get_filter<filter_t::price_t>(); }
+
         const filter_t::percent_price_t& get_filter_percent_price() const { return get_filter<filter_t::percent_price_t>(); }
+
         const filter_t::percent_price_by_side_t& get_filter_percent_price_by_side() const
         {
             return get_filter<filter_t::percent_price_by_side_t>();
         }
+
         const filter_t::notional_t& get_filter_notional() const { return get_filter<filter_t::notional_t>(); }
+
         const filter_t::lot_size_t& get_filter_lot_size() const { return get_filter<filter_t::lot_size_t>(); }
+
         const filter_t::market_lot_size_t& get_filter_market_lot_size() const
         {
             return get_filter<filter_t::market_lot_size_t>();
         }
+
         const filter_t::min_notional_t& get_filter_min_notional() const { return get_filter<filter_t::min_notional_t>(); }
+
         const filter_t::iceberg_parts_t& get_filter_iceberg_parts() const { return get_filter<filter_t::iceberg_parts_t>(); }
+
         const filter_t::max_num_orders_t& get_filter_max_num_orders() const { return get_filter<filter_t::max_num_orders_t>(); }
+
         const filter_t::max_num_algo_orders_t& get_filter_max_num_algo_orders() const
         {
             return get_filter<filter_t::max_num_algo_orders_t>();
         }
+
         const filter_t::max_position_t& get_filter_max_position() const { return get_filter<filter_t::max_position_t>(); }
+
         const filter_t::trailing_delta_t& get_filter_trailing_delta() const { return get_filter<filter_t::trailing_delta_t>(); }
 
         friend std::ostream& operator<<(std::ostream& os, const symbol_t& s);
@@ -351,9 +377,11 @@ struct exchange_info_t
     std::size_t permissions;
 
     bool is_valid_symbol(const std::string& sym) const { return is_valid_symbol(sym.c_str()); }
+
     bool is_valid_symbol(const char* sym) const;
 
     const symbol_t& get_by_symbol(const std::string& sym) const { return get_by_symbol(sym.c_str()); }
+
     const symbol_t& get_by_symbol(const char* sym) const;
 
     static exchange_info_t construct(const flatjson::fjson& json);
@@ -530,6 +558,7 @@ struct new_order_info_full_t
     std::string timeInForce;
     std::string type;
     std::string side;
+
     struct fill_part
     {
         double_type price;
@@ -537,6 +566,7 @@ struct new_order_info_full_t
         double_type commission;
         std::string commissionAsset;
     };
+
     std::vector<fill_part> fills;
 
     static double_type avg_price(const std::vector<fill_part>& parts);
@@ -583,21 +613,25 @@ struct new_order_resp_type :
         const auto r = get_response_type();
         return r.first != e_trade_resp_type::UNKNOWN;
     }
+
     bool is_ack_response_type() const
     {
         const auto r = get_response_type();
         return r.first == e_trade_resp_type::ACK;
     }
+
     bool is_result_response_type() const
     {
         const auto r = get_response_type();
         return r.first == e_trade_resp_type::RESULT;
     }
+
     bool is_full_response_type() const
     {
         const auto r = get_response_type();
         return r.first == e_trade_resp_type::FULL;
     }
+
     bool is_test_response_type() const
     {
         const auto r = get_response_type();
@@ -611,6 +645,7 @@ struct new_order_resp_type :
 
         return *static_cast<const new_order_info_ack_t*>(r.second);
     }
+
     const new_order_info_result_t& get_response_result() const
     {
         const auto r = get_response_type();
@@ -618,6 +653,7 @@ struct new_order_resp_type :
 
         return *static_cast<const new_order_info_result_t*>(r.second);
     }
+
     const new_order_info_full_t& get_response_full() const
     {
         const auto r = get_response_type();
@@ -625,6 +661,7 @@ struct new_order_resp_type :
 
         return *static_cast<const new_order_info_full_t*>(r.second);
     }
+
     const new_test_order_info_t& get_response_test() const
     {
         const auto r = get_response_type();

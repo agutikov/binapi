@@ -39,6 +39,7 @@ template<typename R, typename T, typename F>
 struct invoker : invoker_base
 {
     invoker(F f) : m_cb{ std::move(f) } {}
+
     virtual ~invoker() = default;
 
     bool invoke(const char* fl, int ec, std::string errmsg, const char* ptr, std::size_t size) override

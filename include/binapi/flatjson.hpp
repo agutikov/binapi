@@ -65,6 +65,7 @@
 
 #if __cplusplus >= 201703L
 #include <string_view>
+
 namespace flatjson {
 using static_string = std::string_view;
 } // ns flatjson
@@ -77,23 +78,31 @@ namespace details {
 struct static_string
 {
     static_string() = default;
+
     template<std::size_t N>
     explicit static_string(const char (&str)[N]) : m_ptr{ str }, m_len{ N - 1 }
     {
     }
+
     static_string(const char* ptr, std::size_t len) : m_ptr{ ptr }, m_len{ len } {}
+
     static_string(const char* beg, const char* end) : m_ptr{ beg }, m_len{ static_cast<std::size_t>(end - beg) } {}
 
     std::size_t size() const { return m_len; }
+
     bool empty() const { return size() == 0; }
+
     const char* data() const { return m_ptr; }
 
     friend bool operator==(const static_string& l, const char* r) { return std::strncmp(l.m_ptr, r, l.m_len) == 0; }
+
     friend bool operator==(const static_string& l, const static_string& r)
     {
         return std::strncmp(l.m_ptr, r.m_ptr, l.m_len) == 0;
     }
+
     friend bool operator!=(const static_string& l, const char* r) { return !(l == r); }
+
     friend bool operator!=(const static_string& l, const static_string& r) { return !(l == r); }
 
     friend std::ostream& operator<<(std::ostream& os, const static_string& s)
@@ -439,14 +448,23 @@ struct fj_token
     fj_token() : __type{}, __key{}, __klen{}, __val{}, __vlen{}, __parent{}, __childs{}, __end{} {}
 
     e_fj_token_type type() const { return __type; }
+
     const char* type_name() const { return fj_token_type_name(type()); }
+
     bool valid() const { return type() != FJ_TYPE_INVALID; }
+
     bool is_array() const { return type() == FJ_TYPE_ARRAY; }
+
     bool is_object() const { return type() == FJ_TYPE_OBJECT; }
+
     bool is_null() const { return type() == FJ_TYPE_NULL; }
+
     bool is_bool() const { return type() == FJ_TYPE_BOOL; }
+
     bool is_number() const { return type() == FJ_TYPE_NUMBER; }
+
     bool is_string() const { return type() == FJ_TYPE_STRING; }
+
     bool is_simple_type() const { return details::fj_is_simple_type(type()); }
 
     static_string to_sstring() const
@@ -461,29 +479,42 @@ struct fj_token
 
         throw std::logic_error(__FLATJSON__MAKE_ERROR_MESSAGE("not STRING/NUMBER/BOOL/NULL type"));
     }
+
     std::string to_string() const
     {
         auto s = to_sstring();
         return { s.data(), s.size() };
     }
+
     template<typename T>
     T to() const
     {
         auto s = to_sstring();
         return details::conv_to<T>(s.data(), s.size());
     }
+
     bool to_bool() const { return to<bool>(); }
+
     std::uint32_t to_uint() const { return to<std::uint32_t>(); }
+
     std::int32_t to_int() const { return to<std::int32_t>(); }
+
     std::uint64_t to_uint64() const { return to<std::uint64_t>(); }
+
     std::int64_t to_int64() const { return to<std::int64_t>(); }
+
     double to_double() const { return to<double>(); }
+
     float to_float() const { return to<float>(); }
 
     static_string key() const { return { __key, __klen }; }
+
     static_string value() const { return { __val, __vlen }; }
+
     __FLATJSON__CHILDS_TYPE childs() const { return __childs; }
+
     const fj_token* parent() const { return __parent; }
+
     const fj_token* end() const { return __end; }
 
     e_fj_token_type __type;
@@ -1397,24 +1428,29 @@ private:
         explicit tokens_iterator_impl(pointer c) : m_cur{ c } {}
 
         pointer operator->() const { return m_cur; }
+
         tokens_iterator_impl& operator++()
         {
             ++m_cur;
             return *this;
         }
+
         tokens_iterator_impl operator++(int)
         {
             tokens_iterator_impl tmp{ m_cur };
             ++(*this);
             return tmp;
         }
+
         reference operator*() { return *m_cur; }
 
         friend difference_type operator-(const tokens_iterator_impl& l, const tokens_iterator_impl& r)
         {
             return l.m_cur - r.m_cur;
         }
+
         friend bool operator==(const tokens_iterator_impl& l, const tokens_iterator_impl& r) { return l.m_cur == r.m_cur; }
+
         friend bool operator!=(const tokens_iterator_impl& l, const tokens_iterator_impl& r) { return !operator==(l, r); }
 
     private:
@@ -1426,10 +1462,15 @@ public:
     using const_iterator = tokens_iterator_impl<const element_type>;
 
     iterator begin() { return iterator{ m_beg }; }
+
     iterator end() { return iterator{ m_end }; }
+
     const_iterator begin() const { return const_iterator{ m_beg }; }
+
     const_iterator end() const { return const_iterator{ m_end }; }
+
     const_iterator cbegin() const { return const_iterator{ m_beg }; }
+
     const_iterator cend() const { return const_iterator{ m_end }; }
 
     fjson(const fjson&) = default;
@@ -1443,6 +1484,7 @@ public:
         m_end{ nullptr }, m_err{}
     {
     }
+
     template<std::size_t L, typename CharT = typename std::iterator_traits<InputIterator>::value_type>
     explicit fjson(const CharT (&str)[L], std::size_t reserved = 0) :
         m_storage{ L - 1 ? std::make_shared<storage_type>(reserved) : storage_ptr{} }, m_src_beg{ str },
@@ -1450,12 +1492,14 @@ public:
     {
         load(str, L - 1);
     }
+
     fjson(InputIterator ptr, std::size_t size, std::size_t reserved = 0) :
         m_storage{ size ? std::make_shared<storage_type>(reserved) : storage_ptr{} }, m_src_beg{ ptr }, m_src_end{ ptr + size },
         m_beg{ nullptr }, m_end{ nullptr }, m_err{}
     {
         load(ptr, size);
     }
+
     fjson(InputIterator beg, InputIterator end, std::size_t reserved = 0) :
         m_storage{ beg != end ? std::make_shared<storage_type>(reserved) : storage_ptr{} }, m_src_beg{ beg }, m_src_end{ end },
         m_beg{ nullptr }, m_end{ nullptr }, m_err{}
@@ -1473,7 +1517,9 @@ private:
 
 public:
     bool is_valid() const { return m_beg && m_end && !m_storage->empty() && m_err == FJ_EC_OK; }
+
     e_fj_error_code error() const { return m_err; }
+
     const char* error_string() const { return fj_error_string(m_err); }
 
     std::size_t size() const
@@ -1481,13 +1527,16 @@ public:
         return (!details::fj_is_simple_type(m_beg->__type)) ? m_beg->__childs - 1
                                                             : static_cast<std::size_t>(m_beg->__type != FJ_TYPE_INVALID);
     }
+
     std::size_t tokens() const
     {
         return (!details::fj_is_simple_type(m_beg->__type))
                    ? (m_end - m_beg) + (m_beg->__parent && m_beg->__parent->__type == FJ_TYPE_ARRAY ? 1 : 0)
                    : static_cast<std::size_t>(m_beg->__type != FJ_TYPE_INVALID);
     }
+
     bool is_empty() const { return size() == 0; }
+
     void clear()
     {
         m_storage->clear();
@@ -1495,29 +1544,45 @@ public:
     }
 
     e_fj_token_type type() const { return m_beg->type(); }
+
     const char* type_name() const { return m_beg->type_name(); }
 
     bool is_array() const { return m_beg->is_array(); }
+
     bool is_object() const { return m_beg->is_object(); }
+
     bool is_null() const { return m_beg->is_null(); }
+
     bool is_bool() const { return m_beg->is_bool(); }
+
     bool is_number() const { return m_beg->is_number(); }
+
     bool is_string() const { return m_beg->is_string(); }
+
     bool is_simple_type() const { return m_beg->is_simple_type(); }
 
     static_string to_sstring() const { return m_beg->to_sstring(); }
+
     std::string to_string() const { return m_beg->to_string(); }
+
     template<typename T>
     T to() const
     {
         return m_beg->template to<T>();
     }
+
     bool to_bool() const { return m_beg->to_bool(); }
+
     std::uint32_t to_uint() const { return m_beg->to_uint(); }
+
     std::int32_t to_int() const { return m_beg->to_int(); }
+
     std::uint64_t to_uint64() const { return m_beg->to_uint64(); }
+
     std::int64_t to_int64() const { return m_beg->to_int64(); }
+
     double to_double() const { return m_beg->to_double(); }
+
     float to_float() const { return m_beg->to_float(); }
 
     template<std::size_t KL>
@@ -1525,11 +1590,13 @@ public:
     {
         return contains(key, KL - 1);
     }
+
     template<typename ConstCharPtr, typename = typename std::enable_if<std::is_same<ConstCharPtr, const char*>::value>::type>
     bool contains(ConstCharPtr key) const
     {
         return contains(key, std::strlen(key));
     }
+
     bool contains(const char* key, std::size_t len) const
     {
         auto res = find(key, len);
@@ -1542,11 +1609,13 @@ public:
     {
         return at(key, KL - 1);
     }
+
     template<typename ConstCharPtr, typename = typename std::enable_if<std::is_same<ConstCharPtr, const char*>::value>::type>
     fjson at(ConstCharPtr key) const
     {
         return at(key, std::strlen(key));
     }
+
     fjson at(const char* key, std::size_t len) const
     {
         auto res = find(key, len);
@@ -1556,6 +1625,7 @@ public:
 
         throw std::runtime_error(__FLATJSON__MAKE_ERROR_MESSAGE("key not found"));
     }
+
     // for arrays
     fjson at(std::size_t idx) const
     {
@@ -1576,6 +1646,7 @@ public:
     {
         return at(key, KL - 1);
     }
+
     template<typename ConstCharPtr, typename = typename std::enable_if<std::is_same<ConstCharPtr, const char*>::value>::type>
     fjson operator[](ConstCharPtr key) const
     {
@@ -1587,7 +1658,9 @@ public:
     {
         return load(str, str + N - 1);
     }
+
     bool load(InputIterator beg, std::size_t size) { return load(beg, beg + size); }
+
     bool load(InputIterator beg, InputIterator end)
     {
         if (beg == end) {
@@ -1628,12 +1701,14 @@ public:
 
         return res;
     }
+
     std::ostream& dump(std::ostream& os, std::size_t indent = 0) const
     {
         details::fj_tokens_to_stream(os, m_beg, m_end - m_beg, indent);
 
         return os;
     }
+
     friend std::ostream& operator<<(std::ostream& os, const fjson& fj)
     {
         details::fj_tokens_to_stream(os, fj.m_beg, fj.m_end - fj.m_beg);
@@ -1692,6 +1767,7 @@ private:
 
         throw std::logic_error(__FLATJSON__MAKE_ERROR_MESSAGE("unreachable!"));
     }
+
     std::pair<element_type*, element_type*> find(std::size_t idx) const
     {
         if (type() != FJ_TYPE_ARRAY)

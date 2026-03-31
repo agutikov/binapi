@@ -292,7 +292,7 @@ MacroBlockEnd: ''
 MainIncludeChar: Quote
 
 # The maximum number of consecutive empty lines to keep.
-MaxEmptyLinesToKeep: 1
+MaxEmptyLinesToKeep: 2
 
 # The indentation used for namespaces.
 NamespaceIndentation: None
@@ -335,7 +335,7 @@ RemoveParentheses: Leave
 RemoveSemicolon: false
 RequiresClausePosition: OwnLine
 RequiresExpressionIndentation: OuterScope
-SeparateDefinitionBlocks: Leave
+SeparateDefinitionBlocks: Always
 ShortNamespaceLines: 1
 SkipMacroDefinitionBody: false
 

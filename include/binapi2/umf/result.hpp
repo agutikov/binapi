@@ -17,8 +17,11 @@ struct result
     [[nodiscard]] explicit operator bool() const noexcept { return err.code == error_code::none; }
 
     [[nodiscard]] T& operator*() noexcept { return *value; }
+
     [[nodiscard]] const T& operator*() const noexcept { return *value; }
+
     [[nodiscard]] T* operator->() noexcept { return std::addressof(*value); }
+
     [[nodiscard]] const T* operator->() const noexcept { return std::addressof(*value); }
 
     static result success(T v)

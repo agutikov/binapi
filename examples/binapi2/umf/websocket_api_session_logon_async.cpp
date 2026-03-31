@@ -22,15 +22,17 @@ main()
             return;
         }
 
-        client.session_logon([&](binapi2::umf::result<binapi2::umf::types::websocket_api_response<binapi2::umf::types::session_logon_result>> result) {
-            if (!result) {
-                std::cerr << result.err.message << '\n';
-                return;
-            }
+        client.session_logon(
+            [&](binapi2::umf::result<binapi2::umf::types::websocket_api_response<binapi2::umf::types::session_logon_result>>
+                    result) {
+                if (!result) {
+                    std::cerr << result.err.message << '\n';
+                    return;
+                }
 
-            std::cout << "status=" << result->status << '\n';
-            client.close([](binapi2::umf::result<void>) {});
-        });
+                std::cout << "status=" << result->status << '\n';
+                client.close([](binapi2::umf::result<void>) {});
+            });
     });
 
     io.run();

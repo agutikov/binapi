@@ -13,16 +13,19 @@ client::configuration() noexcept
 {
     return cfg_;
 }
+
 const config&
 client::configuration() const noexcept
 {
     return cfg_;
 }
+
 boost::asio::io_context&
 client::context() noexcept
 {
     return io_context_;
 }
+
 transport::http_client&
 client::transport() noexcept
 {

@@ -626,6 +626,7 @@ exchange_info_t::is_valid_symbol(const char* sym) const
 {
     return symbols.find(sym) != symbols.end();
 }
+
 const exchange_info_t::symbol_t&
 exchange_info_t::get_by_symbol(const char* sym) const
 {
@@ -1279,6 +1280,7 @@ new_order_info_ack_t::construct(const flatjson::fjson& json)
 
     return res;
 }
+
 std::ostream&
 operator<<(std::ostream& os, const new_order_info_ack_t& o)
 {
@@ -1312,6 +1314,7 @@ new_order_info_result_t::construct(const flatjson::fjson& json)
 
     return res;
 }
+
 std::ostream&
 operator<<(std::ostream& os, const new_order_info_result_t& o)
 {
@@ -1344,6 +1347,7 @@ new_order_info_full_t::avg_price(const std::vector<fill_part>& parts)
 
     return res;
 }
+
 double_type
 new_order_info_full_t::max_price(const std::vector<fill_part>& parts)
 {
@@ -1409,6 +1413,7 @@ new_order_info_full_t::construct(const flatjson::fjson& json)
 
     return res;
 }
+
 std::ostream&
 operator<<(std::ostream& os, const new_order_info_full_t& o)
 {

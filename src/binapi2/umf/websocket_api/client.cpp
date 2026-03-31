@@ -243,7 +243,8 @@ void
 client::query_order(const types::query_order_request& request,
                     callback_type<types::websocket_api_response<types::order_response>> callback)
 {
-    boost::asio::post(io_context_, [this, request, callback = std::move(callback)]() mutable { callback(query_order(request)); });
+    boost::asio::post(io_context_,
+                      [this, request, callback = std::move(callback)]() mutable { callback(query_order(request)); });
 }
 
 result<types::websocket_api_response<types::order_response>>
@@ -265,7 +266,8 @@ void
 client::cancel_order(const types::cancel_order_request& request,
                      callback_type<types::websocket_api_response<types::order_response>> callback)
 {
-    boost::asio::post(io_context_, [this, request, callback = std::move(callback)]() mutable { callback(cancel_order(request)); });
+    boost::asio::post(io_context_,
+                      [this, request, callback = std::move(callback)]() mutable { callback(cancel_order(request)); });
 }
 
 result<types::websocket_api_response<types::book_ticker>>
@@ -279,7 +281,8 @@ void
 client::book_ticker(const types::book_ticker_request& request,
                     callback_type<types::websocket_api_response<types::book_ticker>> callback)
 {
-    boost::asio::post(io_context_, [this, request, callback = std::move(callback)]() mutable { callback(book_ticker(request)); });
+    boost::asio::post(io_context_,
+                      [this, request, callback = std::move(callback)]() mutable { callback(book_ticker(request)); });
 }
 
 result<void>

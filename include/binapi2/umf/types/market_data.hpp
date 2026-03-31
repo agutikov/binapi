@@ -14,8 +14,10 @@ namespace binapi2::umf::types {
 
 struct ping_request
 {};
+
 struct server_time_request
 {};
+
 struct exchange_info_request
 {
     std::optional<std::string> symbol{};

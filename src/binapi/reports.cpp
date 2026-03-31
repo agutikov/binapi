@@ -572,6 +572,7 @@ show_exchanger_price_for_orders(std::ostream& os,
         double_type exchanger_price;
         std::vector<double_type> order_price;
     };
+
     std::vector<out_item> out_items;
 
     for (auto& it : orders.orders) {
@@ -630,6 +631,7 @@ calc_loss_for_orders(std::ostream& os,
         std::string pair;
         double_type loss;
     };
+
     std::vector<out_item> out_items;
 
     for (const auto& it : orders.orders) {

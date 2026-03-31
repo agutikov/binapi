@@ -58,7 +58,7 @@ account_service::balances()
     return owner_.execute<std::vector<types::futures_account_balance>>(account_balances_endpoint.method,
                                                                        std::string{ account_balances_endpoint.path },
                                                                        {},
-                                                                        account_balances_endpoint.signed_request);
+                                                                       account_balances_endpoint.signed_request);
 }
 
 void
@@ -77,14 +77,15 @@ account_service::position_risk(const types::position_risk_request& request)
     return owner_.execute<std::vector<types::position_risk>>(position_risk_endpoint.method,
                                                              std::string{ position_risk_endpoint.path },
                                                              query,
-                                                              position_risk_endpoint.signed_request);
+                                                             position_risk_endpoint.signed_request);
 }
 
 void
 account_service::position_risk(const types::position_risk_request& request,
                                callback_type<std::vector<types::position_risk>> callback)
 {
-    post_callback(owner_.context(), [this, request, callback = std::move(callback)]() mutable { callback(position_risk(request)); });
+    post_callback(owner_.context(),
+                  [this, request, callback = std::move(callback)]() mutable { callback(position_risk(request)); });
 }
 
 market_data_service::market_data_service(binapi2::umf::client& owner) noexcept : owner_(owner) {}
@@ -125,14 +126,15 @@ market_data_service::exchange_info(const types::exchange_info_request& request)
     return owner_.execute<types::exchange_info_response>(exchange_info_endpoint.method,
                                                          std::string{ exchange_info_endpoint.path },
                                                          query,
-                                                          exchange_info_endpoint.signed_request);
+                                                         exchange_info_endpoint.signed_request);
 }
 
 void
 market_data_service::exchange_info(const types::exchange_info_request& request,
                                    callback_type<types::exchange_info_response> callback)
 {
-    post_callback(owner_.context(), [this, request, callback = std::move(callback)]() mutable { callback(exchange_info(request)); });
+    post_callback(owner_.context(),
+                  [this, request, callback = std::move(callback)]() mutable { callback(exchange_info(request)); });
 }
 
 result<types::order_book_response>
@@ -149,7 +151,8 @@ market_data_service::order_book(const types::order_book_request& request)
 void
 market_data_service::order_book(const types::order_book_request& request, callback_type<types::order_book_response> callback)
 {
-    post_callback(owner_.context(), [this, request, callback = std::move(callback)]() mutable { callback(order_book(request)); });
+    post_callback(owner_.context(),
+                  [this, request, callback = std::move(callback)]() mutable { callback(order_book(request)); });
 }
 
 result<std::vector<types::recent_trade>>
@@ -162,14 +165,15 @@ market_data_service::recent_trades(const types::recent_trades_request& request)
     return owner_.execute<std::vector<types::recent_trade>>(recent_trades_endpoint.method,
                                                             std::string{ recent_trades_endpoint.path },
                                                             query,
-                                                             recent_trades_endpoint.signed_request);
+                                                            recent_trades_endpoint.signed_request);
 }
 
 void
 market_data_service::recent_trades(const types::recent_trades_request& request,
                                    callback_type<std::vector<types::recent_trade>> callback)
 {
-    post_callback(owner_.context(), [this, request, callback = std::move(callback)]() mutable { callback(recent_trades(request)); });
+    post_callback(owner_.context(),
+                  [this, request, callback = std::move(callback)]() mutable { callback(recent_trades(request)); });
 }
 
 result<std::vector<types::aggregate_trade>>
@@ -191,16 +195,15 @@ market_data_service::aggregate_trades(const types::aggregate_trades_request& req
     return owner_.execute<std::vector<types::aggregate_trade>>(aggregate_trades_endpoint.method,
                                                                std::string{ aggregate_trades_endpoint.path },
                                                                query,
-                                                                aggregate_trades_endpoint.signed_request);
+                                                               aggregate_trades_endpoint.signed_request);
 }
 
 void
 market_data_service::aggregate_trades(const types::aggregate_trades_request& request,
                                       callback_type<std::vector<types::aggregate_trade>> callback)
 {
-    post_callback(owner_.context(), [this, request, callback = std::move(callback)]() mutable {
-        callback(aggregate_trades(request));
-    });
+    post_callback(owner_.context(),
+                  [this, request, callback = std::move(callback)]() mutable { callback(aggregate_trades(request)); });
 }
 
 result<std::vector<types::kline>>
@@ -244,16 +247,15 @@ market_data_service::continuous_klines(const types::continuous_kline_request& re
     return owner_.execute<std::vector<types::kline>>(continuous_klines_endpoint.method,
                                                      std::string{ continuous_klines_endpoint.path },
                                                      query,
-                                                      continuous_klines_endpoint.signed_request);
+                                                     continuous_klines_endpoint.signed_request);
 }
 
 void
 market_data_service::continuous_klines(const types::continuous_kline_request& request,
                                        callback_type<std::vector<types::kline>> callback)
 {
-    post_callback(owner_.context(), [this, request, callback = std::move(callback)]() mutable {
-        callback(continuous_klines(request));
-    });
+    post_callback(owner_.context(),
+                  [this, request, callback = std::move(callback)]() mutable { callback(continuous_klines(request)); });
 }
 
 result<std::vector<types::kline>>
@@ -272,16 +274,15 @@ market_data_service::index_price_klines(const types::index_price_kline_request& 
     return owner_.execute<std::vector<types::kline>>(index_price_klines_endpoint.method,
                                                      std::string{ index_price_klines_endpoint.path },
                                                      query,
-                                                      index_price_klines_endpoint.signed_request);
+                                                     index_price_klines_endpoint.signed_request);
 }
 
 void
 market_data_service::index_price_klines(const types::index_price_kline_request& request,
                                         callback_type<std::vector<types::kline>> callback)
 {
-    post_callback(owner_.context(), [this, request, callback = std::move(callback)]() mutable {
-        callback(index_price_klines(request));
-    });
+    post_callback(owner_.context(),
+                  [this, request, callback = std::move(callback)]() mutable { callback(index_price_klines(request)); });
 }
 
 result<std::vector<types::kline>>
@@ -300,16 +301,14 @@ market_data_service::mark_price_klines(const types::kline_request& request)
     return owner_.execute<std::vector<types::kline>>(mark_price_klines_endpoint.method,
                                                      std::string{ mark_price_klines_endpoint.path },
                                                      query,
-                                                      mark_price_klines_endpoint.signed_request);
+                                                     mark_price_klines_endpoint.signed_request);
 }
 
 void
-market_data_service::mark_price_klines(const types::kline_request& request,
-                                       callback_type<std::vector<types::kline>> callback)
+market_data_service::mark_price_klines(const types::kline_request& request, callback_type<std::vector<types::kline>> callback)
 {
-    post_callback(owner_.context(), [this, request, callback = std::move(callback)]() mutable {
-        callback(mark_price_klines(request));
-    });
+    post_callback(owner_.context(),
+                  [this, request, callback = std::move(callback)]() mutable { callback(mark_price_klines(request)); });
 }
 
 result<std::vector<types::kline>>
@@ -328,16 +327,15 @@ market_data_service::premium_index_klines(const types::kline_request& request)
     return owner_.execute<std::vector<types::kline>>(premium_index_klines_endpoint.method,
                                                      std::string{ premium_index_klines_endpoint.path },
                                                      query,
-                                                      premium_index_klines_endpoint.signed_request);
+                                                     premium_index_klines_endpoint.signed_request);
 }
 
 void
 market_data_service::premium_index_klines(const types::kline_request& request,
                                           callback_type<std::vector<types::kline>> callback)
 {
-    post_callback(owner_.context(), [this, request, callback = std::move(callback)]() mutable {
-        callback(premium_index_klines(request));
-    });
+    post_callback(owner_.context(),
+                  [this, request, callback = std::move(callback)]() mutable { callback(premium_index_klines(request)); });
 }
 
 result<types::book_ticker>
@@ -354,7 +352,8 @@ market_data_service::book_ticker(const types::book_ticker_request& request)
 void
 market_data_service::book_ticker(const types::book_ticker_request& request, callback_type<types::book_ticker> callback)
 {
-    post_callback(owner_.context(), [this, request, callback = std::move(callback)]() mutable { callback(book_ticker(request)); });
+    post_callback(owner_.context(),
+                  [this, request, callback = std::move(callback)]() mutable { callback(book_ticker(request)); });
 }
 
 result<std::vector<types::book_ticker>>
@@ -384,7 +383,8 @@ market_data_service::price_ticker(const types::price_ticker_request& request)
 void
 market_data_service::price_ticker(const types::price_ticker_request& request, callback_type<types::price_ticker> callback)
 {
-    post_callback(owner_.context(), [this, request, callback = std::move(callback)]() mutable { callback(price_ticker(request)); });
+    post_callback(owner_.context(),
+                  [this, request, callback = std::move(callback)]() mutable { callback(price_ticker(request)); });
 }
 
 result<std::vector<types::price_ticker>>
@@ -414,7 +414,8 @@ market_data_service::ticker_24hr(const types::ticker_24hr_request& request)
 void
 market_data_service::ticker_24hr(const types::ticker_24hr_request& request, callback_type<types::ticker_24hr> callback)
 {
-    post_callback(owner_.context(), [this, request, callback = std::move(callback)]() mutable { callback(ticker_24hr(request)); });
+    post_callback(owner_.context(),
+                  [this, request, callback = std::move(callback)]() mutable { callback(ticker_24hr(request)); });
 }
 
 result<std::vector<types::ticker_24hr>>
@@ -444,7 +445,8 @@ market_data_service::mark_price(const types::mark_price_request& request)
 void
 market_data_service::mark_price(const types::mark_price_request& request, callback_type<types::mark_price> callback)
 {
-    post_callback(owner_.context(), [this, request, callback = std::move(callback)]() mutable { callback(mark_price(request)); });
+    post_callback(owner_.context(),
+                  [this, request, callback = std::move(callback)]() mutable { callback(mark_price(request)); });
 }
 
 result<std::vector<types::mark_price>>
@@ -479,16 +481,15 @@ market_data_service::funding_rate_history(const types::funding_rate_history_requ
     return owner_.execute<std::vector<types::funding_rate_history_entry>>(funding_rate_history_endpoint.method,
                                                                           std::string{ funding_rate_history_endpoint.path },
                                                                           query,
-                                                                           funding_rate_history_endpoint.signed_request);
+                                                                          funding_rate_history_endpoint.signed_request);
 }
 
 void
 market_data_service::funding_rate_history(const types::funding_rate_history_request& request,
                                           callback_type<std::vector<types::funding_rate_history_entry>> callback)
 {
-    post_callback(owner_.context(), [this, request, callback = std::move(callback)]() mutable {
-        callback(funding_rate_history(request));
-    });
+    post_callback(owner_.context(),
+                  [this, request, callback = std::move(callback)]() mutable { callback(funding_rate_history(request)); });
 }
 
 result<std::vector<types::funding_rate_info>>
@@ -497,7 +498,7 @@ market_data_service::funding_rate_info()
     return owner_.execute<std::vector<types::funding_rate_info>>(funding_rate_info_endpoint.method,
                                                                  std::string{ funding_rate_info_endpoint.path },
                                                                  {},
-                                                                  funding_rate_info_endpoint.signed_request);
+                                                                 funding_rate_info_endpoint.signed_request);
 }
 
 void
@@ -512,13 +513,14 @@ market_data_service::open_interest(const types::open_interest_request& request)
     return owner_.execute<types::open_interest>(open_interest_endpoint.method,
                                                 std::string{ open_interest_endpoint.path },
                                                 { { "symbol", request.symbol } },
-                                                 open_interest_endpoint.signed_request);
+                                                open_interest_endpoint.signed_request);
 }
 
 void
 market_data_service::open_interest(const types::open_interest_request& request, callback_type<types::open_interest> callback)
 {
-    post_callback(owner_.context(), [this, request, callback = std::move(callback)]() mutable { callback(open_interest(request)); });
+    post_callback(owner_.context(),
+                  [this, request, callback = std::move(callback)]() mutable { callback(open_interest(request)); });
 }
 
 result<std::vector<types::open_interest_statistics_entry>>
@@ -535,9 +537,8 @@ void
 market_data_service::open_interest_statistics(const types::futures_data_request& request,
                                               callback_type<std::vector<types::open_interest_statistics_entry>> callback)
 {
-    post_callback(owner_.context(), [this, request, callback = std::move(callback)]() mutable {
-        callback(open_interest_statistics(request));
-    });
+    post_callback(owner_.context(),
+                  [this, request, callback = std::move(callback)]() mutable { callback(open_interest_statistics(request)); });
 }
 
 result<std::vector<types::long_short_ratio_entry>>
@@ -545,8 +546,8 @@ market_data_service::top_long_short_account_ratio(const types::futures_data_requ
 {
     return owner_.execute<std::vector<types::long_short_ratio_entry>>(top_long_short_account_ratio_endpoint.method,
                                                                       std::string{ top_long_short_account_ratio_endpoint.path },
-                                                                       make_futures_data_query(request),
-                                                                       top_long_short_account_ratio_endpoint.signed_request);
+                                                                      make_futures_data_query(request),
+                                                                      top_long_short_account_ratio_endpoint.signed_request);
 }
 
 void
@@ -563,8 +564,8 @@ market_data_service::top_trader_long_short_ratio(const types::futures_data_reque
 {
     return owner_.execute<std::vector<types::long_short_ratio_entry>>(top_trader_long_short_ratio_endpoint.method,
                                                                       std::string{ top_trader_long_short_ratio_endpoint.path },
-                                                                       make_futures_data_query(request),
-                                                                       top_trader_long_short_ratio_endpoint.signed_request);
+                                                                      make_futures_data_query(request),
+                                                                      top_trader_long_short_ratio_endpoint.signed_request);
 }
 
 void
@@ -581,17 +582,16 @@ market_data_service::long_short_ratio(const types::futures_data_request& request
 {
     return owner_.execute<std::vector<types::long_short_ratio_entry>>(long_short_ratio_endpoint.method,
                                                                       std::string{ long_short_ratio_endpoint.path },
-                                                                       make_futures_data_query(request),
-                                                                       long_short_ratio_endpoint.signed_request);
+                                                                      make_futures_data_query(request),
+                                                                      long_short_ratio_endpoint.signed_request);
 }
 
 void
 market_data_service::long_short_ratio(const types::futures_data_request& request,
                                       callback_type<std::vector<types::long_short_ratio_entry>> callback)
 {
-    post_callback(owner_.context(), [this, request, callback = std::move(callback)]() mutable {
-        callback(long_short_ratio(request));
-    });
+    post_callback(owner_.context(),
+                  [this, request, callback = std::move(callback)]() mutable { callback(long_short_ratio(request)); });
 }
 
 result<std::vector<types::taker_buy_sell_volume_entry>>
@@ -599,17 +599,16 @@ market_data_service::taker_buy_sell_volume(const types::futures_data_request& re
 {
     return owner_.execute<std::vector<types::taker_buy_sell_volume_entry>>(taker_buy_sell_volume_endpoint.method,
                                                                            std::string{ taker_buy_sell_volume_endpoint.path },
-                                                                            make_futures_data_query(request),
-                                                                            taker_buy_sell_volume_endpoint.signed_request);
+                                                                           make_futures_data_query(request),
+                                                                           taker_buy_sell_volume_endpoint.signed_request);
 }
 
 void
 market_data_service::taker_buy_sell_volume(const types::futures_data_request& request,
                                            callback_type<std::vector<types::taker_buy_sell_volume_entry>> callback)
 {
-    post_callback(owner_.context(), [this, request, callback = std::move(callback)]() mutable {
-        callback(taker_buy_sell_volume(request));
-    });
+    post_callback(owner_.context(),
+                  [this, request, callback = std::move(callback)]() mutable { callback(taker_buy_sell_volume(request)); });
 }
 
 result<std::vector<types::recent_trade>>
@@ -625,16 +624,15 @@ market_data_service::historical_trades(const types::historical_trades_request& r
     return owner_.execute<std::vector<types::recent_trade>>(historical_trades_endpoint.method,
                                                             std::string{ historical_trades_endpoint.path },
                                                             query,
-                                                             historical_trades_endpoint.signed_request);
+                                                            historical_trades_endpoint.signed_request);
 }
 
 void
 market_data_service::historical_trades(const types::historical_trades_request& request,
                                        callback_type<std::vector<types::recent_trade>> callback)
 {
-    post_callback(owner_.context(), [this, request, callback = std::move(callback)]() mutable {
-        callback(historical_trades(request));
-    });
+    post_callback(owner_.context(),
+                  [this, request, callback = std::move(callback)]() mutable { callback(historical_trades(request)); });
 }
 
 trade_service::trade_service(binapi2::umf::client& owner) noexcept : owner_(owner) {}
@@ -661,7 +659,8 @@ trade_service::new_order(const types::new_order_request& request)
 void
 trade_service::new_order(const types::new_order_request& request, callback_type<types::order_response> callback)
 {
-    post_callback(owner_.context(), [this, request, callback = std::move(callback)]() mutable { callback(new_order(request)); });
+    post_callback(owner_.context(),
+                  [this, request, callback = std::move(callback)]() mutable { callback(new_order(request)); });
 }
 
 result<types::order_response>
@@ -686,7 +685,8 @@ trade_service::modify_order(const types::modify_order_request& request)
 void
 trade_service::modify_order(const types::modify_order_request& request, callback_type<types::order_response> callback)
 {
-    post_callback(owner_.context(), [this, request, callback = std::move(callback)]() mutable { callback(modify_order(request)); });
+    post_callback(owner_.context(),
+                  [this, request, callback = std::move(callback)]() mutable { callback(modify_order(request)); });
 }
 
 result<types::order_response>
@@ -704,7 +704,8 @@ trade_service::cancel_order(const types::cancel_order_request& request)
 void
 trade_service::cancel_order(const types::cancel_order_request& request, callback_type<types::order_response> callback)
 {
-    post_callback(owner_.context(), [this, request, callback = std::move(callback)]() mutable { callback(cancel_order(request)); });
+    post_callback(owner_.context(),
+                  [this, request, callback = std::move(callback)]() mutable { callback(cancel_order(request)); });
 }
 
 result<types::order_response>
@@ -722,7 +723,8 @@ trade_service::query_order(const types::query_order_request& request)
 void
 trade_service::query_order(const types::query_order_request& request, callback_type<types::order_response> callback)
 {
-    post_callback(owner_.context(), [this, request, callback = std::move(callback)]() mutable { callback(query_order(request)); });
+    post_callback(owner_.context(),
+                  [this, request, callback = std::move(callback)]() mutable { callback(query_order(request)); });
 }
 
 user_data_stream_service::user_data_stream_service(binapi2::umf::client& owner) noexcept : owner_(owner) {}
@@ -732,8 +734,8 @@ user_data_stream_service::start()
 {
     return owner_.execute<types::listen_key_response>(start_listen_key_endpoint.method,
                                                       std::string{ start_listen_key_endpoint.path },
-                                                       {},
-                                                       start_listen_key_endpoint.signed_request);
+                                                      {},
+                                                      start_listen_key_endpoint.signed_request);
 }
 
 void
@@ -747,8 +749,8 @@ user_data_stream_service::keepalive()
 {
     return owner_.execute<types::listen_key_response>(keepalive_listen_key_endpoint.method,
                                                       std::string{ keepalive_listen_key_endpoint.path },
-                                                       {},
-                                                       keepalive_listen_key_endpoint.signed_request);
+                                                      {},
+                                                      keepalive_listen_key_endpoint.signed_request);
 }
 
 void
@@ -762,8 +764,8 @@ user_data_stream_service::close()
 {
     return owner_.execute<types::empty_response>(close_listen_key_endpoint.method,
                                                  std::string{ close_listen_key_endpoint.path },
-                                                  {},
-                                                  close_listen_key_endpoint.signed_request);
+                                                 {},
+                                                 close_listen_key_endpoint.signed_request);
 }
 
 void

@@ -54,6 +54,7 @@ struct websocket : std::enable_shared_from_this<websocket>
         m_buf{}, m_host{}, m_target{}, m_stop_requested{}
     {
     }
+
     virtual ~websocket() {}
 
     using holder_type = std::shared_ptr<websocket>;
@@ -125,6 +126,7 @@ private:
                                        }
                                    });
     }
+
     template<typename CB>
     void on_connected(CB cb, holder_type holder)
     {
@@ -150,6 +152,7 @@ private:
                 }
             });
     }
+
     template<typename CB>
     void on_async_ssl_handshake(CB cb, holder_type holder)
     {
@@ -158,6 +161,7 @@ private:
                 start_read(ec, std::move(cb), std::move(holder));
             });
     }
+
     template<typename CB>
     void start_read(boost::system::error_code ec, CB cb, holder_type holder)
     {
@@ -177,6 +181,7 @@ private:
                 on_read(ec, rd, std::move(cb), std::move(holder));
             });
     }
+
     template<typename CB>
     void on_read(boost::system::error_code ec, std::size_t rd, CB cb, holder_type holder)
     {
@@ -223,6 +228,7 @@ private:
 struct websocket_id_getter
 {
     using type = const void*;
+
     type operator()(const websocket& sock) const { return std::addressof(sock); }
 };
 
@@ -242,6 +248,7 @@ struct websockets::impl
         m_on_stat{ std::move(stat_cb) }, m_stat_interval{ stat_interval }, m_set{}
     {
     }
+
     ~impl() { unsubscribe_all(); }
 
     static std::string make_channel_name(const char* pair, const char* channel)
@@ -352,6 +359,7 @@ struct websockets::impl
     {
         return stop_channel_impl(h, [](auto sp) { sp->stop(); });
     }
+
     void async_stop_channel(handle h)
     {
         return stop_channel_impl(h, [](auto sp) { sp->async_stop(); });
@@ -367,10 +375,12 @@ struct websockets::impl
             it = m_set.erase(it);
         }
     }
+
     void unsubscribe_all()
     {
         return unsubscribe_all_impl([](auto sp) { sp->stop(); });
     }
+
     void async_unsubscribe_all()
     {
         return unsubscribe_all_impl([](auto sp) { sp->async_stop(); });
@@ -594,6 +604,7 @@ websockets::unsubscribe(const handle& h)
 {
     return pimpl->stop_channel(h);
 }
+
 void
 websockets::async_unsubscribe(const handle& h)
 {
@@ -605,6 +616,7 @@ websockets::unsubscribe_all()
 {
     return pimpl->unsubscribe_all();
 }
+
 void
 websockets::async_unsubscribe_all()
 {
