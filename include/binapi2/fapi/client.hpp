@@ -6,6 +6,7 @@
 
 #include <binapi2/fapi/config.hpp>
 #include <binapi2/fapi/rest/account.hpp>
+#include <binapi2/fapi/rest/convert.hpp>
 #include <binapi2/fapi/rest/market_data.hpp>
 #include <binapi2/fapi/rest/trade.hpp>
 #include <binapi2/fapi/rest/user_data_streams.hpp>
@@ -117,6 +118,7 @@ public:
     }
 
     rest::account_service account;
+    rest::convert_service convert;
     rest::market_data_service market_data;
     rest::trade_service trade;
     rest::user_data_stream_service user_data_streams;

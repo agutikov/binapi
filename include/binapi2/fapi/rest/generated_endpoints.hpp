@@ -414,4 +414,14 @@ inline constexpr endpoint_metadata quantitative_rules_endpoint{
     "quantitative_rules", boost::beast::http::verb::get, "/fapi/v1/apiTradingStatus", types::security_type::user_data, true, true, true
 };
 
+inline constexpr endpoint_metadata convert_get_quote_endpoint{
+    "convert_get_quote", boost::beast::http::verb::post, "/fapi/v1/convert/getQuote", types::security_type::trade, true, true, true
+};
+inline constexpr endpoint_metadata convert_accept_quote_endpoint{
+    "convert_accept_quote", boost::beast::http::verb::post, "/fapi/v1/convert/acceptQuote", types::security_type::trade, true, true, true
+};
+inline constexpr endpoint_metadata convert_order_status_endpoint{
+    "convert_order_status", boost::beast::http::verb::get, "/fapi/v1/convert/orderStatus", types::security_type::user_data, true, true, true
+};
+
 } // namespace binapi2::fapi::rest

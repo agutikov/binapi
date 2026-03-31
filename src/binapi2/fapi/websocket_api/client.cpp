@@ -289,6 +289,196 @@ client::book_ticker(const types::book_ticker_request& request,
                       [this, request, callback = std::move(callback)]() mutable { callback(book_ticker(request)); });
 }
 
+result<types::websocket_api_response<types::price_ticker>>
+client::ticker_price(const types::price_ticker_request& request)
+{
+    return send_rpc<types::price_ticker>(
+        transport_, next_id(), ticker_price_method, types::websocket_api_price_ticker_request{ request.symbol });
+}
+
+void
+client::ticker_price(const types::price_ticker_request& request,
+                     callback_type<types::websocket_api_response<types::price_ticker>> callback)
+{
+    boost::asio::post(io_context_,
+                      [this, request, callback = std::move(callback)]() mutable { callback(ticker_price(request)); });
+}
+
+result<types::websocket_api_response<types::order_response>>
+client::modify_order(const types::modify_order_request& request)
+{
+    auto auth = make_signed_request_base(cfg_);
+    types::websocket_api_order_modify_request params{};
+    params.apiKey = auth.apiKey;
+    params.timestamp = auth.timestamp;
+    params.recvWindow = auth.recvWindow;
+    params.signature = auth.signature;
+    params.symbol = request.symbol;
+    params.orderId = request.orderId;
+    params.origClientOrderId = request.origClientOrderId;
+    params.side = to_string(request.side);
+    params.quantity = request.quantity;
+    params.price = request.price;
+    params.priceMatch = request.priceMatch;
+    return send_rpc<types::order_response>(transport_, next_id(), order_modify_method, params);
+}
+
+void
+client::modify_order(const types::modify_order_request& request,
+                     callback_type<types::websocket_api_response<types::order_response>> callback)
+{
+    boost::asio::post(io_context_,
+                      [this, request, callback = std::move(callback)]() mutable { callback(modify_order(request)); });
+}
+
+result<types::websocket_api_response<std::vector<types::position_risk>>>
+client::account_position(const types::position_risk_request& request)
+{
+    auto auth = make_signed_request_base(cfg_);
+    types::websocket_api_position_request params{};
+    params.apiKey = auth.apiKey;
+    params.timestamp = auth.timestamp;
+    params.recvWindow = auth.recvWindow;
+    params.signature = auth.signature;
+    params.symbol = request.symbol;
+    return send_rpc<std::vector<types::position_risk>>(transport_, next_id(), account_position_method, params);
+}
+
+void
+client::account_position(const types::position_risk_request& request,
+                         callback_type<types::websocket_api_response<std::vector<types::position_risk>>> callback)
+{
+    boost::asio::post(io_context_,
+                      [this, request, callback = std::move(callback)]() mutable { callback(account_position(request)); });
+}
+
+result<types::websocket_api_response<std::vector<types::position_risk>>>
+client::account_position_v2(const types::position_risk_request& request)
+{
+    auto auth = make_signed_request_base(cfg_);
+    types::websocket_api_position_request params{};
+    params.apiKey = auth.apiKey;
+    params.timestamp = auth.timestamp;
+    params.recvWindow = auth.recvWindow;
+    params.signature = auth.signature;
+    params.symbol = request.symbol;
+    return send_rpc<std::vector<types::position_risk>>(transport_, next_id(), account_position_v2_method, params);
+}
+
+void
+client::account_position_v2(const types::position_risk_request& request,
+                            callback_type<types::websocket_api_response<std::vector<types::position_risk>>> callback)
+{
+    boost::asio::post(io_context_,
+                      [this, request, callback = std::move(callback)]() mutable { callback(account_position_v2(request)); });
+}
+
+result<types::websocket_api_response<types::account_information>>
+client::account_status_v2()
+{
+    return send_rpc<types::account_information>(transport_, next_id(), account_status_v2_method, make_signed_request_base(cfg_));
+}
+
+void
+client::account_status_v2(callback_type<types::websocket_api_response<types::account_information>> callback)
+{
+    boost::asio::post(io_context_, [this, callback = std::move(callback)]() mutable { callback(account_status_v2()); });
+}
+
+result<types::websocket_api_response<types::algo_order_response>>
+client::algo_order_place(const types::new_algo_order_request& request)
+{
+    auto auth = make_signed_request_base(cfg_);
+    types::websocket_api_algo_order_place_request params{};
+    params.apiKey = auth.apiKey;
+    params.timestamp = auth.timestamp;
+    params.recvWindow = auth.recvWindow;
+    params.signature = auth.signature;
+    params.symbol = request.symbol;
+    params.side = request.side;
+    params.positionSide = request.positionSide;
+    params.type = request.type;
+    params.timeInForce = request.timeInForce;
+    params.quantity = request.quantity;
+    params.price = request.price;
+    params.triggerPrice = request.triggerPrice;
+    params.algoType = request.algoType;
+    params.workingType = request.workingType;
+    return send_rpc<types::algo_order_response>(transport_, next_id(), algo_order_place_method, params);
+}
+
+void
+client::algo_order_place(const types::new_algo_order_request& request,
+                         callback_type<types::websocket_api_response<types::algo_order_response>> callback)
+{
+    boost::asio::post(io_context_,
+                      [this, request, callback = std::move(callback)]() mutable { callback(algo_order_place(request)); });
+}
+
+result<types::websocket_api_response<types::code_msg_response>>
+client::algo_order_cancel(const types::cancel_algo_order_request& request)
+{
+    auto auth = make_signed_request_base(cfg_);
+    types::websocket_api_algo_order_cancel_request params{};
+    params.apiKey = auth.apiKey;
+    params.timestamp = auth.timestamp;
+    params.recvWindow = auth.recvWindow;
+    params.signature = auth.signature;
+    params.algoId = request.algoId;
+    params.clientAlgoId = request.clientAlgoId;
+    return send_rpc<types::code_msg_response>(transport_, next_id(), algo_order_cancel_method, params);
+}
+
+void
+client::algo_order_cancel(const types::cancel_algo_order_request& request,
+                          callback_type<types::websocket_api_response<types::code_msg_response>> callback)
+{
+    boost::asio::post(io_context_,
+                      [this, request, callback = std::move(callback)]() mutable { callback(algo_order_cancel(request)); });
+}
+
+result<types::websocket_api_response<types::websocket_api_listen_key_result>>
+client::user_data_stream_start()
+{
+    types::websocket_api_user_data_stream_request params{};
+    params.apiKey = cfg_.api_key;
+    return send_rpc<types::websocket_api_listen_key_result>(transport_, next_id(), user_data_stream_start_method, params);
+}
+
+void
+client::user_data_stream_start(callback_type<types::websocket_api_response<types::websocket_api_listen_key_result>> callback)
+{
+    boost::asio::post(io_context_, [this, callback = std::move(callback)]() mutable { callback(user_data_stream_start()); });
+}
+
+result<types::websocket_api_response<types::websocket_api_listen_key_result>>
+client::user_data_stream_ping()
+{
+    types::websocket_api_user_data_stream_request params{};
+    params.apiKey = cfg_.api_key;
+    return send_rpc<types::websocket_api_listen_key_result>(transport_, next_id(), user_data_stream_ping_method, params);
+}
+
+void
+client::user_data_stream_ping(callback_type<types::websocket_api_response<types::websocket_api_listen_key_result>> callback)
+{
+    boost::asio::post(io_context_, [this, callback = std::move(callback)]() mutable { callback(user_data_stream_ping()); });
+}
+
+result<types::websocket_api_response<types::empty_response>>
+client::user_data_stream_stop()
+{
+    types::websocket_api_user_data_stream_request params{};
+    params.apiKey = cfg_.api_key;
+    return send_rpc<types::empty_response>(transport_, next_id(), user_data_stream_stop_method, params);
+}
+
+void
+client::user_data_stream_stop(callback_type<types::websocket_api_response<types::empty_response>> callback)
+{
+    boost::asio::post(io_context_, [this, callback = std::move(callback)]() mutable { callback(user_data_stream_stop()); });
+}
+
 result<void>
 client::close()
 {

@@ -11,6 +11,7 @@ set(BINAPI2_FAPI_HEADERS
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/time.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/rest/account.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/rest/generated_endpoints.hpp
+    ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/rest/convert.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/rest/market_data.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/rest/trade.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/rest/user_data_streams.hpp
@@ -23,6 +24,7 @@ set(BINAPI2_FAPI_HEADERS
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/transport/websocket_client.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/types/common.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/types/account.hpp
+    ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/types/convert.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/types/enums.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/types/market_data.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/types/streams.hpp
@@ -37,6 +39,7 @@ set(BINAPI2_FAPI_SOURCES
     client.cpp
     rest/account.cpp
     rest/common.cpp
+    rest/convert.cpp
     rest/market_data.cpp
     rest/trade.cpp
     rest/user_data_streams.cpp
