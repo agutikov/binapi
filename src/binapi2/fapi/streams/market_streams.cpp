@@ -94,6 +94,52 @@ market_streams::connect_diff_book_depth(const diff_book_depth_subscription& subs
 }
 
 result<void>
+market_streams::connect_mini_ticker(const mini_ticker_subscription& subscription)
+{
+    const auto target = cfg_.stream_base_target + "/" + subscription.symbol + "@miniTicker";
+    return transport_.connect(cfg_.stream_host, cfg_.stream_port, target);
+}
+
+void
+market_streams::connect_mini_ticker(const mini_ticker_subscription& subscription, void_callback callback)
+{
+    boost::asio::post(io_context_, [this, subscription, callback = std::move(callback)]() mutable {
+        callback(connect_mini_ticker(subscription));
+    });
+}
+
+result<void>
+market_streams::connect_ticker(const ticker_subscription& subscription)
+{
+    const auto target = cfg_.stream_base_target + "/" + subscription.symbol + "@ticker";
+    return transport_.connect(cfg_.stream_host, cfg_.stream_port, target);
+}
+
+void
+market_streams::connect_ticker(const ticker_subscription& subscription, void_callback callback)
+{
+    boost::asio::post(io_context_, [this, subscription, callback = std::move(callback)]() mutable {
+        callback(connect_ticker(subscription));
+    });
+}
+
+result<void>
+market_streams::connect_kline(const kline_subscription& subscription)
+{
+    const auto target =
+        cfg_.stream_base_target + "/" + subscription.symbol + "@kline_" + types::to_string(subscription.interval);
+    return transport_.connect(cfg_.stream_host, cfg_.stream_port, target);
+}
+
+void
+market_streams::connect_kline(const kline_subscription& subscription, void_callback callback)
+{
+    boost::asio::post(io_context_, [this, subscription, callback = std::move(callback)]() mutable {
+        callback(connect_kline(subscription));
+    });
+}
+
+result<void>
 market_streams::read_aggregate_trade_loop(aggregate_trade_handler handler)
 {
     return read_stream_loop<types::aggregate_trade_stream_event>(transport_, std::move(handler));
@@ -146,6 +192,48 @@ market_streams::read_diff_book_depth_loop(depth_handler handler, void_callback c
 {
     boost::asio::post(io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
         callback(read_diff_book_depth_loop(std::move(handler)));
+    });
+}
+
+result<void>
+market_streams::read_mini_ticker_loop(mini_ticker_handler handler)
+{
+    return read_stream_loop<types::mini_ticker_stream_event>(transport_, std::move(handler));
+}
+
+void
+market_streams::read_mini_ticker_loop(mini_ticker_handler handler, void_callback callback)
+{
+    boost::asio::post(io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
+        callback(read_mini_ticker_loop(std::move(handler)));
+    });
+}
+
+result<void>
+market_streams::read_ticker_loop(ticker_handler handler)
+{
+    return read_stream_loop<types::ticker_stream_event>(transport_, std::move(handler));
+}
+
+void
+market_streams::read_ticker_loop(ticker_handler handler, void_callback callback)
+{
+    boost::asio::post(io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
+        callback(read_ticker_loop(std::move(handler)));
+    });
+}
+
+result<void>
+market_streams::read_kline_loop(kline_handler handler)
+{
+    return read_stream_loop<types::kline_stream_event>(transport_, std::move(handler));
+}
+
+void
+market_streams::read_kline_loop(kline_handler handler, void_callback callback)
+{
+    boost::asio::post(io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
+        callback(read_kline_loop(std::move(handler)));
     });
 }
 

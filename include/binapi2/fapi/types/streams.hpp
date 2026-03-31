@@ -5,6 +5,7 @@
 #pragma once
 
 #include <binapi2/fapi/types/common.hpp>
+#include <binapi2/fapi/types/enums.hpp>
 
 #include <glaze/glaze.hpp>
 
@@ -64,6 +65,70 @@ struct depth_stream_event
     std::uint64_t pu{};
     std::vector<price_level> b{};
     std::vector<price_level> a{};
+};
+
+struct mini_ticker_stream_event
+{
+    std::string e{};
+    std::uint64_t E{};
+    std::string s{};
+    std::string c{};
+    std::string o{};
+    std::string h{};
+    std::string l{};
+    std::string v{};
+    std::string q{};
+};
+
+struct ticker_stream_event
+{
+    std::string e{};
+    std::uint64_t E{};
+    std::string s{};
+    std::string p{};
+    std::string P{};
+    std::string w{};
+    std::string c{};
+    std::string Q{};
+    std::string o{};
+    std::string h{};
+    std::string l{};
+    std::string v{};
+    std::string q{};
+    std::uint64_t O{};
+    std::uint64_t C{};
+    std::uint64_t F{};
+    std::uint64_t L{};
+    std::uint64_t n{};
+};
+
+struct kline_stream_data
+{
+    std::uint64_t t{};
+    std::uint64_t T{};
+    std::string s{};
+    std::string i{};
+    std::uint64_t f{};
+    std::uint64_t L{};
+    std::string o{};
+    std::string c{};
+    std::string h{};
+    std::string l{};
+    std::string v{};
+    std::uint64_t n{};
+    bool x{};
+    std::string q{};
+    std::string V{};
+    std::string Q{};
+    std::string B{};
+};
+
+struct kline_stream_event
+{
+    std::string e{};
+    std::uint64_t E{};
+    std::string s{};
+    kline_stream_data k{};
 };
 
 struct account_update_balance
@@ -202,6 +267,103 @@ struct glz::meta<binapi2::fapi::types::depth_stream_event>
     using T = binapi2::fapi::types::depth_stream_event;
     static constexpr auto value =
         object("e", &T::e, "E", &T::E, "T", &T::T, "s", &T::s, "U", &T::U, "u", &T::u, "pu", &T::pu, "b", &T::b, "a", &T::a);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::mini_ticker_stream_event>
+{
+    using T = binapi2::fapi::types::mini_ticker_stream_event;
+    static constexpr auto value =
+        object("e", &T::e, "E", &T::E, "s", &T::s, "c", &T::c, "o", &T::o, "h", &T::h, "l", &T::l, "v", &T::v, "q", &T::q);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::ticker_stream_event>
+{
+    using T = binapi2::fapi::types::ticker_stream_event;
+    static constexpr auto value = object("e",
+                                         &T::e,
+                                         "E",
+                                         &T::E,
+                                         "s",
+                                         &T::s,
+                                         "p",
+                                         &T::p,
+                                         "P",
+                                         &T::P,
+                                         "w",
+                                         &T::w,
+                                         "c",
+                                         &T::c,
+                                         "Q",
+                                         &T::Q,
+                                         "o",
+                                         &T::o,
+                                         "h",
+                                         &T::h,
+                                         "l",
+                                         &T::l,
+                                         "v",
+                                         &T::v,
+                                         "q",
+                                         &T::q,
+                                         "O",
+                                         &T::O,
+                                         "C",
+                                         &T::C,
+                                         "F",
+                                         &T::F,
+                                         "L",
+                                         &T::L,
+                                         "n",
+                                         &T::n);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::kline_stream_data>
+{
+    using T = binapi2::fapi::types::kline_stream_data;
+    static constexpr auto value = object("t",
+                                         &T::t,
+                                         "T",
+                                         &T::T,
+                                         "s",
+                                         &T::s,
+                                         "i",
+                                         &T::i,
+                                         "f",
+                                         &T::f,
+                                         "L",
+                                         &T::L,
+                                         "o",
+                                         &T::o,
+                                         "c",
+                                         &T::c,
+                                         "h",
+                                         &T::h,
+                                         "l",
+                                         &T::l,
+                                         "v",
+                                         &T::v,
+                                         "n",
+                                         &T::n,
+                                         "x",
+                                         &T::x,
+                                         "q",
+                                         &T::q,
+                                         "V",
+                                         &T::V,
+                                         "Q",
+                                         &T::Q,
+                                         "B",
+                                         &T::B);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::kline_stream_event>
+{
+    using T = binapi2::fapi::types::kline_stream_event;
+    static constexpr auto value = object("e", &T::e, "E", &T::E, "s", &T::s, "k", &T::k);
 };
 
 template<>

@@ -24,3 +24,12 @@ target_link_libraries(binapi2_fapi_websocket_api_account_status PRIVATE binapi2_
 
 add_executable(binapi2_fapi_stream_mark_price stream_mark_price.cpp)
 target_link_libraries(binapi2_fapi_stream_mark_price PRIVATE binapi2_fapi)
+
+add_executable(binapi2_fapi_stream_mini_ticker stream_mini_ticker.cpp)
+target_link_libraries(binapi2_fapi_stream_mini_ticker PRIVATE binapi2_fapi)
+
+add_executable(binapi2_fapi_stream_ticker stream_ticker.cpp)
+target_link_libraries(binapi2_fapi_stream_ticker PRIVATE binapi2_fapi)
+
+add_executable(binapi2_fapi_stream_kline stream_kline.cpp)
+target_link_libraries(binapi2_fapi_stream_kline PRIVATE binapi2_fapi)

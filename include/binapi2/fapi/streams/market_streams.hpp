@@ -24,6 +24,9 @@ public:
     using mark_price_handler = std::function<bool(const types::mark_price_stream_event&)>;
     using book_ticker_handler = std::function<bool(const types::book_ticker_stream_event&)>;
     using depth_handler = std::function<bool(const types::depth_stream_event&)>;
+    using mini_ticker_handler = std::function<bool(const types::mini_ticker_stream_event&)>;
+    using ticker_handler = std::function<bool(const types::ticker_stream_event&)>;
+    using kline_handler = std::function<bool(const types::kline_stream_event&)>;
 
     market_streams(boost::asio::io_context& io_context, config cfg);
 
@@ -35,6 +38,12 @@ public:
     void connect_book_ticker(const book_ticker_subscription& subscription, void_callback callback);
     [[nodiscard]] result<void> connect_diff_book_depth(const diff_book_depth_subscription& subscription);
     void connect_diff_book_depth(const diff_book_depth_subscription& subscription, void_callback callback);
+    [[nodiscard]] result<void> connect_mini_ticker(const mini_ticker_subscription& subscription);
+    void connect_mini_ticker(const mini_ticker_subscription& subscription, void_callback callback);
+    [[nodiscard]] result<void> connect_ticker(const ticker_subscription& subscription);
+    void connect_ticker(const ticker_subscription& subscription, void_callback callback);
+    [[nodiscard]] result<void> connect_kline(const kline_subscription& subscription);
+    void connect_kline(const kline_subscription& subscription, void_callback callback);
     [[nodiscard]] result<void> read_aggregate_trade_loop(aggregate_trade_handler handler);
     void read_aggregate_trade_loop(aggregate_trade_handler handler, void_callback callback);
     [[nodiscard]] result<void> read_mark_price_loop(mark_price_handler handler);
@@ -43,6 +52,12 @@ public:
     void read_book_ticker_loop(book_ticker_handler handler, void_callback callback);
     [[nodiscard]] result<void> read_diff_book_depth_loop(depth_handler handler);
     void read_diff_book_depth_loop(depth_handler handler, void_callback callback);
+    [[nodiscard]] result<void> read_mini_ticker_loop(mini_ticker_handler handler);
+    void read_mini_ticker_loop(mini_ticker_handler handler, void_callback callback);
+    [[nodiscard]] result<void> read_ticker_loop(ticker_handler handler);
+    void read_ticker_loop(ticker_handler handler, void_callback callback);
+    [[nodiscard]] result<void> read_kline_loop(kline_handler handler);
+    void read_kline_loop(kline_handler handler, void_callback callback);
     [[nodiscard]] result<void> close();
     void close(void_callback callback);
 
