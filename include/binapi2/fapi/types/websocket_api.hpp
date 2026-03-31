@@ -85,6 +85,57 @@ struct websocket_api_book_ticker_request
     std::optional<std::string> symbol{};
 };
 
+struct websocket_api_price_ticker_request
+{
+    std::optional<std::string> symbol{};
+};
+
+struct websocket_api_order_modify_request : websocket_api_signed_request
+{
+    std::string symbol{};
+    std::optional<std::uint64_t> orderId{};
+    std::optional<std::string> origClientOrderId{};
+    std::string side{};
+    std::string quantity{};
+    std::string price{};
+    std::optional<std::string> priceMatch{};
+};
+
+struct websocket_api_position_request : websocket_api_signed_request
+{
+    std::optional<std::string> symbol{};
+};
+
+struct websocket_api_algo_order_place_request : websocket_api_signed_request
+{
+    std::string symbol{};
+    std::string side{};
+    std::optional<std::string> positionSide{};
+    std::optional<std::string> type{};
+    std::optional<std::string> timeInForce{};
+    std::string quantity{};
+    std::optional<std::string> price{};
+    std::optional<std::string> triggerPrice{};
+    std::string algoType{};
+    std::optional<std::string> workingType{};
+};
+
+struct websocket_api_algo_order_cancel_request : websocket_api_signed_request
+{
+    std::optional<std::uint64_t> algoId{};
+    std::optional<std::string> clientAlgoId{};
+};
+
+struct websocket_api_user_data_stream_request
+{
+    std::string apiKey{};
+};
+
+struct websocket_api_listen_key_result
+{
+    std::string listenKey{};
+};
+
 template<typename T>
 struct websocket_api_response
 {
@@ -209,6 +260,123 @@ struct glz::meta<binapi2::fapi::types::websocket_api_book_ticker_request>
 {
     using T = binapi2::fapi::types::websocket_api_book_ticker_request;
     static constexpr auto value = object("symbol", &T::symbol);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::websocket_api_price_ticker_request>
+{
+    using T = binapi2::fapi::types::websocket_api_price_ticker_request;
+    static constexpr auto value = object("symbol", &T::symbol);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::websocket_api_order_modify_request>
+{
+    using T = binapi2::fapi::types::websocket_api_order_modify_request;
+    static constexpr auto value = object("apiKey",
+                                         &T::apiKey,
+                                         "timestamp",
+                                         &T::timestamp,
+                                         "recvWindow",
+                                         &T::recvWindow,
+                                         "signature",
+                                         &T::signature,
+                                         "symbol",
+                                         &T::symbol,
+                                         "orderId",
+                                         &T::orderId,
+                                         "origClientOrderId",
+                                         &T::origClientOrderId,
+                                         "side",
+                                         &T::side,
+                                         "quantity",
+                                         &T::quantity,
+                                         "price",
+                                         &T::price,
+                                         "priceMatch",
+                                         &T::priceMatch);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::websocket_api_position_request>
+{
+    using T = binapi2::fapi::types::websocket_api_position_request;
+    static constexpr auto value = object("apiKey",
+                                         &T::apiKey,
+                                         "timestamp",
+                                         &T::timestamp,
+                                         "recvWindow",
+                                         &T::recvWindow,
+                                         "signature",
+                                         &T::signature,
+                                         "symbol",
+                                         &T::symbol);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::websocket_api_algo_order_place_request>
+{
+    using T = binapi2::fapi::types::websocket_api_algo_order_place_request;
+    static constexpr auto value = object("apiKey",
+                                         &T::apiKey,
+                                         "timestamp",
+                                         &T::timestamp,
+                                         "recvWindow",
+                                         &T::recvWindow,
+                                         "signature",
+                                         &T::signature,
+                                         "symbol",
+                                         &T::symbol,
+                                         "side",
+                                         &T::side,
+                                         "positionSide",
+                                         &T::positionSide,
+                                         "type",
+                                         &T::type,
+                                         "timeInForce",
+                                         &T::timeInForce,
+                                         "quantity",
+                                         &T::quantity,
+                                         "price",
+                                         &T::price,
+                                         "triggerPrice",
+                                         &T::triggerPrice,
+                                         "algoType",
+                                         &T::algoType,
+                                         "workingType",
+                                         &T::workingType);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::websocket_api_algo_order_cancel_request>
+{
+    using T = binapi2::fapi::types::websocket_api_algo_order_cancel_request;
+    static constexpr auto value = object("apiKey",
+                                         &T::apiKey,
+                                         "timestamp",
+                                         &T::timestamp,
+                                         "recvWindow",
+                                         &T::recvWindow,
+                                         "signature",
+                                         &T::signature,
+                                         "algoId",
+                                         &T::algoId,
+                                         "clientAlgoId",
+                                         &T::clientAlgoId);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::websocket_api_user_data_stream_request>
+{
+    using T = binapi2::fapi::types::websocket_api_user_data_stream_request;
+    static constexpr auto value = object("apiKey", &T::apiKey);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::websocket_api_listen_key_result>
+{
+    using T = binapi2::fapi::types::websocket_api_listen_key_result;
+    static constexpr auto value = object("listenKey", &T::listenKey);
 };
 
 template<typename T>

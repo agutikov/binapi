@@ -228,4 +228,190 @@ inline constexpr endpoint_metadata trading_schedule_endpoint{ "trading_schedule"
                                                               false,
                                                               false };
 
+inline constexpr endpoint_metadata test_order_endpoint{
+    "test_order", boost::beast::http::verb::post, "/fapi/v1/order/test", types::security_type::trade, true, true, true
+};
+inline constexpr endpoint_metadata batch_orders_endpoint{
+    "batch_orders", boost::beast::http::verb::post, "/fapi/v1/batchOrders", types::security_type::trade, true, true, true
+};
+inline constexpr endpoint_metadata modify_batch_orders_endpoint{
+    "modify_batch_orders", boost::beast::http::verb::put, "/fapi/v1/batchOrders", types::security_type::trade, true, true, true
+};
+inline constexpr endpoint_metadata cancel_batch_orders_endpoint{ "cancel_batch_orders",
+                                                                 boost::beast::http::verb::delete_,
+                                                                 "/fapi/v1/batchOrders",
+                                                                 types::security_type::trade,
+                                                                 true,
+                                                                 true,
+                                                                 true };
+inline constexpr endpoint_metadata cancel_all_open_orders_endpoint{ "cancel_all_open_orders",
+                                                                    boost::beast::http::verb::delete_,
+                                                                    "/fapi/v1/allOpenOrders",
+                                                                    types::security_type::trade,
+                                                                    true,
+                                                                    true,
+                                                                    true };
+inline constexpr endpoint_metadata auto_cancel_endpoint{
+    "auto_cancel", boost::beast::http::verb::post, "/fapi/v1/countdownCancelAll", types::security_type::trade, true, true, true
+};
+inline constexpr endpoint_metadata query_open_order_endpoint{
+    "query_open_order", boost::beast::http::verb::get, "/fapi/v1/openOrder", types::security_type::user_data, true, true, true
+};
+inline constexpr endpoint_metadata all_open_orders_endpoint{
+    "all_open_orders", boost::beast::http::verb::get, "/fapi/v1/openOrders", types::security_type::user_data, true, true, true
+};
+inline constexpr endpoint_metadata all_orders_endpoint{
+    "all_orders", boost::beast::http::verb::get, "/fapi/v1/allOrders", types::security_type::user_data, true, true, true
+};
+inline constexpr endpoint_metadata position_risk_v3_endpoint{
+    "position_risk_v3", boost::beast::http::verb::get, "/fapi/v3/positionRisk", types::security_type::user_data, true, true, true
+};
+inline constexpr endpoint_metadata adl_quantile_endpoint{
+    "adl_quantile", boost::beast::http::verb::get, "/fapi/v1/adlQuantile", types::security_type::user_data, true, true, true
+};
+inline constexpr endpoint_metadata force_orders_endpoint{
+    "force_orders", boost::beast::http::verb::get, "/fapi/v1/forceOrders", types::security_type::user_data, true, true, true
+};
+inline constexpr endpoint_metadata account_trades_endpoint{
+    "account_trades", boost::beast::http::verb::get, "/fapi/v1/userTrades", types::security_type::user_data, true, true, true
+};
+inline constexpr endpoint_metadata change_position_mode_endpoint{ "change_position_mode",
+                                                                  boost::beast::http::verb::post,
+                                                                  "/fapi/v1/positionSide/dual",
+                                                                  types::security_type::trade,
+                                                                  true,
+                                                                  true,
+                                                                  true };
+inline constexpr endpoint_metadata change_multi_assets_endpoint{ "change_multi_assets",
+                                                                 boost::beast::http::verb::post,
+                                                                 "/fapi/v1/multiAssetsMargin",
+                                                                 types::security_type::trade,
+                                                                 true,
+                                                                 true,
+                                                                 true };
+inline constexpr endpoint_metadata change_leverage_endpoint{
+    "change_leverage", boost::beast::http::verb::post, "/fapi/v1/leverage", types::security_type::trade, true, true, true
+};
+inline constexpr endpoint_metadata change_margin_type_endpoint{
+    "change_margin_type", boost::beast::http::verb::post, "/fapi/v1/marginType", types::security_type::trade, true, true, true
+};
+inline constexpr endpoint_metadata modify_isolated_margin_endpoint{ "modify_isolated_margin",
+                                                                    boost::beast::http::verb::post,
+                                                                    "/fapi/v1/positionMargin",
+                                                                    types::security_type::trade,
+                                                                    true,
+                                                                    true,
+                                                                    true };
+inline constexpr endpoint_metadata position_margin_history_endpoint{ "position_margin_history",
+                                                                     boost::beast::http::verb::get,
+                                                                     "/fapi/v1/positionMargin/history",
+                                                                     types::security_type::user_data,
+                                                                     true,
+                                                                     true,
+                                                                     true };
+inline constexpr endpoint_metadata order_modify_history_endpoint{ "order_modify_history",
+                                                                  boost::beast::http::verb::get,
+                                                                  "/fapi/v1/orderAmendment",
+                                                                  types::security_type::user_data,
+                                                                  true,
+                                                                  true,
+                                                                  true };
+inline constexpr endpoint_metadata new_algo_order_endpoint{
+    "new_algo_order", boost::beast::http::verb::post, "/fapi/v1/algoOrder", types::security_type::trade, true, true, true
+};
+inline constexpr endpoint_metadata cancel_algo_order_endpoint{ "cancel_algo_order",
+                                                               boost::beast::http::verb::delete_,
+                                                               "/fapi/v1/algoOrder",
+                                                               types::security_type::trade,
+                                                               true,
+                                                               true,
+                                                               true };
+inline constexpr endpoint_metadata query_algo_order_endpoint{
+    "query_algo_order", boost::beast::http::verb::get, "/fapi/v1/algoOrder", types::security_type::user_data, true, true, true
+};
+inline constexpr endpoint_metadata all_algo_orders_endpoint{
+    "all_algo_orders", boost::beast::http::verb::get, "/fapi/v1/allAlgoOrders", types::security_type::user_data, true, true, true
+};
+inline constexpr endpoint_metadata open_algo_orders_endpoint{
+    "open_algo_orders", boost::beast::http::verb::get, "/fapi/v1/openAlgoOrders", types::security_type::user_data, true, true, true
+};
+inline constexpr endpoint_metadata cancel_all_algo_orders_endpoint{ "cancel_all_algo_orders",
+                                                                    boost::beast::http::verb::delete_,
+                                                                    "/fapi/v1/algoOpenOrders",
+                                                                    types::security_type::trade,
+                                                                    true,
+                                                                    true,
+                                                                    true };
+inline constexpr endpoint_metadata account_config_endpoint{
+    "account_config", boost::beast::http::verb::get, "/fapi/v1/accountConfig", types::security_type::user_data, true, true, true
+};
+inline constexpr endpoint_metadata symbol_config_endpoint{
+    "symbol_config", boost::beast::http::verb::get, "/fapi/v1/symbolConfig", types::security_type::user_data, true, true, true
+};
+inline constexpr endpoint_metadata get_multi_assets_mode_endpoint{ "get_multi_assets_mode",
+                                                                   boost::beast::http::verb::get,
+                                                                   "/fapi/v1/multiAssetsMargin",
+                                                                   types::security_type::user_data,
+                                                                   true,
+                                                                   true,
+                                                                   true };
+inline constexpr endpoint_metadata get_position_mode_endpoint{
+    "get_position_mode", boost::beast::http::verb::get, "/fapi/v1/positionSide/dual", types::security_type::user_data, true, true, true
+};
+inline constexpr endpoint_metadata income_history_endpoint{
+    "income_history", boost::beast::http::verb::get, "/fapi/v1/income", types::security_type::user_data, true, true, true
+};
+inline constexpr endpoint_metadata leverage_brackets_endpoint{
+    "leverage_brackets", boost::beast::http::verb::get, "/fapi/v1/leverageBracket", types::security_type::user_data, true, true, true
+};
+inline constexpr endpoint_metadata commission_rate_endpoint{
+    "commission_rate", boost::beast::http::verb::get, "/fapi/v1/commissionRate", types::security_type::user_data, true, true, true
+};
+inline constexpr endpoint_metadata rate_limit_order_endpoint{
+    "rate_limit_order", boost::beast::http::verb::get, "/fapi/v1/rateLimit/order", types::security_type::user_data, true, true, true
+};
+inline constexpr endpoint_metadata download_id_transaction_endpoint{ "download_id_transaction",
+                                                                     boost::beast::http::verb::get,
+                                                                     "/fapi/v1/income/asyn",
+                                                                     types::security_type::user_data,
+                                                                     true,
+                                                                     true,
+                                                                     true };
+inline constexpr endpoint_metadata download_link_transaction_endpoint{ "download_link_transaction",
+                                                                       boost::beast::http::verb::get,
+                                                                       "/fapi/v1/income/asyn/id",
+                                                                       types::security_type::user_data,
+                                                                       true,
+                                                                       true,
+                                                                       true };
+inline constexpr endpoint_metadata download_id_order_endpoint{
+    "download_id_order", boost::beast::http::verb::get, "/fapi/v1/order/asyn", types::security_type::user_data, true, true, true
+};
+inline constexpr endpoint_metadata download_link_order_endpoint{ "download_link_order",
+                                                                 boost::beast::http::verb::get,
+                                                                 "/fapi/v1/order/asyn/id",
+                                                                 types::security_type::user_data,
+                                                                 true,
+                                                                 true,
+                                                                 true };
+inline constexpr endpoint_metadata download_id_trade_endpoint{
+    "download_id_trade", boost::beast::http::verb::get, "/fapi/v1/trade/asyn", types::security_type::user_data, true, true, true
+};
+inline constexpr endpoint_metadata download_link_trade_endpoint{ "download_link_trade",
+                                                                 boost::beast::http::verb::get,
+                                                                 "/fapi/v1/trade/asyn/id",
+                                                                 types::security_type::user_data,
+                                                                 true,
+                                                                 true,
+                                                                 true };
+inline constexpr endpoint_metadata get_bnb_burn_endpoint{
+    "get_bnb_burn", boost::beast::http::verb::get, "/fapi/v1/feeBurn", types::security_type::user_data, true, true, true
+};
+inline constexpr endpoint_metadata toggle_bnb_burn_endpoint{
+    "toggle_bnb_burn", boost::beast::http::verb::post, "/fapi/v1/feeBurn", types::security_type::trade, true, true, true
+};
+inline constexpr endpoint_metadata quantitative_rules_endpoint{
+    "quantitative_rules", boost::beast::http::verb::get, "/fapi/v1/apiTradingStatus", types::security_type::user_data, true, true, true
+};
+
 } // namespace binapi2::fapi::rest

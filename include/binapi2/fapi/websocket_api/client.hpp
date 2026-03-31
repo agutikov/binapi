@@ -48,6 +48,38 @@ public:
         const types::book_ticker_request& request = {});
     void book_ticker(const types::book_ticker_request& request,
                      callback_type<types::websocket_api_response<types::book_ticker>> callback);
+    [[nodiscard]] result<types::websocket_api_response<types::price_ticker>> ticker_price(
+        const types::price_ticker_request& request = {});
+    void ticker_price(const types::price_ticker_request& request,
+                      callback_type<types::websocket_api_response<types::price_ticker>> callback);
+    [[nodiscard]] result<types::websocket_api_response<types::order_response>> modify_order(
+        const types::modify_order_request& request);
+    void modify_order(const types::modify_order_request& request,
+                      callback_type<types::websocket_api_response<types::order_response>> callback);
+    [[nodiscard]] result<types::websocket_api_response<std::vector<types::position_risk>>> account_position(
+        const types::position_risk_request& request = {});
+    void account_position(const types::position_risk_request& request,
+                          callback_type<types::websocket_api_response<std::vector<types::position_risk>>> callback);
+    [[nodiscard]] result<types::websocket_api_response<std::vector<types::position_risk>>> account_position_v2(
+        const types::position_risk_request& request = {});
+    void account_position_v2(const types::position_risk_request& request,
+                             callback_type<types::websocket_api_response<std::vector<types::position_risk>>> callback);
+    [[nodiscard]] result<types::websocket_api_response<types::account_information>> account_status_v2();
+    void account_status_v2(callback_type<types::websocket_api_response<types::account_information>> callback);
+    [[nodiscard]] result<types::websocket_api_response<types::algo_order_response>> algo_order_place(
+        const types::new_algo_order_request& request);
+    void algo_order_place(const types::new_algo_order_request& request,
+                          callback_type<types::websocket_api_response<types::algo_order_response>> callback);
+    [[nodiscard]] result<types::websocket_api_response<types::code_msg_response>> algo_order_cancel(
+        const types::cancel_algo_order_request& request);
+    void algo_order_cancel(const types::cancel_algo_order_request& request,
+                           callback_type<types::websocket_api_response<types::code_msg_response>> callback);
+    [[nodiscard]] result<types::websocket_api_response<types::websocket_api_listen_key_result>> user_data_stream_start();
+    void user_data_stream_start(callback_type<types::websocket_api_response<types::websocket_api_listen_key_result>> callback);
+    [[nodiscard]] result<types::websocket_api_response<types::websocket_api_listen_key_result>> user_data_stream_ping();
+    void user_data_stream_ping(callback_type<types::websocket_api_response<types::websocket_api_listen_key_result>> callback);
+    [[nodiscard]] result<types::websocket_api_response<types::empty_response>> user_data_stream_stop();
+    void user_data_stream_stop(callback_type<types::websocket_api_response<types::empty_response>> callback);
     [[nodiscard]] result<void> close();
     void close(callback_type<void> callback);
 
