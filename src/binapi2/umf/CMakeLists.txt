@@ -31,7 +31,11 @@ set(BINAPI2_UMF_HEADERS
 
 set(BINAPI2_UMF_SOURCES
     client.cpp
-    rest.cpp
+    rest/account.cpp
+    rest/common.cpp
+    rest/market_data.cpp
+    rest/trade.cpp
+    rest/user_data_streams.cpp
     signing.cpp
     transport/http_client.cpp
     transport/ssl_context.cpp
