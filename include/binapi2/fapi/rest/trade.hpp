@@ -101,6 +101,8 @@ public:
     void open_algo_orders(callback_type<std::vector<types::algo_order_response>> callback);
     [[nodiscard]] result<types::code_msg_response> cancel_all_algo_orders();
     void cancel_all_algo_orders(callback_type<types::code_msg_response> callback);
+    [[nodiscard]] result<types::code_msg_response> tradfi_perps(const types::tradfi_perps_request& request = {});
+    void tradfi_perps(const types::tradfi_perps_request& request, callback_type<types::code_msg_response> callback);
 
 private:
     client& owner_;

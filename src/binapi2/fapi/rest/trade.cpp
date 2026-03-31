@@ -689,4 +689,19 @@ trade_service::cancel_all_algo_orders(callback_type<types::code_msg_response> ca
                           [this, callback = std::move(callback)]() mutable { callback(cancel_all_algo_orders()); });
 }
 
+result<types::code_msg_response>
+trade_service::tradfi_perps(const types::tradfi_perps_request& /*request*/)
+{
+    query_map query{};
+    return owner_.execute<types::code_msg_response>(
+        tradfi_perps_endpoint.method, std::string{ tradfi_perps_endpoint.path }, query, tradfi_perps_endpoint.signed_request);
+}
+
+void
+trade_service::tradfi_perps(const types::tradfi_perps_request& request, callback_type<types::code_msg_response> callback)
+{
+    detail::post_callback(owner_.context(),
+                          [this, request, callback = std::move(callback)]() mutable { callback(tradfi_perps(request)); });
+}
+
 } // namespace binapi2::fapi::rest

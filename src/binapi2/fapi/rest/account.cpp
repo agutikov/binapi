@@ -393,4 +393,23 @@ account_service::quantitative_rules(const types::quantitative_rules_request& req
                           [this, request, callback = std::move(callback)]() mutable { callback(quantitative_rules(request)); });
 }
 
+result<types::pm_account_info_response>
+account_service::pm_account_info(const types::pm_account_info_request& request)
+{
+    query_map query;
+    query["asset"] = request.asset;
+    return owner_.execute<types::pm_account_info_response>(pm_account_info_endpoint.method,
+                                                           std::string{ pm_account_info_endpoint.path },
+                                                           query,
+                                                           pm_account_info_endpoint.signed_request);
+}
+
+void
+account_service::pm_account_info(const types::pm_account_info_request& request,
+                                 callback_type<types::pm_account_info_response> callback)
+{
+    detail::post_callback(owner_.context(),
+                          [this, request, callback = std::move(callback)]() mutable { callback(pm_account_info(request)); });
+}
+
 } // namespace binapi2::fapi::rest

@@ -65,6 +65,8 @@ public:
     void toggle_bnb_burn(const types::toggle_bnb_burn_request& request, callback_type<types::bnb_burn_status_response> callback);
     [[nodiscard]] result<types::quantitative_rules_response> quantitative_rules(const types::quantitative_rules_request& request = {});
     void quantitative_rules(const types::quantitative_rules_request& request, callback_type<types::quantitative_rules_response> callback);
+    [[nodiscard]] result<types::pm_account_info_response> pm_account_info(const types::pm_account_info_request& request);
+    void pm_account_info(const types::pm_account_info_request& request, callback_type<types::pm_account_info_response> callback);
 
 private:
     client& owner_;

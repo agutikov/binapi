@@ -265,7 +265,27 @@ struct quantitative_rules_response
     std::map<std::string, std::vector<trading_status_indicator>> indicators{};
 };
 
+struct pm_account_info_request
+{
+    std::string asset{};
+};
+
+struct pm_account_info_response
+{
+    std::string maxWithdrawAmountUSD{};
+    std::string asset{};
+    std::string maxWithdrawAmount{};
+};
+
 } // namespace binapi2::fapi::types
+
+template<>
+struct glz::meta<binapi2::fapi::types::pm_account_info_response>
+{
+    using T = binapi2::fapi::types::pm_account_info_response;
+    static constexpr auto value =
+        object("maxWithdrawAmountUSD", &T::maxWithdrawAmountUSD, "asset", &T::asset, "maxWithdrawAmount", &T::maxWithdrawAmount);
+};
 
 template<>
 struct glz::meta<binapi2::fapi::types::account_asset>

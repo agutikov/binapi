@@ -348,6 +348,9 @@ struct all_algo_orders_request
     std::optional<int> limit{};
 };
 
+struct tradfi_perps_request
+{};
+
 } // namespace binapi2::fapi::types
 
 template<>

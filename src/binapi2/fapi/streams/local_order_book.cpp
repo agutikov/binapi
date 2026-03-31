@@ -1,0 +1,212 @@
+// SPDX-License-Identifier: Apache-2.0
+//
+// binapi2 USD-M Futures client library.
+
+#include <binapi2/fapi/streams/local_order_book.hpp>
+
+#include <binapi2/fapi/client.hpp>
+#include <binapi2/fapi/streams/market_streams.hpp>
+#include <binapi2/fapi/streams/subscriptions.hpp>
+
+#include <algorithm>
+#include <mutex>
+#include <utility>
+
+namespace binapi2::fapi::streams {
+
+local_order_book::local_order_book(market_streams& streams, client& rest_client) noexcept :
+    streams_(streams), rest_client_(rest_client)
+{
+}
+
+result<void>
+local_order_book::start(const std::string& symbol, int depth_limit)
+{
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        symbol_ = symbol;
+        depth_limit_ = depth_limit;
+        synced_ = false;
+        running_ = true;
+        buffer_.clear();
+        book_ = {};
+        last_u_ = 0;
+    }
+
+    // Step 1: open diff depth stream
+    diff_book_depth_subscription sub;
+    sub.symbol = symbol;
+    sub.speed = "100ms";
+    auto connect_result = streams_.connect_diff_book_depth(sub);
+    if (!connect_result) {
+        return connect_result;
+    }
+
+    // Step 2: buffer events, get snapshot, apply sequencing
+    auto loop_result = streams_.read_diff_book_depth_loop([this](const types::depth_stream_event& event) -> bool {
+        bool need_snapshot = false;
+
+        {
+            std::lock_guard<std::mutex> lock(mutex_);
+            if (!running_) {
+                return false;
+            }
+
+            if (!synced_) {
+                buffer_.push_back(event);
+                // Trigger snapshot on the first buffered event
+                need_snapshot = true;
+            } else {
+                // Step 6: validate pu == previous u
+                if (event.pu != last_u_) {
+                    synced_ = false;
+                    buffer_.clear();
+                    buffer_.push_back(event);
+                    need_snapshot = true;
+                } else {
+                    apply_event(event);
+                    last_u_ = event.u;
+
+                    if (on_snapshot_) {
+                        on_snapshot_(book_);
+                    }
+                    return true;
+                }
+            }
+        }
+
+        if (need_snapshot) {
+            fetch_snapshot();
+        }
+
+        std::lock_guard<std::mutex> lock(mutex_);
+        return running_;
+    });
+
+    return loop_result;
+}
+
+void
+local_order_book::stop()
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    running_ = false;
+}
+
+order_book_snapshot
+local_order_book::snapshot() const
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    return book_;
+}
+
+void
+local_order_book::set_snapshot_callback(snapshot_callback callback)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    on_snapshot_ = std::move(callback);
+}
+
+void
+local_order_book::fetch_snapshot()
+{
+    // Step 3: get REST depth snapshot (no lock held during network call)
+    types::order_book_request request;
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        request.symbol = symbol_;
+        request.limit = depth_limit_;
+    }
+
+    auto snap = rest_client_.market_data.order_book(request);
+    if (!snap) {
+        return;
+    }
+
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (!running_) {
+        return;
+    }
+
+    const auto last_update_id = snap->lastUpdateId;
+
+    // Step 4: drop buffered events where u < lastUpdateId
+    buffer_.erase(std::remove_if(buffer_.begin(),
+                                 buffer_.end(),
+                                 [last_update_id](const types::depth_stream_event& ev) { return ev.u < last_update_id; }),
+                  buffer_.end());
+
+    // Step 5: first event should have U <= lastUpdateId AND u >= lastUpdateId
+    if (buffer_.empty() || buffer_.front().U > last_update_id || buffer_.front().u < last_update_id) {
+        // Cannot sync yet - will retry on next event
+        return;
+    }
+
+    // Initialize book from snapshot
+    book_ = {};
+    book_.last_update_id = last_update_id;
+    for (const auto& level : snap->bids) {
+        if (level.quantity != "0" && level.quantity != "0.00000000") {
+            book_.bids[level.price] = level.quantity;
+        }
+    }
+    for (const auto& level : snap->asks) {
+        if (level.quantity != "0" && level.quantity != "0.00000000") {
+            book_.asks[level.price] = level.quantity;
+        }
+    }
+
+    // Apply buffered events in sequence
+    last_u_ = last_update_id;
+    for (const auto& event : buffer_) {
+        if (event.u <= last_update_id) {
+            last_u_ = event.u;
+            continue;
+        }
+        apply_event(event);
+        last_u_ = event.u;
+    }
+    buffer_.clear();
+    synced_ = true;
+
+    if (on_snapshot_) {
+        on_snapshot_(book_);
+    }
+}
+
+void
+local_order_book::apply_event(const types::depth_stream_event& event)
+{
+    apply_levels(event.b, book_.bids);
+    apply_levels(event.a, book_.asks);
+    book_.last_update_id = event.u;
+}
+
+void
+local_order_book::apply_levels(const std::vector<types::price_level>& levels,
+                               std::map<std::string, std::string, std::greater<>>& side)
+{
+    for (const auto& level : levels) {
+        // Step 7: if quantity=0, remove price level
+        if (level.quantity == "0" || level.quantity == "0.00000000") {
+            side.erase(level.price);
+        } else {
+            side[level.price] = level.quantity;
+        }
+    }
+}
+
+void
+local_order_book::apply_levels(const std::vector<types::price_level>& levels,
+                               std::map<std::string, std::string, std::less<>>& side)
+{
+    for (const auto& level : levels) {
+        if (level.quantity == "0" || level.quantity == "0.00000000") {
+            side.erase(level.price);
+        } else {
+            side[level.price] = level.quantity;
+        }
+    }
+}
+
+} // namespace binapi2::fapi::streams

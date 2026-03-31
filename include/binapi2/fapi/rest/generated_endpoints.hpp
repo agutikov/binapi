@@ -424,4 +424,11 @@ inline constexpr endpoint_metadata convert_order_status_endpoint{
     "convert_order_status", boost::beast::http::verb::get, "/fapi/v1/convert/orderStatus", types::security_type::user_data, true, true, true
 };
 
+inline constexpr endpoint_metadata pm_account_info_endpoint{
+    "pm_account_info", boost::beast::http::verb::get, "/fapi/v1/pmAccountInfo", types::security_type::user_data, true, true, true
+};
+inline constexpr endpoint_metadata tradfi_perps_endpoint{
+    "tradfi_perps", boost::beast::http::verb::post, "/fapi/v1/stock/contract", types::security_type::trade, true, true, true
+};
+
 } // namespace binapi2::fapi::rest
