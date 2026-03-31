@@ -8,6 +8,37 @@
 
 #include <glaze/glaze.hpp>
 
+namespace binapi2::fapi::streams::detail {
+
+struct stream_control_request
+{
+    std::string method{};
+    std::vector<std::string> params{};
+    unsigned int id{};
+};
+
+struct stream_list_response
+{
+    std::vector<std::string> result{};
+    unsigned int id{};
+};
+
+} // namespace binapi2::fapi::streams::detail
+
+template<>
+struct glz::meta<binapi2::fapi::streams::detail::stream_control_request>
+{
+    using T = binapi2::fapi::streams::detail::stream_control_request;
+    static constexpr auto value = object("method", &T::method, "params", &T::params, "id", &T::id);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::streams::detail::stream_list_response>
+{
+    using T = binapi2::fapi::streams::detail::stream_list_response;
+    static constexpr auto value = object("result", &T::result, "id", &T::id);
+};
+
 namespace binapi2::fapi::streams {
 
 namespace {
@@ -695,15 +726,7 @@ market_streams::connect_combined(const std::string& target, void_callback callba
 result<void>
 market_streams::subscribe(const std::vector<std::string>& streams)
 {
-    struct subscribe_request
-    {
-        std::string method{ "SUBSCRIBE" };
-        std::vector<std::string> params{};
-        unsigned int id{ 1 };
-    };
-
-    subscribe_request request;
-    request.params = streams;
+    detail::stream_control_request request{ "SUBSCRIBE", streams, 1 };
     auto payload = glz::write_json(request);
     if (!payload) {
         return result<void>::failure({ error_code::json, 0, 0, "failed to serialize subscribe request", {} });
@@ -722,15 +745,7 @@ market_streams::subscribe(const std::vector<std::string>& streams)
 result<void>
 market_streams::unsubscribe(const std::vector<std::string>& streams)
 {
-    struct unsubscribe_request
-    {
-        std::string method{ "UNSUBSCRIBE" };
-        std::vector<std::string> params{};
-        unsigned int id{ 2 };
-    };
-
-    unsubscribe_request request;
-    request.params = streams;
+    detail::stream_control_request request{ "UNSUBSCRIBE", streams, 2 };
     auto payload = glz::write_json(request);
     if (!payload) {
         return result<void>::failure({ error_code::json, 0, 0, "failed to serialize unsubscribe request", {} });
@@ -749,13 +764,7 @@ market_streams::unsubscribe(const std::vector<std::string>& streams)
 result<std::vector<std::string>>
 market_streams::list_subscriptions()
 {
-    struct list_request
-    {
-        std::string method{ "LIST_SUBSCRIPTIONS" };
-        unsigned int id{ 3 };
-    };
-
-    list_request request;
+    detail::stream_control_request request{ "LIST_SUBSCRIPTIONS", {}, 3 };
     auto payload = glz::write_json(request);
     if (!payload) {
         return result<std::vector<std::string>>::failure(
@@ -769,12 +778,7 @@ market_streams::list_subscriptions()
     if (!raw) {
         return result<std::vector<std::string>>::failure(raw.err);
     }
-    struct list_response
-    {
-        std::vector<std::string> result{};
-        unsigned int id{};
-    };
-    list_response response{};
+    detail::stream_list_response response{};
     if (auto ec = glz::read_json(response, *raw)) {
         return result<std::vector<std::string>>::failure(
             { error_code::json, 0, 0, glz::format_error(ec, *raw), *raw });

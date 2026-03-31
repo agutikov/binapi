@@ -96,10 +96,10 @@ public:
                            callback_type<std::vector<types::recent_trade>> callback);
     [[nodiscard]] result<std::vector<types::basis_entry>> basis(const types::basis_request& request);
     void basis(const types::basis_request& request, callback_type<std::vector<types::basis_entry>> callback);
-    [[nodiscard]] result<types::price_ticker_v2> price_ticker_v2(const types::price_ticker_v2_request& request);
-    void price_ticker_v2(const types::price_ticker_v2_request& request, callback_type<types::price_ticker_v2> callback);
-    [[nodiscard]] result<std::vector<types::price_ticker_v2>> price_tickers_v2();
-    void price_tickers_v2(callback_type<std::vector<types::price_ticker_v2>> callback);
+    [[nodiscard]] result<types::price_ticker> price_ticker_v2(const types::price_ticker_v2_request& request);
+    void price_ticker_v2(const types::price_ticker_v2_request& request, callback_type<types::price_ticker> callback);
+    [[nodiscard]] result<std::vector<types::price_ticker>> price_tickers_v2();
+    void price_tickers_v2(callback_type<std::vector<types::price_ticker>> callback);
     [[nodiscard]] result<std::vector<types::delivery_price_entry>> delivery_price(
         const types::delivery_price_request& request);
     void delivery_price(const types::delivery_price_request& request,
@@ -112,20 +112,20 @@ public:
         const types::index_constituents_request& request);
     void index_constituents(const types::index_constituents_request& request,
                             callback_type<types::index_constituents_response> callback);
-    [[nodiscard]] result<std::vector<types::asset_index_entry>> asset_index(const types::asset_index_request& request = {});
-    void asset_index(const types::asset_index_request& request, callback_type<std::vector<types::asset_index_entry>> callback);
-    [[nodiscard]] result<std::vector<types::insurance_fund_entry>> insurance_fund(
+    [[nodiscard]] result<std::vector<types::asset_index>> asset_index(const types::asset_index_request& request = {});
+    void asset_index(const types::asset_index_request& request, callback_type<std::vector<types::asset_index>> callback);
+    [[nodiscard]] result<types::insurance_fund_response> insurance_fund(
         const types::insurance_fund_request& request = {});
     void insurance_fund(const types::insurance_fund_request& request,
-                        callback_type<std::vector<types::insurance_fund_entry>> callback);
+                        callback_type<types::insurance_fund_response> callback);
     [[nodiscard]] result<std::vector<types::adl_risk_entry>> adl_risk(const types::adl_risk_request& request = {});
     void adl_risk(const types::adl_risk_request& request, callback_type<std::vector<types::adl_risk_entry>> callback);
-    [[nodiscard]] result<std::vector<types::rpi_depth_entry>> rpi_depth(const types::rpi_depth_request& request);
-    void rpi_depth(const types::rpi_depth_request& request, callback_type<std::vector<types::rpi_depth_entry>> callback);
-    [[nodiscard]] result<std::vector<types::trading_schedule_entry>> trading_schedule(
+    [[nodiscard]] result<types::order_book_response> rpi_depth(const types::rpi_depth_request& request);
+    void rpi_depth(const types::rpi_depth_request& request, callback_type<types::order_book_response> callback);
+    [[nodiscard]] result<types::trading_schedule_response> trading_schedule(
         const types::trading_schedule_request& request = {});
     void trading_schedule(const types::trading_schedule_request& request,
-                          callback_type<std::vector<types::trading_schedule_entry>> callback);
+                          callback_type<types::trading_schedule_response> callback);
 
 private:
     client& owner_;
