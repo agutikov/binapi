@@ -558,4 +558,221 @@ market_data_service::historical_trades(const types::historical_trades_request& r
                           [this, request, callback = std::move(callback)]() mutable { callback(historical_trades(request)); });
 }
 
+result<std::vector<types::basis_entry>>
+market_data_service::basis(const types::basis_request& request)
+{
+    query_map query{ { "pair", request.pair }, { "contractType", to_string(request.contractType) }, { "period", request.period } };
+    if (request.limit) {
+        query["limit"] = std::to_string(*request.limit);
+    }
+    if (request.startTime) {
+        query["startTime"] = std::to_string(*request.startTime);
+    }
+    if (request.endTime) {
+        query["endTime"] = std::to_string(*request.endTime);
+    }
+    return owner_.execute<std::vector<types::basis_entry>>(
+        basis_endpoint.method, std::string{ basis_endpoint.path }, query, basis_endpoint.signed_request);
+}
+
+void
+market_data_service::basis(const types::basis_request& request, callback_type<std::vector<types::basis_entry>> callback)
+{
+    detail::post_callback(owner_.context(),
+                          [this, request, callback = std::move(callback)]() mutable { callback(basis(request)); });
+}
+
+result<types::price_ticker_v2>
+market_data_service::price_ticker_v2(const types::price_ticker_v2_request& request)
+{
+    query_map query;
+    if (request.symbol) {
+        query["symbol"] = *request.symbol;
+    }
+    return owner_.execute<types::price_ticker_v2>(price_ticker_v2_endpoint.method,
+                                                   std::string{ price_ticker_v2_endpoint.path },
+                                                   query,
+                                                   price_ticker_v2_endpoint.signed_request);
+}
+
+void
+market_data_service::price_ticker_v2(const types::price_ticker_v2_request& request,
+                                     callback_type<types::price_ticker_v2> callback)
+{
+    detail::post_callback(owner_.context(),
+                          [this, request, callback = std::move(callback)]() mutable { callback(price_ticker_v2(request)); });
+}
+
+result<std::vector<types::price_ticker_v2>>
+market_data_service::price_tickers_v2()
+{
+    return owner_.execute<std::vector<types::price_ticker_v2>>(price_ticker_v2_endpoint.method,
+                                                                std::string{ price_ticker_v2_endpoint.path },
+                                                                {},
+                                                                price_ticker_v2_endpoint.signed_request);
+}
+
+void
+market_data_service::price_tickers_v2(callback_type<std::vector<types::price_ticker_v2>> callback)
+{
+    detail::post_callback(owner_.context(), [this, callback = std::move(callback)]() mutable { callback(price_tickers_v2()); });
+}
+
+result<std::vector<types::delivery_price_entry>>
+market_data_service::delivery_price(const types::delivery_price_request& request)
+{
+    query_map query;
+    if (request.pair) {
+        query["pair"] = *request.pair;
+    }
+    return owner_.execute<std::vector<types::delivery_price_entry>>(delivery_price_endpoint.method,
+                                                                     std::string{ delivery_price_endpoint.path },
+                                                                     query,
+                                                                     delivery_price_endpoint.signed_request);
+}
+
+void
+market_data_service::delivery_price(const types::delivery_price_request& request,
+                                    callback_type<std::vector<types::delivery_price_entry>> callback)
+{
+    detail::post_callback(owner_.context(),
+                          [this, request, callback = std::move(callback)]() mutable { callback(delivery_price(request)); });
+}
+
+result<std::vector<types::composite_index_info>>
+market_data_service::composite_index_info(const types::composite_index_info_request& request)
+{
+    query_map query;
+    if (request.symbol) {
+        query["symbol"] = *request.symbol;
+    }
+    return owner_.execute<std::vector<types::composite_index_info>>(composite_index_info_endpoint.method,
+                                                                     std::string{ composite_index_info_endpoint.path },
+                                                                     query,
+                                                                     composite_index_info_endpoint.signed_request);
+}
+
+void
+market_data_service::composite_index_info(const types::composite_index_info_request& request,
+                                          callback_type<std::vector<types::composite_index_info>> callback)
+{
+    detail::post_callback(owner_.context(),
+                          [this, request, callback = std::move(callback)]() mutable { callback(composite_index_info(request)); });
+}
+
+result<types::index_constituents_response>
+market_data_service::index_constituents(const types::index_constituents_request& request)
+{
+    query_map query{ { "symbol", request.symbol } };
+    return owner_.execute<types::index_constituents_response>(index_constituents_endpoint.method,
+                                                              std::string{ index_constituents_endpoint.path },
+                                                              query,
+                                                              index_constituents_endpoint.signed_request);
+}
+
+void
+market_data_service::index_constituents(const types::index_constituents_request& request,
+                                        callback_type<types::index_constituents_response> callback)
+{
+    detail::post_callback(owner_.context(),
+                          [this, request, callback = std::move(callback)]() mutable { callback(index_constituents(request)); });
+}
+
+result<std::vector<types::asset_index_entry>>
+market_data_service::asset_index(const types::asset_index_request& request)
+{
+    query_map query;
+    if (request.symbol) {
+        query["symbol"] = *request.symbol;
+    }
+    return owner_.execute<std::vector<types::asset_index_entry>>(asset_index_endpoint.method,
+                                                                  std::string{ asset_index_endpoint.path },
+                                                                  query,
+                                                                  asset_index_endpoint.signed_request);
+}
+
+void
+market_data_service::asset_index(const types::asset_index_request& request,
+                                 callback_type<std::vector<types::asset_index_entry>> callback)
+{
+    detail::post_callback(owner_.context(),
+                          [this, request, callback = std::move(callback)]() mutable { callback(asset_index(request)); });
+}
+
+result<std::vector<types::insurance_fund_entry>>
+market_data_service::insurance_fund(const types::insurance_fund_request& request)
+{
+    query_map query;
+    if (request.symbol) {
+        query["symbol"] = *request.symbol;
+    }
+    return owner_.execute<std::vector<types::insurance_fund_entry>>(insurance_fund_endpoint.method,
+                                                                     std::string{ insurance_fund_endpoint.path },
+                                                                     query,
+                                                                     insurance_fund_endpoint.signed_request);
+}
+
+void
+market_data_service::insurance_fund(const types::insurance_fund_request& request,
+                                    callback_type<std::vector<types::insurance_fund_entry>> callback)
+{
+    detail::post_callback(owner_.context(),
+                          [this, request, callback = std::move(callback)]() mutable { callback(insurance_fund(request)); });
+}
+
+result<std::vector<types::adl_risk_entry>>
+market_data_service::adl_risk(const types::adl_risk_request& request)
+{
+    query_map query;
+    if (request.symbol) {
+        query["symbol"] = *request.symbol;
+    }
+    return owner_.execute<std::vector<types::adl_risk_entry>>(
+        adl_risk_endpoint.method, std::string{ adl_risk_endpoint.path }, query, adl_risk_endpoint.signed_request);
+}
+
+void
+market_data_service::adl_risk(const types::adl_risk_request& request, callback_type<std::vector<types::adl_risk_entry>> callback)
+{
+    detail::post_callback(owner_.context(),
+                          [this, request, callback = std::move(callback)]() mutable { callback(adl_risk(request)); });
+}
+
+result<std::vector<types::rpi_depth_entry>>
+market_data_service::rpi_depth(const types::rpi_depth_request& request)
+{
+    query_map query{ { "symbol", request.symbol } };
+    return owner_.execute<std::vector<types::rpi_depth_entry>>(
+        rpi_depth_endpoint.method, std::string{ rpi_depth_endpoint.path }, query, rpi_depth_endpoint.signed_request);
+}
+
+void
+market_data_service::rpi_depth(const types::rpi_depth_request& request,
+                               callback_type<std::vector<types::rpi_depth_entry>> callback)
+{
+    detail::post_callback(owner_.context(),
+                          [this, request, callback = std::move(callback)]() mutable { callback(rpi_depth(request)); });
+}
+
+result<std::vector<types::trading_schedule_entry>>
+market_data_service::trading_schedule(const types::trading_schedule_request& request)
+{
+    query_map query;
+    if (request.symbol) {
+        query["symbol"] = *request.symbol;
+    }
+    return owner_.execute<std::vector<types::trading_schedule_entry>>(trading_schedule_endpoint.method,
+                                                                      std::string{ trading_schedule_endpoint.path },
+                                                                      query,
+                                                                      trading_schedule_endpoint.signed_request);
+}
+
+void
+market_data_service::trading_schedule(const types::trading_schedule_request& request,
+                                      callback_type<std::vector<types::trading_schedule_entry>> callback)
+{
+    detail::post_callback(owner_.context(),
+                          [this, request, callback = std::move(callback)]() mutable { callback(trading_schedule(request)); });
+}
+
 } // namespace binapi2::fapi::rest
