@@ -25,7 +25,7 @@ main()
         .price = "10000",
     };
 
-    const auto result = client.trade.new_order(request);
+    const auto result = client.trade.execute(request);
     if (!result) {
         std::cerr << result.err.message << '\n';
         return 1;

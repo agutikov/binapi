@@ -10,7 +10,7 @@ main()
     boost::asio::io_context io;
     binapi2::fapi::client client{ io, {} };
 
-    client.market_data.ping([&](binapi2::fapi::result<binapi2::fapi::types::empty_response> result) {
+    client.market_data.async_execute(binapi2::fapi::types::ping_request{}, [&](binapi2::fapi::result<binapi2::fapi::types::empty_response> result) {
         if (!result) {
             std::cerr << result.err.message << '\n';
             return;

@@ -5,9 +5,12 @@
 #pragma once
 
 #include <binapi2/fapi/config.hpp>
+#include <binapi2/fapi/query.hpp>
 #include <binapi2/fapi/rest/account.hpp>
 #include <binapi2/fapi/rest/convert.hpp>
+#include <binapi2/fapi/rest/endpoint_traits.hpp>
 #include <binapi2/fapi/rest/market_data.hpp>
+#include <binapi2/fapi/rest/service.hpp>
 #include <binapi2/fapi/rest/trade.hpp>
 #include <binapi2/fapi/rest/user_data_streams.hpp>
 #include <binapi2/fapi/signing.hpp>
@@ -117,6 +120,30 @@ public:
              callback = std::move(callback)]() mutable { callback(execute<Response>(method, path, query, signed_request)); });
     }
 
+    // Generic execute: derives endpoint and response type from the request type.
+    template<class Request>
+        requires rest::has_endpoint_traits<Request>
+    [[nodiscard]] auto execute(const Request& request)
+    {
+        using traits = rest::endpoint_traits<Request>;
+        return execute<typename traits::response_type>(
+            traits::endpoint.method, std::string{ traits::endpoint.path }, to_query_map(request), traits::endpoint.signed_request);
+    }
+
+    // Generic async execute.
+    template<class Request>
+        requires rest::has_endpoint_traits<Request>
+    void async_execute(const Request& request, callback_type<typename rest::endpoint_traits<Request>::response_type> callback)
+    {
+        using traits = rest::endpoint_traits<Request>;
+        async_execute<typename traits::response_type>(
+            traits::endpoint.method,
+            std::string{ traits::endpoint.path },
+            to_query_map(request),
+            traits::endpoint.signed_request,
+            std::move(callback));
+    }
+
     rest::account_service account;
     rest::convert_service convert;
     rest::market_data_service market_data;
@@ -128,5 +155,22 @@ private:
     config cfg_;
     transport::http_client http_;
 };
+
+// Template definitions for rest::service (needs full client definition).
+template<class Request>
+    requires rest::has_endpoint_traits<Request>
+auto
+rest::service::execute(const Request& request) -> result<typename rest::endpoint_traits<Request>::response_type>
+{
+    return owner_.execute(request);
+}
+
+template<class Request>
+    requires rest::has_endpoint_traits<Request>
+void
+rest::service::async_execute(const Request& request, callback_type<typename rest::endpoint_traits<Request>::response_type> callback)
+{
+    owner_.async_execute(request, std::move(callback));
+}
 
 } // namespace binapi2::fapi

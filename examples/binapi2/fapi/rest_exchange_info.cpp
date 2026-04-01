@@ -10,7 +10,7 @@ main()
     boost::asio::io_context io;
     binapi2::fapi::client client{ io, {} };
 
-    const auto result = client.market_data.exchange_info();
+    const auto result = client.market_data.execute(binapi2::fapi::types::exchange_info_request{});
     if (!result) {
         std::cerr << result.err.message << '\n';
         return 1;

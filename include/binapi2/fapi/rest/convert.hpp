@@ -4,28 +4,22 @@
 
 #pragma once
 
-#include <binapi2/fapi/result.hpp>
+#include <binapi2/fapi/rest/service.hpp>
 #include <binapi2/fapi/types/convert.hpp>
-#include <functional>
-
-namespace binapi2::fapi { class client; }
 
 namespace binapi2::fapi::rest {
 
-class convert_service {
+class convert_service : public service
+{
 public:
-    template<typename T> using callback_type = std::function<void(result<T>)>;
-    explicit convert_service(client& owner) noexcept;
+    using service::service;
 
-    [[nodiscard]] result<types::convert_quote_response> get_quote(const types::convert_quote_request& request);
-    void get_quote(const types::convert_quote_request& request, callback_type<types::convert_quote_response> callback);
-    [[nodiscard]] result<types::convert_accept_response> accept_quote(const types::convert_accept_request& request);
-    void accept_quote(const types::convert_accept_request& request, callback_type<types::convert_accept_response> callback);
-    [[nodiscard]] result<types::convert_order_status_response> order_status(const types::convert_order_status_request& request);
-    void order_status(const types::convert_order_status_request& request, callback_type<types::convert_order_status_response> callback);
-
-private:
-    client& owner_;
+    using quote_request = types::convert_quote_request;
+    using quote_response = types::convert_quote_response;
+    using accept_request = types::convert_accept_request;
+    using accept_response = types::convert_accept_response;
+    using order_status_request = types::convert_order_status_request;
+    using order_status_response = types::convert_order_status_response;
 };
 
 } // namespace binapi2::fapi::rest

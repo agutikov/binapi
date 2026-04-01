@@ -118,7 +118,7 @@ local_order_book::fetch_snapshot()
         request.limit = depth_limit_;
     }
 
-    auto snap = rest_client_.market_data.order_book(request);
+    auto snap = rest_client_.market_data.execute(request);
     if (!snap) {
         return;
     }
