@@ -64,6 +64,7 @@ target_include_directories(binapi2_fapi
         ${CMAKE_SOURCE_DIR}/include
 )
 
+cmake_policy(SET CMP0167 NEW)
 find_package(Boost REQUIRED COMPONENTS cobalt)
 
 target_link_libraries(
