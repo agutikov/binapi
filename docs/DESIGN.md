@@ -16,6 +16,7 @@ package "binapi2::fapi" {
   [client] as CLI
 
   package "REST Services" {
+    [service (base)] as SVC
     [market_data_service] as MDS
     [account_service] as ACS
     [trade_service] as TRS
@@ -41,6 +42,8 @@ package "binapi2::fapi" {
   package "Infrastructure" {
     [config] as CFG
     [signing] as SIGN
+    [query (to_query_map)] as QRY
+    [endpoint_traits] as ET
     [result<T> / error] as RES
     [types] as TYP
   }
@@ -52,21 +55,26 @@ cloud "Binance" {
   [WebSocket API\nws-fapi.binance.com] as BWSAPI
 }
 
+MDS --|> SVC
+ACS --|> SVC
+TRS --|> SVC
+CVS --|> SVC
+
 CLI --> MDS
 CLI --> ACS
 CLI --> TRS
 CLI --> CVS
 CLI --> UDS
 
-MDS --> HTTP
-ACS --> HTTP
-TRS --> HTTP
-CVS --> HTTP
-UDS --> HTTP
+SVC --> CLI : execute(request)
+SVC --> ET : endpoint_traits<Request>
+SVC --> QRY : to_query_map(request)
+
+CLI --> HTTP
+WSA --> WS
 
 MS --> WS
 US --> WS
-WSA --> WS
 LOB --> MS
 LOB --> CLI
 
@@ -80,72 +88,130 @@ WS --> BWSAPI
 
 ---
 
-## Component Diagram
+## Generic Request Dispatch
+
+The core design pattern: **request types carry all the information needed to dispatch an API call**.
+
+### REST API
 
 ```plantuml
 @startuml
 skinparam classAttributeIconSize 0
 
-class client {
-  +account : account_service
-  +convert : convert_service
-  +market_data : market_data_service
-  +trade : trade_service
-  +user_data_streams : user_data_stream_service
+class "rest::service" as SVC {
+  #owner_ : client&
   --
-  +execute<Response>(method, path, query, signed) : result<Response>
-  +async_execute<Response>(method, path, query, signed, callback) : void
+  +execute<Request>(request) : result<response_type>
+  +async_execute<Request>(request, callback) : void
 }
 
-class "market_streams" {
-  +connect_*(subscription) : result<void>
-  +read_*_loop(handler) : result<void>
-  +connect_combined(target) : result<void>
-  +subscribe(streams) : result<void>
-  +unsubscribe(streams) : result<void>
-  +close() : result<void>
+class "rest::endpoint_traits<Request>" as ET <<specialization>> {
+  +{static} response_type : type alias
+  +{static} endpoint : endpoint_metadata&
 }
 
-class "user_streams" {
-  +connect(listen_key) : result<void>
-  +read_loop(handlers) : result<void>
-  +close() : result<void>
+class "endpoint_metadata" as EM {
+  +name : string_view
+  +method : http::verb
+  +path : string_view
+  +security : security_type
+  +signed_request : bool
 }
 
-class "local_order_book" {
-  +start(symbol, depth) : result<void>
-  +stop() : void
-  +snapshot() : order_book_snapshot
-  +set_snapshot_callback(cb) : void
+class "to_query_map<T>" as QM <<function>> {
+  Reflects struct fields via glz::reflect<T>
+  Skips nullopt optionals
+  Stringifies enums via to_string()
+  Returns query_map
 }
 
-class "websocket_api::client" {
-  +connect() : result<void>
-  +session_logon() : result<T>
-  +new_order(req) : result<T>
-  +cancel_order(req) : result<T>
-  +close() : result<void>
+class "market_data_service" as MDS {
+  Inherits execute/async_execute
+  --
+  using ping_request = types::ping_request
+  using exchange_info_request = ...
+  ... (type aliases)
+  --
+  klines(kline_request) : named method
+  .. (shared request type methods)
 }
 
-class "result<T>" {
-  +value : optional<T>
-  +err : error
-  +operator bool()
-  +operator*()
+class "client" as CLI {
+  +execute<Request>(request) : result<response_type>
+  +async_execute<Request>(request, callback) : void
+  --
+  +execute<Response>(method, path, query, signed)
+  +async_execute<Response>(method, path, query, signed, callback)
 }
 
-class "error" {
-  +code : error_code
-  +http_status : int
-  +binance_code : int
-  +message : string
-  +payload : string
-}
-
-client --> "market_streams" : listen_key via\nuser_data_streams
-"local_order_book" --> "market_streams" : depth events
-"local_order_book" --> client : REST snapshots
+MDS --|> SVC
+SVC --> CLI : delegates
+SVC ..> ET : resolves endpoint
+SVC ..> QM : serializes request
+ET --> EM
 @enduml
+```
+
+**How it works:**
+
+1. `service::execute(request)` looks up `endpoint_traits<Request>` at compile time to get the endpoint metadata and response type
+2. `to_query_map(request)` uses `glz::reflect<T>` to serialize the request struct fields into a `query_map`, skipping `std::optional` nullopts and converting enums via `to_string()`
+3. `client::execute<Response>()` handles signing, query string encoding, HTTP transport, and JSON response deserialization
+
+**Usage:**
+```cpp
+// Via service (grouped by domain):
+auto result = client.market_data.execute(exchange_info_request{});
+auto result = client.trade.execute(new_order_request{.symbol = "BTCUSDT", ...});
+
+// Or directly on client:
+auto result = client.execute(types::cancel_order_request{.symbol = "BTCUSDT", .orderId = 123});
+
+// Async:
+client.trade.async_execute(new_order_request{...}, [](auto result) { ... });
+```
+
+### WebSocket API
+
+```plantuml
+@startuml
+skinparam classAttributeIconSize 0
+
+class "websocket_api::client" as WSC {
+  +execute<Request>(request) : result<ws_response<response_type>>
+  +async_execute<Request>(request, callback) : void
+  --
+  -inject_auth(request) : Request
+  -send_rpc<Response>(method, params) : result<ws_response<Response>>
+  -make_signed_request_base() : signed_request
+}
+
+class "ws::endpoint_traits<Request>" as WET <<specialization>> {
+  +{static} response_type : type alias
+  +{static} method : string_view (RPC method name)
+}
+
+note right of WSC
+  Auth injection is automatic:
+  if Request inherits from
+  websocket_api_signed_request,
+  auth fields are populated.
+end note
+
+WSC ..> WET : resolves method + response
+@enduml
+```
+
+**How it works:**
+
+1. `ws::client::execute(request)` looks up `ws::endpoint_traits<Request>` to get the RPC method name and response type
+2. If the request type inherits from `websocket_api_signed_request`, auth fields (apiKey, timestamp, recvWindow, signature) are injected automatically
+3. The request is serialized into a JSON-RPC envelope `{id, method, params}` and sent over the WebSocket connection
+
+**Usage:**
+```cpp
+ws_client.execute(websocket_api_order_place_request{.symbol = "BTCUSDT", .side = "BUY", ...});
+ws_client.execute(websocket_api_book_ticker_request{.symbol = "BTCUSDT"});
 ```
 
 ---
@@ -155,20 +221,28 @@ client --> "market_streams" : listen_key via\nuser_data_streams
 ```plantuml
 @startuml
 actor User
+participant "service" as SVC
+participant "endpoint_traits" as ET
+participant "to_query_map" as QM
 participant "client" as C
 participant "signing" as S
 participant "http_client" as H
 participant "Binance REST" as B
 
-User -> C: market_data.klines(request)
-C -> C: build query_map from request
-C -> S: inject_auth_query(query, recv_window, timestamp)
-C -> S: sign_query(query, secret_key)
+User -> SVC: execute(kline_request{symbol, interval, ...})
+SVC -> ET: endpoint_traits<kline_request>::endpoint
+ET --> SVC: {GET, "/fapi/v1/klines", unsigned}
+SVC -> QM: to_query_map(request)
+QM -> QM: reflect fields via glz::reflect<T>
+QM -> QM: skip nullopt, stringify enums
+QM --> SVC: query_map{"symbol":"BTCUSDT","interval":"1h",...}
+SVC -> C: execute<vector<kline>>(GET, path, query, false)
+C -> S: inject_auth_query + sign_query (if signed)
 C -> H: request(GET, path?query, "", api_key)
-H -> B: HTTPS GET /fapi/v1/klines?...
+H -> B: HTTPS GET /fapi/v1/klines?symbol=BTCUSDT&interval=1h
 B --> H: JSON response
 H --> C: http_response{status, body}
-C -> C: decode_response<T>(response)
+C -> C: decode_response<vector<kline>>(response)
 C --> User: result<vector<kline>>
 @enduml
 ```
@@ -217,7 +291,7 @@ MS -> B: WSS subscribe depth stream
 
 LOB -> LOB: buffer incoming depth events
 
-LOB -> REST: market_data.order_book({symbol, limit})
+LOB -> REST: execute(order_book_request{symbol, limit})
 REST -> B: GET /fapi/v1/depth
 B --> REST: snapshot (lastUpdateId = S)
 REST --> LOB: order_book_response
@@ -237,6 +311,35 @@ end
 
 ---
 
+## Type System
+
+### Request → Endpoint Mapping
+
+Request types with a 1:1 endpoint mapping have `endpoint_traits` (REST) or `ws::endpoint_traits` (WebSocket API) specializations. These are dispatched generically via `execute(request)`.
+
+Shared request types (used by multiple endpoints) retain named service methods:
+
+| Shared Type | Endpoints | Service |
+|---|---|---|
+| `kline_request` | klines, mark_price_klines, premium_index_klines | market_data |
+| `futures_data_request` | open_interest_statistics, top_long_short_account_ratio, top_trader_long_short_ratio, long_short_ratio, taker_buy_sell_volume | market_data |
+| `download_id_request` | download_id_transaction, download_id_order, download_id_trade | account |
+| `download_link_request` | download_link_transaction, download_link_order, download_link_trade | account |
+| `batch_orders_request` | batch_orders, modify_batch_orders | trade |
+
+### Query Serialization
+
+`to_query_map<T>(request)` uses compile-time reflection via `glz::reflect<T>` to automatically build URL query parameters from request struct fields:
+
+- `std::string` → passed as-is
+- `std::uint64_t`, `int` → `std::to_string()`
+- `bool` → `"true"` / `"false"`
+- fapi enums → `types::to_string()` (e.g., `order_side::buy` → `"BUY"`)
+- `std::optional<T>` where value is nullopt → skipped entirely
+- Works with both `glz::meta`-annotated and plain `reflectable` aggregates
+
+---
+
 ## Access Modes
 
 Every method supports **synchronous** (returns `result<T>`) and **asynchronous** (takes `callback_type<T>`, invoked via `io_context`) access.
@@ -250,231 +353,59 @@ Every method supports **synchronous** (returns `result<T>`) and **asynchronous**
 
 ---
 
-## API Groups
+## Service Classes
+
+Services inherit from `rest::service` which provides generic `execute(request)` / `async_execute(request, callback)`. Each service pulls request types from the `types` namespace via `using` declarations.
 
 ### 1. Market Data Service (`rest::market_data_service`)
 
 Public endpoints. No authentication required.
 
-| Method | Data Provided | Return Type |
-|---|---|---|
-| `ping()` | Server connectivity check | `empty_response` |
-| `server_time()` | Server timestamp (ms) | `server_time_response` |
-| `exchange_info()` | Symbols, filters, rate limits, trading rules | `exchange_info_response` |
-| `order_book(symbol, limit)` | Bid/ask depth snapshot | `order_book_response` |
-| `recent_trades(symbol)` | Latest trades | `vector<recent_trade>` |
-| `historical_trades(symbol)` | Older trades (needs API key) | `vector<recent_trade>` |
-| `aggregate_trades(symbol)` | Compressed/aggregated trades | `vector<aggregate_trade>` |
-| `klines(symbol, interval)` | OHLCV candlesticks | `vector<kline>` |
-| `continuous_klines(pair, contract, interval)` | Perpetual contract klines | `vector<kline>` |
-| `index_price_klines(pair, interval)` | Index price candlesticks | `vector<kline>` |
-| `mark_price_klines(symbol, interval)` | Mark price candlesticks | `vector<kline>` |
-| `premium_index_klines(symbol, interval)` | Premium index candlesticks | `vector<kline>` |
-| `mark_price(symbol)` | Mark price + funding rate | `mark_price` |
-| `mark_prices()` | All symbols mark prices | `vector<mark_price>` |
-| `funding_rate_history()` | Historical funding rates | `vector<funding_rate_history_entry>` |
-| `funding_rate_info()` | Next funding time & rate per symbol | `vector<funding_rate_info>` |
-| `ticker_24hr(symbol)` | 24h price change statistics | `ticker_24hr` |
-| `ticker_24hrs()` | All symbols 24h stats | `vector<ticker_24hr>` |
-| `price_ticker(symbol)` | Latest price | `price_ticker` |
-| `price_tickers()` | All latest prices | `vector<price_ticker>` |
-| `price_ticker_v2(symbol)` | Latest price (v2 endpoint) | `price_ticker` |
-| `price_tickers_v2()` | All latest prices (v2) | `vector<price_ticker>` |
-| `book_ticker(symbol)` | Best bid/ask | `book_ticker` |
-| `book_tickers()` | All symbols best bid/ask | `vector<book_ticker>` |
-| `open_interest(symbol)` | Current open interest | `open_interest` |
-| `open_interest_statistics(symbol, period)` | Historical open interest | `vector<open_interest_statistics_entry>` |
-| `top_long_short_account_ratio(symbol, period)` | Top trader account ratio | `vector<long_short_ratio_entry>` |
-| `top_trader_long_short_ratio(symbol, period)` | Top trader position ratio | `vector<long_short_ratio_entry>` |
-| `long_short_ratio(symbol, period)` | Global long/short ratio | `vector<long_short_ratio_entry>` |
-| `taker_buy_sell_volume(symbol, period)` | Taker buy/sell volume | `vector<taker_buy_sell_volume_entry>` |
-| `basis(pair, contract, period)` | Spot-futures basis | `vector<basis_entry>` |
-| `delivery_price(pair)` | Historical delivery prices | `vector<delivery_price_entry>` |
-| `composite_index_info(symbol)` | Composite index details | `vector<composite_index_info>` |
-| `index_constituents(symbol)` | Index component weights | `index_constituents_response` |
-| `asset_index()` | Multi-asset mode index | `vector<asset_index>` |
-| `insurance_fund()` | Insurance fund balance history | `insurance_fund_response` |
-| `adl_risk()` | ADL risk percentile | `vector<adl_risk_entry>` |
-| `rpi_depth(symbol)` | Restricted price index depth | `order_book_response` |
-| `trading_schedule()` | Trading session schedule | `trading_schedule_response` |
+Generic (via `execute`): `ping_request`, `server_time_request`, `exchange_info_request`, `order_book_request`, `recent_trades_request`, `aggregate_trades_request`, `continuous_kline_request`, `index_price_kline_request`, `book_ticker_request`, `price_ticker_request`, `ticker_24hr_request`, `mark_price_request`, `funding_rate_history_request`, `open_interest_request`, `historical_trades_request`, `basis_request`, `price_ticker_v2_request`, `delivery_price_request`, `composite_index_info_request`, `index_constituents_request`, `asset_index_request`, `insurance_fund_request`, `adl_risk_request`, `rpi_depth_request`, `trading_schedule_request`
+
+Named methods: `klines`, `mark_price_klines`, `premium_index_klines` (shared `kline_request`); `open_interest_statistics`, `top_long_short_account_ratio`, `top_trader_long_short_ratio`, `long_short_ratio`, `taker_buy_sell_volume` (shared `futures_data_request`); `book_tickers`, `price_tickers`, `price_tickers_v2`, `ticker_24hrs`, `mark_prices`, `funding_rate_info` (parameterless)
 
 ### 2. Account Service (`rest::account_service`)
 
-Signed endpoints. Requires API key + secret.
+Signed endpoints.
 
-| Method | Data Provided | Return Type |
-|---|---|---|
-| `account_information()` | Full account state: balances, positions, margin | `account_information` |
-| `balances()` | All asset balances | `vector<futures_account_balance>` |
-| `position_risk(symbol?)` | Position details with PnL, liquidation price | `vector<position_risk>` |
-| `account_config()` | Fee tier, permissions, multi-asset mode | `account_config_response` |
-| `symbol_config(symbol?)` | Per-symbol leverage and margin settings | `vector<symbol_config_entry>` |
-| `get_multi_assets_mode()` | Whether multi-asset margin is enabled | `multi_assets_mode_response` |
-| `get_position_mode()` | Hedge mode vs one-way mode | `position_mode_response` |
-| `income_history(type?, symbol?)` | Funding fees, realized PnL, commissions | `vector<income_history_entry>` |
-| `leverage_brackets(symbol?)` | Leverage limits by notional tier | `vector<symbol_leverage_brackets>` |
-| `commission_rate(symbol)` | Maker/taker commission rates | `commission_rate_response` |
-| `rate_limit_order()` | Current order rate limit usage | `vector<rate_limit>` |
-| `download_id_transaction(start, end)` | Start transaction history download | `download_id_response` |
-| `download_link_transaction(id)` | Get transaction download link | `download_link_response` |
-| `download_id_order(start, end)` | Start order history download | `download_id_response` |
-| `download_link_order(id)` | Get order download link | `download_link_response` |
-| `download_id_trade(start, end)` | Start trade history download | `download_id_response` |
-| `download_link_trade(id)` | Get trade download link | `download_link_response` |
-| `get_bnb_burn()` | BNB burn on interest status | `bnb_burn_status_response` |
-| `toggle_bnb_burn(enabled)` | Enable/disable BNB interest burn | `bnb_burn_status_response` |
-| `quantitative_rules(symbol?)` | Portfolio margin rules/indicators | `quantitative_rules_response` |
-| `pm_account_info(asset)` | Portfolio margin account info | `pm_account_info_response` |
+Generic: `position_risk_request`, `symbol_config_request`, `income_history_request`, `leverage_bracket_request`, `commission_rate_request`, `toggle_bnb_burn_request`, `quantitative_rules_request`, `pm_account_info_request`
+
+Named methods: `account_information`, `balances`, `account_config`, `get_multi_assets_mode`, `get_position_mode`, `rate_limit_order`, `get_bnb_burn` (parameterless); `download_id_*`, `download_link_*` (shared request types)
 
 ### 3. Trade Service (`rest::trade_service`)
 
-Signed endpoints. Requires API key + secret.
+Signed endpoints.
 
-| Method | Data Provided | Return Type |
-|---|---|---|
-| `new_order(request)` | Place an order | `order_response` |
-| `test_order(request)` | Validate order without execution | `order_response` |
-| `modify_order(request)` | Modify a pending order | `order_response` |
-| `cancel_order(request)` | Cancel an order | `order_response` |
-| `query_order(request)` | Get order details | `order_response` |
-| `query_open_order(request)` | Get a single open order | `order_response` |
-| `all_open_orders(symbol?)` | List open orders | `vector<order_response>` |
-| `all_orders(symbol)` | Full order history | `vector<order_response>` |
-| `batch_orders(orders)` | Place up to 5 orders at once | `vector<order_response>` |
-| `modify_batch_orders(orders)` | Modify multiple orders | `vector<order_response>` |
-| `cancel_batch_orders(request)` | Cancel multiple orders | `vector<order_response>` |
-| `cancel_all_open_orders(symbol)` | Cancel all open orders for symbol | `code_msg_response` |
-| `auto_cancel(symbol, countdown)` | Dead-man's switch auto-cancel | `auto_cancel_response` |
-| `change_leverage(symbol, leverage)` | Set leverage | `change_leverage_response` |
-| `change_margin_type(symbol, type)` | Isolated vs cross margin | `code_msg_response` |
-| `change_position_mode(dual)` | One-way vs hedge mode | `code_msg_response` |
-| `change_multi_assets(enabled)` | Toggle multi-asset margin | `code_msg_response` |
-| `modify_isolated_margin(request)` | Adjust isolated position margin | `modify_isolated_margin_response` |
-| `position_margin_history(symbol)` | Margin adjustment history | `vector<position_margin_history_entry>` |
-| `position_risk_v3(symbol?)` | Position info (v3 format) | `vector<position_risk_v3>` |
-| `adl_quantile(symbol?)` | Auto-deleverage ranking | `vector<adl_quantile_entry>` |
-| `force_orders(symbol?)` | Liquidation order history | `vector<order_response>` |
-| `account_trades(symbol)` | Executed trade history | `vector<account_trade_entry>` |
-| `order_modify_history(request)` | Order modification history | `vector<order_response>` |
-| `new_algo_order(request)` | Place conditional/algo order | `algo_order_response` |
-| `cancel_algo_order(request)` | Cancel algo order | `code_msg_response` |
-| `query_algo_order(request)` | Query algo order status | `algo_order_response` |
-| `all_algo_orders(request)` | Algo order history | `vector<algo_order_response>` |
-| `open_algo_orders()` | Current open algo orders | `vector<algo_order_response>` |
-| `cancel_all_algo_orders()` | Cancel all algo orders | `code_msg_response` |
-| `tradfi_perps(request?)` | TradFi perpetuals toggle | `code_msg_response` |
+Generic: `new_order_request`, `modify_order_request`, `cancel_order_request`, `query_order_request`, `cancel_all_open_orders_request`, `auto_cancel_request`, `query_open_order_request`, `all_open_orders_request`, `all_orders_request`, `position_info_v3_request`, `adl_quantile_request`, `force_orders_request`, `account_trade_request`, `change_position_mode_request`, `change_multi_assets_mode_request`, `change_leverage_request`, `change_margin_type_request`, `modify_isolated_margin_request`, `position_margin_history_request`, `order_modify_history_request`, `new_algo_order_request`, `cancel_algo_order_request`, `query_algo_order_request`, `all_algo_orders_request`
+
+Named methods: `test_order` (alias collision), `batch_orders`, `modify_batch_orders`, `cancel_batch_orders` (special serialization); `open_algo_orders`, `cancel_all_algo_orders`, `tradfi_perps` (parameterless)
 
 ### 4. Convert Service (`rest::convert_service`)
 
-Signed endpoints. Asset conversion between futures wallet assets.
-
-| Method | Data Provided | Return Type |
-|---|---|---|
-| `get_quote(from, to, amount)` | Conversion quote with price | `convert_quote_response` |
-| `accept_quote(quoteId)` | Execute the quoted conversion | `convert_accept_response` |
-| `order_status(orderId)` | Check conversion status | `convert_order_status_response` |
+Fully generic: `quote_request`, `accept_request`, `order_status_request`
 
 ### 5. User Data Stream Service (`rest::user_data_stream_service`)
 
-Listen key management for user WebSocket streams.
+Named methods: `start`, `keepalive`, `close`
 
-| Method | Data Provided | Return Type |
-|---|---|---|
-| `start()` | Create a listen key (valid 60 min) | `listen_key_response` |
-| `keepalive()` | Extend listen key validity | `listen_key_response` |
-| `close()` | Revoke listen key | `empty_response` |
+### 6. WebSocket API (`websocket_api::client`)
 
-### 6. Market Streams (`streams::market_streams`)
+Generic (via `execute`): `order_place_request`, `order_query_request`, `order_cancel_request`, `order_modify_request`, `position_request`, `book_ticker_request`, `price_ticker_request`, `algo_order_place_request`, `algo_order_cancel_request`
 
-Real-time WebSocket market data. No authentication.
+Named methods: `session_logon`, `account_status/v2`, `account_balance`, `account_position_v2` (shared type), `user_data_stream_start/ping/stop` (shared type), `connect`, `close`
 
-| Stream | Method Pair | Event Type | Data Provided |
-|---|---|---|---|
-| Aggregate Trade | `connect_aggregate_trade` / `read_aggregate_trade_loop` | `aggregate_trade_stream_event` | Compressed trades: price, qty, time, side |
-| Mark Price | `connect_mark_price` / `read_mark_price_loop` | `mark_price_stream_event` | Mark price, index price, funding rate |
-| All Mark Prices | `connect_all_market_mark_price` / `read_all_market_mark_price_loop` | `all_market_mark_price_stream_event` | All symbols mark prices |
-| Book Ticker | `connect_book_ticker` / `read_book_ticker_loop` | `book_ticker_stream_event` | Best bid/ask price and qty |
-| All Book Tickers | `connect_all_book_tickers` / `read_all_book_tickers_loop` | `book_ticker_stream_event` | All symbols best bid/ask |
-| Diff Depth | `connect_diff_book_depth` / `read_diff_book_depth_loop` | `depth_stream_event` | Incremental order book updates |
-| Partial Depth | `connect_partial_book_depth` / `read_partial_book_depth_loop` | `depth_stream_event` | Top N levels snapshot (5/10/20) |
-| RPI Diff Depth | `connect_rpi_diff_book_depth` / `read_rpi_diff_book_depth_loop` | `depth_stream_event` | Restricted price index depth diffs |
-| Mini Ticker | `connect_mini_ticker` / `read_mini_ticker_loop` | `mini_ticker_stream_event` | Compact 24h stats (OHLC, volume) |
-| All Mini Tickers | `connect_all_market_mini_tickers` / `read_all_market_mini_tickers_loop` | `all_market_mini_ticker_stream_event` | All symbols compact stats |
-| Ticker | `connect_ticker` / `read_ticker_loop` | `ticker_stream_event` | Full 24h rolling stats |
-| All Tickers | `connect_all_market_tickers` / `read_all_market_tickers_loop` | `all_market_ticker_stream_event` | All symbols full stats |
-| Kline | `connect_kline` / `read_kline_loop` | `kline_stream_event` | Candlestick OHLCV updates |
-| Continuous Kline | `connect_continuous_contract_kline` / `read_continuous_contract_kline_loop` | `continuous_contract_kline_stream_event` | Perpetual contract klines |
-| Liquidation | `connect_liquidation_order` / `read_liquidation_order_loop` | `liquidation_order_stream_event` | Individual symbol liquidations |
-| All Liquidations | `connect_all_market_liquidation_orders` / `read_all_market_liquidation_orders_loop` | `liquidation_order_stream_event` | All symbols liquidations |
-| Composite Index | `connect_composite_index` / `read_composite_index_loop` | `composite_index_stream_event` | Index composition changes |
-| Contract Info | `connect_contract_info` / `read_contract_info_loop` | `contract_info_stream_event` | Contract spec changes |
-| Asset Index | `connect_asset_index` / `read_asset_index_loop` | `asset_index_stream_event` | Single asset index |
-| All Asset Index | `connect_all_asset_index` / `read_all_asset_index_loop` | `all_asset_index_stream_event` | All asset indices |
-| Trading Session | `connect_trading_session` / `read_trading_session_loop` | `trading_session_stream_event` | Session schedule changes |
+### 7. Market Streams (`streams::market_streams`)
 
-**Combined stream management:**
+Real-time WebSocket market data. Connect/read loop pattern per stream type. See [implementation_status.md] for full stream list.
 
-| Method | Purpose |
-|---|---|
-| `connect_combined(target)` | Open multiplexed connection |
-| `subscribe(streams)` | Dynamically add streams |
-| `unsubscribe(streams)` | Remove streams |
-| `list_subscriptions()` | List active stream names |
-| `close()` | Disconnect |
+### 8. User Streams (`streams::user_streams`)
 
-### 7. User Streams (`streams::user_streams`)
+Real-time account events via listen key. Multiplexed event handlers for order updates, balance changes, margin calls, etc.
 
-Real-time account events. Requires listen key.
+### 9. Local Order Book (`streams::local_order_book`)
 
-| Event | Handler Type | Data Provided |
-|---|---|---|
-| Account Update | `account_update_handler` | Balance changes, position updates, margin changes |
-| Order Trade Update | `order_trade_update_handler` | Order fills, cancellations, expirations |
-| Margin Call | `margin_call_handler` | Margin ratio warnings for positions |
-| Listen Key Expired | `listen_key_expired_handler` | Key invalidation notification |
-| Account Config Update | `account_config_update_handler` | Leverage or multi-asset mode changes |
-| Trade Lite | `trade_lite_handler` | Lightweight trade fill notifications |
-| Algo Order Update | `algo_order_update_handler` | Conditional/algo order status changes |
-| Conditional Order Reject | `conditional_order_reject_handler` | Trigger rejection notifications |
-| Grid Update | `grid_update_handler` | Grid strategy updates |
-| Strategy Update | `strategy_update_handler` | Strategy status changes |
-
-### 8. Local Order Book (`streams::local_order_book`)
-
-Thread-safe synchronized local order book.
-
-| Method | Purpose |
-|---|---|
-| `start(symbol, depth)` | Begin syncing: fetches REST snapshot, applies buffered WS diffs |
-| `stop()` | Stop syncing |
-| `snapshot()` | Get current book state (bids descending, asks ascending) |
-| `set_snapshot_callback(cb)` | Receive notification on each update |
-
-### 9. WebSocket API (`websocket_api::client`)
-
-Low-latency trading via persistent WebSocket. HMAC-SHA256 signed per message.
-
-| Method | Category | Data Provided |
-|---|---|---|
-| `connect()` | Session | Establish WSS connection |
-| `session_logon()` | Session | Authenticate with API key |
-| `close()` | Session | Disconnect |
-| `account_status()` | Account | Full account info |
-| `account_status_v2()` | Account | Account info (v2) |
-| `account_balance()` | Account | Asset balances |
-| `account_position()` | Account | Position details |
-| `account_position_v2()` | Account | Position details (v2) |
-| `new_order(request)` | Trade | Place order |
-| `modify_order(request)` | Trade | Modify pending order |
-| `cancel_order(request)` | Trade | Cancel order |
-| `query_order(request)` | Trade | Query order status |
-| `book_ticker(symbol?)` | Market | Best bid/ask |
-| `ticker_price(symbol?)` | Market | Latest price |
-| `algo_order_place(request)` | Algo | Place conditional order |
-| `algo_order_cancel(request)` | Algo | Cancel conditional order |
-| `user_data_stream_start()` | User Data | Create listen key |
-| `user_data_stream_ping()` | User Data | Refresh listen key |
-| `user_data_stream_stop()` | User Data | Revoke listen key |
+Thread-safe synchronized local order book. Combines REST snapshots with WebSocket depth diffs.
 
 ---
 
@@ -552,7 +483,9 @@ error --> error_code
 | Boost.Beast | HTTP/WebSocket protocol | Required |
 | OpenSSL | TLS (HTTPS/WSS) + HMAC-SHA256 signing | Required |
 | ZLIB | Response compression | Required |
-| Glaze | Compile-time JSON serialization | Bundled (header-only) |
+| Glaze | Compile-time JSON serialization + struct reflection | Bundled (header-only) |
 | DTF | Datetime formatting | Bundled (header-only) |
 
 **Build:** CMake 3.10+, C++23 compiler.
+
+[implementation_status.md]: /docs/implementation_status.md

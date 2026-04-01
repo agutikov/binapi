@@ -6,7 +6,6 @@
 
 #include <binapi2/fapi/signing.hpp>
 #include <binapi2/fapi/time.hpp>
-#include <binapi2/fapi/websocket_api/generated_methods.hpp>
 
 #include <glaze/glaze.hpp>
 
@@ -83,37 +82,50 @@ encode_rpc_request(const std::string& id, std::string_view method, const Params&
     return result<std::string>::success(std::move(*payload));
 }
 
+} // namespace
+
+client::client(boost::asio::io_context& io_context, config cfg) :
+    io_context_(io_context), cfg_(std::move(cfg)), transport_(io_context_, cfg_)
+{
+}
+
+std::string
+client::next_id()
+{
+    return std::to_string(++id_counter_);
+}
+
 types::websocket_api_signed_request
-make_signed_request_base(const config& cfg)
+client::make_signed_request_base()
 {
     query_map auth_query;
-    inject_auth_query(auth_query, cfg.recv_window, current_timestamp_ms());
-    auth_query["apiKey"] = cfg.api_key;
+    inject_auth_query(auth_query, cfg_.recv_window, current_timestamp_ms());
+    auth_query["apiKey"] = cfg_.api_key;
 
     const auto canonical = build_query_string(auth_query);
     return {
-        .apiKey = cfg.api_key,
+        .apiKey = cfg_.api_key,
         .timestamp = std::stoull(auth_query["timestamp"]),
         .recvWindow = std::stoull(auth_query["recvWindow"]),
-        .signature = hmac_sha256_hex(cfg.secret_key, canonical),
+        .signature = hmac_sha256_hex(cfg_.secret_key, canonical),
     };
 }
 
 template<typename Response, typename Params>
 result<types::websocket_api_response<Response>>
-send_rpc(transport::websocket_client& transport, const std::string& id, std::string_view method, const Params& params)
+client::send_rpc(std::string_view method, const Params& params)
 {
-    auto payload = encode_rpc_request(id, method, params);
+    auto payload = encode_rpc_request(next_id(), method, params);
     if (!payload) {
         return result<types::websocket_api_response<Response>>::failure(payload.err);
     }
 
-    auto write_result = transport.write_text(*payload);
+    auto write_result = transport_.write_text(*payload);
     if (!write_result) {
         return result<types::websocket_api_response<Response>>::failure(write_result.err);
     }
 
-    auto raw = transport.read_text();
+    auto raw = transport_.read_text();
     if (!raw) {
         return result<types::websocket_api_response<Response>>::failure(raw.err);
     }
@@ -121,12 +133,87 @@ send_rpc(transport::websocket_client& transport, const std::string& id, std::str
     return decode_rpc_response<Response>(*raw);
 }
 
-} // namespace
-
-client::client(boost::asio::io_context& io_context, config cfg) :
-    io_context_(io_context), cfg_(std::move(cfg)), transport_(io_context_, cfg_)
+template<class Request>
+Request
+client::inject_auth(const Request& request)
 {
+    if constexpr (std::is_base_of_v<types::websocket_api_signed_request, Request>) {
+        auto auth = make_signed_request_base();
+        Request authed = request;
+        authed.apiKey = auth.apiKey;
+        authed.timestamp = auth.timestamp;
+        authed.recvWindow = auth.recvWindow;
+        authed.signature = auth.signature;
+        return authed;
+    }
+    else {
+        return request;
+    }
 }
+
+// --- Generic execute ---
+
+template<class Request>
+    requires has_ws_endpoint_traits<Request>
+auto
+client::execute(const Request& request)
+    -> result<types::websocket_api_response<typename endpoint_traits<Request>::response_type>>
+{
+    using traits = endpoint_traits<Request>;
+    return send_rpc<typename traits::response_type>(traits::method, inject_auth(request));
+}
+
+template<class Request>
+    requires has_ws_endpoint_traits<Request>
+void
+client::async_execute(
+    const Request& request,
+    callback_type<types::websocket_api_response<typename endpoint_traits<Request>::response_type>> callback)
+{
+    boost::asio::post(io_context_,
+                      [this, request, callback = std::move(callback)]() mutable { callback(execute(request)); });
+}
+
+// Explicit instantiations for all trait-enabled request types.
+template auto client::execute(const types::websocket_api_book_ticker_request&)
+    -> result<types::websocket_api_response<types::book_ticker>>;
+template auto client::execute(const types::websocket_api_price_ticker_request&)
+    -> result<types::websocket_api_response<types::price_ticker>>;
+template auto client::execute(const types::websocket_api_order_place_request&)
+    -> result<types::websocket_api_response<types::order_response>>;
+template auto client::execute(const types::websocket_api_order_query_request&)
+    -> result<types::websocket_api_response<types::order_response>>;
+template auto client::execute(const types::websocket_api_order_cancel_request&)
+    -> result<types::websocket_api_response<types::order_response>>;
+template auto client::execute(const types::websocket_api_order_modify_request&)
+    -> result<types::websocket_api_response<types::order_response>>;
+template auto client::execute(const types::websocket_api_position_request&)
+    -> result<types::websocket_api_response<std::vector<types::position_risk>>>;
+template auto client::execute(const types::websocket_api_algo_order_place_request&)
+    -> result<types::websocket_api_response<types::algo_order_response>>;
+template auto client::execute(const types::websocket_api_algo_order_cancel_request&)
+    -> result<types::websocket_api_response<types::code_msg_response>>;
+
+template void client::async_execute(const types::websocket_api_book_ticker_request&,
+    callback_type<types::websocket_api_response<types::book_ticker>>);
+template void client::async_execute(const types::websocket_api_price_ticker_request&,
+    callback_type<types::websocket_api_response<types::price_ticker>>);
+template void client::async_execute(const types::websocket_api_order_place_request&,
+    callback_type<types::websocket_api_response<types::order_response>>);
+template void client::async_execute(const types::websocket_api_order_query_request&,
+    callback_type<types::websocket_api_response<types::order_response>>);
+template void client::async_execute(const types::websocket_api_order_cancel_request&,
+    callback_type<types::websocket_api_response<types::order_response>>);
+template void client::async_execute(const types::websocket_api_order_modify_request&,
+    callback_type<types::websocket_api_response<types::order_response>>);
+template void client::async_execute(const types::websocket_api_position_request&,
+    callback_type<types::websocket_api_response<std::vector<types::position_risk>>>);
+template void client::async_execute(const types::websocket_api_algo_order_place_request&,
+    callback_type<types::websocket_api_response<types::algo_order_response>>);
+template void client::async_execute(const types::websocket_api_algo_order_cancel_request&,
+    callback_type<types::websocket_api_response<types::code_msg_response>>);
+
+// --- Connection ---
 
 result<void>
 client::connect()
@@ -140,11 +227,19 @@ client::connect(callback_type<void> callback)
     boost::asio::post(io_context_, [this, callback = std::move(callback)]() mutable { callback(connect()); });
 }
 
-std::string
-client::next_id()
+result<void>
+client::close()
 {
-    return std::to_string(++id_counter_);
+    return transport_.close();
 }
+
+void
+client::close(callback_type<void> callback)
+{
+    boost::asio::post(io_context_, [this, callback = std::move(callback)]() mutable { callback(close()); });
+}
+
+// --- Session logon (unique auth flow) ---
 
 result<types::websocket_api_response<types::session_logon_result>>
 client::session_logon()
@@ -156,18 +251,14 @@ client::session_logon()
     const auto canonical = build_query_string(auth_query);
     const auto signature = hmac_sha256_hex(cfg_.secret_key, canonical);
 
-    session_logon_wire_request request{
-        .id = next_id(),
-        .method = std::string{session_logon_method},
-        .params = {
-            .apiKey = cfg_.api_key,
-            .timestamp = std::stoull(auth_query["timestamp"]),
-            .recvWindow = std::stoull(auth_query["recvWindow"]),
-            .signature = signature,
-        },
+    types::session_logon_request params{
+        .apiKey = cfg_.api_key,
+        .timestamp = std::stoull(auth_query["timestamp"]),
+        .recvWindow = std::stoull(auth_query["recvWindow"]),
+        .signature = signature,
     };
 
-    return send_rpc<types::session_logon_result>(transport_, request.id, session_logon_method, request.params);
+    return send_rpc<types::session_logon_result>(session_logon_method, params);
 }
 
 void
@@ -176,10 +267,12 @@ client::session_logon(callback_type<types::websocket_api_response<types::session
     boost::asio::post(io_context_, [this, callback = std::move(callback)]() mutable { callback(session_logon()); });
 }
 
+// --- Parameterless signed endpoints ---
+
 result<types::websocket_api_response<types::account_information>>
 client::account_status()
 {
-    return send_rpc<types::account_information>(transport_, next_id(), account_status_method, make_signed_request_base(cfg_));
+    return send_rpc<types::account_information>(account_status_method, make_signed_request_base());
 }
 
 void
@@ -188,195 +281,10 @@ client::account_status(callback_type<types::websocket_api_response<types::accoun
     boost::asio::post(io_context_, [this, callback = std::move(callback)]() mutable { callback(account_status()); });
 }
 
-result<types::websocket_api_response<std::vector<types::futures_account_balance>>>
-client::account_balance()
-{
-    return send_rpc<std::vector<types::futures_account_balance>>(
-        transport_, next_id(), account_balance_method, make_signed_request_base(cfg_));
-}
-
-void
-client::account_balance(callback_type<types::websocket_api_response<std::vector<types::futures_account_balance>>> callback)
-{
-    boost::asio::post(io_context_, [this, callback = std::move(callback)]() mutable { callback(account_balance()); });
-}
-
-result<types::websocket_api_response<types::order_response>>
-client::new_order(const types::new_order_request& request)
-{
-    auto auth = make_signed_request_base(cfg_);
-    types::websocket_api_order_place_request params{};
-    params.apiKey = auth.apiKey;
-    params.timestamp = auth.timestamp;
-    params.recvWindow = auth.recvWindow;
-    params.signature = auth.signature;
-    params.symbol = request.symbol;
-    params.side = to_string(request.side);
-    params.type = to_string(request.type);
-    params.timeInForce = request.timeInForce ? std::optional<std::string>{ to_string(*request.timeInForce) } : std::nullopt;
-    params.quantity = request.quantity;
-    params.price = request.price;
-    params.newClientOrderId = request.newClientOrderId;
-    params.stopPrice = request.stopPrice;
-    return send_rpc<types::order_response>(transport_, next_id(), order_place_method, params);
-}
-
-void
-client::new_order(const types::new_order_request& request,
-                  callback_type<types::websocket_api_response<types::order_response>> callback)
-{
-    boost::asio::post(io_context_, [this, request, callback = std::move(callback)]() mutable { callback(new_order(request)); });
-}
-
-result<types::websocket_api_response<types::order_response>>
-client::query_order(const types::query_order_request& request)
-{
-    auto auth = make_signed_request_base(cfg_);
-    types::websocket_api_order_query_request params{};
-    params.apiKey = auth.apiKey;
-    params.timestamp = auth.timestamp;
-    params.recvWindow = auth.recvWindow;
-    params.signature = auth.signature;
-    params.symbol = request.symbol;
-    params.orderId = request.orderId;
-    params.origClientOrderId = request.origClientOrderId;
-    return send_rpc<types::order_response>(transport_, next_id(), order_status_method, params);
-}
-
-void
-client::query_order(const types::query_order_request& request,
-                    callback_type<types::websocket_api_response<types::order_response>> callback)
-{
-    boost::asio::post(io_context_,
-                      [this, request, callback = std::move(callback)]() mutable { callback(query_order(request)); });
-}
-
-result<types::websocket_api_response<types::order_response>>
-client::cancel_order(const types::cancel_order_request& request)
-{
-    auto auth = make_signed_request_base(cfg_);
-    types::websocket_api_order_cancel_request params{};
-    params.apiKey = auth.apiKey;
-    params.timestamp = auth.timestamp;
-    params.recvWindow = auth.recvWindow;
-    params.signature = auth.signature;
-    params.symbol = request.symbol;
-    params.orderId = request.orderId;
-    params.origClientOrderId = request.origClientOrderId;
-    return send_rpc<types::order_response>(transport_, next_id(), order_cancel_method, params);
-}
-
-void
-client::cancel_order(const types::cancel_order_request& request,
-                     callback_type<types::websocket_api_response<types::order_response>> callback)
-{
-    boost::asio::post(io_context_,
-                      [this, request, callback = std::move(callback)]() mutable { callback(cancel_order(request)); });
-}
-
-result<types::websocket_api_response<types::book_ticker>>
-client::book_ticker(const types::book_ticker_request& request)
-{
-    return send_rpc<types::book_ticker>(
-        transport_, next_id(), ticker_book_method, types::websocket_api_book_ticker_request{ request.symbol });
-}
-
-void
-client::book_ticker(const types::book_ticker_request& request,
-                    callback_type<types::websocket_api_response<types::book_ticker>> callback)
-{
-    boost::asio::post(io_context_,
-                      [this, request, callback = std::move(callback)]() mutable { callback(book_ticker(request)); });
-}
-
-result<types::websocket_api_response<types::price_ticker>>
-client::ticker_price(const types::price_ticker_request& request)
-{
-    return send_rpc<types::price_ticker>(
-        transport_, next_id(), ticker_price_method, types::websocket_api_price_ticker_request{ request.symbol });
-}
-
-void
-client::ticker_price(const types::price_ticker_request& request,
-                     callback_type<types::websocket_api_response<types::price_ticker>> callback)
-{
-    boost::asio::post(io_context_,
-                      [this, request, callback = std::move(callback)]() mutable { callback(ticker_price(request)); });
-}
-
-result<types::websocket_api_response<types::order_response>>
-client::modify_order(const types::modify_order_request& request)
-{
-    auto auth = make_signed_request_base(cfg_);
-    types::websocket_api_order_modify_request params{};
-    params.apiKey = auth.apiKey;
-    params.timestamp = auth.timestamp;
-    params.recvWindow = auth.recvWindow;
-    params.signature = auth.signature;
-    params.symbol = request.symbol;
-    params.orderId = request.orderId;
-    params.origClientOrderId = request.origClientOrderId;
-    params.side = to_string(request.side);
-    params.quantity = request.quantity;
-    params.price = request.price;
-    params.priceMatch = request.priceMatch;
-    return send_rpc<types::order_response>(transport_, next_id(), order_modify_method, params);
-}
-
-void
-client::modify_order(const types::modify_order_request& request,
-                     callback_type<types::websocket_api_response<types::order_response>> callback)
-{
-    boost::asio::post(io_context_,
-                      [this, request, callback = std::move(callback)]() mutable { callback(modify_order(request)); });
-}
-
-result<types::websocket_api_response<std::vector<types::position_risk>>>
-client::account_position(const types::position_risk_request& request)
-{
-    auto auth = make_signed_request_base(cfg_);
-    types::websocket_api_position_request params{};
-    params.apiKey = auth.apiKey;
-    params.timestamp = auth.timestamp;
-    params.recvWindow = auth.recvWindow;
-    params.signature = auth.signature;
-    params.symbol = request.symbol;
-    return send_rpc<std::vector<types::position_risk>>(transport_, next_id(), account_position_method, params);
-}
-
-void
-client::account_position(const types::position_risk_request& request,
-                         callback_type<types::websocket_api_response<std::vector<types::position_risk>>> callback)
-{
-    boost::asio::post(io_context_,
-                      [this, request, callback = std::move(callback)]() mutable { callback(account_position(request)); });
-}
-
-result<types::websocket_api_response<std::vector<types::position_risk>>>
-client::account_position_v2(const types::position_risk_request& request)
-{
-    auto auth = make_signed_request_base(cfg_);
-    types::websocket_api_position_request params{};
-    params.apiKey = auth.apiKey;
-    params.timestamp = auth.timestamp;
-    params.recvWindow = auth.recvWindow;
-    params.signature = auth.signature;
-    params.symbol = request.symbol;
-    return send_rpc<std::vector<types::position_risk>>(transport_, next_id(), account_position_v2_method, params);
-}
-
-void
-client::account_position_v2(const types::position_risk_request& request,
-                            callback_type<types::websocket_api_response<std::vector<types::position_risk>>> callback)
-{
-    boost::asio::post(io_context_,
-                      [this, request, callback = std::move(callback)]() mutable { callback(account_position_v2(request)); });
-}
-
 result<types::websocket_api_response<types::account_information>>
 client::account_status_v2()
 {
-    return send_rpc<types::account_information>(transport_, next_id(), account_status_v2_method, make_signed_request_base(cfg_));
+    return send_rpc<types::account_information>(account_status_v2_method, make_signed_request_base());
 }
 
 void
@@ -385,64 +293,41 @@ client::account_status_v2(callback_type<types::websocket_api_response<types::acc
     boost::asio::post(io_context_, [this, callback = std::move(callback)]() mutable { callback(account_status_v2()); });
 }
 
-result<types::websocket_api_response<types::algo_order_response>>
-client::algo_order_place(const types::new_algo_order_request& request)
+result<types::websocket_api_response<std::vector<types::futures_account_balance>>>
+client::account_balance()
 {
-    auto auth = make_signed_request_base(cfg_);
-    types::websocket_api_algo_order_place_request params{};
-    params.apiKey = auth.apiKey;
-    params.timestamp = auth.timestamp;
-    params.recvWindow = auth.recvWindow;
-    params.signature = auth.signature;
-    params.symbol = request.symbol;
-    params.side = request.side;
-    params.positionSide = request.positionSide;
-    params.type = request.type;
-    params.timeInForce = request.timeInForce;
-    params.quantity = request.quantity;
-    params.price = request.price;
-    params.triggerPrice = request.triggerPrice;
-    params.algoType = request.algoType;
-    params.workingType = request.workingType;
-    return send_rpc<types::algo_order_response>(transport_, next_id(), algo_order_place_method, params);
+    return send_rpc<std::vector<types::futures_account_balance>>(account_balance_method, make_signed_request_base());
 }
 
 void
-client::algo_order_place(const types::new_algo_order_request& request,
-                         callback_type<types::websocket_api_response<types::algo_order_response>> callback)
+client::account_balance(callback_type<types::websocket_api_response<std::vector<types::futures_account_balance>>> callback)
 {
-    boost::asio::post(io_context_,
-                      [this, request, callback = std::move(callback)]() mutable { callback(algo_order_place(request)); });
+    boost::asio::post(io_context_, [this, callback = std::move(callback)]() mutable { callback(account_balance()); });
 }
 
-result<types::websocket_api_response<types::code_msg_response>>
-client::algo_order_cancel(const types::cancel_algo_order_request& request)
+// --- Shared: position v2 (same request type, different method) ---
+
+result<types::websocket_api_response<std::vector<types::position_risk>>>
+client::account_position_v2(const types::websocket_api_position_request& request)
 {
-    auto auth = make_signed_request_base(cfg_);
-    types::websocket_api_algo_order_cancel_request params{};
-    params.apiKey = auth.apiKey;
-    params.timestamp = auth.timestamp;
-    params.recvWindow = auth.recvWindow;
-    params.signature = auth.signature;
-    params.algoId = request.algoId;
-    params.clientAlgoId = request.clientAlgoId;
-    return send_rpc<types::code_msg_response>(transport_, next_id(), algo_order_cancel_method, params);
+    return send_rpc<std::vector<types::position_risk>>(account_position_v2_method, inject_auth(request));
 }
 
 void
-client::algo_order_cancel(const types::cancel_algo_order_request& request,
-                          callback_type<types::websocket_api_response<types::code_msg_response>> callback)
+client::account_position_v2(const types::websocket_api_position_request& request,
+                            callback_type<types::websocket_api_response<std::vector<types::position_risk>>> callback)
 {
     boost::asio::post(io_context_,
-                      [this, request, callback = std::move(callback)]() mutable { callback(algo_order_cancel(request)); });
+                      [this, request, callback = std::move(callback)]() mutable { callback(account_position_v2(request)); });
 }
+
+// --- Shared: user data stream (same request type, 3 methods) ---
 
 result<types::websocket_api_response<types::websocket_api_listen_key_result>>
 client::user_data_stream_start()
 {
-    types::websocket_api_user_data_stream_request params{};
-    params.apiKey = cfg_.api_key;
-    return send_rpc<types::websocket_api_listen_key_result>(transport_, next_id(), user_data_stream_start_method, params);
+    types::websocket_api_user_data_stream_request params{ .apiKey = cfg_.api_key };
+    return send_rpc<types::websocket_api_listen_key_result>(user_data_stream_start_method, params);
 }
 
 void
@@ -454,9 +339,8 @@ client::user_data_stream_start(callback_type<types::websocket_api_response<types
 result<types::websocket_api_response<types::websocket_api_listen_key_result>>
 client::user_data_stream_ping()
 {
-    types::websocket_api_user_data_stream_request params{};
-    params.apiKey = cfg_.api_key;
-    return send_rpc<types::websocket_api_listen_key_result>(transport_, next_id(), user_data_stream_ping_method, params);
+    types::websocket_api_user_data_stream_request params{ .apiKey = cfg_.api_key };
+    return send_rpc<types::websocket_api_listen_key_result>(user_data_stream_ping_method, params);
 }
 
 void
@@ -468,27 +352,14 @@ client::user_data_stream_ping(callback_type<types::websocket_api_response<types:
 result<types::websocket_api_response<types::empty_response>>
 client::user_data_stream_stop()
 {
-    types::websocket_api_user_data_stream_request params{};
-    params.apiKey = cfg_.api_key;
-    return send_rpc<types::empty_response>(transport_, next_id(), user_data_stream_stop_method, params);
+    types::websocket_api_user_data_stream_request params{ .apiKey = cfg_.api_key };
+    return send_rpc<types::empty_response>(user_data_stream_stop_method, params);
 }
 
 void
 client::user_data_stream_stop(callback_type<types::websocket_api_response<types::empty_response>> callback)
 {
     boost::asio::post(io_context_, [this, callback = std::move(callback)]() mutable { callback(user_data_stream_stop()); });
-}
-
-result<void>
-client::close()
-{
-    return transport_.close();
-}
-
-void
-client::close(callback_type<void> callback)
-{
-    boost::asio::post(io_context_, [this, callback = std::move(callback)]() mutable { callback(close()); });
 }
 
 } // namespace binapi2::fapi::websocket_api
