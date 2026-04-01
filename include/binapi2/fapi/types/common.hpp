@@ -47,15 +47,57 @@ struct price_level
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Exchange-Information.md
+struct exchange_info_asset
+{
+    std::string asset{};
+    bool marginAvailable{};
+    std::optional<std::string> autoAssetExchange{};
+};
+
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Exchange-Information.md
+struct symbol_filter
+{
+    std::string filterType{};
+    std::optional<std::string> maxPrice{};
+    std::optional<std::string> minPrice{};
+    std::optional<std::string> tickSize{};
+    std::optional<std::string> maxQty{};
+    std::optional<std::string> minQty{};
+    std::optional<std::string> stepSize{};
+    std::optional<int> limit{};
+    std::optional<std::string> notional{};
+    std::optional<std::string> multiplierUp{};
+    std::optional<std::string> multiplierDown{};
+    std::optional<std::string> multiplierDecimal{};
+};
+
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Exchange-Information.md
 struct symbol_info
 {
     std::string symbol{};
     std::string pair{};
     std::string contractType{};
+    std::uint64_t deliveryDate{};
+    std::uint64_t onboardDate{};
     std::string status{};
+    std::string maintMarginPercent{};
+    std::string requiredMarginPercent{};
     std::string baseAsset{};
     std::string quoteAsset{};
     std::string marginAsset{};
+    int pricePrecision{};
+    int quantityPrecision{};
+    int baseAssetPrecision{};
+    int quotePrecision{};
+    std::string underlyingType{};
+    std::vector<std::string> underlyingSubType{};
+    int settlePlan{};
+    std::string triggerProtect{};
+    std::vector<symbol_filter> filters{};
+    std::vector<std::string> orderTypes{};
+    std::vector<std::string> timeInForce{};
+    std::string liquidationFee{};
+    std::string marketTakeBound{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Exchange-Information.md
@@ -64,6 +106,7 @@ struct exchange_info_response
     std::string timezone{};
     std::uint64_t serverTime{};
     std::vector<rate_limit> rateLimits{};
+    std::vector<exchange_info_asset> assets{};
     std::vector<symbol_info> symbols{};
 };
 
@@ -120,6 +163,44 @@ struct glz::meta<binapi2::fapi::types::price_level>
 };
 
 template<>
+struct glz::meta<binapi2::fapi::types::exchange_info_asset>
+{
+    using T = binapi2::fapi::types::exchange_info_asset;
+    static constexpr auto value =
+        object("asset", &T::asset, "marginAvailable", &T::marginAvailable, "autoAssetExchange", &T::autoAssetExchange);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::symbol_filter>
+{
+    using T = binapi2::fapi::types::symbol_filter;
+    static constexpr auto value = object("filterType",
+                                         &T::filterType,
+                                         "maxPrice",
+                                         &T::maxPrice,
+                                         "minPrice",
+                                         &T::minPrice,
+                                         "tickSize",
+                                         &T::tickSize,
+                                         "maxQty",
+                                         &T::maxQty,
+                                         "minQty",
+                                         &T::minQty,
+                                         "stepSize",
+                                         &T::stepSize,
+                                         "limit",
+                                         &T::limit,
+                                         "notional",
+                                         &T::notional,
+                                         "multiplierUp",
+                                         &T::multiplierUp,
+                                         "multiplierDown",
+                                         &T::multiplierDown,
+                                         "multiplierDecimal",
+                                         &T::multiplierDecimal);
+};
+
+template<>
 struct glz::meta<binapi2::fapi::types::symbol_info>
 {
     using T = binapi2::fapi::types::symbol_info;
@@ -129,22 +210,64 @@ struct glz::meta<binapi2::fapi::types::symbol_info>
                                          &T::pair,
                                          "contractType",
                                          &T::contractType,
+                                         "deliveryDate",
+                                         &T::deliveryDate,
+                                         "onboardDate",
+                                         &T::onboardDate,
                                          "status",
                                          &T::status,
+                                         "maintMarginPercent",
+                                         &T::maintMarginPercent,
+                                         "requiredMarginPercent",
+                                         &T::requiredMarginPercent,
                                          "baseAsset",
                                          &T::baseAsset,
                                          "quoteAsset",
                                          &T::quoteAsset,
                                          "marginAsset",
-                                         &T::marginAsset);
+                                         &T::marginAsset,
+                                         "pricePrecision",
+                                         &T::pricePrecision,
+                                         "quantityPrecision",
+                                         &T::quantityPrecision,
+                                         "baseAssetPrecision",
+                                         &T::baseAssetPrecision,
+                                         "quotePrecision",
+                                         &T::quotePrecision,
+                                         "underlyingType",
+                                         &T::underlyingType,
+                                         "underlyingSubType",
+                                         &T::underlyingSubType,
+                                         "settlePlan",
+                                         &T::settlePlan,
+                                         "triggerProtect",
+                                         &T::triggerProtect,
+                                         "filters",
+                                         &T::filters,
+                                         "orderTypes",
+                                         &T::orderTypes,
+                                         "timeInForce",
+                                         &T::timeInForce,
+                                         "liquidationFee",
+                                         &T::liquidationFee,
+                                         "marketTakeBound",
+                                         &T::marketTakeBound);
 };
 
 template<>
 struct glz::meta<binapi2::fapi::types::exchange_info_response>
 {
     using T = binapi2::fapi::types::exchange_info_response;
-    static constexpr auto value =
-        object("timezone", &T::timezone, "serverTime", &T::serverTime, "rateLimits", &T::rateLimits, "symbols", &T::symbols);
+    static constexpr auto value = object("timezone",
+                                         &T::timezone,
+                                         "serverTime",
+                                         &T::serverTime,
+                                         "rateLimits",
+                                         &T::rateLimits,
+                                         "assets",
+                                         &T::assets,
+                                         "symbols",
+                                         &T::symbols);
 };
 
 template<>
