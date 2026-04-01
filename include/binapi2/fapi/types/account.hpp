@@ -14,6 +14,7 @@
 
 namespace binapi2::fapi::types {
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Account-Information-V3.md
 struct account_asset
 {
     std::string asset{};
@@ -32,6 +33,7 @@ struct account_asset
     std::uint64_t updateTime{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Account-Information-V3.md
 struct account_position
 {
     std::string symbol{};
@@ -55,6 +57,7 @@ struct account_position
     std::uint64_t updateTime{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Account-Information-V3.md
 struct account_information
 {
     int feeTier{};
@@ -79,6 +82,7 @@ struct account_information
     std::vector<account_position> positions{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Futures-Account-Balance-V3.md
 struct futures_account_balance
 {
     std::string accountAlias{};
@@ -92,11 +96,13 @@ struct futures_account_balance
     std::uint64_t updateTime{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Position-Information-V2.md
 struct position_risk_request
 {
     std::optional<std::string> symbol{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Position-Information-V2.md
 struct position_risk
 {
     std::string symbol{};
@@ -117,6 +123,7 @@ struct position_risk
     std::uint64_t updateTime{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Account-Config.md
 struct account_config_response
 {
     int feeTier{};
@@ -128,11 +135,13 @@ struct account_config_response
     std::optional<int> tradeGroupId{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Symbol-Config.md
 struct symbol_config_request
 {
     std::optional<std::string> symbol{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Symbol-Config.md
 struct symbol_config_entry
 {
     std::string symbol{};
@@ -142,16 +151,19 @@ struct symbol_config_entry
     std::string maxNotionalValue{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Get-Current-Multi-Assets-Mode.md
 struct multi_assets_mode_response
 {
     bool multiAssetsMargin{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Get-Current-Position-Mode.md
 struct position_mode_response
 {
     bool dualSidePosition{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Get-Income-History.md
 struct income_history_request
 {
     std::optional<std::string> symbol{};
@@ -162,6 +174,7 @@ struct income_history_request
     std::optional<int> limit{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Get-Income-History.md
 struct income_history_entry
 {
     std::string symbol{};
@@ -174,11 +187,13 @@ struct income_history_entry
     std::string tradeId{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Notional-and-Leverage-Brackets.md
 struct leverage_bracket_request
 {
     std::optional<std::string> symbol{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Notional-and-Leverage-Brackets.md
 struct leverage_bracket_entry
 {
     int bracket{};
@@ -189,6 +204,7 @@ struct leverage_bracket_entry
     std::string cum{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Notional-and-Leverage-Brackets.md
 struct symbol_leverage_brackets
 {
     std::string symbol{};
@@ -196,11 +212,13 @@ struct symbol_leverage_brackets
     std::vector<leverage_bracket_entry> brackets{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/User-Commission-Rate.md
 struct commission_rate_request
 {
     std::string symbol{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/User-Commission-Rate.md
 struct commission_rate_response
 {
     std::string symbol{};
@@ -209,23 +227,27 @@ struct commission_rate_response
     std::optional<std::string> rpiCommissionRate{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Get-Download-Id-For-Futures-Transaction-History.md
 struct download_id_request
 {
     std::uint64_t startTime{};
     std::uint64_t endTime{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Get-Download-Id-For-Futures-Transaction-History.md
 struct download_id_response
 {
     std::uint64_t avgCostTimestampOfLast30d{};
     std::string downloadId{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Get-Futures-Transaction-History-Download-Link-by-Id.md
 struct download_link_request
 {
     std::string downloadId{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Get-Futures-Transaction-History-Download-Link-by-Id.md
 struct download_link_response
 {
     std::string downloadId{};
@@ -236,16 +258,19 @@ struct download_link_response
     bool isExpired{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Get-BNB-Burn-Status.md
 struct bnb_burn_status_response
 {
     bool feeBurn{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Toggle-BNB-Burn-On-Futures-Trade.md
 struct toggle_bnb_burn_request
 {
     std::string feeBurn{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Futures-Trading-Quantitative-Rules-Indicators.md
 struct trading_status_indicator
 {
     bool isLocked{};
@@ -255,21 +280,25 @@ struct trading_status_indicator
     double triggerValue{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Futures-Trading-Quantitative-Rules-Indicators.md
 struct quantitative_rules_request
 {
     std::optional<std::string> symbol{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Futures-Trading-Quantitative-Rules-Indicators.md
 struct quantitative_rules_response
 {
     std::map<std::string, std::vector<trading_status_indicator>> indicators{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/portfolio-margin-endpoints.md
 struct pm_account_info_request
 {
     std::string asset{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/portfolio-margin-endpoints.md
 struct pm_account_info_response
 {
     std::string maxWithdrawAmountUSD{};

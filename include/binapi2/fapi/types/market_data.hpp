@@ -17,23 +17,28 @@
 
 namespace binapi2::fapi::types {
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Check-Server-Time.md
 struct ping_request
 {};
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Check-Server-Time.md
 struct server_time_request
 {};
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Exchange-Information.md
 struct exchange_info_request
 {
     std::optional<std::string> symbol{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Order-Book.md
 struct order_book_request
 {
     std::string symbol{};
     std::optional<int> limit{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Order-Book.md
 struct order_book_response
 {
     std::uint64_t lastUpdateId{};
@@ -43,12 +48,14 @@ struct order_book_response
     std::vector<price_level> asks{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Recent-Trades-List.md
 struct recent_trades_request
 {
     std::string symbol{};
     std::optional<int> limit{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Recent-Trades-List.md
 struct recent_trade
 {
     std::uint64_t id{};
@@ -60,6 +67,7 @@ struct recent_trade
     std::optional<bool> isRPITrade{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Compressed-Aggregate-Trades-List.md
 struct aggregate_trades_request
 {
     std::string symbol{};
@@ -69,6 +77,7 @@ struct aggregate_trades_request
     std::optional<int> limit{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Compressed-Aggregate-Trades-List.md
 struct aggregate_trade
 {
     std::uint64_t a{};
@@ -80,6 +89,7 @@ struct aggregate_trade
     bool m{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Old-Trades-Lookup.md
 struct historical_trades_request
 {
     std::string symbol{};
@@ -87,6 +97,7 @@ struct historical_trades_request
     std::optional<std::uint64_t> fromId{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Kline-Candlestick-Data.md
 struct kline_request
 {
     std::string symbol{};
@@ -96,6 +107,7 @@ struct kline_request
     std::optional<int> limit{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Continuous-Contract-Kline-Candlestick-Data.md
 struct continuous_kline_request
 {
     std::string pair{};
@@ -106,6 +118,7 @@ struct continuous_kline_request
     std::optional<int> limit{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Index-Price-Kline-Candlestick-Data.md
 struct index_price_kline_request
 {
     std::string pair{};
@@ -115,6 +128,7 @@ struct index_price_kline_request
     std::optional<int> limit{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Kline-Candlestick-Data.md
 struct kline
 {
     std::uint64_t openTime{};
@@ -131,11 +145,13 @@ struct kline
     std::string ignore{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Symbol-Order-Book-Ticker.md
 struct book_ticker_request
 {
     std::optional<std::string> symbol{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Symbol-Order-Book-Ticker.md
 struct book_ticker
 {
     std::string symbol{};
@@ -147,11 +163,13 @@ struct book_ticker
     std::uint64_t lastUpdateId{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Symbol-Price-Ticker.md
 struct price_ticker_request
 {
     std::optional<std::string> symbol{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Symbol-Price-Ticker.md
 struct price_ticker
 {
     std::string symbol{};
@@ -159,11 +177,13 @@ struct price_ticker
     std::uint64_t time{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/24hr-Ticker-Price-Change-Statistics.md
 struct ticker_24hr_request
 {
     std::optional<std::string> symbol{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/24hr-Ticker-Price-Change-Statistics.md
 struct ticker_24hr
 {
     std::string symbol{};
@@ -184,11 +204,13 @@ struct ticker_24hr
     std::uint64_t count{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Mark-Price.md
 struct mark_price_request
 {
     std::optional<std::string> symbol{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Mark-Price.md
 struct mark_price
 {
     std::string symbol{};
@@ -200,6 +222,7 @@ struct mark_price
     std::uint64_t time{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Get-Funding-Rate-History.md
 struct funding_rate_history_request
 {
     std::optional<std::string> symbol{};
@@ -208,6 +231,7 @@ struct funding_rate_history_request
     std::optional<int> limit{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Get-Funding-Rate-History.md
 struct funding_rate_history_entry
 {
     std::string symbol{};
@@ -216,6 +240,7 @@ struct funding_rate_history_entry
     std::string markPrice{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Get-Funding-Rate-Info.md
 struct funding_rate_info
 {
     std::string symbol{};
@@ -225,11 +250,13 @@ struct funding_rate_info
     bool disclaimer{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Open-Interest.md
 struct open_interest_request
 {
     std::string symbol{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Open-Interest.md
 struct open_interest
 {
     std::string openInterest{};
@@ -237,6 +264,7 @@ struct open_interest
     std::uint64_t time{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Open-Interest-Statistics.md
 struct futures_data_request
 {
     std::string symbol{};
@@ -246,6 +274,7 @@ struct futures_data_request
     std::optional<std::uint64_t> endTime{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Open-Interest-Statistics.md
 struct open_interest_statistics_entry
 {
     std::string symbol{};
@@ -255,6 +284,7 @@ struct open_interest_statistics_entry
     std::uint64_t timestamp{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Long-Short-Ratio.md
 struct long_short_ratio_entry
 {
     std::string symbol{};
@@ -264,6 +294,7 @@ struct long_short_ratio_entry
     std::uint64_t timestamp{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Taker-BuySell-Volume.md
 struct taker_buy_sell_volume_entry
 {
     std::string buySellRatio{};
@@ -272,6 +303,7 @@ struct taker_buy_sell_volume_entry
     std::uint64_t timestamp{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Basis.md
 struct basis_request
 {
     std::string pair{};
@@ -282,6 +314,7 @@ struct basis_request
     std::optional<std::uint64_t> endTime{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Basis.md
 struct basis_entry
 {
     std::string pair{};
@@ -294,27 +327,32 @@ struct basis_entry
     std::uint64_t timestamp{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Symbol-Price-Ticker-v2.md
 struct price_ticker_v2_request
 {
     std::optional<std::string> symbol{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Delivery-Price.md
 struct delivery_price_request
 {
     std::string pair{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Delivery-Price.md
 struct delivery_price_entry
 {
     std::uint64_t deliveryTime{};
     std::string deliveryPrice{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Composite-Index-Symbol-Information.md
 struct composite_index_info_request
 {
     std::optional<std::string> symbol{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Composite-Index-Symbol-Information.md
 struct composite_index_base_asset
 {
     std::string baseAsset{};
@@ -323,6 +361,7 @@ struct composite_index_base_asset
     std::string weightInPercentage{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Composite-Index-Symbol-Information.md
 struct composite_index_info
 {
     std::string symbol{};
@@ -331,11 +370,13 @@ struct composite_index_info
     std::vector<composite_index_base_asset> baseAssetList{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Index-Constituents.md
 struct index_constituents_request
 {
     std::string symbol{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Index-Constituents.md
 struct index_constituent
 {
     std::string exchange{};
@@ -344,6 +385,7 @@ struct index_constituent
     std::string weight{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Index-Constituents.md
 struct index_constituents_response
 {
     std::string symbol{};
@@ -351,11 +393,13 @@ struct index_constituents_response
     std::vector<index_constituent> constituents{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Multi-Assets-Mode-Asset-Index.md
 struct asset_index_request
 {
     std::optional<std::string> symbol{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Multi-Assets-Mode-Asset-Index.md
 struct asset_index
 {
     std::string symbol{};
@@ -371,11 +415,13 @@ struct asset_index
     std::string autoExchangeAskRate{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Insurance-Fund-Balance.md
 struct insurance_fund_request
 {
     std::optional<std::string> symbol{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Insurance-Fund-Balance.md
 struct insurance_fund_asset
 {
     std::string asset{};
@@ -383,17 +429,20 @@ struct insurance_fund_asset
     std::uint64_t updateTime{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Insurance-Fund-Balance.md
 struct insurance_fund_response
 {
     std::vector<std::string> symbols{};
     std::vector<insurance_fund_asset> assets{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/ADL-Risk.md
 struct adl_risk_request
 {
     std::optional<std::string> symbol{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/ADL-Risk.md
 struct adl_risk_entry
 {
     std::string symbol{};
@@ -401,15 +450,18 @@ struct adl_risk_entry
     std::uint64_t updateTime{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Order-Book-RPI.md
 struct rpi_depth_request
 {
     std::string symbol{};
     std::optional<int> limit{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Trading-Schedule.md
 struct trading_schedule_request
 {};
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Trading-Schedule.md
 struct trading_schedule_response
 {
     std::uint64_t updateTime{};

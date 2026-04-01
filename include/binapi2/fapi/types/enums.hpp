@@ -17,12 +17,14 @@ enum class security_type
     trade,
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 enum class order_side
 {
     buy,
     sell,
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 enum class order_type
 {
     limit,
@@ -34,6 +36,7 @@ enum class order_type
     trailing_stop_market,
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 enum class time_in_force
 {
     gtc,
@@ -43,6 +46,7 @@ enum class time_in_force
     gtd,
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 enum class kline_interval
 {
     m1,
@@ -62,6 +66,7 @@ enum class kline_interval
     mo1,
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 enum class position_side
 {
     both,
@@ -69,24 +74,28 @@ enum class position_side
     short_side,
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 enum class working_type
 {
     mark_price,
     contract_price,
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 enum class response_type
 {
     ack,
     result,
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 enum class margin_type
 {
     isolated,
     crossed,
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 enum class contract_type
 {
     perpetual,
@@ -98,6 +107,7 @@ enum class contract_type
     tradifi_perpetual,
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 enum class contract_status
 {
     pending_trading,
@@ -110,6 +120,7 @@ enum class contract_status
     close,
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 enum class order_status
 {
     new_order,
@@ -121,6 +132,7 @@ enum class order_status
     expired_in_match,
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 enum class stp_mode
 {
     expire_taker,
@@ -128,6 +140,7 @@ enum class stp_mode
     expire_maker,
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 enum class price_match
 {
     none,
@@ -141,6 +154,7 @@ enum class price_match
     queue_20,
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 enum class income_type
 {
     transfer,
@@ -164,6 +178,7 @@ enum class income_type
     position_limit_increase_fee,
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 enum class futures_data_period
 {
     m5,

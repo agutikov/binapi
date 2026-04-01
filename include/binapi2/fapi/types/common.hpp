@@ -16,6 +16,7 @@ namespace binapi2::fapi::types {
 struct empty_response
 {};
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 struct rate_limit
 {
     std::string rateLimitType{};
@@ -25,23 +26,27 @@ struct rate_limit
     std::optional<int> count{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Check-Server-Time.md
 struct server_time_response
 {
     std::uint64_t serverTime{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/error-code.md
 struct binance_error_document
 {
     int code{};
     std::string msg{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Order-Book.md
 struct price_level
 {
     std::string price{};
     std::string quantity{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Exchange-Information.md
 struct symbol_info
 {
     std::string symbol{};
@@ -53,6 +58,7 @@ struct symbol_info
     std::string marginAsset{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Exchange-Information.md
 struct exchange_info_response
 {
     std::string timezone{};
@@ -61,6 +67,7 @@ struct exchange_info_response
     std::vector<symbol_info> symbols{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Start-User-Data-Stream.md
 struct listen_key_response
 {
     std::string listenKey{};

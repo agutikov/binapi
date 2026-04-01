@@ -15,6 +15,7 @@
 
 namespace binapi2::fapi::types {
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Individual-Symbol-Book-Ticker-Streams.md
 struct book_ticker_stream_event
 {
     std::string e{};
@@ -28,6 +29,7 @@ struct book_ticker_stream_event
     std::uint64_t E{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Aggregate-Trade-Streams.md
 struct aggregate_trade_stream_event
 {
     std::string e{};
@@ -42,6 +44,7 @@ struct aggregate_trade_stream_event
     bool m{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Mark-Price-Stream.md
 struct mark_price_stream_event
 {
     std::string e{};
@@ -55,8 +58,10 @@ struct mark_price_stream_event
     std::uint64_t T{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Mark-Price-Stream-for-All-market.md
 using all_market_mark_price_stream_event = std::vector<mark_price_stream_event>;
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Diff-Book-Depth-Streams.md
 struct depth_stream_event
 {
     std::string e{};
@@ -70,6 +75,7 @@ struct depth_stream_event
     std::vector<price_level> a{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/All-Market-Mini-Tickers-Stream.md
 struct mini_ticker_stream_event
 {
     std::string e{};
@@ -83,8 +89,10 @@ struct mini_ticker_stream_event
     std::string q{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/All-Market-Mini-Tickers-Stream.md
 using all_market_mini_ticker_stream_event = std::vector<mini_ticker_stream_event>;
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/All-Market-Tickers-Streams.md
 struct ticker_stream_event
 {
     std::string e{};
@@ -107,8 +115,10 @@ struct ticker_stream_event
     std::uint64_t n{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/All-Market-Tickers-Streams.md
 using all_market_ticker_stream_event = std::vector<ticker_stream_event>;
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/All-Market-Liquidation-Order-Streams.md
 struct liquidation_order_stream_data
 {
     std::string s{};
@@ -124,6 +134,7 @@ struct liquidation_order_stream_data
     std::uint64_t T{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/All-Market-Liquidation-Order-Streams.md
 struct liquidation_order_stream_event
 {
     std::string e{};
@@ -131,6 +142,7 @@ struct liquidation_order_stream_event
     liquidation_order_stream_data o{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Kline-Candlestick-Streams.md
 struct kline_stream_data
 {
     std::uint64_t t{};
@@ -152,6 +164,7 @@ struct kline_stream_data
     std::string B{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Kline-Candlestick-Streams.md
 struct kline_stream_event
 {
     std::string e{};
@@ -160,6 +173,7 @@ struct kline_stream_event
     kline_stream_data k{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Continuous-Contract-Kline-Candlestick-Streams.md
 struct continuous_contract_kline_stream_data
 {
     std::uint64_t t{};
@@ -180,6 +194,7 @@ struct continuous_contract_kline_stream_data
     std::string B{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Continuous-Contract-Kline-Candlestick-Streams.md
 struct continuous_contract_kline_stream_event
 {
     std::string e{};
@@ -189,6 +204,7 @@ struct continuous_contract_kline_stream_event
     continuous_contract_kline_stream_data k{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Composite-Index-Symbol-Information-Streams.md
 struct composite_index_constituent
 {
     std::string b{};
@@ -198,6 +214,7 @@ struct composite_index_constituent
     std::string i{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Composite-Index-Symbol-Information-Streams.md
 struct composite_index_stream_event
 {
     std::string e{};
@@ -208,6 +225,7 @@ struct composite_index_stream_event
     std::vector<composite_index_constituent> c{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Contract-Info-Stream.md
 struct contract_info_bracket
 {
     int bs{};
@@ -219,6 +237,7 @@ struct contract_info_bracket
     int ma{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Contract-Info-Stream.md
 struct contract_info_stream_event
 {
     std::string e{};
@@ -232,6 +251,7 @@ struct contract_info_stream_event
     std::optional<std::vector<contract_info_bracket>> bks{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Asset-Index-Stream.md
 struct asset_index_stream_event
 {
     std::string e{};
@@ -248,8 +268,10 @@ struct asset_index_stream_event
     std::string G{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Asset-Index-Stream.md
 using all_asset_index_stream_event = std::vector<asset_index_stream_event>;
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Trading-Session-Stream.md
 struct trading_session_stream_event
 {
     std::string e{};
@@ -259,6 +281,7 @@ struct trading_session_stream_event
     std::string S{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Balance-and-Position-Update.md
 struct account_update_balance
 {
     std::string a{};
@@ -267,6 +290,7 @@ struct account_update_balance
     std::string bc{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Balance-and-Position-Update.md
 struct account_update_position
 {
     std::string s{};
@@ -279,6 +303,7 @@ struct account_update_position
     std::string ps{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Balance-and-Position-Update.md
 struct account_update_data
 {
     std::string m{};
@@ -286,6 +311,7 @@ struct account_update_data
     std::vector<account_update_position> P{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Balance-and-Position-Update.md
 struct account_update_event
 {
     std::string e{};
@@ -294,6 +320,7 @@ struct account_update_event
     account_update_data a{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Order-Update.md
 struct order_trade_update_order
 {
     std::string s{};
@@ -309,6 +336,7 @@ struct order_trade_update_order
     std::uint64_t i{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Order-Update.md
 struct order_trade_update_event
 {
     std::string e{};
@@ -317,6 +345,7 @@ struct order_trade_update_event
     order_trade_update_order o{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Margin-Call.md
 struct margin_call_position
 {
     std::string s{};
@@ -329,6 +358,7 @@ struct margin_call_position
     std::string mm{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Margin-Call.md
 struct margin_call_event
 {
     std::string e{};
@@ -337,6 +367,7 @@ struct margin_call_event
     std::vector<margin_call_position> p{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-User-Data-Stream-Expired.md
 struct listen_key_expired_event
 {
     std::string e{};
@@ -345,17 +376,20 @@ struct listen_key_expired_event
     std::string listenKey{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Account-Configuration-Update-previous-Leverage-Update.md
 struct account_config_leverage
 {
     std::string s{};
     int l{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Account-Configuration-Update-previous-Leverage-Update.md
 struct account_config_multi_assets
 {
     bool j{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Account-Configuration-Update-previous-Leverage-Update.md
 struct account_config_update_event
 {
     std::string e{};
@@ -365,6 +399,7 @@ struct account_config_update_event
     std::optional<account_config_multi_assets> ai{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Trade-Lite.md
 struct trade_lite_event
 {
     std::string e{};
@@ -382,6 +417,7 @@ struct trade_lite_event
     std::uint64_t i{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Algo-Order-Update.md
 struct algo_order_update_data
 {
     std::string caid{};
@@ -411,6 +447,7 @@ struct algo_order_update_data
     std::optional<std::string> rm{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Algo-Order-Update.md
 struct algo_order_update_event
 {
     std::string e{};
@@ -419,6 +456,7 @@ struct algo_order_update_event
     algo_order_update_data o{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Conditional-Order-Trigger-Reject.md
 struct conditional_order_reject_data
 {
     std::string s{};
@@ -426,6 +464,7 @@ struct conditional_order_reject_data
     std::string r{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Conditional-Order-Trigger-Reject.md
 struct conditional_order_trigger_reject_event
 {
     std::string e{};
@@ -434,6 +473,7 @@ struct conditional_order_trigger_reject_event
     conditional_order_reject_data or_{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-GRID-UPDATE.md
 struct grid_update_data
 {
     std::uint64_t si{};
@@ -448,6 +488,7 @@ struct grid_update_data
     std::uint64_t ut{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-GRID-UPDATE.md
 struct grid_update_event
 {
     std::string e{};
@@ -456,6 +497,7 @@ struct grid_update_event
     grid_update_data gu{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-STRATEGY-UPDATE.md
 struct strategy_update_data
 {
     std::uint64_t si{};
@@ -466,6 +508,7 @@ struct strategy_update_data
     int c{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-STRATEGY-UPDATE.md
 struct strategy_update_event
 {
     std::string e{};

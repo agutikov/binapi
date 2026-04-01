@@ -11,6 +11,7 @@
 
 namespace binapi2::fapi::types {
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/convert/Send-quote-request.md
 struct convert_quote_request {
     std::string fromAsset{};
     std::string toAsset{};
@@ -19,6 +20,7 @@ struct convert_quote_request {
     std::optional<std::string> validTime{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/convert/Send-quote-request.md
 struct convert_quote_response {
     std::string quoteId{};
     std::string ratio{};
@@ -28,21 +30,25 @@ struct convert_quote_response {
     std::string fromAmount{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/convert/Accept-Quote.md
 struct convert_accept_request {
     std::string quoteId{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/convert/Accept-Quote.md
 struct convert_accept_response {
     std::string orderId{};
     std::uint64_t createTime{};
     std::string orderStatus{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/convert/Order-Status.md
 struct convert_order_status_request {
     std::optional<std::string> orderId{};
     std::optional<std::string> quoteId{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/convert/Order-Status.md
 struct convert_order_status_response {
     std::string orderId{};
     std::string orderStatus{};

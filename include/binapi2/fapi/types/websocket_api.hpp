@@ -18,12 +18,14 @@
 
 namespace binapi2::fapi::types {
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-api-general-info.md
 struct websocket_api_error
 {
     int code{};
     std::string msg{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-api-general-info.md
 struct session_logon_request
 {
     std::string apiKey{};
@@ -32,12 +34,14 @@ struct session_logon_request
     std::string signature{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-api-general-info.md
 struct websocket_api_status
 {
     int status{};
     std::string id{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-api-general-info.md
 struct session_logon_result
 {
     std::optional<std::string> apiKey{};
@@ -46,6 +50,7 @@ struct session_logon_result
     std::optional<std::string> serverTime{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-api-general-info.md
 struct websocket_api_signed_request
 {
     std::string apiKey{};
@@ -54,6 +59,7 @@ struct websocket_api_signed_request
     std::string signature{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/websocket-api/New-Order.md
 struct websocket_api_order_place_request : websocket_api_signed_request
 {
     std::string symbol{};
@@ -66,6 +72,7 @@ struct websocket_api_order_place_request : websocket_api_signed_request
     std::optional<std::string> stopPrice{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/websocket-api/Query-Order.md
 struct websocket_api_order_query_request : websocket_api_signed_request
 {
     std::string symbol{};
@@ -73,6 +80,7 @@ struct websocket_api_order_query_request : websocket_api_signed_request
     std::optional<std::string> origClientOrderId{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/websocket-api/Cancel-Order.md
 struct websocket_api_order_cancel_request : websocket_api_signed_request
 {
     std::string symbol{};
@@ -80,16 +88,19 @@ struct websocket_api_order_cancel_request : websocket_api_signed_request
     std::optional<std::string> origClientOrderId{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/websocket-api/Symbol-Order-Book-Ticker.md
 struct websocket_api_book_ticker_request
 {
     std::optional<std::string> symbol{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/websocket-api/Symbol-Price-Ticker.md
 struct websocket_api_price_ticker_request
 {
     std::optional<std::string> symbol{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/websocket-api/Modify-Order.md
 struct websocket_api_order_modify_request : websocket_api_signed_request
 {
     std::string symbol{};
@@ -101,11 +112,13 @@ struct websocket_api_order_modify_request : websocket_api_signed_request
     std::optional<std::string> priceMatch{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/websocket-api/Position-Information.md
 struct websocket_api_position_request : websocket_api_signed_request
 {
     std::optional<std::string> symbol{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/websocket-api/New-Algo-Order.md
 struct websocket_api_algo_order_place_request : websocket_api_signed_request
 {
     std::string symbol{};
@@ -120,22 +133,26 @@ struct websocket_api_algo_order_place_request : websocket_api_signed_request
     std::optional<std::string> workingType{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/websocket-api/Cancel-Algo-Order.md
 struct websocket_api_algo_order_cancel_request : websocket_api_signed_request
 {
     std::optional<std::uint64_t> algoId{};
     std::optional<std::string> clientAlgoId{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Start-User-Data-Stream-Wsp.md
 struct websocket_api_user_data_stream_request
 {
     std::string apiKey{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Start-User-Data-Stream-Wsp.md
 struct websocket_api_listen_key_result
 {
     std::string listenKey{};
 };
 
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-api-general-info.md
 template<typename T>
 struct websocket_api_response
 {
