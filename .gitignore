@@ -1,3 +1,4 @@
 build
 _build
 _docs
+compile_commands.json

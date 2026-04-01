@@ -39,3 +39,11 @@ add_subdirectory(src/binapi)
 add_subdirectory(src/binapi2/fapi)
 add_subdirectory(examples/binapi)
 add_subdirectory(examples/binapi2/fapi)
+
+if(PROJECT_IS_TOP_LEVEL AND UNIX)
+    execute_process(
+        COMMAND ${CMAKE_COMMAND} -E create_symlink
+            ${CMAKE_BINARY_DIR}/compile_commands.json
+            ${CMAKE_SOURCE_DIR}/compile_commands.json
+    )
+endif()
