@@ -45,7 +45,8 @@ struct websocket_api_status
 struct session_logon_result
 {
     std::optional<std::string> apiKey{};
-    std::optional<bool> authorizedSinceConnect{};
+    std::optional<std::uint64_t> authorizedSince{};
+    std::optional<std::uint64_t> connectedSince{};
     std::optional<bool> returnRateLimits{};
     std::optional<std::string> serverTime{};
 };
@@ -124,13 +125,23 @@ struct websocket_api_algo_order_place_request : websocket_api_signed_request
     std::string symbol{};
     std::string side{};
     std::optional<std::string> positionSide{};
-    std::optional<std::string> type{};
+    std::string type{};
     std::optional<std::string> timeInForce{};
     std::string quantity{};
     std::optional<std::string> price{};
     std::optional<std::string> triggerPrice{};
     std::string algoType{};
     std::optional<std::string> workingType{};
+    std::optional<std::string> priceMatch{};
+    std::optional<std::string> closePosition{};
+    std::optional<std::string> priceProtect{};
+    std::optional<std::string> reduceOnly{};
+    std::optional<std::string> activatePrice{};
+    std::optional<std::string> callbackRate{};
+    std::optional<std::string> clientAlgoId{};
+    std::optional<std::string> newOrderRespType{};
+    std::optional<std::string> selfTradePreventionMode{};
+    std::optional<std::uint64_t> goodTillDate{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/websocket-api/Cancel-Algo-Order.md
@@ -186,8 +197,10 @@ struct glz::meta<binapi2::fapi::types::session_logon_result>
     using T = binapi2::fapi::types::session_logon_result;
     static constexpr auto value = object("apiKey",
                                          &T::apiKey,
-                                         "authorizedSinceConnect",
-                                         &T::authorizedSinceConnect,
+                                         "authorizedSince",
+                                         &T::authorizedSince,
+                                         "connectedSince",
+                                         &T::connectedSince,
                                          "returnRateLimits",
                                          &T::returnRateLimits,
                                          "serverTime",
@@ -361,7 +374,27 @@ struct glz::meta<binapi2::fapi::types::websocket_api_algo_order_place_request>
                                          "algoType",
                                          &T::algoType,
                                          "workingType",
-                                         &T::workingType);
+                                         &T::workingType,
+                                         "priceMatch",
+                                         &T::priceMatch,
+                                         "closePosition",
+                                         &T::closePosition,
+                                         "priceProtect",
+                                         &T::priceProtect,
+                                         "reduceOnly",
+                                         &T::reduceOnly,
+                                         "activatePrice",
+                                         &T::activatePrice,
+                                         "callbackRate",
+                                         &T::callbackRate,
+                                         "clientAlgoId",
+                                         &T::clientAlgoId,
+                                         "newOrderRespType",
+                                         &T::newOrderRespType,
+                                         "selfTradePreventionMode",
+                                         &T::selfTradePreventionMode,
+                                         "goodTillDate",
+                                         &T::goodTillDate);
 };
 
 template<>

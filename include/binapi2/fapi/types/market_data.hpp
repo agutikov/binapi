@@ -218,6 +218,7 @@ struct mark_price
     std::string indexPrice{};
     std::string estimatedSettlePrice{};
     std::string lastFundingRate{};
+    std::string interestRate{};
     std::uint64_t nextFundingTime{};
     std::uint64_t time{};
 };
@@ -462,10 +463,24 @@ struct trading_schedule_request
 {};
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Trading-Schedule.md
+struct trading_session_entry
+{
+    std::uint64_t startTime{};
+    std::uint64_t endTime{};
+    std::string type{};
+};
+
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Trading-Schedule.md
+struct market_schedule
+{
+    std::vector<trading_session_entry> sessions{};
+};
+
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Trading-Schedule.md
 struct trading_schedule_response
 {
     std::uint64_t updateTime{};
-    std::map<std::string, std::vector<std::string>> marketSchedules{};
+    std::map<std::string, market_schedule> marketSchedules{};
 };
 
 } // namespace binapi2::fapi::types
@@ -602,6 +617,8 @@ struct glz::meta<binapi2::fapi::types::mark_price>
                                          &T::estimatedSettlePrice,
                                          "lastFundingRate",
                                          &T::lastFundingRate,
+                                         "interestRate",
+                                         &T::interestRate,
                                          "nextFundingTime",
                                          &T::nextFundingTime,
                                          "time",
@@ -804,6 +821,20 @@ struct glz::meta<binapi2::fapi::types::adl_risk_entry>
 {
     using T = binapi2::fapi::types::adl_risk_entry;
     static constexpr auto value = object("symbol", &T::symbol, "adlRisk", &T::adlRisk, "updateTime", &T::updateTime);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::trading_session_entry>
+{
+    using T = binapi2::fapi::types::trading_session_entry;
+    static constexpr auto value = object("startTime", &T::startTime, "endTime", &T::endTime, "type", &T::type);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::market_schedule>
+{
+    using T = binapi2::fapi::types::market_schedule;
+    static constexpr auto value = object("sessions", &T::sessions);
 };
 
 template<>

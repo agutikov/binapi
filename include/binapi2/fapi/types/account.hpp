@@ -133,6 +133,7 @@ struct account_config_response
     bool dualSidePosition{};
     bool multiAssetsMargin{};
     std::optional<int> tradeGroupId{};
+    std::uint64_t updateTime{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Symbol-Config.md
@@ -146,7 +147,7 @@ struct symbol_config_entry
 {
     std::string symbol{};
     std::string marginType{};
-    std::string isAutoAddMargin{};
+    bool isAutoAddMargin{};
     int leverage{};
     std::string maxNotionalValue{};
 };
@@ -290,6 +291,7 @@ struct quantitative_rules_request
 struct quantitative_rules_response
 {
     std::map<std::string, std::vector<trading_status_indicator>> indicators{};
+    std::uint64_t updateTime{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/portfolio-margin-endpoints.md
@@ -519,7 +521,9 @@ struct glz::meta<binapi2::fapi::types::account_config_response>
                                          "multiAssetsMargin",
                                          &T::multiAssetsMargin,
                                          "tradeGroupId",
-                                         &T::tradeGroupId);
+                                         &T::tradeGroupId,
+                                         "updateTime",
+                                         &T::updateTime);
 };
 
 template<>
@@ -667,5 +671,5 @@ template<>
 struct glz::meta<binapi2::fapi::types::quantitative_rules_response>
 {
     using T = binapi2::fapi::types::quantitative_rules_response;
-    static constexpr auto value = object("indicators", &T::indicators);
+    static constexpr auto value = object("indicators", &T::indicators, "updateTime", &T::updateTime);
 };

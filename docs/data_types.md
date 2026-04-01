@@ -17,7 +17,7 @@ Source: `include/binapi2/fapi/types/enums.hpp`
 | `security_type` | (internal) | complete | Not from API docs |
 | `order_side` | [common-definition.md] | complete | |
 | `order_type` | [common-definition.md] | complete | |
-| `time_in_force` | [common-definition.md] | partial | Missing `rpi` (RPI - Retail Price Improvement) |
+| `time_in_force` | [common-definition.md] | complete | |
 | `kline_interval` | [common-definition.md] | complete | |
 | `position_side` | [common-definition.md] | complete | |
 | `working_type` | [common-definition.md] | complete | |
@@ -48,7 +48,7 @@ Source: `include/binapi2/fapi/types/common.hpp`
 | `exchange_info_asset` | [Exchange-Information.md] | complete | |
 | `symbol_filter` | [Exchange-Information.md] | complete | |
 | `symbol_info` | [Exchange-Information.md] | complete | |
-| `exchange_info_response` | [Exchange-Information.md] | partial | Missing `exchangeFilters` (always empty array) |
+| `exchange_info_response` | [Exchange-Information.md] | complete | |
 | `listen_key_response` | [Start-User-Data-Stream.md] | complete | |
 
 [Check-Server-Time.md]: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Check-Server-Time.md
@@ -85,7 +85,7 @@ Source: `include/binapi2/fapi/types/market_data.hpp`
 | `ticker_24hr_request` | [24hr-Ticker.md] | complete | |
 | `ticker_24hr` | [24hr-Ticker.md] | complete | |
 | `mark_price_request` | [Mark-Price.md] | complete | |
-| `mark_price` | [Mark-Price.md] | partial | Missing `interestRate` |
+| `mark_price` | [Mark-Price.md] | complete | |
 | `funding_rate_history_request` | [Get-Funding-Rate-History.md] | complete | |
 | `funding_rate_history_entry` | [Get-Funding-Rate-History.md] | complete | |
 | `funding_rate_info` | [Get-Funding-Rate-Info.md] | complete | |
@@ -115,7 +115,9 @@ Source: `include/binapi2/fapi/types/market_data.hpp`
 | `adl_risk_entry` | [ADL-Risk.md] | complete | |
 | `rpi_depth_request` | [Order-Book-RPI.md] | complete | |
 | `trading_schedule_request` | [Trading-Schedule.md] | complete | |
-| `trading_schedule_response` | [Trading-Schedule.md] | partial | `marketSchedules` type is wrong: should be nested struct with `sessions` array (each having `startTime`, `endTime`, `type`), not `map<string, vector<string>>` |
+| `trading_session_entry` | [Trading-Schedule.md] | complete | |
+| `market_schedule` | [Trading-Schedule.md] | complete | |
+| `trading_schedule_response` | [Trading-Schedule.md] | complete | |
 
 Note: Mark-Price-Kline-Candlestick-Data and Premium-Index-Kline-Data endpoints have no dedicated request types; they reuse `kline_request`/`kline` at the endpoint level.
 
@@ -159,9 +161,9 @@ Source: `include/binapi2/fapi/types/account.hpp`
 | `futures_account_balance` | [Futures-Account-Balance-V3.md] | complete | |
 | `position_risk_request` | [Position-Information-V2.md] | complete | |
 | `position_risk` | [Position-Information-V2.md] | complete | |
-| `account_config_response` | [Account-Config.md] | partial | Missing `updateTime` |
+| `account_config_response` | [Account-Config.md] | complete | |
 | `symbol_config_request` | [Symbol-Config.md] | complete | |
-| `symbol_config_entry` | [Symbol-Config.md] | partial | `isAutoAddMargin` is `std::string` but doc shows boolean |
+| `symbol_config_entry` | [Symbol-Config.md] | complete | |
 | `multi_assets_mode_response` | [Get-Current-Multi-Assets-Mode.md] | complete | |
 | `position_mode_response` | [Get-Current-Position-Mode.md] | complete | |
 | `income_history_request` | [Get-Income-History.md] | complete | |
@@ -179,7 +181,7 @@ Source: `include/binapi2/fapi/types/account.hpp`
 | `toggle_bnb_burn_request` | [Toggle-BNB-Burn.md] | complete | |
 | `trading_status_indicator` | [Quantitative-Rules.md] | complete | |
 | `quantitative_rules_request` | [Quantitative-Rules.md] | complete | |
-| `quantitative_rules_response` | [Quantitative-Rules.md] | partial | Missing `updateTime` |
+| `quantitative_rules_response` | [Quantitative-Rules.md] | complete | |
 | `pm_account_info_request` | [portfolio-margin-endpoints.md] | complete | |
 | `pm_account_info_response` | [portfolio-margin-endpoints.md] | complete | |
 
@@ -207,12 +209,12 @@ Source: `include/binapi2/fapi/types/trade.hpp`
 
 | Type | Doc | Status | Notes |
 |---|---|---|---|
-| `new_order_request` | [New-Order-Test.md] | partial | Missing 11 optional params: `positionSide`, `reduceOnly`, `closePosition`, `activationPrice`, `callbackRate`, `workingType`, `priceProtect`, `newOrderRespType`, `priceMatch`, `selfTradePreventionMode`, `goodTillDate` |
-| `order_response` | [New-Order-Test.md] | partial | Missing `activatePrice`, `priceRate` |
+| `new_order_request` | [New-Order-Test.md] | complete | |
+| `order_response` | [New-Order-Test.md] | complete | |
 | `modify_order_request` | [Modify-Order.md] | complete | |
 | `cancel_order_request` | [Cancel-Order.md] | complete | |
 | `query_order_request` | [Query-Order.md] | complete | |
-| `test_new_order_request` | [New-Order-Test.md] | partial | Alias for `new_order_request` (inherits issues) |
+| `test_new_order_request` | [New-Order-Test.md] | complete | Alias for `new_order_request` |
 | `batch_orders_request` | [Place-Multiple-Orders.md] | complete | |
 | `cancel_multiple_orders_request` | [Cancel-Multiple-Orders.md] | complete | |
 | `cancel_all_open_orders_request` | [Cancel-All-Open-Orders.md] | complete | |
@@ -224,7 +226,7 @@ Source: `include/binapi2/fapi/types/trade.hpp`
 | `all_orders_request` | [All-Orders.md] | complete | |
 | `position_risk_v3` | [Position-Information-V3.md] | complete | |
 | `position_info_v3_request` | [Position-Information-V3.md] | complete | |
-| `adl_quantile_values` | [Position-ADL-Quantile.md] | partial | Missing `HEDGE` field (used in crossed-margin hedge mode) |
+| `adl_quantile_values` | [Position-ADL-Quantile.md] | complete | |
 | `adl_quantile_entry` | [Position-ADL-Quantile.md] | complete | |
 | `adl_quantile_request` | [Position-ADL-Quantile.md] | complete | |
 | `force_orders_request` | [Users-Force-Orders.md] | complete | |
@@ -240,8 +242,8 @@ Source: `include/binapi2/fapi/types/trade.hpp`
 | `position_margin_history_request` | [Get-Position-Margin-Change-History.md] | complete | |
 | `position_margin_history_entry` | [Get-Position-Margin-Change-History.md] | complete | |
 | `order_modify_history_request` | [Get-Order-Modify-History.md] | complete | |
-| `new_algo_order_request` | [New-Algo-Order.md] | partial | Missing 9 optional params: `priceMatch`, `closePosition`, `priceProtect`, `reduceOnly`, `activatePrice`, `callbackRate`, `newOrderRespType`, `selfTradePreventionMode`, `goodTillDate` |
-| `algo_order_response` | [New-Algo-Order.md] | partial | Missing 18 fields: `orderType`, `timeInForce`, `quantity`, `triggerPrice`, `price`, `icebergQuantity`, `selfTradePreventionMode`, `workingType`, `priceMatch`, `closePosition`, `priceProtect`, `reduceOnly`, `activatePrice`, `callbackRate`, `createTime`, `updateTime`, `triggerTime`, `goodTillDate` |
+| `new_algo_order_request` | [New-Algo-Order.md] | complete | |
+| `algo_order_response` | [New-Algo-Order.md] | complete | |
 | `cancel_algo_order_request` | [Cancel-Algo-Order.md] | complete | |
 | `query_algo_order_request` | [Query-Algo-Order.md] | complete | |
 | `all_algo_orders_request` | [Query-All-Algo-Orders.md] | complete | |
@@ -283,7 +285,7 @@ Source: `include/binapi2/fapi/types/streams.hpp`
 | Type | Doc | Status | Notes |
 |---|---|---|---|
 | `book_ticker_stream_event` | [Individual-Symbol-Book-Ticker-Streams.md] | complete | |
-| `aggregate_trade_stream_event` | [Aggregate-Trade-Streams.md] | partial | Missing `nq` (normal quantity without RPI) |
+| `aggregate_trade_stream_event` | [Aggregate-Trade-Streams.md] | complete | |
 | `mark_price_stream_event` | [Mark-Price-Stream.md] | complete | |
 | `all_market_mark_price_stream_event` | [Mark-Price-Stream-All.md] | complete | |
 | `depth_stream_event` | [Diff-Book-Depth-Streams.md] | complete | |
@@ -328,10 +330,10 @@ Source: `include/binapi2/fapi/types/streams.hpp`
 | Type | Doc | Status | Notes |
 |---|---|---|---|
 | `account_update_balance` | [Event-Balance-and-Position-Update.md] | complete | |
-| `account_update_position` | [Event-Balance-and-Position-Update.md] | partial | Missing `bep` (breakeven price) |
+| `account_update_position` | [Event-Balance-and-Position-Update.md] | complete | |
 | `account_update_data` | [Event-Balance-and-Position-Update.md] | complete | |
 | `account_update_event` | [Event-Balance-and-Position-Update.md] | complete | |
-| `order_trade_update_order` | [Event-Order-Update.md] | partial | Only 11 of ~37 fields implemented. Missing 26 fields: `sp`, `l`, `z`, `L`, `N`, `n`, `T`, `t`, `b`, `a`, `m`, `R`, `wt`, `ot`, `ps`, `cp`, `AP`, `cr`, `pP`, `si`, `ss`, `rp`, `V`, `pm`, `gtd`, `er` |
+| `order_trade_update_order` | [Event-Order-Update.md] | complete | |
 | `order_trade_update_event` | [Event-Order-Update.md] | complete | |
 | `margin_call_position` | [Event-Margin-Call.md] | complete | |
 | `margin_call_event` | [Event-Margin-Call.md] | complete | |
@@ -388,7 +390,7 @@ Source: `include/binapi2/fapi/types/websocket_api.hpp`
 | `websocket_api_error` | [websocket-api-general-info.md] | complete | |
 | `session_logon_request` | [websocket-api-general-info.md] | complete | |
 | `websocket_api_status` | [websocket-api-general-info.md] | complete | |
-| `session_logon_result` | [websocket-api-general-info.md] | partial | Has `authorizedSinceConnect` (nonexistent in doc); should be `authorizedSince` + `connectedSince` (two separate fields) |
+| `session_logon_result` | [websocket-api-general-info.md] | complete | |
 | `websocket_api_signed_request` | [websocket-api-general-info.md] | complete | |
 | `websocket_api_order_place_request` | [WS-New-Order.md] | complete | |
 | `websocket_api_order_query_request` | [WS-Query-Order.md] | complete | |
@@ -397,7 +399,7 @@ Source: `include/binapi2/fapi/types/websocket_api.hpp`
 | `websocket_api_price_ticker_request` | [WS-Symbol-Price-Ticker.md] | complete | |
 | `websocket_api_order_modify_request` | [WS-Modify-Order.md] | complete | |
 | `websocket_api_position_request` | [WS-Position-Information.md] | complete | |
-| `websocket_api_algo_order_place_request` | [WS-New-Algo-Order.md] | partial | Missing 10 optional params: `priceMatch`, `closePosition`, `priceProtect`, `reduceOnly`, `activatePrice`, `callbackRate`, `clientAlgoId`, `newOrderRespType`, `selfTradePreventionMode`, `goodTillDate`; also `type` should be mandatory |
+| `websocket_api_algo_order_place_request` | [WS-New-Algo-Order.md] | complete | |
 | `websocket_api_algo_order_cancel_request` | [WS-Cancel-Algo-Order.md] | complete | |
 | `websocket_api_user_data_stream_request` | [Start-User-Data-Stream-Wsp.md] | complete | |
 | `websocket_api_listen_key_result` | [Start-User-Data-Stream-Wsp.md] | complete | |
@@ -416,26 +418,6 @@ Source: `include/binapi2/fapi/types/websocket_api.hpp`
 [Start-User-Data-Stream-Wsp.md]: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Start-User-Data-Stream-Wsp.md
 
 
-## Summary of incomplete types
+## Summary
 
-Types requiring attention, ordered by severity:
-
-| Type | File | Missing |
-|---|---|---|
-| `order_trade_update_order` | streams.hpp | 26 of ~37 fields missing |
-| `algo_order_response` | trade.hpp | 18 response fields missing |
-| `new_order_request` | trade.hpp | 11 optional request params missing |
-| `websocket_api_algo_order_place_request` | websocket_api.hpp | 10 optional params missing |
-| `new_algo_order_request` | trade.hpp | 9 optional request params missing |
-| `order_response` | trade.hpp | 2 response fields missing (`activatePrice`, `priceRate`) |
-| `session_logon_result` | websocket_api.hpp | Wrong field name: `authorizedSinceConnect` should be `authorizedSince` + `connectedSince` |
-| `trading_schedule_response` | market_data.hpp | `marketSchedules` has wrong nested type structure |
-| `mark_price` | market_data.hpp | Missing `interestRate` |
-| `account_update_position` | streams.hpp | Missing `bep` (breakeven price) |
-| `aggregate_trade_stream_event` | streams.hpp | Missing `nq` (normal quantity without RPI) |
-| `account_config_response` | account.hpp | Missing `updateTime` |
-| `quantitative_rules_response` | account.hpp | Missing `updateTime` |
-| `symbol_config_entry` | account.hpp | `isAutoAddMargin` type mismatch (string vs bool) |
-| `adl_quantile_values` | trade.hpp | Missing `HEDGE` field |
-| `time_in_force` | enums.hpp | Missing `rpi` enum value |
-| `exchange_info_response` | common.hpp | Missing `exchangeFilters` (always empty) |
+All data types are complete. No types have missing fields relative to their API documentation.

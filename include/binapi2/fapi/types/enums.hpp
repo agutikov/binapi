@@ -44,6 +44,7 @@ enum class time_in_force
     fok,
     gtx,
     gtd,
+    rpi,
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
@@ -258,6 +259,8 @@ to_string(time_in_force value)
             return "GTX";
         case time_in_force::gtd:
             return "GTD";
+        case time_in_force::rpi:
+            return "RPI";
     }
     return "GTC";
 }

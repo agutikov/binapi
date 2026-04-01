@@ -42,6 +42,7 @@ struct aggregate_trade_stream_event
     std::uint64_t l{};
     std::uint64_t T{};
     bool m{};
+    std::optional<std::string> nq{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Mark-Price-Stream.md
@@ -301,6 +302,7 @@ struct account_update_position
     std::string mt{};
     std::string iw{};
     std::string ps{};
+    std::string bep{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Balance-and-Position-Update.md
@@ -331,9 +333,35 @@ struct order_trade_update_order
     std::string q{};
     std::string p{};
     std::string ap{};
-    std::string X{};
+    std::string sp{};
     std::string x{};
+    std::string X{};
     std::uint64_t i{};
+    std::string l{};
+    std::string z{};
+    std::string L{};
+    std::string N{};
+    std::string n{};
+    std::uint64_t T{};
+    std::uint64_t t{};
+    std::string b{};
+    std::string a{};
+    bool m{};
+    bool R{};
+    std::string wt{};
+    std::string ot{};
+    std::string ps{};
+    bool cp{};
+    std::optional<std::string> AP{};
+    std::optional<std::string> cr{};
+    bool pP{};
+    int si{};
+    int ss{};
+    std::string rp{};
+    std::string V{};
+    std::string pm{};
+    std::optional<std::uint64_t> gtd{};
+    std::optional<std::string> er{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Order-Update.md
@@ -550,7 +578,9 @@ struct glz::meta<binapi2::fapi::types::aggregate_trade_stream_event>
                                          "T",
                                          &T::T,
                                          "m",
-                                         &T::m);
+                                         &T::m,
+                                         "nq",
+                                         &T::nq);
 };
 
 template<>
@@ -758,7 +788,7 @@ struct glz::meta<binapi2::fapi::types::account_update_position>
 {
     using T = binapi2::fapi::types::account_update_position;
     static constexpr auto value =
-        object("s", &T::s, "pa", &T::pa, "ep", &T::ep, "cr", &T::cr, "up", &T::up, "mt", &T::mt, "iw", &T::iw, "ps", &T::ps);
+        object("s", &T::s, "pa", &T::pa, "ep", &T::ep, "cr", &T::cr, "up", &T::up, "mt", &T::mt, "iw", &T::iw, "ps", &T::ps, "bep", &T::bep);
 };
 
 template<>
@@ -779,28 +809,14 @@ template<>
 struct glz::meta<binapi2::fapi::types::order_trade_update_order>
 {
     using T = binapi2::fapi::types::order_trade_update_order;
-    static constexpr auto value = object("s",
-                                         &T::s,
-                                         "c",
-                                         &T::c,
-                                         "S",
-                                         &T::S,
-                                         "o",
-                                         &T::o,
-                                         "f",
-                                         &T::f,
-                                         "q",
-                                         &T::q,
-                                         "p",
-                                         &T::p,
-                                         "ap",
-                                         &T::ap,
-                                         "X",
-                                         &T::X,
-                                         "x",
-                                         &T::x,
-                                         "i",
-                                         &T::i);
+    static constexpr auto value = object("s", &T::s, "c", &T::c, "S", &T::S, "o", &T::o, "f", &T::f,
+                                         "q", &T::q, "p", &T::p, "ap", &T::ap, "sp", &T::sp, "x", &T::x,
+                                         "X", &T::X, "i", &T::i, "l", &T::l, "z", &T::z, "L", &T::L,
+                                         "N", &T::N, "n", &T::n, "T", &T::T, "t", &T::t, "b", &T::b,
+                                         "a", &T::a, "m", &T::m, "R", &T::R, "wt", &T::wt, "ot", &T::ot,
+                                         "ps", &T::ps, "cp", &T::cp, "AP", &T::AP, "cr", &T::cr, "pP", &T::pP,
+                                         "si", &T::si, "ss", &T::ss, "rp", &T::rp, "V", &T::V, "pm", &T::pm,
+                                         "gtd", &T::gtd, "er", &T::er);
 };
 
 template<>

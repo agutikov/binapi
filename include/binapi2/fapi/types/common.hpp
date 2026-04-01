@@ -105,6 +105,7 @@ struct exchange_info_response
 {
     std::string timezone{};
     std::uint64_t serverTime{};
+    std::vector<glz::generic> exchangeFilters{};
     std::vector<rate_limit> rateLimits{};
     std::vector<exchange_info_asset> assets{};
     std::vector<symbol_info> symbols{};
@@ -262,6 +263,8 @@ struct glz::meta<binapi2::fapi::types::exchange_info_response>
                                          &T::timezone,
                                          "serverTime",
                                          &T::serverTime,
+                                         "exchangeFilters",
+                                         &T::exchangeFilters,
                                          "rateLimits",
                                          &T::rateLimits,
                                          "assets",

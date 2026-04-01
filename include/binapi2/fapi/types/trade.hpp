@@ -27,6 +27,17 @@ struct new_order_request
     std::optional<std::string> price{};
     std::optional<std::string> newClientOrderId{};
     std::optional<std::string> stopPrice{};
+    std::optional<std::string> positionSide{};
+    std::optional<std::string> reduceOnly{};
+    std::optional<std::string> closePosition{};
+    std::optional<std::string> activationPrice{};
+    std::optional<std::string> callbackRate{};
+    std::optional<std::string> workingType{};
+    std::optional<std::string> priceProtect{};
+    std::optional<std::string> newOrderRespType{};
+    std::optional<std::string> priceMatch{};
+    std::optional<std::string> selfTradePreventionMode{};
+    std::optional<std::uint64_t> goodTillDate{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/New-Order-Test.md
@@ -57,6 +68,8 @@ struct order_response
     std::optional<std::string> priceMatch{};
     std::optional<std::string> selfTradePreventionMode{};
     std::optional<std::uint64_t> goodTillDate{};
+    std::optional<std::string> activatePrice{};
+    std::optional<std::string> priceRate{};
     std::optional<std::uint64_t> updateTime{};
 };
 
@@ -193,6 +206,7 @@ struct adl_quantile_values
     int LONG{};
     int SHORT{};
     std::optional<int> BOTH{};
+    std::optional<int> HEDGE{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Position-ADL-Quantile-Estimation.md
@@ -347,6 +361,15 @@ struct new_algo_order_request
     std::optional<std::string> workingType{};
     std::string algoType{};
     std::optional<std::string> clientAlgoId{};
+    std::optional<std::string> priceMatch{};
+    std::optional<std::string> closePosition{};
+    std::optional<std::string> priceProtect{};
+    std::optional<std::string> reduceOnly{};
+    std::optional<std::string> activatePrice{};
+    std::optional<std::string> callbackRate{};
+    std::optional<std::string> newOrderRespType{};
+    std::optional<std::string> selfTradePreventionMode{};
+    std::optional<std::uint64_t> goodTillDate{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/New-Algo-Order.md
@@ -359,6 +382,24 @@ struct algo_order_response
     std::string side{};
     std::optional<std::string> positionSide{};
     std::string algoStatus{};
+    std::optional<std::string> orderType{};
+    std::optional<std::string> timeInForce{};
+    std::optional<std::string> quantity{};
+    std::optional<std::string> triggerPrice{};
+    std::optional<std::string> price{};
+    std::optional<std::string> icebergQuantity{};
+    std::optional<std::string> selfTradePreventionMode{};
+    std::optional<std::string> workingType{};
+    std::optional<std::string> priceMatch{};
+    std::optional<bool> closePosition{};
+    std::optional<bool> priceProtect{};
+    std::optional<bool> reduceOnly{};
+    std::optional<std::string> activatePrice{};
+    std::optional<std::string> callbackRate{};
+    std::optional<std::uint64_t> createTime{};
+    std::optional<std::uint64_t> updateTime{};
+    std::optional<std::uint64_t> triggerTime{};
+    std::optional<std::uint64_t> goodTillDate{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Cancel-Algo-Order.md
@@ -446,6 +487,10 @@ struct glz::meta<binapi2::fapi::types::order_response>
                                          &T::selfTradePreventionMode,
                                          "goodTillDate",
                                          &T::goodTillDate,
+                                         "activatePrice",
+                                         &T::activatePrice,
+                                         "priceRate",
+                                         &T::priceRate,
                                          "updateTime",
                                          &T::updateTime);
 };
@@ -514,7 +559,7 @@ template<>
 struct glz::meta<binapi2::fapi::types::adl_quantile_values>
 {
     using T = binapi2::fapi::types::adl_quantile_values;
-    static constexpr auto value = object("LONG", &T::LONG, "SHORT", &T::SHORT, "BOTH", &T::BOTH);
+    static constexpr auto value = object("LONG", &T::LONG, "SHORT", &T::SHORT, "BOTH", &T::BOTH, "HEDGE", &T::HEDGE);
 };
 
 template<>
@@ -610,5 +655,41 @@ struct glz::meta<binapi2::fapi::types::algo_order_response>
                                          "positionSide",
                                          &T::positionSide,
                                          "algoStatus",
-                                         &T::algoStatus);
+                                         &T::algoStatus,
+                                         "orderType",
+                                         &T::orderType,
+                                         "timeInForce",
+                                         &T::timeInForce,
+                                         "quantity",
+                                         &T::quantity,
+                                         "triggerPrice",
+                                         &T::triggerPrice,
+                                         "price",
+                                         &T::price,
+                                         "icebergQuantity",
+                                         &T::icebergQuantity,
+                                         "selfTradePreventionMode",
+                                         &T::selfTradePreventionMode,
+                                         "workingType",
+                                         &T::workingType,
+                                         "priceMatch",
+                                         &T::priceMatch,
+                                         "closePosition",
+                                         &T::closePosition,
+                                         "priceProtect",
+                                         &T::priceProtect,
+                                         "reduceOnly",
+                                         &T::reduceOnly,
+                                         "activatePrice",
+                                         &T::activatePrice,
+                                         "callbackRate",
+                                         &T::callbackRate,
+                                         "createTime",
+                                         &T::createTime,
+                                         "updateTime",
+                                         &T::updateTime,
+                                         "triggerTime",
+                                         &T::triggerTime,
+                                         "goodTillDate",
+                                         &T::goodTillDate);
 };
