@@ -23,6 +23,7 @@ set(BINAPI2_FAPI_HEADERS
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/transport/session_base.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/transport/ssl_context.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/transport/websocket_client.hpp
+    ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/types/decimal.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/types/common.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/types/account.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/types/convert.hpp
@@ -37,6 +38,7 @@ set(BINAPI2_FAPI_HEADERS
 )
 
 set(BINAPI2_FAPI_SOURCES
+    decimal.cpp
     client.cpp
     rest/account.cpp
     rest/convert.cpp
