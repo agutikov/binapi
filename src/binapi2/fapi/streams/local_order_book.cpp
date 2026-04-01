@@ -77,14 +77,14 @@ local_order_book::start(const std::string& symbol, int depth_limit)
                 need_snapshot = true;
             } else {
                 // Step 6: validate pu == previous u
-                if (event.pu != last_u_) {
+                if (event.prev_final_update_id != last_u_) {
                     synced_ = false;
                     buffer_.clear();
                     buffer_.push_back(event);
                     need_snapshot = true;
                 } else {
                     apply_event(event);
-                    last_u_ = event.u;
+                    last_u_ = event.final_update_id;
 
                     if (on_snapshot_) {
                         on_snapshot_(book_);
@@ -155,11 +155,11 @@ local_order_book::fetch_snapshot()
     // Step 4: drop buffered events where u < lastUpdateId
     buffer_.erase(std::remove_if(buffer_.begin(),
                                  buffer_.end(),
-                                 [last_update_id](const types::depth_stream_event& ev) { return ev.u < last_update_id; }),
+                                 [last_update_id](const types::depth_stream_event& ev) { return ev.final_update_id < last_update_id; }),
                   buffer_.end());
 
     // Step 5: first event should have U <= lastUpdateId AND u >= lastUpdateId
-    if (buffer_.empty() || buffer_.front().U > last_update_id || buffer_.front().u < last_update_id) {
+    if (buffer_.empty() || buffer_.front().first_update_id > last_update_id || buffer_.front().final_update_id < last_update_id) {
         // Cannot sync yet - will retry on next event
         return;
     }
@@ -181,12 +181,12 @@ local_order_book::fetch_snapshot()
     // Apply buffered events in sequence
     last_u_ = last_update_id;
     for (const auto& event : buffer_) {
-        if (event.u <= last_update_id) {
-            last_u_ = event.u;
+        if (event.final_update_id <= last_update_id) {
+            last_u_ = event.final_update_id;
             continue;
         }
         apply_event(event);
-        last_u_ = event.u;
+        last_u_ = event.final_update_id;
     }
     buffer_.clear();
     synced_ = true;
@@ -199,9 +199,9 @@ local_order_book::fetch_snapshot()
 void
 local_order_book::apply_event(const types::depth_stream_event& event)
 {
-    apply_levels(event.b, book_.bids);
-    apply_levels(event.a, book_.asks);
-    book_.last_update_id = event.u;
+    apply_levels(event.bids, book_.bids);
+    apply_levels(event.asks, book_.asks);
+    book_.last_update_id = event.final_update_id;
 }
 
 void

@@ -20,7 +20,7 @@ main()
     }
 
     auto loop = streams.read_kline_loop([](const binapi2::fapi::types::kline_stream_event& event) {
-        std::cout << event.s << ' ' << event.k.i << ' ' << event.k.c << ' ' << event.k.x << '\n';
+        std::cout << event.symbol << ' ' << event.kline.interval << ' ' << event.kline.close_price << ' ' << event.kline.is_closed << '\n';
         return false;
     });
     if (!loop) {

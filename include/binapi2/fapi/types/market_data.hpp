@@ -60,8 +60,8 @@ struct order_book_request
 struct order_book_response
 {
     std::uint64_t lastUpdateId{};
-    std::uint64_t E{};  ///< Message output time (ms).
-    std::uint64_t T{};   ///< Transaction time (ms).
+    std::uint64_t message_output_time{};
+    std::uint64_t transaction_time{};
     std::vector<price_level> bids{};
     std::vector<price_level> asks{};
 };
@@ -99,19 +99,16 @@ struct aggregate_trades_request
     std::optional<int> limit{};
 };
 
-/// Aggregate trade entry. Single-letter field names match the Binance API
-/// wire format: a=aggTradeId, p=price, q=quantity, f=firstTradeId,
-/// l=lastTradeId, T=timestamp, m=isBuyerMaker.
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Compressed-Aggregate-Trades-List.md
 struct aggregate_trade
 {
-    std::uint64_t a{};
-    std::string p{};
-    std::string q{};
-    std::uint64_t f{};
-    std::uint64_t l{};
-    std::uint64_t T{};
-    bool m{};
+    std::uint64_t agg_trade_id{};
+    std::string price{};
+    std::string quantity{};
+    std::uint64_t first_trade_id{};
+    std::uint64_t last_trade_id{};
+    std::uint64_t timestamp{};
+    bool is_buyer_maker{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Old-Trades-Lookup.md
@@ -545,7 +542,7 @@ struct glz::meta<binapi2::fapi::types::order_book_response>
 {
     using T = binapi2::fapi::types::order_book_response;
     static constexpr auto value =
-        object("lastUpdateId", &T::lastUpdateId, "E", &T::E, "T", &T::T, "bids", &T::bids, "asks", &T::asks);
+        object("lastUpdateId", &T::lastUpdateId, "E", &T::message_output_time, "T", &T::transaction_time, "bids", &T::bids, "asks", &T::asks);
 };
 
 template<>
@@ -572,7 +569,7 @@ template<>
 struct glz::meta<binapi2::fapi::types::aggregate_trade>
 {
     using T = binapi2::fapi::types::aggregate_trade;
-    static constexpr auto value = object("a", &T::a, "p", &T::p, "q", &T::q, "f", &T::f, "l", &T::l, "T", &T::T, "m", &T::m);
+    static constexpr auto value = object("a", &T::agg_trade_id, "p", &T::price, "q", &T::quantity, "f", &T::first_trade_id, "l", &T::last_trade_id, "T", &T::timestamp, "m", &T::is_buyer_maker);
 };
 
 template<>

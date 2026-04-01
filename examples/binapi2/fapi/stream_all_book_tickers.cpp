@@ -18,7 +18,7 @@ main()
     }
 
     auto loop = streams.read_all_book_tickers_loop([](const binapi2::fapi::types::book_ticker_stream_event& event) {
-        std::cout << event.s << ' ' << event.b << ' ' << event.a << '\n';
+        std::cout << event.symbol << ' ' << event.best_bid_price << ' ' << event.best_ask_price << '\n';
         return false;
     });
     if (!loop) {

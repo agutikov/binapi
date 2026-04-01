@@ -14,7 +14,7 @@ main()
     }
 
     auto loop = streams.read_mark_price_loop([](const binapi2::fapi::types::mark_price_stream_event& event) {
-        std::cout << event.s << ' ' << event.p << ' ' << event.r << '\n';
+        std::cout << event.symbol << ' ' << event.mark_price << ' ' << event.funding_rate << '\n';
         return false;
     });
     if (!loop) {

@@ -18,7 +18,7 @@ main()
     }
 
     auto loop = streams.read_partial_book_depth_loop([](const binapi2::fapi::types::depth_stream_event& event) {
-        std::cout << event.s << ' ' << event.u << ' ' << event.b.size() << ' ' << event.a.size() << '\n';
+        std::cout << event.symbol << ' ' << event.final_update_id << ' ' << event.bids.size() << ' ' << event.asks.size() << '\n';
         return false;
     });
     if (!loop) {

@@ -19,7 +19,7 @@ main()
 
     auto loop = streams.read_all_market_mini_tickers_loop([](const binapi2::fapi::types::all_market_mini_ticker_stream_event& events) {
         for (const auto& event : events) {
-            std::cout << event.s << ' ' << event.c << ' ' << event.v << '\n';
+            std::cout << event.symbol << ' ' << event.close_price << ' ' << event.base_volume << '\n';
         }
         return false;
     });

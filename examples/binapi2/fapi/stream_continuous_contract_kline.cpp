@@ -21,7 +21,7 @@ main()
 
     auto loop = streams.read_continuous_contract_kline_loop(
         [](const binapi2::fapi::types::continuous_contract_kline_stream_event& event) {
-            std::cout << event.ps << ' ' << event.ct << ' ' << event.k.i << ' ' << event.k.c << '\n';
+            std::cout << event.pair << ' ' << event.contract_type << ' ' << event.kline.interval << ' ' << event.kline.close_price << '\n';
             return false;
         });
     if (!loop) {

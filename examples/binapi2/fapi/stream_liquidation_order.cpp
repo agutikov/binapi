@@ -18,7 +18,7 @@ main()
     }
 
     auto loop = streams.read_liquidation_order_loop([](const binapi2::fapi::types::liquidation_order_stream_event& event) {
-        std::cout << event.o.s << ' ' << event.o.S << ' ' << event.o.ap << '\n';
+        std::cout << event.order.symbol << ' ' << event.order.side << ' ' << event.order.average_price << '\n';
         return false;
     });
     if (!loop) {
