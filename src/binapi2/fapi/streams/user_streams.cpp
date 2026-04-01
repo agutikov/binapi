@@ -2,6 +2,22 @@
 //
 // binapi2 USD-M Futures client library.
 
+/// @file Implements the user data WebSocket stream consumer. Unlike market
+/// streams (one event type per connection), the user data stream multiplexes
+/// many event types on a single connection, so incoming messages must be
+/// dispatched by inspecting the "e" (event type) field in the raw JSON before
+/// deserialising into the correct type. Two read_loop overloads are provided:
+///   - A legacy variant accepting individual handler callbacks for the most
+///     common events (ACCOUNT_UPDATE, ORDER_TRADE_UPDATE, MARGIN_CALL,
+///     listenKeyExpired).
+///   - A handlers-struct variant that supports all event types including
+///     ACCOUNT_CONFIG_UPDATE, TRADE_LITE, ALGO_UPDATE,
+///     CONDITIONAL_ORDER_TRIGGER_REJECT, GRID_UPDATE, and STRATEGY_UPDATE.
+///
+/// Event type detection uses a string::find on the raw payload rather than a
+/// full parse, avoiding the cost of deserialising events the caller did not
+/// register a handler for.
+
 #include <binapi2/fapi/streams/user_streams.hpp>
 
 #include <boost/asio/post.hpp>
@@ -29,6 +45,11 @@ user_streams::connect(const std::string& listen_key, void_callback callback)
                       [this, listen_key, callback = std::move(callback)]() mutable { callback(connect(listen_key)); });
 }
 
+// Legacy read_loop dispatching on the four most common user data event types.
+// Each incoming JSON frame is tested with string::find for both whitespace
+// variants ("e": "..." and "e":"...") because the Binance server does not
+// guarantee consistent whitespace in its JSON output. Unrecognised events
+// are silently skipped (returns true to keep reading).
 result<void>
 user_streams::read_loop(account_update_handler account_handler,
                         order_trade_update_handler order_handler,
@@ -98,6 +119,9 @@ user_streams::read_loop(account_update_handler account_handler,
 
 namespace {
 
+// Matches the "e" (event type) field in raw JSON without a full parse.
+// Checks both with and without a space after the colon to handle
+// inconsistent Binance JSON formatting.
 bool
 match_event(const std::string& payload, const char* event_name)
 {
@@ -106,6 +130,10 @@ match_event(const std::string& payload, const char* event_name)
     return payload.find(with_space) != std::string::npos || payload.find(without_space) != std::string::npos;
 }
 
+// Attempts to match and dispatch a single event type. Skips if no handler
+// is registered (null check) or the event name does not match. Returns true
+// if the event was consumed, false otherwise so the caller can try the
+// next event type in the dispatch chain.
 template<typename Event, typename Handler>
 bool
 try_dispatch(const std::string& payload, const char* event_name, const Handler& handler)
@@ -126,6 +154,10 @@ try_dispatch(const std::string& payload, const char* event_name, const Handler& 
 
 } // namespace
 
+// Full-featured read_loop using the handlers struct. Dispatches each incoming
+// frame through a chain of try_dispatch calls. The dispatch order matches
+// event frequency in typical usage (account/order updates first). Unmatched
+// events are silently ignored (returns true) so the stream continues.
 result<void>
 user_streams::read_loop(const handlers& h)
 {

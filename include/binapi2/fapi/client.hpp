@@ -2,6 +2,10 @@
 //
 // binapi2 USD-M Futures client library.
 
+/// @file
+/// @brief Top-level USD-M Futures API client, combining all REST service groups
+///        and providing both synchronous and asynchronous (boost::cobalt) execution.
+
 #pragma once
 
 #include <binapi2/fapi/config.hpp>
@@ -33,6 +37,19 @@ namespace binapi2::fapi {
 
 namespace detail {
 
+/// @brief Decode an HTTP response body into a typed result.
+///
+/// Checks the HTTP status code first; on non-2xx responses, attempts to parse
+/// a Binance error document from the body. On success, deserializes the body
+/// as JSON into @p T using glaze.
+///
+/// For @c types::empty_response, skips JSON parsing and returns an empty value.
+///
+/// @tparam T  The response type to deserialize into. Must be default-constructible
+///            and supported by glz::read_json, or types::empty_response.
+/// @param response  The raw HTTP response from the transport layer.
+/// @return A result containing either the deserialized value or an error with
+///         error_code::binance, error_code::http_status, or error_code::json.
 template<typename T>
 result<T>
 decode_response(const transport::http_response& response)
@@ -59,6 +76,20 @@ decode_response(const transport::http_response& response)
 
 } // namespace detail
 
+/// @brief USD-M Futures API client.
+///
+/// Owns the HTTP transport and configuration, and exposes domain-specific
+/// service objects (market_data, trade, account, convert, user_data_streams)
+/// for organized access to Binance endpoints.
+///
+/// All network I/O is implemented as boost::cobalt coroutines (async_execute).
+/// The synchronous execute methods wrap the coroutine via cobalt::run and block
+/// until completion, so they must not be called from within a coroutine context.
+///
+/// Two execution styles are available:
+///   - **Low-level**: caller specifies HTTP verb, path, query map, and signing flag.
+///   - **Generic**: caller passes a request struct; endpoint metadata and response
+///     type are resolved automatically via endpoint_traits.
 class client
 {
 public:
@@ -69,7 +100,18 @@ public:
     [[nodiscard]] boost::asio::io_context& context() noexcept;
     [[nodiscard]] transport::http_client& transport() noexcept;
 
-    // Low-level sync execute.
+    /// @brief Low-level synchronous request execution.
+    ///
+    /// Prepares the query (signing, timestamp injection), sends the HTTP request,
+    /// and deserializes the response body into @p Response.
+    /// Blocks the calling thread; must not be called from a coroutine.
+    ///
+    /// @tparam Response     The type to deserialize the response body into.
+    /// @param method        HTTP verb (GET, POST, PUT, DELETE).
+    /// @param path          API endpoint path (e.g. "/fapi/v1/order").
+    /// @param query         Query parameters as key-value pairs.
+    /// @param signed_request  Whether to HMAC-sign the request.
+    /// @return Typed result with the deserialized response or an error.
     template<typename Response>
     [[nodiscard]] result<Response> execute(boost::beast::http::verb method,
                                            const std::string& path,
@@ -83,7 +125,17 @@ public:
         return detail::decode_response<Response>(*response);
     }
 
-    // Low-level async execute.
+    /// @brief Low-level asynchronous request execution (boost::cobalt coroutine).
+    ///
+    /// Same behavior as the synchronous overload, but suspends rather than blocks.
+    /// This is the primary execution path; the synchronous variant delegates here.
+    ///
+    /// @tparam Response     The type to deserialize the response body into.
+    /// @param method        HTTP verb.
+    /// @param path          API endpoint path (taken by value for coroutine safety).
+    /// @param query         Query parameters (taken by value for coroutine safety).
+    /// @param signed_request  Whether to HMAC-sign the request.
+    /// @return Typed result with the deserialized response or an error.
     template<typename Response>
     [[nodiscard]] boost::cobalt::task<result<Response>> async_execute(boost::beast::http::verb method,
                                                                       std::string path,
@@ -97,7 +149,15 @@ public:
         co_return detail::decode_response<Response>(*response);
     }
 
-    // Generic sync execute: derives endpoint and response type from request type.
+    /// @brief Generic synchronous execute that derives endpoint metadata from the request type.
+    ///
+    /// Looks up the HTTP method, path, signing requirement, and response type
+    /// via endpoint_traits<Request>, then delegates to the low-level execute.
+    ///
+    /// @tparam Request  A request struct for which endpoint_traits is specialized.
+    ///                  Must satisfy the has_endpoint_traits concept.
+    /// @param request   The populated request struct; converted to a query_map via to_query_map.
+    /// @return Typed result with the endpoint's associated response type.
     template<class Request>
         requires rest::has_endpoint_traits<Request>
     [[nodiscard]] auto execute(const Request& request)
@@ -107,7 +167,13 @@ public:
             traits::endpoint.method, std::string{ traits::endpoint.path }, to_query_map(request), traits::endpoint.signed_request);
     }
 
-    // Generic async execute.
+    /// @brief Generic asynchronous execute (boost::cobalt coroutine).
+    ///
+    /// Asynchronous counterpart of the generic synchronous execute.
+    ///
+    /// @tparam Request  A request struct satisfying has_endpoint_traits.
+    /// @param request   The populated request struct.
+    /// @return Coroutine yielding a typed result with the endpoint's response type.
     template<class Request>
         requires rest::has_endpoint_traits<Request>
     [[nodiscard]] auto async_execute(const Request& request)
@@ -143,7 +209,10 @@ private:
                                                                                   bool signed_request);
 };
 
-// Template definitions for rest::service (needs full client definition).
+/// @brief Deferred definition of rest::service::execute.
+///
+/// Defined here (not in service.hpp) because the full client definition is
+/// required to delegate the call.
 template<class Request>
     requires rest::has_endpoint_traits<Request>
 auto
@@ -152,6 +221,9 @@ rest::service::execute(const Request& request) -> result<typename rest::endpoint
     return owner_.execute(request);
 }
 
+/// @brief Deferred definition of rest::service::async_execute.
+///
+/// Defined here for the same reason as execute above.
 template<class Request>
     requires rest::has_endpoint_traits<Request>
 auto

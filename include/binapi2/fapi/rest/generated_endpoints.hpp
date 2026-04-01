@@ -2,6 +2,14 @@
 //
 // binapi2 USD-M Futures client library.
 
+/// @file
+/// @brief Endpoint registry: compile-time metadata for every Binance USD-M Futures REST endpoint.
+///
+/// Each inline constexpr endpoint_metadata instance describes a single REST endpoint's
+/// HTTP method, URL path, security level, and signing/timestamp requirements.
+/// These are referenced by endpoint_traits specializations and by named service methods
+/// for endpoints that share a request type.
+
 #pragma once
 
 #include <binapi2/fapi/types/enums.hpp>
@@ -12,15 +20,18 @@
 
 namespace binapi2::fapi::rest {
 
+/// @brief Compile-time description of a single Binance REST endpoint.
+///
+/// Used by endpoint_traits and service methods to drive request construction.
 struct endpoint_metadata
 {
-    std::string_view name;
-    boost::beast::http::verb method;
-    std::string_view path;
-    types::security_type security;
-    bool signed_request;
-    bool requires_timestamp;
-    bool allows_recv_window;
+    std::string_view name;              ///< Human-readable endpoint name (for logging/diagnostics).
+    boost::beast::http::verb method;    ///< HTTP method (GET, POST, PUT, DELETE).
+    std::string_view path;              ///< URL path (e.g. "/fapi/v1/order").
+    types::security_type security;      ///< Binance security level (none, market_data, trade, user_data, user_stream).
+    bool signed_request;                ///< Whether the request must be HMAC-SHA256 signed.
+    bool requires_timestamp;            ///< Whether a timestamp parameter must be appended.
+    bool allows_recv_window;            ///< Whether the recvWindow parameter is accepted.
 };
 
 inline constexpr endpoint_metadata ping_endpoint{

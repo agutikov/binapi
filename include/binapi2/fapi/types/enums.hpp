@@ -2,12 +2,21 @@
 //
 // binapi2 USD-M Futures client library.
 
+/// @file enums.hpp
+/// @brief Enumeration types for the Binance USD-M Futures API.
+///
+/// Each enum class maps to a Binance API constant set. The corresponding
+/// to_string() overload converts each enumerator to the exact API wire-format
+/// string (e.g. order_side::buy -> "BUY").
+
 #pragma once
 
 #include <string>
 
 namespace binapi2::fapi::types {
 
+/// API endpoint security classification. Determines what credentials
+/// are required to call an endpoint.
 enum class security_type
 {
     none,
@@ -17,6 +26,7 @@ enum class security_type
     trade,
 };
 
+/// Order side: buy or sell.
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 enum class order_side
 {
@@ -24,29 +34,33 @@ enum class order_side
     sell,
 };
 
+/// Order type: LIMIT, MARKET, and conditional order variants (STOP, TAKE_PROFIT, etc.).
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 enum class order_type
 {
     limit,
     market,
-    stop,
-    stop_market,
-    take_profit,
-    take_profit_market,
+    stop,              ///< Stop-limit order (requires price + stopPrice).
+    stop_market,       ///< Stop-market order (requires stopPrice only).
+    take_profit,       ///< Take-profit limit order.
+    take_profit_market,///< Take-profit market order.
     trailing_stop_market,
 };
 
+/// Time-in-force policy for order lifetime.
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 enum class time_in_force
 {
-    gtc,
-    ioc,
-    fok,
-    gtx,
-    gtd,
-    rpi,
+    gtc,  ///< Good Till Cancel.
+    ioc,  ///< Immediate Or Cancel.
+    fok,  ///< Fill Or Kill.
+    gtx,  ///< Good Till Crossing (post-only).
+    gtd,  ///< Good Till Date.
+    rpi,  ///< Retail Price Improvement.
 };
 
+/// Kline/candlestick interval. Prefixed by unit: m=minutes, h=hours, d=days, w=weeks, mo=months.
+/// to_string() produces the API format (e.g. m1 -> "1m", mo1 -> "1M").
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 enum class kline_interval
 {
@@ -67,14 +81,17 @@ enum class kline_interval
     mo1,
 };
 
+/// Position side for hedge mode. "both" is used in one-way mode.
+/// long_side/short_side map to API strings "LONG"/"SHORT".
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 enum class position_side
 {
     both,
-    long_side,
-    short_side,
+    long_side,   ///< Maps to "LONG" on the wire (avoids C++ keyword).
+    short_side,  ///< Maps to "SHORT" on the wire (avoids C++ keyword).
 };
 
+/// Price type used for triggering conditional orders.
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 enum class working_type
 {
@@ -82,6 +99,7 @@ enum class working_type
     contract_price,
 };
 
+/// Controls the detail level of order placement responses.
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 enum class response_type
 {
@@ -89,6 +107,7 @@ enum class response_type
     result,
 };
 
+/// Position margin mode: isolated or cross (crossed).
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 enum class margin_type
 {
@@ -96,6 +115,7 @@ enum class margin_type
     crossed,
 };
 
+/// Futures contract delivery type (perpetual, quarterly, etc.).
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 enum class contract_type
 {
@@ -108,6 +128,7 @@ enum class contract_type
     tradifi_perpetual,
 };
 
+/// Trading status of a futures contract through its lifecycle.
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 enum class contract_status
 {
@@ -121,6 +142,8 @@ enum class contract_status
     close,
 };
 
+/// Order execution status. Note: new_order maps to API string "NEW"
+/// (renamed to avoid collision with C++ keywords/macros).
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 enum class order_status
 {
@@ -133,6 +156,8 @@ enum class order_status
     expired_in_match,
 };
 
+/// Self-Trade Prevention mode. Controls which side is expired when
+/// an order would match against another order from the same account.
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 enum class stp_mode
 {
@@ -141,6 +166,9 @@ enum class stp_mode
     expire_maker,
 };
 
+/// Price match mode for order placement. Determines how the order price
+/// is derived relative to the current order book (opponent/queue side,
+/// with optional tick offset).
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 enum class price_match
 {
@@ -155,6 +183,8 @@ enum class price_match
     queue_20,
 };
 
+/// Classification of account income/transaction entries returned by
+/// the income history endpoint.
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 enum class income_type
 {
@@ -179,6 +209,9 @@ enum class income_type
     position_limit_increase_fee,
 };
 
+/// Aggregation period for futures statistics endpoints (open interest stats,
+/// long/short ratio, taker volume, basis). to_string() produces API format
+/// (e.g. m5 -> "5m").
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 enum class futures_data_period
 {

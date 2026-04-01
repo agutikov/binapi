@@ -2,6 +2,12 @@
 //
 // binapi2 USD-M Futures client library.
 
+/// @file account.hpp
+/// @brief Request and response types for Binance USD-M Futures account endpoints.
+///
+/// Covers account information, balances, position risk, configuration,
+/// income history, leverage brackets, commissions, and related queries.
+
 #pragma once
 
 #include <glaze/glaze.hpp>
@@ -13,6 +19,10 @@
 #include <vector>
 
 namespace binapi2::fapi::types {
+
+// ---------------------------------------------------------------------------
+// Account information and balances
+// ---------------------------------------------------------------------------
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Account-Information-V3.md
 struct account_asset
@@ -96,6 +106,10 @@ struct futures_account_balance
     std::uint64_t updateTime{};
 };
 
+// ---------------------------------------------------------------------------
+// Position risk
+// ---------------------------------------------------------------------------
+
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Position-Information-V2.md
 struct position_risk_request
 {
@@ -122,6 +136,10 @@ struct position_risk
     std::string isolatedWallet{};
     std::uint64_t updateTime{};
 };
+
+// ---------------------------------------------------------------------------
+// Account and symbol configuration
+// ---------------------------------------------------------------------------
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Account-Config.md
 struct account_config_response
@@ -164,6 +182,10 @@ struct position_mode_response
     bool dualSidePosition{};
 };
 
+// ---------------------------------------------------------------------------
+// Income history
+// ---------------------------------------------------------------------------
+
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Get-Income-History.md
 struct income_history_request
 {
@@ -187,6 +209,10 @@ struct income_history_entry
     std::uint64_t tranId{};
     std::string tradeId{};
 };
+
+// ---------------------------------------------------------------------------
+// Leverage brackets and commissions
+// ---------------------------------------------------------------------------
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Notional-and-Leverage-Brackets.md
 struct leverage_bracket_request
@@ -228,6 +254,10 @@ struct commission_rate_response
     std::optional<std::string> rpiCommissionRate{};
 };
 
+// ---------------------------------------------------------------------------
+// Transaction history download
+// ---------------------------------------------------------------------------
+
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Get-Download-Id-For-Futures-Transaction-History.md
 struct download_id_request
 {
@@ -258,6 +288,10 @@ struct download_link_response
     std::uint64_t expirationTimestamp{};
     bool isExpired{};
 };
+
+// ---------------------------------------------------------------------------
+// BNB burn and trading rules
+// ---------------------------------------------------------------------------
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Get-BNB-Burn-Status.md
 struct bnb_burn_status_response
@@ -293,6 +327,10 @@ struct quantitative_rules_response
     std::map<std::string, std::vector<trading_status_indicator>> indicators{};
     std::uint64_t updateTime{};
 };
+
+// ---------------------------------------------------------------------------
+// Portfolio margin
+// ---------------------------------------------------------------------------
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/portfolio-margin-endpoints.md
 struct pm_account_info_request

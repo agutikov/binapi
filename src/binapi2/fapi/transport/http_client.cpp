@@ -2,6 +2,12 @@
 //
 // binapi2 USD-M Futures client library.
 
+/// @file Implements the HTTP transport for REST API calls. Each request opens a
+/// fresh TLS connection (resolve -> TCP connect -> SSL handshake -> write ->
+/// read -> shutdown). The primary implementation is the coroutine-based
+/// async_request; the synchronous request() is a thin wrapper that drives the
+/// coroutine to completion via boost::cobalt::run.
+
 #include <binapi2/fapi/transport/http_client.hpp>
 
 #include <binapi2/fapi/error.hpp>
@@ -25,6 +31,12 @@ http_client::http_client(boost::asio::io_context& io_context, config cfg) :
 {
 }
 
+// Coroutine-based async HTTP request. Each call creates its own SSL context,
+// resolver, and socket so requests are independent and thread-safe.
+// Parameters are taken by value to ensure they survive across suspension
+// points. The X-MBX-APIKEY header is required by Binance for authenticated
+// endpoints. SSL shutdown errors are intentionally ignored -- truncated
+// closes are common with HTTP/1.1 servers and do not affect the response.
 boost::cobalt::task<result<http_response>>
 http_client::async_request(boost::beast::http::verb method,
                            std::string target,
@@ -83,6 +95,8 @@ http_client::async_request(boost::beast::http::verb method,
     }
 }
 
+// Synchronous wrapper: runs the async coroutine on the io_context via
+// boost::cobalt::run, which blocks until the coroutine completes.
 result<http_response>
 http_client::request(boost::beast::http::verb method,
                      const std::string& target,

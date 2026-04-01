@@ -2,12 +2,30 @@
 //
 // binapi2 USD-M Futures client library.
 
+/// @file Implements market data WebSocket stream subscriptions. Each stream
+/// type follows a two-phase pattern:
+///   1. connect_*() opens a WebSocket connection to a Binance stream endpoint
+///      whose URL is built from the subscription parameters (symbol, speed,
+///      interval, etc.).
+///   2. read_*_loop() pumps incoming JSON frames through read_stream_loop,
+///      which deserialises each frame into the appropriate event type and
+///      invokes the user-supplied handler. The handler returns false to stop.
+///
+/// Every method has both a synchronous variant (blocks the calling thread) and
+/// an async variant that posts the work onto the io_context via
+/// boost::asio::post, invoking a callback on completion. The stream_control
+/// helpers (subscribe/unsubscribe/list_subscriptions) use the Binance combined
+/// stream protocol to manage multiple subscriptions over a single connection.
+
 #include <binapi2/fapi/streams/market_streams.hpp>
 
 #include <boost/asio/post.hpp>
 
 #include <glaze/glaze.hpp>
 
+// Wire types for the Binance combined stream control protocol. These are used
+// to send SUBSCRIBE/UNSUBSCRIBE/LIST_SUBSCRIPTIONS commands over an existing
+// WebSocket connection when using the combined stream endpoint.
 namespace binapi2::fapi::streams::detail {
 
 struct stream_control_request
@@ -49,6 +67,10 @@ invalid_subscription(const std::string& message)
     return result<void>::failure({ error_code::invalid_argument, 0, 0, message, {} });
 }
 
+// Generic stream read loop: reads raw JSON text frames from the WebSocket,
+// deserialises each into the specified Event type, and passes it to the
+// handler. Returns on handler returning false or on a JSON parse failure
+// (which is treated as a terminal condition to avoid silently losing data).
 template<typename Event, typename Handler>
 result<void>
 read_stream_loop(transport::websocket_client& transport, Handler handler)
@@ -723,6 +745,9 @@ market_streams::connect_combined(const std::string& target, void_callback callba
                       [this, target, callback = std::move(callback)]() mutable { callback(connect_combined(target)); });
 }
 
+// Sends a SUBSCRIBE control message over the combined stream connection.
+// The response is read and discarded; Binance returns a null result on
+// success. Any transport or serialization error is propagated.
 result<void>
 market_streams::subscribe(const std::vector<std::string>& streams)
 {

@@ -2,6 +2,13 @@
 //
 // binapi2 USD-M Futures client library.
 
+/// @file Implements account REST endpoints. Most are parameterless signed
+/// queries. The download_id / download_link methods follow a shared two-step
+/// pattern: first request a download_id (with a date range), then poll for
+/// the download_link using that ID. This pattern is repeated for transactions,
+/// orders, and trades, each hitting a different endpoint but using the same
+/// request/response types.
+
 #include <binapi2/fapi/rest/account.hpp>
 
 #include <binapi2/fapi/client.hpp>

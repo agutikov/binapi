@@ -2,6 +2,14 @@
 //
 // binapi2 USD-M Futures client library.
 
+/// @file Implements the listen key lifecycle for user data streams. The Binance
+/// API requires a listen key to establish a user data WebSocket connection:
+///   start()     - POST to create a new listen key (valid for 60 minutes)
+///   keepalive() - PUT to extend the key's validity (must be called < 60 min)
+///   close()     - DELETE to invalidate the key and close the stream
+/// None of these endpoints take query parameters; authentication is via the
+/// X-MBX-APIKEY header (injected by the transport layer).
+
 #include <binapi2/fapi/rest/user_data_streams.hpp>
 
 #include <binapi2/fapi/client.hpp>

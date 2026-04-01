@@ -2,6 +2,23 @@
 //
 // binapi2 USD-M Futures client library.
 
+/// @file Implements a locally-maintained order book that stays synchronised
+/// with the exchange via the diff depth WebSocket stream, following the
+/// Binance "How to manage a local order book correctly" algorithm:
+///
+///   1. Open a @depth@100ms WebSocket stream and begin buffering events.
+///   2. Fetch a REST depth snapshot (GET /fapi/v1/depth).
+///   3. Discard buffered events where u < snapshot.lastUpdateId.
+///   4. Verify the first remaining event brackets the snapshot
+///      (U <= lastUpdateId <= u).
+///   5. Apply remaining buffered events, then process live events.
+///   6. On each live event, verify pu == previous u (sequence continuity).
+///      If a gap is detected, re-sync from step 2.
+///   7. Remove price levels with quantity == 0.
+///
+/// All book state is protected by a mutex so snapshot() can be called from
+/// any thread while the read loop runs on the io_context thread.
+
 #include <binapi2/fapi/streams/local_order_book.hpp>
 
 #include <binapi2/fapi/client.hpp>
@@ -42,7 +59,9 @@ local_order_book::start(const std::string& symbol, int depth_limit)
         return connect_result;
     }
 
-    // Step 2: buffer events, get snapshot, apply sequencing
+    // Step 2: buffer incoming diff events. On the first event (or after a
+    // sequence gap), fetch a REST snapshot and apply the buffered events to
+    // bring the book up to date. From then on, events are applied directly.
     auto loop_result = streams_.read_diff_book_depth_loop([this](const types::depth_stream_event& event) -> bool {
         bool need_snapshot = false;
 
@@ -107,6 +126,9 @@ local_order_book::set_snapshot_callback(snapshot_callback callback)
     on_snapshot_ = std::move(callback);
 }
 
+// Fetches the REST depth snapshot and reconciles it with buffered diff events.
+// The mutex is intentionally released during the network call to avoid blocking
+// the WebSocket read loop; it is re-acquired before mutating book state.
 void
 local_order_book::fetch_snapshot()
 {

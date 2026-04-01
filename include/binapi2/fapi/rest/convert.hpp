@@ -2,6 +2,9 @@
 //
 // binapi2 USD-M Futures client library.
 
+/// @file
+/// @brief Convert service for USD-M Futures asset conversion endpoints.
+
 #pragma once
 
 #include <binapi2/fapi/rest/service.hpp>
@@ -9,6 +12,15 @@
 
 namespace binapi2::fapi::rest {
 
+/// @brief Service group for futures asset conversion (quote, accept, status).
+///
+/// This service is fully generic: all three request types (quote_request,
+/// accept_request, order_status_request) have endpoint_traits specializations
+/// and are dispatched entirely through the inherited execute/async_execute
+/// template methods. No named methods are needed.
+///
+/// The using declarations provide convenient short aliases for the request
+/// and response types within the convert_service scope.
 class convert_service : public service
 {
 public:

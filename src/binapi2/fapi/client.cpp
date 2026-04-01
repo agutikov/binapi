@@ -2,6 +2,12 @@
 //
 // binapi2 USD-M Futures client library.
 
+/// @file Implements the top-level fapi::client facade. Provides prepare_and_send
+/// (and its async counterpart) which centralise the shared query-building logic
+/// used by every REST endpoint: auth injection, signing, query-string assembly,
+/// and method-dependent placement of the query (URL for GET/DELETE, body for
+/// POST/PUT).
+
 #include <binapi2/fapi/client.hpp>
 #include <binapi2/fapi/signing.hpp>
 #include <binapi2/fapi/time.hpp>
@@ -40,6 +46,11 @@ client::transport() noexcept
     return http_;
 }
 
+// Shared query pipeline for synchronous REST calls. Copies the incoming query
+// so the caller's map is not mutated, then optionally injects recvWindow +
+// timestamp and appends the HMAC-SHA256 signature. GET and DELETE encode
+// parameters into the URL; POST and PUT send them as a form-encoded body, as
+// required by the Binance API.
 result<transport::http_response>
 client::prepare_and_send(boost::beast::http::verb method,
                          const std::string& path,
@@ -66,6 +77,10 @@ client::prepare_and_send(boost::beast::http::verb method,
     return http_.request(method, target, body, "application/x-www-form-urlencoded", cfg_.api_key);
 }
 
+// Async variant of prepare_and_send. Takes parameters by value so they can be
+// safely moved into the coroutine frame. Uses co_await on the transport layer's
+// async_request, allowing the io_context to service other work while the
+// network I/O is in flight.
 boost::cobalt::task<result<transport::http_response>>
 client::async_prepare_and_send(boost::beast::http::verb method,
                                std::string path,

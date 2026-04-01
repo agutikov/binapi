@@ -2,6 +2,15 @@
 //
 // binapi2 USD-M Futures client library.
 
+/// @file Implements the WebSocket API client, which uses a persistent WebSocket
+/// connection for JSON-RPC-style request/response communication. Each request
+/// is serialized as a wire_request envelope (id + method + params), sent as a
+/// text frame, and the response is read synchronously from the same connection.
+/// Authentication is handled by injecting apiKey, timestamp, recvWindow, and an
+/// HMAC-SHA256 signature into the params of signed requests. Explicit template
+/// instantiations at the bottom ensure that all supported request types are
+/// compiled into the shared library.
+
 #include <binapi2/fapi/websocket_api/client.hpp>
 
 #include <binapi2/fapi/signing.hpp>
@@ -15,6 +24,9 @@ namespace binapi2::fapi::websocket_api {
 
 namespace {
 
+// Generic JSON-RPC envelope for outgoing WebSocket API requests. The id field
+// is a monotonically increasing counter that allows correlating responses, and
+// method identifies the Binance endpoint (e.g. "v2/ticker.book").
 template<typename Params>
 struct wire_request
 {
@@ -23,6 +35,9 @@ struct wire_request
     Params params{};
 };
 
+// Separate wire type for session.logon because its params type
+// (session_logon_request) has a different structure than the generic
+// signed_request base used by other endpoints.
 struct session_logon_wire_request
 {
     std::string id{};
@@ -41,6 +56,9 @@ struct glz::meta<binapi2::fapi::websocket_api::wire_request<T>>
     static constexpr auto value = object("id", &U::id, "method", &U::method, "params", &U::params);
 };
 
+// glz::meta specializations must be defined in the global/glz namespace and
+// outside the binapi2 namespace, so the namespace is temporarily closed above
+// and reopened below. This is a glaze requirement for custom serialization.
 template<>
 struct glz::meta<binapi2::fapi::websocket_api::session_logon_wire_request>
 {
@@ -52,6 +70,10 @@ namespace binapi2::fapi::websocket_api {
 
 namespace {
 
+// Deserializes a raw JSON WebSocket frame into a typed RPC response. Handles
+// two failure modes: JSON parse errors (malformed data) and Binance-level
+// errors (valid JSON but the response contains an error object with a code
+// and message).
 template<typename Response>
 result<types::websocket_api_response<Response>>
 decode_rpc_response(const std::string& raw)
@@ -133,6 +155,10 @@ client::send_rpc(std::string_view method, const Params& params)
     return decode_rpc_response<Response>(*raw);
 }
 
+// Conditionally injects authentication fields into a request. Uses
+// if-constexpr to check at compile time whether the request type inherits
+// from websocket_api_signed_request; unsigned request types pass through
+// unmodified.
 template<class Request>
 Request
 client::inject_auth(const Request& request)
@@ -153,6 +179,9 @@ client::inject_auth(const Request& request)
 
 // --- Generic execute ---
 
+// Trait-driven dispatch: endpoint_traits<Request> maps each request type to
+// its method string and response type at compile time, so a single execute
+// template handles all WebSocket API endpoints uniformly.
 template<class Request>
     requires has_ws_endpoint_traits<Request>
 auto
@@ -239,6 +268,11 @@ client::async_close()
 
 // --- Session logon (unique auth flow) ---
 
+// session.logon has a unique auth flow: it builds the signature from a
+// query map containing apiKey, recvWindow, and timestamp (in sorted order),
+// rather than embedding auth fields into a generic signed_request struct.
+// This is because the logon request predates the generic auth pattern and
+// the server expects the params in a specific shape.
 result<types::websocket_api_response<types::session_logon_result>>
 client::session_logon()
 {

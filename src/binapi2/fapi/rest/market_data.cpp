@@ -2,6 +2,15 @@
 //
 // binapi2 USD-M Futures client library.
 
+/// @file Implements market data REST endpoints that are not fully handled by
+/// the generated_endpoints machinery. Methods here fall into two categories:
+/// (1) endpoints whose request/response types are shared across multiple
+/// paths (e.g. klines, mark_price_klines, premium_index_klines all use
+/// kline_request -> vector<kline>), and (2) parameterless endpoints that
+/// return aggregate collections (book_tickers, price_tickers, etc.) and need
+/// no query serialization. All async variants delegate to their sync
+/// counterparts.
+
 #include <binapi2/fapi/rest/market_data.hpp>
 
 #include <binapi2/fapi/client.hpp>

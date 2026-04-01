@@ -7,6 +7,15 @@
 // Shared request types (futures_data_request, kline_request, download_id_request,
 // download_link_request, batch_orders_request) are handled by named service methods.
 
+/// @file
+/// @brief Compile-time mapping from request types to endpoint metadata and response types.
+///
+/// Specializations of endpoint_traits exist only for request types that map to exactly
+/// one endpoint. Request types shared across multiple endpoints (kline_request,
+/// futures_data_request, download_id_request, download_link_request, batch_orders_request,
+/// cancel_multiple_orders_request) have no specialization and must be dispatched through
+/// named methods on the appropriate service class.
+
 #pragma once
 
 #include <binapi2/fapi/rest/generated_endpoints.hpp>
@@ -20,6 +29,14 @@
 
 namespace binapi2::fapi::rest {
 
+/// @brief Primary template for endpoint traits; intentionally left undefined.
+///
+/// Each specialization must provide:
+///   - @c response_type : the type to deserialize the JSON response body into.
+///   - @c endpoint : a static constexpr reference to the endpoint_metadata instance
+///     that describes the HTTP method, path, security, and signing requirements.
+///
+/// A specialization exists for each request struct with a unique 1:1 endpoint mapping.
 template<class Request>
 struct endpoint_traits;
 
@@ -451,7 +468,10 @@ struct endpoint_traits<types::convert_order_status_request>
     static constexpr auto& endpoint = convert_order_status_endpoint;
 };
 
-// Concept for request types that have endpoint_traits defined.
+/// @brief Concept satisfied by request types that have a valid endpoint_traits specialization.
+///
+/// Requires that endpoint_traits<T> defines a response_type alias and an endpoint
+/// member convertible to const endpoint_metadata&.
 template<class T>
 concept has_endpoint_traits = requires {
     typename endpoint_traits<T>::response_type;

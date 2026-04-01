@@ -2,6 +2,12 @@
 //
 // binapi2 USD-M Futures client library.
 
+/// @file trade.hpp
+/// @brief Request and response types for Binance USD-M Futures trade endpoints.
+///
+/// Covers order placement/query/cancel, batch orders, position management
+/// (leverage, margin type, margin adjustment), trade history, and algo orders.
+
 #pragma once
 
 #include <binapi2/fapi/types/common.hpp>
@@ -15,6 +21,10 @@
 #include <vector>
 
 namespace binapi2::fapi::types {
+
+// ---------------------------------------------------------------------------
+// Order placement, query, and cancel
+// ---------------------------------------------------------------------------
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/New-Order-Test.md
 struct new_order_request
@@ -101,9 +111,16 @@ struct query_order_request
     std::optional<std::string> origClientOrderId{};
 };
 
+/// Alias: test order uses the same request shape as a real order.
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/New-Order-Test.md
 using test_new_order_request = new_order_request;
 
+// ---------------------------------------------------------------------------
+// Batch and cancel-all orders
+// ---------------------------------------------------------------------------
+
+/// Batch order placement. The batchOrders field is a JSON-encoded array
+/// of order parameter objects (pre-serialized by the caller).
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Place-Multiple-Orders.md
 struct batch_orders_request
 {
@@ -131,6 +148,8 @@ struct code_msg_response
     std::string msg{};
 };
 
+/// Auto-cancel (dead man's switch): cancel all open orders if not refreshed
+/// within countdownTime milliseconds.
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Auto-Cancel-All-Open-Orders.md
 struct auto_cancel_request
 {
@@ -144,6 +163,10 @@ struct auto_cancel_response
     std::string symbol{};
     std::uint64_t countdownTime{};
 };
+
+// ---------------------------------------------------------------------------
+// Order queries and trade history
+// ---------------------------------------------------------------------------
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Query-Current-Open-Order.md
 struct query_open_order_request
@@ -168,6 +191,10 @@ struct all_orders_request
     std::optional<std::uint64_t> endTime{};
     std::optional<int> limit{};
 };
+
+// ---------------------------------------------------------------------------
+// Position information and ADL quantile
+// ---------------------------------------------------------------------------
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Position-Information-V3.md
 struct position_risk_v3
@@ -261,6 +288,10 @@ struct account_trade_entry
     bool maker{};
     std::string realizedPnl{};
 };
+
+// ---------------------------------------------------------------------------
+// Position management (leverage, margin type, margin adjustment, mode)
+// ---------------------------------------------------------------------------
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Change-Position-Mode.md
 struct change_position_mode_request

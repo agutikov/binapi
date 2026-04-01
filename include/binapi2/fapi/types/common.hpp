@@ -2,6 +2,12 @@
 //
 // binapi2 USD-M Futures client library.
 
+/// @file common.hpp
+/// @brief Shared types used across multiple Binance USD-M Futures API endpoints.
+///
+/// Contains fundamental response/request types: rate limits, price levels,
+/// exchange information, symbol filters, and error documents.
+
 #pragma once
 
 #include <glaze/glaze.hpp>
@@ -13,9 +19,13 @@
 
 namespace binapi2::fapi::types {
 
+/// Placeholder response type for endpoints that return no payload (e.g. DELETE listen key).
 struct empty_response
 {};
 
+/// API rate limit descriptor. Returned inside exchange_info_response and
+/// WebSocket API responses. The optional `count` field is populated in
+/// WebSocket API responses to indicate current usage.
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 struct rate_limit
 {
@@ -32,6 +42,7 @@ struct server_time_response
     std::uint64_t serverTime{};
 };
 
+/// Standard Binance error response body (HTTP 4xx/5xx).
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/error-code.md
 struct binance_error_document
 {
@@ -39,6 +50,8 @@ struct binance_error_document
     std::string msg{};
 };
 
+/// A single [price, quantity] level in an order book.
+/// Serialized as a JSON array (positional), not an object.
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Order-Book.md
 struct price_level
 {
@@ -46,6 +59,8 @@ struct price_level
     std::string quantity{};
 };
 
+/// Asset descriptor from exchange info. Indicates whether the asset can be
+/// used as margin and its auto-exchange threshold.
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Exchange-Information.md
 struct exchange_info_asset
 {
@@ -54,6 +69,10 @@ struct exchange_info_asset
     std::optional<std::string> autoAssetExchange{};
 };
 
+/// Symbol trading filter from exchange info. This is a union-like type:
+/// filterType determines which optional fields are populated. For example,
+/// PRICE_FILTER sets minPrice/maxPrice/tickSize, LOT_SIZE sets minQty/maxQty/stepSize,
+/// PERCENT_PRICE sets multiplierUp/multiplierDown, etc.
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Exchange-Information.md
 struct symbol_filter
 {
@@ -100,6 +119,8 @@ struct symbol_info
     std::string marketTakeBound{};
 };
 
+/// Full exchange information response. Contains rate limits, supported assets,
+/// and per-symbol trading rules/filters.
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Exchange-Information.md
 struct exchange_info_response
 {
@@ -111,6 +132,7 @@ struct exchange_info_response
     std::vector<symbol_info> symbols{};
 };
 
+/// Response from creating/querying a user data stream listen key.
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Start-User-Data-Stream.md
 struct listen_key_response
 {

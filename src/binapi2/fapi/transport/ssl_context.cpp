@@ -2,6 +2,10 @@
 //
 // binapi2 USD-M Futures client library.
 
+/// @file Factory for TLS client contexts used by both the HTTP and WebSocket
+/// transports. Configures TLS with system-default CA paths and peer
+/// verification enabled.
+
 #include <binapi2/fapi/transport/ssl_context.hpp>
 
 namespace binapi2::fapi::transport {

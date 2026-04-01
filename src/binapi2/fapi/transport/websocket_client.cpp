@@ -2,6 +2,13 @@
 //
 // binapi2 USD-M Futures client library.
 
+/// @file Implements the WebSocket transport using the pimpl idiom to hide
+/// Beast/ASIO types from the header. The async_* methods are the primary
+/// implementations (coroutine-based); the sync wrappers drive them to
+/// completion via boost::cobalt::run. A control_callback is installed during
+/// connect to automatically reply with a pong frame whenever a ping is
+/// received, satisfying the Binance WebSocket keepalive requirement.
+
 #include <binapi2/fapi/transport/websocket_client.hpp>
 
 #include <binapi2/fapi/error.hpp>
@@ -21,6 +28,10 @@
 
 namespace binapi2::fapi::transport {
 
+// Pimpl body. Owns the SSL context, resolver, Beast WebSocket stream, and
+// read buffer. The SSL context is created once at construction time (unlike
+// the HTTP client which creates one per request) because the WebSocket
+// connection is long-lived.
 struct websocket_client::impl
 {
     impl(boost::asio::io_context& io_context, config cfg) :
@@ -58,6 +69,11 @@ websocket_client::async_connect(std::string host, std::string port, std::string 
 
         co_await boost::asio::async_connect(impl_->stream.next_layer().next_layer(), endpoints, boost::cobalt::use_op);
 
+        // Install a ping/pong handler. Binance sends periodic pings and
+        // expects a pong within a timeout window; failure to respond causes
+        // the server to drop the connection. The pong is sent synchronously
+        // here because we are inside a control callback where async writes
+        // are not permitted by Beast.
         impl_->stream.control_callback([this](boost::beast::websocket::frame_type kind, boost::beast::string_view) {
             if (kind == boost::beast::websocket::frame_type::ping) {
                 boost::system::error_code ignored;
@@ -94,6 +110,8 @@ boost::cobalt::task<result<std::string>>
 websocket_client::async_read_text()
 {
     try {
+        // Drain the buffer before each read to prevent stale data from
+        // accumulating across successive reads on the same flat_buffer.
         impl_->buffer.consume(impl_->buffer.size());
         co_await impl_->stream.async_read(impl_->buffer, boost::cobalt::use_op);
         std::string data = boost::beast::buffers_to_string(impl_->buffer.data());
@@ -142,6 +160,9 @@ websocket_client::read_text()
     return boost::cobalt::run(async_read_text());
 }
 
+// Blocking read loop: reads messages until the handler returns false or
+// an error occurs. Used by stream consumers (market_streams, user_streams)
+// to pump incoming WebSocket messages.
 result<void>
 websocket_client::run_read_loop(message_handler handler)
 {

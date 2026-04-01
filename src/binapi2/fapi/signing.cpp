@@ -2,6 +2,12 @@
 //
 // binapi2 USD-M Futures client library.
 
+/// @file Implements Binance request signing: HMAC-SHA256 signature computation,
+/// RFC 3986 percent-encoding, canonical query-string construction, and auth
+/// parameter injection. The signing procedure follows the Binance API docs:
+/// build a sorted, percent-encoded query string from all parameters, then
+/// HMAC-SHA256 it with the secret key and append the hex digest as "signature".
+
 #include <binapi2/fapi/signing.hpp>
 
 #include <openssl/evp.h>
@@ -15,6 +21,8 @@ namespace binapi2::fapi {
 
 namespace {
 
+// Converts raw bytes to a lowercase hex string. Uses a lookup table rather
+// than snprintf for performance, since this runs on every signed request.
 std::string
 to_hex(const unsigned char* data, std::size_t size)
 {
@@ -30,6 +38,10 @@ to_hex(const unsigned char* data, std::size_t size)
 
 } // namespace
 
+// Computes HMAC-SHA256 of `data` keyed by `key` via OpenSSL, returning the
+// digest as a lowercase hex string. The digest buffer is sized to
+// EVP_MAX_MD_SIZE to accommodate any hash algorithm, though SHA-256 always
+// produces 32 bytes.
 std::string
 hmac_sha256_hex(const std::string& key, const std::string& data)
 {
@@ -45,6 +57,10 @@ hmac_sha256_hex(const std::string& key, const std::string& data)
     return to_hex(digest.data(), digest_size);
 }
 
+// RFC 3986 percent-encoding: unreserved characters (alphanum, '-', '_', '.',
+// '~') pass through; everything else is encoded as %XX uppercase hex. This is
+// critical for signature correctness -- the canonical query string must use
+// exactly this encoding.
 std::string
 percent_encode(std::string_view value)
 {
@@ -61,6 +77,10 @@ percent_encode(std::string_view value)
     return out;
 }
 
+// Assembles a canonical query string from a sorted map. Because query_map is
+// std::map (ordered), iteration order is deterministic, which is essential
+// for reproducible signatures -- the server reconstructs this same string
+// from the received parameters to verify the HMAC.
 std::string
 build_query_string(const query_map& query)
 {
@@ -83,6 +103,10 @@ inject_auth_query(query_map& query, std::uint64_t recv_window, std::uint64_t tim
     query["timestamp"] = std::to_string(timestamp_ms);
 }
 
+// Builds the canonical query string from all current parameters (excluding
+// "signature" itself, which must not yet be present), then appends the HMAC
+// hex digest as the "signature" parameter. This must be the last mutation
+// before the query is sent.
 void
 sign_query(query_map& query, const std::string& secret_key)
 {

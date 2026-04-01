@@ -2,6 +2,10 @@
 //
 // binapi2 USD-M Futures client library.
 
+/// @file config.hpp
+/// @brief Connection and authentication settings for the Binance USD-M Futures
+///        API (REST, WebSocket-API, and market-data streams).
+
 #pragma once
 
 #include <cstdint>
@@ -9,26 +13,48 @@
 
 namespace binapi2::fapi {
 
+/// @brief Complete configuration for a Binance USD-M Futures client session.
+///
+/// Default-constructed values point to the **production** endpoints.  Use
+/// `testnet_config()` to obtain a config pre-filled with testnet hosts.
+/// Callers must set `api_key` and `secret_key` before any authenticated call.
 struct config
 {
+    // -- REST API endpoints --------------------------------------------------
     std::string rest_host{ "fapi.binance.com" };
     std::string rest_port{ "443" };
     std::string rest_base_path{};
 
+    // -- WebSocket API endpoints (request/response over WS) ------------------
     std::string websocket_api_host{ "ws-fapi.binance.com" };
     std::string websocket_api_port{ "443" };
     std::string websocket_api_target{ "/ws-fapi/v1" };
 
+    // -- Market-data stream endpoints ----------------------------------------
     std::string stream_host{ "fstream.binance.com" };
     std::string stream_port{ "443" };
     std::string stream_base_target{ "/ws" };
 
+    // -- Authentication & client settings ------------------------------------
     std::string api_key{};
     std::string secret_key{};
+
+    /// @brief Server-side tolerance window (ms) for timestamp validation.
+    /// Binance rejects requests whose timestamp differs from server time by
+    /// more than this value.
     std::uint64_t recv_window{ 5000 };
+
     std::string user_agent{ "binapi2-fapi/0.1.0" };
+
+    /// @brief When true the config targets the Binance Futures testnet.
     bool testnet{ false };
 
+    /// @brief Factory that returns a config pre-filled for the Binance Futures
+    ///        **testnet** environment.
+    ///
+    /// The returned config still requires `api_key` and `secret_key` to be set
+    /// by the caller.
+    /// @return A config with testnet hosts and `testnet == true`.
     [[nodiscard]] static config testnet_config()
     {
         config cfg;

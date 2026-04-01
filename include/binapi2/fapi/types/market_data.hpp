@@ -2,6 +2,12 @@
 //
 // binapi2 USD-M Futures client library.
 
+/// @file market_data.hpp
+/// @brief Request and response types for Binance USD-M Futures market data endpoints.
+///
+/// Types are grouped by functional area: connectivity, order book, trades,
+/// klines, tickers, funding rates, open interest, and analytics.
+
 #pragma once
 
 #include <binapi2/fapi/types/common.hpp>
@@ -17,6 +23,10 @@
 
 namespace binapi2::fapi::types {
 
+// ---------------------------------------------------------------------------
+// Connectivity / Server status
+// ---------------------------------------------------------------------------
+
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Check-Server-Time.md
 struct ping_request
 {};
@@ -25,11 +35,19 @@ struct ping_request
 struct server_time_request
 {};
 
+// ---------------------------------------------------------------------------
+// Exchange information
+// ---------------------------------------------------------------------------
+
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Exchange-Information.md
 struct exchange_info_request
 {
     std::optional<std::string> symbol{};
 };
+
+// ---------------------------------------------------------------------------
+// Order book
+// ---------------------------------------------------------------------------
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Order-Book.md
 struct order_book_request
@@ -42,11 +60,15 @@ struct order_book_request
 struct order_book_response
 {
     std::uint64_t lastUpdateId{};
-    std::uint64_t E{};
-    std::uint64_t T{};
+    std::uint64_t E{};  ///< Message output time (ms).
+    std::uint64_t T{};   ///< Transaction time (ms).
     std::vector<price_level> bids{};
     std::vector<price_level> asks{};
 };
+
+// ---------------------------------------------------------------------------
+// Trades (recent, historical, aggregate)
+// ---------------------------------------------------------------------------
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Recent-Trades-List.md
 struct recent_trades_request
@@ -77,6 +99,9 @@ struct aggregate_trades_request
     std::optional<int> limit{};
 };
 
+/// Aggregate trade entry. Single-letter field names match the Binance API
+/// wire format: a=aggTradeId, p=price, q=quantity, f=firstTradeId,
+/// l=lastTradeId, T=timestamp, m=isBuyerMaker.
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Compressed-Aggregate-Trades-List.md
 struct aggregate_trade
 {
@@ -96,6 +121,10 @@ struct historical_trades_request
     std::optional<int> limit{};
     std::optional<std::uint64_t> fromId{};
 };
+
+// ---------------------------------------------------------------------------
+// Klines / Candlesticks
+// ---------------------------------------------------------------------------
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Kline-Candlestick-Data.md
 struct kline_request
@@ -128,6 +157,10 @@ struct index_price_kline_request
     std::optional<int> limit{};
 };
 
+/// Kline (candlestick) data. Serialized as a positional JSON array (not an
+/// object), so field order matters. Fields map to array indices:
+/// [openTime, open, high, low, close, volume, closeTime, quoteAssetVolume,
+///  numberOfTrades, takerBuyBaseAssetVolume, takerBuyQuoteAssetVolume, ignore].
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Kline-Candlestick-Data.md
 struct kline
 {
@@ -144,6 +177,10 @@ struct kline
     std::string takerBuyQuoteAssetVolume{};
     std::string ignore{};
 };
+
+// ---------------------------------------------------------------------------
+// Tickers (book, price, 24hr)
+// ---------------------------------------------------------------------------
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Symbol-Order-Book-Ticker.md
 struct book_ticker_request
@@ -204,6 +241,10 @@ struct ticker_24hr
     std::uint64_t count{};
 };
 
+// ---------------------------------------------------------------------------
+// Mark price and funding rates
+// ---------------------------------------------------------------------------
+
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Mark-Price.md
 struct mark_price_request
 {
@@ -251,6 +292,10 @@ struct funding_rate_info
     bool disclaimer{};
 };
 
+// ---------------------------------------------------------------------------
+// Open interest and futures analytics
+// ---------------------------------------------------------------------------
+
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Open-Interest.md
 struct open_interest_request
 {
@@ -265,6 +310,8 @@ struct open_interest
     std::uint64_t time{};
 };
 
+/// Generic request for futures analytics endpoints (open interest statistics,
+/// long/short ratio, taker volume). Shares the same parameter shape.
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Open-Interest-Statistics.md
 struct futures_data_request
 {
@@ -327,6 +374,10 @@ struct basis_entry
     std::string annualizedBasisRate{};
     std::uint64_t timestamp{};
 };
+
+// ---------------------------------------------------------------------------
+// Delivery, composite index, index constituents, asset index
+// ---------------------------------------------------------------------------
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Symbol-Price-Ticker-v2.md
 struct price_ticker_v2_request
@@ -415,6 +466,10 @@ struct asset_index
     std::string autoExchangeBidRate{};
     std::string autoExchangeAskRate{};
 };
+
+// ---------------------------------------------------------------------------
+// Insurance fund, ADL risk, RPI depth, trading schedule
+// ---------------------------------------------------------------------------
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Insurance-Fund-Balance.md
 struct insurance_fund_request

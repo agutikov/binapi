@@ -2,4 +2,6 @@
 //
 // binapi2 USD-M Futures client library.
 
-// All convert_service methods are handled by the generic service::execute/async_execute.
+/// @file Convert service implementation. All convert_service methods are fully
+/// handled by the generic service::execute/async_execute template machinery
+/// in generated_endpoints, so this file has no additional implementation.

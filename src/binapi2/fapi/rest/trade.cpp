@@ -2,6 +2,13 @@
 //
 // binapi2 USD-M Futures client library.
 
+/// @file Implements trade REST endpoints that require special serialization
+/// beyond what the generic execute path provides. Notably, cancel_batch_orders
+/// needs custom query construction because the Binance API expects the order
+/// ID lists as JSON array strings (e.g. orderIdList=[123,456]) rather than
+/// the usual key=value form. Batch order placement and modification also use
+/// a pre-serialized batchOrders JSON string.
+
 #include <binapi2/fapi/rest/trade.hpp>
 
 #include <binapi2/fapi/client.hpp>
@@ -37,6 +44,8 @@ trade_service::async_batch_orders(const types::batch_orders_request& request)
     co_return batch_orders(request);
 }
 
+// modify_batch_orders bypasses to_query_map because the batchOrders field
+// is already a pre-serialized JSON array string that must be sent as-is.
 result<std::vector<types::order_response>>
 trade_service::modify_batch_orders(const types::batch_orders_request& request)
 {
@@ -53,6 +62,11 @@ trade_service::async_modify_batch_orders(const types::batch_orders_request& requ
     co_return modify_batch_orders(request);
 }
 
+// cancel_batch_orders requires manual query construction because the Binance
+// API expects orderIdList and origClientOrderIdList as JSON-formatted array
+// strings within the query parameters, e.g. orderIdList=[123,456] and
+// origClientOrderIdList=["abc","def"]. The standard to_query_map serialization
+// cannot produce this format, so the arrays are built by hand.
 result<std::vector<types::order_response>>
 trade_service::cancel_batch_orders(const types::cancel_multiple_orders_request& request)
 {
