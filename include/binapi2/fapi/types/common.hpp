@@ -10,6 +10,9 @@
 
 #pragma once
 
+#include <binapi2/fapi/types/decimal.hpp>
+#include <binapi2/fapi/types/enums.hpp>
+
 #include <glaze/glaze.hpp>
 
 #include <cstdint>
@@ -29,8 +32,8 @@ struct empty_response
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 struct rate_limit
 {
-    std::string rateLimitType{};
-    std::string interval{};
+    rate_limit_type rateLimitType{};
+    rate_limit_interval interval{};
     int intervalNum{};
     int limit{};
     std::optional<int> count{};
@@ -55,8 +58,8 @@ struct binance_error_document
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Order-Book.md
 struct price_level
 {
-    std::string price{};
-    std::string quantity{};
+    decimal price{};
+    decimal quantity{};
 };
 
 /// Asset descriptor from exchange info. Indicates whether the asset can be
@@ -77,17 +80,17 @@ struct exchange_info_asset
 struct symbol_filter
 {
     std::string filterType{};
-    std::optional<std::string> maxPrice{};
-    std::optional<std::string> minPrice{};
-    std::optional<std::string> tickSize{};
-    std::optional<std::string> maxQty{};
-    std::optional<std::string> minQty{};
-    std::optional<std::string> stepSize{};
+    std::optional<decimal> maxPrice{};
+    std::optional<decimal> minPrice{};
+    std::optional<decimal> tickSize{};
+    std::optional<decimal> maxQty{};
+    std::optional<decimal> minQty{};
+    std::optional<decimal> stepSize{};
     std::optional<int> limit{};
-    std::optional<std::string> notional{};
-    std::optional<std::string> multiplierUp{};
-    std::optional<std::string> multiplierDown{};
-    std::optional<std::string> multiplierDecimal{};
+    std::optional<decimal> notional{};
+    std::optional<decimal> multiplierUp{};
+    std::optional<decimal> multiplierDown{};
+    std::optional<decimal> multiplierDecimal{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Exchange-Information.md
@@ -95,12 +98,12 @@ struct symbol_info
 {
     std::string symbol{};
     std::string pair{};
-    std::string contractType{};
+    contract_type contractType{};
     std::uint64_t deliveryDate{};
     std::uint64_t onboardDate{};
-    std::string status{};
-    std::string maintMarginPercent{};
-    std::string requiredMarginPercent{};
+    contract_status status{};
+    decimal maintMarginPercent{};
+    decimal requiredMarginPercent{};
     std::string baseAsset{};
     std::string quoteAsset{};
     std::string marginAsset{};
@@ -111,12 +114,12 @@ struct symbol_info
     std::string underlyingType{};
     std::vector<std::string> underlyingSubType{};
     int settlePlan{};
-    std::string triggerProtect{};
+    decimal triggerProtect{};
     std::vector<symbol_filter> filters{};
     std::vector<std::string> orderTypes{};
     std::vector<std::string> timeInForce{};
-    std::string liquidationFee{};
-    std::string marketTakeBound{};
+    decimal liquidationFee{};
+    decimal marketTakeBound{};
 };
 
 /// Full exchange information response. Contains rate limits, supported assets,

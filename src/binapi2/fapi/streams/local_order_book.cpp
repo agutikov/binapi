@@ -168,12 +168,12 @@ local_order_book::fetch_snapshot()
     book_ = {};
     book_.last_update_id = last_update_id;
     for (const auto& level : snap->bids) {
-        if (level.quantity != "0" && level.quantity != "0.00000000") {
+        if (!level.quantity.is_zero()) {
             book_.bids[level.price] = level.quantity;
         }
     }
     for (const auto& level : snap->asks) {
-        if (level.quantity != "0" && level.quantity != "0.00000000") {
+        if (!level.quantity.is_zero()) {
             book_.asks[level.price] = level.quantity;
         }
     }
@@ -204,13 +204,14 @@ local_order_book::apply_event(const types::depth_stream_event& event)
     book_.last_update_id = event.final_update_id;
 }
 
+template<class Compare>
 void
 local_order_book::apply_levels(const std::vector<types::price_level>& levels,
-                               std::map<std::string, std::string, std::greater<>>& side)
+                               std::map<types::decimal, types::decimal, Compare>& side)
 {
     for (const auto& level : levels) {
         // Step 7: if quantity=0, remove price level
-        if (level.quantity == "0" || level.quantity == "0.00000000") {
+        if (level.quantity.is_zero()) {
             side.erase(level.price);
         } else {
             side[level.price] = level.quantity;
@@ -218,17 +219,10 @@ local_order_book::apply_levels(const std::vector<types::price_level>& levels,
     }
 }
 
-void
-local_order_book::apply_levels(const std::vector<types::price_level>& levels,
-                               std::map<std::string, std::string, std::less<>>& side)
-{
-    for (const auto& level : levels) {
-        if (level.quantity == "0" || level.quantity == "0.00000000") {
-            side.erase(level.price);
-        } else {
-            side[level.price] = level.quantity;
-        }
-    }
-}
+// Explicit instantiations for bid (descending) and ask (ascending) sides.
+template void local_order_book::apply_levels(const std::vector<types::price_level>&,
+                                             std::map<types::decimal, types::decimal, std::greater<>>&);
+template void local_order_book::apply_levels(const std::vector<types::price_level>&,
+                                             std::map<types::decimal, types::decimal, std::less<>>&);
 
 } // namespace binapi2::fapi::streams

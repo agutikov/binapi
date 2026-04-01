@@ -10,6 +10,7 @@
 #pragma once
 
 #include <binapi2/fapi/signing.hpp>
+#include <binapi2/fapi/types/decimal.hpp>
 #include <binapi2/fapi/types/enums.hpp>
 
 #include <glaze/glaze.hpp>
@@ -43,6 +44,12 @@ inline void
 to_query_value(const std::string& value, std::string& out)
 {
     out = value;
+}
+
+inline void
+to_query_value(const types::decimal& value, std::string& out)
+{
+    out = value.to_string();
 }
 
 inline void

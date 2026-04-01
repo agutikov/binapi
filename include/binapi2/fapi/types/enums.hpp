@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include <glaze/glaze.hpp>
+
 #include <string>
 
 namespace binapi2::fapi::types {
@@ -566,4 +568,342 @@ to_string(futures_data_period value)
     return "5m";
 }
 
+/// Execution type in order update events.
+enum class execution_type
+{
+    new_order,
+    partial_fill,
+    fill,
+    canceled,
+    rejected,
+    expired,
+    trade,
+};
+
+[[nodiscard]] inline std::string
+to_string(execution_type value)
+{
+    switch (value) {
+        case execution_type::new_order: return "NEW";
+        case execution_type::partial_fill: return "PARTIAL_FILL";
+        case execution_type::fill: return "FILL";
+        case execution_type::canceled: return "CANCELED";
+        case execution_type::rejected: return "REJECTED";
+        case execution_type::expired: return "EXPIRED";
+        case execution_type::trade: return "TRADE";
+    }
+    return "NEW";
+}
+
+/// Rate limit type from exchange info.
+enum class rate_limit_type
+{
+    request_weight,
+    orders_1s,
+    orders_1m,
+    orders_1h,
+    orders_1d,
+};
+
+[[nodiscard]] inline std::string
+to_string(rate_limit_type value)
+{
+    switch (value) {
+        case rate_limit_type::request_weight: return "REQUEST_WEIGHT";
+        case rate_limit_type::orders_1s: return "ORDERS_1S";
+        case rate_limit_type::orders_1m: return "ORDERS_1M";
+        case rate_limit_type::orders_1h: return "ORDERS_1H";
+        case rate_limit_type::orders_1d: return "ORDERS_1D";
+    }
+    return "REQUEST_WEIGHT";
+}
+
+/// Rate limit interval unit.
+enum class rate_limit_interval
+{
+    second,
+    minute,
+    hour,
+    day,
+};
+
+[[nodiscard]] inline std::string
+to_string(rate_limit_interval value)
+{
+    switch (value) {
+        case rate_limit_interval::second: return "SECOND";
+        case rate_limit_interval::minute: return "MINUTE";
+        case rate_limit_interval::hour: return "HOUR";
+        case rate_limit_interval::day: return "DAY";
+    }
+    return "SECOND";
+}
+
+/// Auto-close type for forced liquidation/ADL orders.
+enum class auto_close_type
+{
+    liquidation,
+    adl,
+};
+
+[[nodiscard]] inline std::string
+to_string(auto_close_type value)
+{
+    switch (value) {
+        case auto_close_type::liquidation: return "LIQUIDATION";
+        case auto_close_type::adl: return "ADL";
+    }
+    return "LIQUIDATION";
+}
+
+/// Isolated margin delta direction.
+enum class delta_type
+{
+    add,
+    reduce,
+};
+
+[[nodiscard]] inline std::string
+to_string(delta_type value)
+{
+    switch (value) {
+        case delta_type::add: return "1";
+        case delta_type::reduce: return "2";
+    }
+    return "1";
+}
+
+/// Algo order type.
+enum class algo_type
+{
+    twap,
+    vp,
+};
+
+[[nodiscard]] inline std::string
+to_string(algo_type value)
+{
+    switch (value) {
+        case algo_type::twap: return "TWAP";
+        case algo_type::vp: return "VP";
+    }
+    return "TWAP";
+}
+
+/// Algo order status.
+enum class algo_status
+{
+    working,
+    cancelled,
+    rejected,
+    expired,
+    triggered,
+};
+
+[[nodiscard]] inline std::string
+to_string(algo_status value)
+{
+    switch (value) {
+        case algo_status::working: return "WORKING";
+        case algo_status::cancelled: return "CANCELLED";
+        case algo_status::rejected: return "REJECTED";
+        case algo_status::expired: return "EXPIRED";
+        case algo_status::triggered: return "TRIGGERED";
+    }
+    return "WORKING";
+}
+
 } // namespace binapi2::fapi::types
+
+// ---------------------------------------------------------------------------
+// Glaze enum metadata — maps wire-format strings to enum values for JSON
+// deserialization. Each specialization uses glz::enumerate("WIRE_NAME", value).
+// ---------------------------------------------------------------------------
+
+template<>
+struct glz::meta<binapi2::fapi::types::order_side>
+{
+    using enum binapi2::fapi::types::order_side;
+    static constexpr auto value = enumerate("BUY", buy, "SELL", sell);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::order_type>
+{
+    using enum binapi2::fapi::types::order_type;
+    static constexpr auto value = enumerate(
+        "LIMIT", limit, "MARKET", market, "STOP", stop, "STOP_MARKET", stop_market,
+        "TAKE_PROFIT", take_profit, "TAKE_PROFIT_MARKET", take_profit_market,
+        "TRAILING_STOP_MARKET", trailing_stop_market);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::time_in_force>
+{
+    using enum binapi2::fapi::types::time_in_force;
+    static constexpr auto value = enumerate("GTC", gtc, "IOC", ioc, "FOK", fok, "GTX", gtx, "GTD", gtd, "RPI", rpi);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::kline_interval>
+{
+    using enum binapi2::fapi::types::kline_interval;
+    static constexpr auto value = enumerate(
+        "1m", m1, "3m", m3, "5m", m5, "15m", m15, "30m", m30,
+        "1h", h1, "2h", h2, "4h", h4, "6h", h6, "8h", h8, "12h", h12,
+        "1d", d1, "3d", d3, "1w", w1, "1M", mo1);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::position_side>
+{
+    using enum binapi2::fapi::types::position_side;
+    static constexpr auto value = enumerate("BOTH", both, "LONG", long_side, "SHORT", short_side);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::working_type>
+{
+    using enum binapi2::fapi::types::working_type;
+    static constexpr auto value = enumerate("MARK_PRICE", mark_price, "CONTRACT_PRICE", contract_price);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::response_type>
+{
+    using enum binapi2::fapi::types::response_type;
+    static constexpr auto value = enumerate("ACK", ack, "RESULT", result);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::margin_type>
+{
+    using enum binapi2::fapi::types::margin_type;
+    static constexpr auto value = enumerate("ISOLATED", isolated, "CROSSED", crossed, "isolated", isolated, "cross", crossed);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::contract_type>
+{
+    using enum binapi2::fapi::types::contract_type;
+    static constexpr auto value = enumerate(
+        "PERPETUAL", perpetual, "CURRENT_MONTH", current_month, "NEXT_MONTH", next_month,
+        "CURRENT_QUARTER", current_quarter, "NEXT_QUARTER", next_quarter,
+        "PERPETUAL_DELIVERING", perpetual_delivering, "TRADIFI_PERPETUAL", tradifi_perpetual);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::contract_status>
+{
+    using enum binapi2::fapi::types::contract_status;
+    static constexpr auto value = enumerate(
+        "PENDING_TRADING", pending_trading, "TRADING", trading, "PRE_DELIVERING", pre_delivering,
+        "DELIVERING", delivering, "DELIVERED", delivered, "PRE_SETTLE", pre_settle,
+        "SETTLING", settling, "CLOSE", close);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::order_status>
+{
+    using enum binapi2::fapi::types::order_status;
+    static constexpr auto value = enumerate(
+        "NEW", new_order, "PARTIALLY_FILLED", partially_filled, "FILLED", filled,
+        "CANCELED", canceled, "REJECTED", rejected, "EXPIRED", expired,
+        "EXPIRED_IN_MATCH", expired_in_match);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::stp_mode>
+{
+    using enum binapi2::fapi::types::stp_mode;
+    static constexpr auto value = enumerate("EXPIRE_TAKER", expire_taker, "EXPIRE_BOTH", expire_both, "EXPIRE_MAKER", expire_maker);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::price_match>
+{
+    using enum binapi2::fapi::types::price_match;
+    static constexpr auto value = enumerate(
+        "NONE", none, "OPPONENT", opponent, "OPPONENT_5", opponent_5, "OPPONENT_10", opponent_10,
+        "OPPONENT_20", opponent_20, "QUEUE", queue, "QUEUE_5", queue_5, "QUEUE_10", queue_10,
+        "QUEUE_20", queue_20);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::income_type>
+{
+    using enum binapi2::fapi::types::income_type;
+    static constexpr auto value = enumerate(
+        "TRANSFER", transfer, "WELCOME_BONUS", welcome_bonus, "REALIZED_PNL", realized_pnl,
+        "FUNDING_FEE", funding_fee, "COMMISSION", commission, "INSURANCE_CLEAR", insurance_clear,
+        "REFERRAL_KICKBACK", referral_kickback, "COMMISSION_REBATE", commission_rebate,
+        "API_REBATE", api_rebate, "CONTEST_REWARD", contest_reward,
+        "CROSS_COLLATERAL_TRANSFER", cross_collateral_transfer,
+        "OPTIONS_PREMIUM_FEE", options_premium_fee, "OPTIONS_SETTLE_PROFIT", options_settle_profit,
+        "INTERNAL_TRANSFER", internal_transfer, "AUTO_EXCHANGE", auto_exchange,
+        "DELIVERED_SETTELMENT", delivered_settelment, "COIN_SWAP_DEPOSIT", coin_swap_deposit,
+        "COIN_SWAP_WITHDRAW", coin_swap_withdraw, "POSITION_LIMIT_INCREASE_FEE", position_limit_increase_fee);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::futures_data_period>
+{
+    using enum binapi2::fapi::types::futures_data_period;
+    static constexpr auto value = enumerate(
+        "5m", m5, "15m", m15, "30m", m30, "1h", h1, "2h", h2, "4h", h4, "6h", h6, "12h", h12, "1d", d1);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::execution_type>
+{
+    using enum binapi2::fapi::types::execution_type;
+    static constexpr auto value = enumerate(
+        "NEW", new_order, "PARTIAL_FILL", partial_fill, "FILL", fill,
+        "CANCELED", canceled, "REJECTED", rejected, "EXPIRED", expired, "TRADE", trade);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::rate_limit_type>
+{
+    using enum binapi2::fapi::types::rate_limit_type;
+    static constexpr auto value = enumerate(
+        "REQUEST_WEIGHT", request_weight, "ORDERS_1S", orders_1s, "ORDERS_1M", orders_1m,
+        "ORDERS_1H", orders_1h, "ORDERS_1D", orders_1d);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::rate_limit_interval>
+{
+    using enum binapi2::fapi::types::rate_limit_interval;
+    static constexpr auto value = enumerate("SECOND", second, "MINUTE", minute, "HOUR", hour, "DAY", day);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::auto_close_type>
+{
+    using enum binapi2::fapi::types::auto_close_type;
+    static constexpr auto value = enumerate("LIQUIDATION", liquidation, "ADL", adl);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::delta_type>
+{
+    using enum binapi2::fapi::types::delta_type;
+    static constexpr auto value = enumerate("1", add, "2", reduce);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::algo_type>
+{
+    using enum binapi2::fapi::types::algo_type;
+    static constexpr auto value = enumerate("TWAP", twap, "VP", vp);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::algo_status>
+{
+    using enum binapi2::fapi::types::algo_status;
+    static constexpr auto value = enumerate(
+        "WORKING", working, "CANCELLED", cancelled, "REJECTED", rejected,
+        "EXPIRED", expired, "TRIGGERED", triggered);
+};

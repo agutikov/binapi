@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <binapi2/fapi/types/decimal.hpp>
+
 #include <glaze/glaze.hpp>
 #include <cstdint>
 #include <optional>
@@ -15,19 +17,19 @@ namespace binapi2::fapi::types {
 struct convert_quote_request {
     std::string fromAsset{};
     std::string toAsset{};
-    std::optional<std::string> fromAmount{};
-    std::optional<std::string> toAmount{};
+    std::optional<decimal> fromAmount{};
+    std::optional<decimal> toAmount{};
     std::optional<std::string> validTime{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/convert/Send-quote-request.md
 struct convert_quote_response {
     std::string quoteId{};
-    std::string ratio{};
-    std::string inverseRatio{};
+    decimal ratio{};
+    decimal inverseRatio{};
     std::uint64_t validTimestamp{};
-    std::string toAmount{};
-    std::string fromAmount{};
+    decimal toAmount{};
+    decimal fromAmount{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/convert/Accept-Quote.md
@@ -53,11 +55,11 @@ struct convert_order_status_response {
     std::string orderId{};
     std::string orderStatus{};
     std::string fromAsset{};
-    std::string fromAmount{};
+    decimal fromAmount{};
     std::string toAsset{};
-    std::string toAmount{};
-    std::string ratio{};
-    std::string inverseRatio{};
+    decimal toAmount{};
+    decimal ratio{};
+    decimal inverseRatio{};
     std::uint64_t createTime{};
 };
 

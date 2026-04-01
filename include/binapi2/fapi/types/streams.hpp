@@ -5,6 +5,7 @@
 #pragma once
 
 #include <binapi2/fapi/types/common.hpp>
+#include <binapi2/fapi/types/decimal.hpp>
 #include <binapi2/fapi/types/enums.hpp>
 
 #include <glaze/glaze.hpp>
@@ -21,10 +22,10 @@ struct book_ticker_stream_event
     std::string event_type{};
     std::uint64_t update_id{};
     std::string symbol{};
-    std::string best_bid_price{};
-    std::string best_bid_qty{};
-    std::string best_ask_price{};
-    std::string best_ask_qty{};
+    decimal best_bid_price{};
+    decimal best_bid_qty{};
+    decimal best_ask_price{};
+    decimal best_ask_qty{};
     std::uint64_t transaction_time{};
     std::uint64_t event_time{};
 };
@@ -36,13 +37,13 @@ struct aggregate_trade_stream_event
     std::uint64_t event_time{};
     std::string symbol{};
     std::uint64_t agg_trade_id{};
-    std::string price{};
-    std::string quantity{};
+    decimal price{};
+    decimal quantity{};
     std::uint64_t first_trade_id{};
     std::uint64_t last_trade_id{};
     std::uint64_t trade_time{};
     bool is_buyer_maker{};
-    std::optional<std::string> normal_quantity{};
+    std::optional<decimal> normal_quantity{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Mark-Price-Stream.md
@@ -51,11 +52,11 @@ struct mark_price_stream_event
     std::string event_type{};
     std::uint64_t event_time{};
     std::string symbol{};
-    std::string mark_price{};
-    std::optional<std::string> mark_price_avg{};
-    std::string index_price{};
-    std::string settle_price{};
-    std::string funding_rate{};
+    decimal mark_price{};
+    std::optional<decimal> mark_price_avg{};
+    decimal index_price{};
+    decimal settle_price{};
+    decimal funding_rate{};
     std::uint64_t next_funding_time{};
 };
 
@@ -82,12 +83,12 @@ struct mini_ticker_stream_event
     std::string event_type{};
     std::uint64_t event_time{};
     std::string symbol{};
-    std::string close_price{};
-    std::string open_price{};
-    std::string high_price{};
-    std::string low_price{};
-    std::string base_volume{};
-    std::string quote_volume{};
+    decimal close_price{};
+    decimal open_price{};
+    decimal high_price{};
+    decimal low_price{};
+    decimal base_volume{};
+    decimal quote_volume{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/All-Market-Mini-Tickers-Stream.md
@@ -99,16 +100,16 @@ struct ticker_stream_event
     std::string event_type{};
     std::uint64_t event_time{};
     std::string symbol{};
-    std::string price_change{};
-    std::string price_change_pct{};
-    std::string weighted_avg_price{};
-    std::string last_price{};
-    std::string last_quantity{};
-    std::string open_price{};
-    std::string high_price{};
-    std::string low_price{};
-    std::string base_volume{};
-    std::string quote_volume{};
+    decimal price_change{};
+    decimal price_change_pct{};
+    decimal weighted_avg_price{};
+    decimal last_price{};
+    decimal last_quantity{};
+    decimal open_price{};
+    decimal high_price{};
+    decimal low_price{};
+    decimal base_volume{};
+    decimal quote_volume{};
     std::uint64_t stats_open_time{};
     std::uint64_t stats_close_time{};
     std::uint64_t first_trade_id{};
@@ -123,15 +124,15 @@ using all_market_ticker_stream_event = std::vector<ticker_stream_event>;
 struct liquidation_order_stream_data
 {
     std::string symbol{};
-    std::string side{};
-    std::string order_type{};
-    std::string time_in_force{};
-    std::string original_quantity{};
-    std::string price{};
-    std::string average_price{};
-    std::string order_status{};
-    std::string last_filled_qty{};
-    std::string filled_accum_qty{};
+    order_side side{};
+    order_type type{};
+    time_in_force tif{};
+    decimal original_quantity{};
+    decimal price{};
+    decimal average_price{};
+    order_status status{};
+    decimal last_filled_qty{};
+    decimal filled_accum_qty{};
     std::uint64_t trade_time{};
 };
 
@@ -152,17 +153,17 @@ struct kline_stream_data
     std::string interval{};
     std::uint64_t first_trade_id{};
     std::uint64_t last_trade_id{};
-    std::string open_price{};
-    std::string close_price{};
-    std::string high_price{};
-    std::string low_price{};
-    std::string base_volume{};
+    decimal open_price{};
+    decimal close_price{};
+    decimal high_price{};
+    decimal low_price{};
+    decimal base_volume{};
     std::uint64_t trade_count{};
     bool is_closed{};
-    std::string quote_volume{};
-    std::string taker_buy_base_vol{};
-    std::string taker_buy_quote_vol{};
-    std::string ignore{};
+    decimal quote_volume{};
+    decimal taker_buy_base_vol{};
+    decimal taker_buy_quote_vol{};
+    decimal ignore{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Kline-Candlestick-Streams.md
@@ -182,17 +183,17 @@ struct continuous_contract_kline_stream_data
     std::string interval{};
     std::uint64_t first_update_id{};
     std::uint64_t last_update_id{};
-    std::string open_price{};
-    std::string close_price{};
-    std::string high_price{};
-    std::string low_price{};
-    std::string volume{};
+    decimal open_price{};
+    decimal close_price{};
+    decimal high_price{};
+    decimal low_price{};
+    decimal volume{};
     std::uint64_t trade_count{};
     bool is_closed{};
-    std::string quote_volume{};
-    std::string taker_buy_volume{};
-    std::string taker_buy_quote_vol{};
-    std::string ignore{};
+    decimal quote_volume{};
+    decimal taker_buy_volume{};
+    decimal taker_buy_quote_vol{};
+    decimal ignore{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Continuous-Contract-Kline-Candlestick-Streams.md
@@ -210,9 +211,9 @@ struct composite_index_constituent
 {
     std::string base_asset{};
     std::string quote_asset{};
-    std::string weight_in_quantity{};
-    std::string weight_in_pct{};
-    std::string index_price{};
+    decimal weight_in_quantity{};
+    decimal weight_in_pct{};
+    decimal index_price{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Composite-Index-Symbol-Information-Streams.md
@@ -221,7 +222,7 @@ struct composite_index_stream_event
     std::string event_type{};
     std::uint64_t event_time{};
     std::string symbol{};
-    std::string price{};
+    decimal price{};
     std::optional<std::string> base_asset_type{};
     std::vector<composite_index_constituent> composition{};
 };
@@ -258,15 +259,15 @@ struct asset_index_stream_event
     std::string event_type{};
     std::uint64_t event_time{};
     std::string symbol{};
-    std::string index_price{};
-    std::string bid_buffer{};
-    std::string ask_buffer{};
-    std::string bid_rate{};
-    std::string ask_rate{};
-    std::string auto_exch_bid_buffer{};
-    std::string auto_exch_ask_buffer{};
-    std::string auto_exch_bid_rate{};
-    std::string auto_exch_ask_rate{};
+    decimal index_price{};
+    decimal bid_buffer{};
+    decimal ask_buffer{};
+    decimal bid_rate{};
+    decimal ask_rate{};
+    decimal auto_exch_bid_buffer{};
+    decimal auto_exch_ask_buffer{};
+    decimal auto_exch_bid_rate{};
+    decimal auto_exch_ask_rate{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Asset-Index-Stream.md
@@ -286,23 +287,23 @@ struct trading_session_stream_event
 struct account_update_balance
 {
     std::string asset{};
-    std::string wallet_balance{};
-    std::string cross_wallet_balance{};
-    std::string balance_change{};
+    decimal wallet_balance{};
+    decimal cross_wallet_balance{};
+    decimal balance_change{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Balance-and-Position-Update.md
 struct account_update_position
 {
     std::string symbol{};
-    std::string position_amount{};
-    std::string entry_price{};
-    std::string accum_realized{};
-    std::string unrealized_pnl{};
-    std::string margin_type{};
-    std::string isolated_wallet{};
-    std::string position_side{};
-    std::string breakeven_price{};
+    decimal position_amount{};
+    decimal entry_price{};
+    decimal accum_realized{};
+    decimal unrealized_pnl{};
+    margin_type margin{};
+    decimal isolated_wallet{};
+    position_side pos_side{};
+    decimal breakeven_price{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Balance-and-Position-Update.md
@@ -327,39 +328,39 @@ struct order_trade_update_order
 {
     std::string symbol{};
     std::string client_order_id{};
-    std::string side{};
-    std::string order_type{};
-    std::string time_in_force{};
-    std::string original_quantity{};
-    std::string original_price{};
-    std::string average_price{};
-    std::string stop_price{};
-    std::string execution_type{};
-    std::string order_status{};
+    order_side side{};
+    order_type type{};
+    time_in_force tif{};
+    decimal original_quantity{};
+    decimal original_price{};
+    decimal average_price{};
+    decimal stop_price{};
+    execution_type exec_type{};
+    order_status status{};
     std::uint64_t order_id{};
-    std::string last_filled_qty{};
-    std::string filled_accum_qty{};
-    std::string last_filled_price{};
+    decimal last_filled_qty{};
+    decimal filled_accum_qty{};
+    decimal last_filled_price{};
     std::string commission_asset{};
-    std::string commission{};
+    decimal commission{};
     std::uint64_t trade_time{};
     std::uint64_t trade_id{};
-    std::string bids_notional{};
-    std::string ask_notional{};
+    decimal bids_notional{};
+    decimal ask_notional{};
     bool is_maker{};
     bool is_reduce_only{};
-    std::string working_type{};
-    std::string orig_order_type{};
-    std::string position_side{};
+    working_type work_type{};
+    order_type orig_order_type{};
+    position_side pos_side{};
     bool is_close_all{};
-    std::optional<std::string> activation_price{};
-    std::optional<std::string> callback_rate{};
+    std::optional<decimal> activation_price{};
+    std::optional<decimal> callback_rate{};
     bool price_protection{};
     int ignore_si{};
     int ignore_ss{};
-    std::string realized_profit{};
-    std::string stp_mode{};
-    std::string price_match_mode{};
+    decimal realized_profit{};
+    stp_mode stp{};
+    price_match price_match_mode{};
     std::optional<std::uint64_t> gtd_auto_cancel{};
     std::optional<std::string> expiry_reason{};
 };
@@ -377,13 +378,13 @@ struct order_trade_update_event
 struct margin_call_position
 {
     std::string symbol{};
-    std::string position_side{};
-    std::string position_amount{};
-    std::string margin_type{};
-    std::string isolated_wallet{};
-    std::string mark_price{};
-    std::string unrealized_pnl{};
-    std::string maint_margin{};
+    position_side pos_side{};
+    decimal position_amount{};
+    margin_type margin{};
+    decimal isolated_wallet{};
+    decimal mark_price{};
+    decimal unrealized_pnl{};
+    decimal maint_margin{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Margin-Call.md
@@ -391,7 +392,7 @@ struct margin_call_event
 {
     std::string event_type{};
     std::uint64_t event_time{};
-    std::string cross_wallet_balance{};
+    decimal cross_wallet_balance{};
     std::vector<margin_call_position> positions{};
 };
 
@@ -434,13 +435,13 @@ struct trade_lite_event
     std::uint64_t event_time{};
     std::uint64_t transaction_time{};
     std::string symbol{};
-    std::string original_quantity{};
-    std::string original_price{};
+    decimal original_quantity{};
+    decimal original_price{};
     bool is_maker{};
     std::string client_order_id{};
-    std::string side{};
-    std::string last_filled_price{};
-    std::string last_filled_qty{};
+    order_side side{};
+    decimal last_filled_price{};
+    decimal last_filled_qty{};
     std::uint64_t trade_id{};
     std::uint64_t order_id{};
 };
@@ -450,23 +451,23 @@ struct algo_order_update_data
 {
     std::string client_algo_id{};
     std::uint64_t algo_id{};
-    std::string algo_type{};
-    std::string order_type{};
+    algo_type alg_type{};
+    order_type type{};
     std::string symbol{};
-    std::string side{};
-    std::string position_side{};
-    std::string time_in_force{};
-    std::string quantity{};
-    std::string algo_status{};
+    order_side side{};
+    position_side pos_side{};
+    time_in_force tif{};
+    decimal quantity{};
+    algo_status alg_status{};
     std::optional<std::string> matched_order_id{};
-    std::optional<std::string> avg_fill_price{};
-    std::optional<std::string> executed_quantity{};
+    std::optional<decimal> avg_fill_price{};
+    std::optional<decimal> executed_quantity{};
     std::optional<std::string> actual_order_type{};
-    std::optional<std::string> trigger_price{};
-    std::optional<std::string> order_price{};
-    std::optional<std::string> stp_mode{};
-    std::optional<std::string> working_type{};
-    std::optional<std::string> price_match_mode{};
+    std::optional<decimal> trigger_price{};
+    std::optional<decimal> order_price{};
+    std::optional<stp_mode> stp{};
+    std::optional<working_type> work_type{};
+    std::optional<price_match> price_match_mode{};
     std::optional<bool> is_close_all{};
     std::optional<bool> price_protection{};
     std::optional<bool> is_reduce_only{};
@@ -508,11 +509,11 @@ struct grid_update_data
     std::string strategy_type{};
     std::string strategy_status{};
     std::string symbol{};
-    std::string realized_pnl{};
-    std::string unmatched_avg_price{};
-    std::string unmatched_qty{};
-    std::string unmatched_fee{};
-    std::string matched_pnl{};
+    decimal realized_pnl{};
+    decimal unmatched_avg_price{};
+    decimal unmatched_qty{};
+    decimal unmatched_fee{};
+    decimal matched_pnl{};
     std::uint64_t update_time{};
 };
 
@@ -658,9 +659,9 @@ struct glz::meta<binapi2::fapi::types::liquidation_order_stream_data>
                                          "S",
                                          &T::side,
                                          "o",
-                                         &T::order_type,
+                                         &T::type,
                                          "f",
-                                         &T::time_in_force,
+                                         &T::tif,
                                          "q",
                                          &T::original_quantity,
                                          "p",
@@ -668,7 +669,7 @@ struct glz::meta<binapi2::fapi::types::liquidation_order_stream_data>
                                          "ap",
                                          &T::average_price,
                                          "X",
-                                         &T::order_status,
+                                         &T::status,
                                          "l",
                                          &T::last_filled_qty,
                                          "z",
@@ -788,7 +789,7 @@ struct glz::meta<binapi2::fapi::types::account_update_position>
 {
     using T = binapi2::fapi::types::account_update_position;
     static constexpr auto value =
-        object("s", &T::symbol, "pa", &T::position_amount, "ep", &T::entry_price, "cr", &T::accum_realized, "up", &T::unrealized_pnl, "mt", &T::margin_type, "iw", &T::isolated_wallet, "ps", &T::position_side, "bep", &T::breakeven_price);
+        object("s", &T::symbol, "pa", &T::position_amount, "ep", &T::entry_price, "cr", &T::accum_realized, "up", &T::unrealized_pnl, "mt", &T::margin, "iw", &T::isolated_wallet, "ps", &T::pos_side, "bep", &T::breakeven_price);
 };
 
 template<>
@@ -809,13 +810,13 @@ template<>
 struct glz::meta<binapi2::fapi::types::order_trade_update_order>
 {
     using T = binapi2::fapi::types::order_trade_update_order;
-    static constexpr auto value = object("s", &T::symbol, "c", &T::client_order_id, "S", &T::side, "o", &T::order_type, "f", &T::time_in_force,
-                                         "q", &T::original_quantity, "p", &T::original_price, "ap", &T::average_price, "sp", &T::stop_price, "x", &T::execution_type,
-                                         "X", &T::order_status, "i", &T::order_id, "l", &T::last_filled_qty, "z", &T::filled_accum_qty, "L", &T::last_filled_price,
+    static constexpr auto value = object("s", &T::symbol, "c", &T::client_order_id, "S", &T::side, "o", &T::type, "f", &T::tif,
+                                         "q", &T::original_quantity, "p", &T::original_price, "ap", &T::average_price, "sp", &T::stop_price, "x", &T::exec_type,
+                                         "X", &T::status, "i", &T::order_id, "l", &T::last_filled_qty, "z", &T::filled_accum_qty, "L", &T::last_filled_price,
                                          "N", &T::commission_asset, "n", &T::commission, "T", &T::trade_time, "t", &T::trade_id, "b", &T::bids_notional,
-                                         "a", &T::ask_notional, "m", &T::is_maker, "R", &T::is_reduce_only, "wt", &T::working_type, "ot", &T::orig_order_type,
-                                         "ps", &T::position_side, "cp", &T::is_close_all, "AP", &T::activation_price, "cr", &T::callback_rate, "pP", &T::price_protection,
-                                         "si", &T::ignore_si, "ss", &T::ignore_ss, "rp", &T::realized_profit, "V", &T::stp_mode, "pm", &T::price_match_mode,
+                                         "a", &T::ask_notional, "m", &T::is_maker, "R", &T::is_reduce_only, "wt", &T::work_type, "ot", &T::orig_order_type,
+                                         "ps", &T::pos_side, "cp", &T::is_close_all, "AP", &T::activation_price, "cr", &T::callback_rate, "pP", &T::price_protection,
+                                         "si", &T::ignore_si, "ss", &T::ignore_ss, "rp", &T::realized_profit, "V", &T::stp, "pm", &T::price_match_mode,
                                          "gtd", &T::gtd_auto_cancel, "er", &T::expiry_reason);
 };
 
@@ -831,7 +832,7 @@ struct glz::meta<binapi2::fapi::types::margin_call_position>
 {
     using T = binapi2::fapi::types::margin_call_position;
     static constexpr auto value =
-        object("s", &T::symbol, "ps", &T::position_side, "pa", &T::position_amount, "mt", &T::margin_type, "iw", &T::isolated_wallet, "mp", &T::mark_price, "up", &T::unrealized_pnl, "mm", &T::maint_margin);
+        object("s", &T::symbol, "ps", &T::pos_side, "pa", &T::position_amount, "mt", &T::margin, "iw", &T::isolated_wallet, "mp", &T::mark_price, "up", &T::unrealized_pnl, "mm", &T::maint_margin);
 };
 
 template<>
@@ -993,21 +994,21 @@ struct glz::meta<binapi2::fapi::types::algo_order_update_data>
                                          "aid",
                                          &T::algo_id,
                                          "at",
-                                         &T::algo_type,
+                                         &T::alg_type,
                                          "o",
-                                         &T::order_type,
+                                         &T::type,
                                          "s",
                                          &T::symbol,
                                          "S",
                                          &T::side,
                                          "ps",
-                                         &T::position_side,
+                                         &T::pos_side,
                                          "f",
-                                         &T::time_in_force,
+                                         &T::tif,
                                          "q",
                                          &T::quantity,
                                          "X",
-                                         &T::algo_status,
+                                         &T::alg_status,
                                          "ai",
                                          &T::matched_order_id,
                                          "ap",
@@ -1021,9 +1022,9 @@ struct glz::meta<binapi2::fapi::types::algo_order_update_data>
                                          "p",
                                          &T::order_price,
                                          "V",
-                                         &T::stp_mode,
+                                         &T::stp,
                                          "wt",
-                                         &T::working_type,
+                                         &T::work_type,
                                          "pm",
                                          &T::price_match_mode,
                                          "cp",

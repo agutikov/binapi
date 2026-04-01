@@ -6,6 +6,7 @@
 
 #include <binapi2/fapi/types/account.hpp>
 #include <binapi2/fapi/types/common.hpp>
+#include <binapi2/fapi/types/decimal.hpp>
 #include <binapi2/fapi/types/market_data.hpp>
 #include <binapi2/fapi/types/trade.hpp>
 
@@ -64,13 +65,13 @@ struct websocket_api_signed_request
 struct websocket_api_order_place_request : websocket_api_signed_request
 {
     std::string symbol{};
-    std::string side{};
-    std::string type{};
-    std::optional<std::string> timeInForce{};
-    std::string quantity{};
-    std::optional<std::string> price{};
+    order_side side{};
+    order_type type{};
+    std::optional<time_in_force> timeInForce{};
+    decimal quantity{};
+    std::optional<decimal> price{};
     std::optional<std::string> newClientOrderId{};
-    std::optional<std::string> stopPrice{};
+    std::optional<decimal> stopPrice{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/websocket-api/Query-Order.md
@@ -107,10 +108,10 @@ struct websocket_api_order_modify_request : websocket_api_signed_request
     std::string symbol{};
     std::optional<std::uint64_t> orderId{};
     std::optional<std::string> origClientOrderId{};
-    std::string side{};
-    std::string quantity{};
-    std::string price{};
-    std::optional<std::string> priceMatch{};
+    order_side side{};
+    decimal quantity{};
+    decimal price{};
+    std::optional<price_match> priceMatch{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/websocket-api/Position-Information.md
@@ -123,21 +124,21 @@ struct websocket_api_position_request : websocket_api_signed_request
 struct websocket_api_algo_order_place_request : websocket_api_signed_request
 {
     std::string symbol{};
-    std::string side{};
-    std::optional<std::string> positionSide{};
-    std::string type{};
-    std::optional<std::string> timeInForce{};
-    std::string quantity{};
-    std::optional<std::string> price{};
-    std::optional<std::string> triggerPrice{};
-    std::string algoType{};
+    order_side side{};
+    std::optional<position_side> positionSide{};
+    order_type type{};
+    std::optional<time_in_force> timeInForce{};
+    decimal quantity{};
+    std::optional<decimal> price{};
+    std::optional<decimal> triggerPrice{};
+    algo_type algoType{};
     std::optional<std::string> workingType{};
     std::optional<std::string> priceMatch{};
     std::optional<std::string> closePosition{};
     std::optional<std::string> priceProtect{};
     std::optional<std::string> reduceOnly{};
-    std::optional<std::string> activatePrice{};
-    std::optional<std::string> callbackRate{};
+    std::optional<decimal> activationPrice{};
+    std::optional<decimal> callbackRate{};
     std::optional<std::string> clientAlgoId{};
     std::optional<std::string> newOrderRespType{};
     std::optional<std::string> selfTradePreventionMode{};
@@ -384,7 +385,7 @@ struct glz::meta<binapi2::fapi::types::websocket_api_algo_order_place_request>
                                          "reduceOnly",
                                          &T::reduceOnly,
                                          "activatePrice",
-                                         &T::activatePrice,
+                                         &T::activationPrice,
                                          "callbackRate",
                                          &T::callbackRate,
                                          "clientAlgoId",

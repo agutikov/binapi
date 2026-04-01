@@ -11,6 +11,7 @@
 #pragma once
 
 #include <binapi2/fapi/types/common.hpp>
+#include <binapi2/fapi/types/decimal.hpp>
 #include <binapi2/fapi/types/enums.hpp>
 
 #include <glaze/glaze.hpp>
@@ -81,9 +82,9 @@ struct recent_trades_request
 struct recent_trade
 {
     std::uint64_t id{};
-    std::string price{};
-    std::string qty{};
-    std::string quoteQty{};
+    decimal price{};
+    decimal qty{};
+    decimal quoteQty{};
     std::uint64_t time{};
     bool isBuyerMaker{};
     std::optional<bool> isRPITrade{};
@@ -103,8 +104,8 @@ struct aggregate_trades_request
 struct aggregate_trade
 {
     std::uint64_t agg_trade_id{};
-    std::string price{};
-    std::string quantity{};
+    decimal price{};
+    decimal quantity{};
     std::uint64_t first_trade_id{};
     std::uint64_t last_trade_id{};
     std::uint64_t timestamp{};
@@ -162,17 +163,17 @@ struct index_price_kline_request
 struct kline
 {
     std::uint64_t openTime{};
-    std::string open{};
-    std::string high{};
-    std::string low{};
-    std::string close{};
-    std::string volume{};
+    decimal open{};
+    decimal high{};
+    decimal low{};
+    decimal close{};
+    decimal volume{};
     std::uint64_t closeTime{};
-    std::string quoteAssetVolume{};
+    decimal quoteAssetVolume{};
     std::uint64_t numberOfTrades{};
-    std::string takerBuyBaseAssetVolume{};
-    std::string takerBuyQuoteAssetVolume{};
-    std::string ignore{};
+    decimal takerBuyBaseAssetVolume{};
+    decimal takerBuyQuoteAssetVolume{};
+    decimal ignore{};
 };
 
 // ---------------------------------------------------------------------------
@@ -189,10 +190,10 @@ struct book_ticker_request
 struct book_ticker
 {
     std::string symbol{};
-    std::string bidPrice{};
-    std::string bidQty{};
-    std::string askPrice{};
-    std::string askQty{};
+    decimal bidPrice{};
+    decimal bidQty{};
+    decimal askPrice{};
+    decimal askQty{};
     std::uint64_t time{};
     std::uint64_t lastUpdateId{};
 };
@@ -207,7 +208,7 @@ struct price_ticker_request
 struct price_ticker
 {
     std::string symbol{};
-    std::string price{};
+    decimal price{};
     std::uint64_t time{};
 };
 
@@ -221,16 +222,16 @@ struct ticker_24hr_request
 struct ticker_24hr
 {
     std::string symbol{};
-    std::string priceChange{};
-    std::string priceChangePercent{};
-    std::string weightedAvgPrice{};
-    std::string lastPrice{};
-    std::string lastQty{};
-    std::string openPrice{};
-    std::string highPrice{};
-    std::string lowPrice{};
-    std::string volume{};
-    std::string quoteVolume{};
+    decimal priceChange{};
+    decimal priceChangePercent{};
+    decimal weightedAvgPrice{};
+    decimal lastPrice{};
+    decimal lastQty{};
+    decimal openPrice{};
+    decimal highPrice{};
+    decimal lowPrice{};
+    decimal volume{};
+    decimal quoteVolume{};
     std::uint64_t openTime{};
     std::uint64_t closeTime{};
     std::uint64_t firstId{};
@@ -252,11 +253,11 @@ struct mark_price_request
 struct mark_price
 {
     std::string symbol{};
-    std::string markPrice{};
-    std::string indexPrice{};
-    std::string estimatedSettlePrice{};
-    std::string lastFundingRate{};
-    std::string interestRate{};
+    decimal markPrice{};
+    decimal indexPrice{};
+    decimal estimatedSettlePrice{};
+    decimal lastFundingRate{};
+    decimal interestRate{};
     std::uint64_t nextFundingTime{};
     std::uint64_t time{};
 };
@@ -274,17 +275,17 @@ struct funding_rate_history_request
 struct funding_rate_history_entry
 {
     std::string symbol{};
-    std::string fundingRate{};
+    decimal fundingRate{};
     std::uint64_t fundingTime{};
-    std::string markPrice{};
+    decimal markPrice{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Get-Funding-Rate-Info.md
 struct funding_rate_info
 {
     std::string symbol{};
-    std::string adjustedFundingRateCap{};
-    std::string adjustedFundingRateFloor{};
+    decimal adjustedFundingRateCap{};
+    decimal adjustedFundingRateFloor{};
     int fundingIntervalHours{};
     bool disclaimer{};
 };
@@ -302,7 +303,7 @@ struct open_interest_request
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Open-Interest.md
 struct open_interest
 {
-    std::string openInterest{};
+    decimal openInterest{};
     std::string symbol{};
     std::uint64_t time{};
 };
@@ -323,9 +324,9 @@ struct futures_data_request
 struct open_interest_statistics_entry
 {
     std::string symbol{};
-    std::string sumOpenInterest{};
-    std::string sumOpenInterestValue{};
-    std::string CMCCirculatingSupply{};
+    decimal sumOpenInterest{};
+    decimal sumOpenInterestValue{};
+    decimal CMCCirculatingSupply{};
     std::uint64_t timestamp{};
 };
 
@@ -333,18 +334,18 @@ struct open_interest_statistics_entry
 struct long_short_ratio_entry
 {
     std::string symbol{};
-    std::string longShortRatio{};
-    std::string longAccount{};
-    std::string shortAccount{};
+    decimal longShortRatio{};
+    decimal longAccount{};
+    decimal shortAccount{};
     std::uint64_t timestamp{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Taker-BuySell-Volume.md
 struct taker_buy_sell_volume_entry
 {
-    std::string buySellRatio{};
-    std::string buyVol{};
-    std::string sellVol{};
+    decimal buySellRatio{};
+    decimal buyVol{};
+    decimal sellVol{};
     std::uint64_t timestamp{};
 };
 
@@ -364,11 +365,11 @@ struct basis_entry
 {
     std::string pair{};
     std::string contractType{};
-    std::string basis{};
-    std::string basisRate{};
-    std::string futuresPrice{};
-    std::string indexPrice{};
-    std::string annualizedBasisRate{};
+    decimal basis{};
+    decimal basisRate{};
+    decimal futuresPrice{};
+    decimal indexPrice{};
+    decimal annualizedBasisRate{};
     std::uint64_t timestamp{};
 };
 
@@ -392,7 +393,7 @@ struct delivery_price_request
 struct delivery_price_entry
 {
     std::uint64_t deliveryTime{};
-    std::string deliveryPrice{};
+    decimal deliveryPrice{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Composite-Index-Symbol-Information.md
@@ -406,8 +407,8 @@ struct composite_index_base_asset
 {
     std::string baseAsset{};
     std::string quoteAsset{};
-    std::string weightInQuantity{};
-    std::string weightInPercentage{};
+    decimal weightInQuantity{};
+    decimal weightInPercentage{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Composite-Index-Symbol-Information.md
@@ -430,8 +431,8 @@ struct index_constituent
 {
     std::string exchange{};
     std::string symbol{};
-    std::string price{};
-    std::string weight{};
+    decimal price{};
+    decimal weight{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Index-Constituents.md
@@ -453,15 +454,15 @@ struct asset_index
 {
     std::string symbol{};
     std::uint64_t time{};
-    std::string index{};
-    std::string bidBuffer{};
-    std::string askBuffer{};
-    std::string bidRate{};
-    std::string askRate{};
-    std::string autoExchangeBidBuffer{};
-    std::string autoExchangeAskBuffer{};
-    std::string autoExchangeBidRate{};
-    std::string autoExchangeAskRate{};
+    decimal index{};
+    decimal bidBuffer{};
+    decimal askBuffer{};
+    decimal bidRate{};
+    decimal askRate{};
+    decimal autoExchangeBidBuffer{};
+    decimal autoExchangeAskBuffer{};
+    decimal autoExchangeBidRate{};
+    decimal autoExchangeAskRate{};
 };
 
 // ---------------------------------------------------------------------------
@@ -478,7 +479,7 @@ struct insurance_fund_request
 struct insurance_fund_asset
 {
     std::string asset{};
-    std::string marginBalance{};
+    decimal marginBalance{};
     std::uint64_t updateTime{};
 };
 
@@ -499,7 +500,7 @@ struct adl_risk_request
 struct adl_risk_entry
 {
     std::string symbol{};
-    std::string adlRisk{};
+    decimal adlRisk{};
     std::uint64_t updateTime{};
 };
 

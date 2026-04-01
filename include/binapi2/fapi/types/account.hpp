@@ -10,6 +10,9 @@
 
 #pragma once
 
+#include <binapi2/fapi/types/decimal.hpp>
+#include <binapi2/fapi/types/enums.hpp>
+
 #include <glaze/glaze.hpp>
 
 #include <cstdint>
@@ -28,17 +31,17 @@ namespace binapi2::fapi::types {
 struct account_asset
 {
     std::string asset{};
-    std::string walletBalance{};
-    std::string unrealizedProfit{};
-    std::string marginBalance{};
-    std::string maintMargin{};
-    std::string initialMargin{};
-    std::string positionInitialMargin{};
-    std::string openOrderInitialMargin{};
-    std::string crossWalletBalance{};
-    std::string crossUnPnl{};
-    std::string availableBalance{};
-    std::string maxWithdrawAmount{};
+    decimal walletBalance{};
+    decimal unrealizedProfit{};
+    decimal marginBalance{};
+    decimal maintMargin{};
+    decimal initialMargin{};
+    decimal positionInitialMargin{};
+    decimal openOrderInitialMargin{};
+    decimal crossWalletBalance{};
+    decimal crossUnPnl{};
+    decimal availableBalance{};
+    decimal maxWithdrawAmount{};
     std::optional<bool> marginAvailable{};
     std::uint64_t updateTime{};
 };
@@ -47,23 +50,23 @@ struct account_asset
 struct account_position
 {
     std::string symbol{};
-    std::string initialMargin{};
-    std::string maintMargin{};
-    std::string unrealizedProfit{};
-    std::string positionInitialMargin{};
-    std::string openOrderInitialMargin{};
-    std::optional<std::string> leverage{};
+    decimal initialMargin{};
+    decimal maintMargin{};
+    decimal unrealizedProfit{};
+    decimal positionInitialMargin{};
+    decimal openOrderInitialMargin{};
+    std::optional<decimal> leverage{};
     std::optional<bool> isolated{};
-    std::optional<std::string> entryPrice{};
-    std::optional<std::string> breakEvenPrice{};
-    std::optional<std::string> maxNotional{};
-    std::optional<std::string> bidNotional{};
-    std::optional<std::string> askNotional{};
-    std::string positionSide{};
-    std::string positionAmt{};
-    std::optional<std::string> isolatedMargin{};
-    std::optional<std::string> notional{};
-    std::optional<std::string> isolatedWallet{};
+    std::optional<decimal> entryPrice{};
+    std::optional<decimal> breakEvenPrice{};
+    std::optional<decimal> maxNotional{};
+    std::optional<decimal> bidNotional{};
+    std::optional<decimal> askNotional{};
+    position_side positionSide{};
+    decimal positionAmt{};
+    std::optional<decimal> isolatedMargin{};
+    std::optional<decimal> notional{};
+    std::optional<decimal> isolatedWallet{};
     std::uint64_t updateTime{};
 };
 
@@ -77,17 +80,17 @@ struct account_information
     std::uint64_t updateTime{};
     std::optional<bool> multiAssetsMargin{};
     std::optional<int> tradeGroupId{};
-    std::string totalInitialMargin{};
-    std::string totalMaintMargin{};
-    std::string totalWalletBalance{};
-    std::string totalUnrealizedProfit{};
-    std::string totalMarginBalance{};
-    std::string totalPositionInitialMargin{};
-    std::string totalOpenOrderInitialMargin{};
-    std::string totalCrossWalletBalance{};
-    std::string totalCrossUnPnl{};
-    std::string availableBalance{};
-    std::string maxWithdrawAmount{};
+    decimal totalInitialMargin{};
+    decimal totalMaintMargin{};
+    decimal totalWalletBalance{};
+    decimal totalUnrealizedProfit{};
+    decimal totalMarginBalance{};
+    decimal totalPositionInitialMargin{};
+    decimal totalOpenOrderInitialMargin{};
+    decimal totalCrossWalletBalance{};
+    decimal totalCrossUnPnl{};
+    decimal availableBalance{};
+    decimal maxWithdrawAmount{};
     std::vector<account_asset> assets{};
     std::vector<account_position> positions{};
 };
@@ -97,11 +100,11 @@ struct futures_account_balance
 {
     std::string accountAlias{};
     std::string asset{};
-    std::string balance{};
-    std::string crossWalletBalance{};
-    std::string crossUnPnl{};
-    std::string availableBalance{};
-    std::string maxWithdrawAmount{};
+    decimal balance{};
+    decimal crossWalletBalance{};
+    decimal crossUnPnl{};
+    decimal availableBalance{};
+    decimal maxWithdrawAmount{};
     bool marginAvailable{};
     std::uint64_t updateTime{};
 };
@@ -120,20 +123,20 @@ struct position_risk_request
 struct position_risk
 {
     std::string symbol{};
-    std::string positionAmt{};
-    std::string entryPrice{};
-    std::string breakEvenPrice{};
-    std::string markPrice{};
-    std::string unRealizedProfit{};
-    std::string liquidationPrice{};
-    std::string leverage{};
-    std::string maxNotionalValue{};
-    std::string marginType{};
-    std::string isolatedMargin{};
+    decimal positionAmt{};
+    decimal entryPrice{};
+    decimal breakEvenPrice{};
+    decimal markPrice{};
+    decimal unRealizedProfit{};
+    decimal liquidationPrice{};
+    decimal leverage{};
+    decimal maxNotionalValue{};
+    margin_type marginType{};
+    decimal isolatedMargin{};
     bool isAutoAddMargin{};
-    std::string positionSide{};
-    std::string notional{};
-    std::string isolatedWallet{};
+    position_side positionSide{};
+    decimal notional{};
+    decimal isolatedWallet{};
     std::uint64_t updateTime{};
 };
 
@@ -164,10 +167,10 @@ struct symbol_config_request
 struct symbol_config_entry
 {
     std::string symbol{};
-    std::string marginType{};
+    margin_type marginType{};
     bool isAutoAddMargin{};
     int leverage{};
-    std::string maxNotionalValue{};
+    decimal maxNotionalValue{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Get-Current-Multi-Assets-Mode.md
@@ -201,8 +204,8 @@ struct income_history_request
 struct income_history_entry
 {
     std::string symbol{};
-    std::string incomeType{};
-    std::string income{};
+    income_type incomeType{};
+    decimal income{};
     std::string asset{};
     std::string info{};
     std::uint64_t time{};
@@ -227,15 +230,15 @@ struct leverage_bracket_entry
     int initialLeverage{};
     std::uint64_t notionalCap{};
     std::uint64_t notionalFloor{};
-    std::string maintMarginRatio{};
-    std::string cum{};
+    decimal maintMarginRatio{};
+    decimal cum{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Notional-and-Leverage-Brackets.md
 struct symbol_leverage_brackets
 {
     std::string symbol{};
-    std::optional<std::string> notionalCoef{};
+    std::optional<decimal> notionalCoef{};
     std::vector<leverage_bracket_entry> brackets{};
 };
 
@@ -249,9 +252,9 @@ struct commission_rate_request
 struct commission_rate_response
 {
     std::string symbol{};
-    std::string makerCommissionRate{};
-    std::string takerCommissionRate{};
-    std::optional<std::string> rpiCommissionRate{};
+    decimal makerCommissionRate{};
+    decimal takerCommissionRate{};
+    std::optional<decimal> rpiCommissionRate{};
 };
 
 // ---------------------------------------------------------------------------
@@ -341,9 +344,9 @@ struct pm_account_info_request
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/portfolio-margin-endpoints.md
 struct pm_account_info_response
 {
-    std::string maxWithdrawAmountUSD{};
+    decimal maxWithdrawAmountUSD{};
     std::string asset{};
-    std::string maxWithdrawAmount{};
+    decimal maxWithdrawAmount{};
 };
 
 } // namespace binapi2::fapi::types

@@ -8,6 +8,7 @@
 #pragma once
 
 #include <binapi2/fapi/result.hpp>
+#include <binapi2/fapi/types/decimal.hpp>
 #include <binapi2/fapi/types/market_data.hpp>
 #include <binapi2/fapi/types/streams.hpp>
 
@@ -29,9 +30,10 @@ class market_streams;
 /// @brief Snapshot of the locally maintained order book at a point in time.
 struct order_book_snapshot
 {
-    std::uint64_t last_update_id{};                              ///< Last update ID reflected in this snapshot.
-    std::map<std::string, std::string, std::greater<>> bids{};   ///< Bid levels sorted by price descending (best bid first).
-    std::map<std::string, std::string, std::less<>> asks{};      ///< Ask levels sorted by price ascending (best ask first).
+    using decimal = types::decimal;
+    std::uint64_t last_update_id{};                         ///< Last update ID reflected in this snapshot.
+    std::map<decimal, decimal, std::greater<>> bids{};      ///< Bid levels sorted by price descending (best bid first).
+    std::map<decimal, decimal, std::less<>> asks{};          ///< Ask levels sorted by price ascending (best ask first).
 };
 
 /// @brief Locally maintained order book synchronized from the diff depth stream.
@@ -87,12 +89,8 @@ private:
     /// @brief Apply price level deltas to the bid side.
     /// @param levels Price level updates (quantity of "0" removes the level).
     /// @param side   The bid-side map to update.
-    void apply_levels(const std::vector<types::price_level>& levels, std::map<std::string, std::string, std::greater<>>& side);
-
-    /// @brief Apply price level deltas to the ask side.
-    /// @param levels Price level updates (quantity of "0" removes the level).
-    /// @param side   The ask-side map to update.
-    void apply_levels(const std::vector<types::price_level>& levels, std::map<std::string, std::string, std::less<>>& side);
+    template<class Compare>
+    void apply_levels(const std::vector<types::price_level>& levels, std::map<types::decimal, types::decimal, Compare>& side);
 
     market_streams& streams_;         ///< Source of diff depth stream events.
     client& rest_client_;             ///< REST client for fetching the initial snapshot.

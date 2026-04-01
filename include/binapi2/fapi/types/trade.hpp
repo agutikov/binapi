@@ -11,6 +11,7 @@
 #pragma once
 
 #include <binapi2/fapi/types/common.hpp>
+#include <binapi2/fapi/types/decimal.hpp>
 #include <binapi2/fapi/types/enums.hpp>
 
 #include <glaze/glaze.hpp>
@@ -33,15 +34,15 @@ struct new_order_request
     order_side side{ order_side::buy };
     order_type type{ order_type::limit };
     std::optional<time_in_force> timeInForce{};
-    std::string quantity{};
-    std::optional<std::string> price{};
+    decimal quantity{};
+    std::optional<decimal> price{};
     std::optional<std::string> newClientOrderId{};
-    std::optional<std::string> stopPrice{};
-    std::optional<std::string> positionSide{};
+    std::optional<decimal> stopPrice{};
+    std::optional<position_side> positionSide{};
     std::optional<std::string> reduceOnly{};
     std::optional<std::string> closePosition{};
-    std::optional<std::string> activationPrice{};
-    std::optional<std::string> callbackRate{};
+    std::optional<decimal> activationPrice{};
+    std::optional<decimal> callbackRate{};
     std::optional<std::string> workingType{};
     std::optional<std::string> priceProtect{};
     std::optional<std::string> newOrderRespType{};
@@ -54,32 +55,32 @@ struct new_order_request
 struct order_response
 {
     std::string clientOrderId{};
-    std::string cumQty{};
-    std::string cumQuote{};
-    std::string executedQty{};
-    std::optional<std::string> cumBase{};
+    decimal cumQty{};
+    decimal cumQuote{};
+    decimal executedQty{};
+    std::optional<decimal> cumBase{};
     std::uint64_t orderId{};
-    std::string avgPrice{};
-    std::string origQty{};
+    decimal avgPrice{};
+    decimal origQty{};
     std::optional<std::string> pair{};
-    std::string price{};
+    decimal price{};
     bool reduceOnly{};
-    std::string side{};
-    std::string positionSide{};
-    std::string status{};
-    std::string stopPrice{};
+    order_side side{};
+    position_side positionSide{};
+    order_status status{};
+    decimal stopPrice{};
     bool closePosition{};
     std::string symbol{};
-    std::string timeInForce{};
-    std::string type{};
-    std::optional<std::string> workingType{};
+    time_in_force timeInForce{};
+    order_type type{};
+    std::optional<working_type> workingType{};
     std::optional<bool> priceProtect{};
-    std::string origType{};
-    std::optional<std::string> priceMatch{};
-    std::optional<std::string> selfTradePreventionMode{};
+    order_type origType{};
+    std::optional<price_match> priceMatch{};
+    std::optional<stp_mode> selfTradePreventionMode{};
     std::optional<std::uint64_t> goodTillDate{};
-    std::optional<std::string> activatePrice{};
-    std::optional<std::string> priceRate{};
+    std::optional<decimal> activatePrice{};
+    std::optional<decimal> priceRate{};
     std::optional<std::uint64_t> updateTime{};
 };
 
@@ -88,8 +89,8 @@ struct modify_order_request
 {
     std::string symbol{};
     order_side side{ order_side::buy };
-    std::string quantity{};
-    std::string price{};
+    decimal quantity{};
+    decimal price{};
     std::optional<std::uint64_t> orderId{};
     std::optional<std::string> origClientOrderId{};
     std::optional<std::string> priceMatch{};
@@ -200,24 +201,24 @@ struct all_orders_request
 struct position_risk_v3
 {
     std::string symbol{};
-    std::string positionSide{};
-    std::string positionAmt{};
-    std::string entryPrice{};
-    std::string breakEvenPrice{};
-    std::string markPrice{};
-    std::string unRealizedProfit{};
-    std::string liquidationPrice{};
-    std::string isolatedMargin{};
-    std::string notional{};
+    position_side positionSide{};
+    decimal positionAmt{};
+    decimal entryPrice{};
+    decimal breakEvenPrice{};
+    decimal markPrice{};
+    decimal unRealizedProfit{};
+    decimal liquidationPrice{};
+    decimal isolatedMargin{};
+    decimal notional{};
     std::string marginAsset{};
     std::string isolatedWallet{};
-    std::string initialMargin{};
-    std::string maintMargin{};
-    std::string positionInitialMargin{};
-    std::string openOrderInitialMargin{};
+    decimal initialMargin{};
+    decimal maintMargin{};
+    decimal positionInitialMargin{};
+    decimal openOrderInitialMargin{};
     int adl{};
-    std::string bidNotional{};
-    std::string askNotional{};
+    decimal bidNotional{};
+    decimal askNotional{};
     std::uint64_t updateTime{};
 };
 
@@ -253,7 +254,7 @@ struct adl_quantile_request
 struct force_orders_request
 {
     std::optional<std::string> symbol{};
-    std::optional<std::string> autoCloseType{};
+    std::optional<auto_close_type> autoCloseType{};
     std::optional<std::uint64_t> startTime{};
     std::optional<std::uint64_t> endTime{};
     std::optional<int> limit{};
@@ -276,17 +277,17 @@ struct account_trade_entry
     std::uint64_t id{};
     std::uint64_t orderId{};
     std::string symbol{};
-    std::string side{};
-    std::string positionSide{};
-    std::string price{};
-    std::string qty{};
-    std::string quoteQty{};
-    std::string commission{};
+    order_side side{};
+    position_side positionSide{};
+    decimal price{};
+    decimal qty{};
+    decimal quoteQty{};
+    decimal commission{};
     std::string commissionAsset{};
     std::uint64_t time{};
     bool buyer{};
     bool maker{};
-    std::string realizedPnl{};
+    decimal realizedPnl{};
 };
 
 // ---------------------------------------------------------------------------
@@ -316,7 +317,7 @@ struct change_leverage_request
 struct change_leverage_response
 {
     int leverage{};
-    std::string maxNotionalValue{};
+    decimal maxNotionalValue{};
     std::string symbol{};
 };
 
@@ -331,9 +332,9 @@ struct change_margin_type_request
 struct modify_isolated_margin_request
 {
     std::string symbol{};
-    std::optional<std::string> positionSide{};
-    std::string amount{};
-    int type{};
+    std::optional<position_side> positionSide{};
+    decimal amount{};
+    delta_type type{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Modify-Isolated-Position-Margin.md
@@ -341,7 +342,7 @@ struct modify_isolated_margin_response
 {
     int code{};
     std::string msg{};
-    std::string amount{};
+    decimal amount{};
     int type{};
 };
 
@@ -361,7 +362,7 @@ struct position_margin_history_entry
     std::string symbol{};
     int type{};
     std::string deltaType{};
-    std::string amount{};
+    decimal amount{};
     std::string asset{};
     std::uint64_t time{};
     std::string positionSide{};
@@ -382,22 +383,22 @@ struct order_modify_history_request
 struct new_algo_order_request
 {
     std::string symbol{};
-    std::string side{};
-    std::optional<std::string> positionSide{};
-    std::string type{};
-    std::optional<std::string> timeInForce{};
-    std::string quantity{};
-    std::optional<std::string> price{};
-    std::optional<std::string> triggerPrice{};
+    order_side side{};
+    std::optional<position_side> positionSide{};
+    order_type type{};
+    std::optional<time_in_force> timeInForce{};
+    decimal quantity{};
+    std::optional<decimal> price{};
+    std::optional<decimal> triggerPrice{};
     std::optional<std::string> workingType{};
-    std::string algoType{};
+    algo_type algoType{};
     std::optional<std::string> clientAlgoId{};
     std::optional<std::string> priceMatch{};
     std::optional<std::string> closePosition{};
     std::optional<std::string> priceProtect{};
     std::optional<std::string> reduceOnly{};
-    std::optional<std::string> activatePrice{};
-    std::optional<std::string> callbackRate{};
+    std::optional<decimal> activatePrice{};
+    std::optional<decimal> callbackRate{};
     std::optional<std::string> newOrderRespType{};
     std::optional<std::string> selfTradePreventionMode{};
     std::optional<std::uint64_t> goodTillDate{};
@@ -408,25 +409,25 @@ struct algo_order_response
 {
     std::uint64_t algoId{};
     std::optional<std::string> clientAlgoId{};
-    std::string algoType{};
+    algo_type algoType{};
     std::string symbol{};
-    std::string side{};
-    std::optional<std::string> positionSide{};
-    std::string algoStatus{};
-    std::optional<std::string> orderType{};
-    std::optional<std::string> timeInForce{};
-    std::optional<std::string> quantity{};
-    std::optional<std::string> triggerPrice{};
-    std::optional<std::string> price{};
-    std::optional<std::string> icebergQuantity{};
-    std::optional<std::string> selfTradePreventionMode{};
-    std::optional<std::string> workingType{};
-    std::optional<std::string> priceMatch{};
+    order_side side{};
+    std::optional<position_side> positionSide{};
+    algo_status algoStatus{};
+    std::optional<order_type> orderType{};
+    std::optional<time_in_force> timeInForce{};
+    std::optional<decimal> quantity{};
+    std::optional<decimal> triggerPrice{};
+    std::optional<decimal> price{};
+    std::optional<decimal> icebergQuantity{};
+    std::optional<stp_mode> selfTradePreventionMode{};
+    std::optional<working_type> workingType{};
+    std::optional<price_match> priceMatch{};
     std::optional<bool> closePosition{};
     std::optional<bool> priceProtect{};
     std::optional<bool> reduceOnly{};
-    std::optional<std::string> activatePrice{};
-    std::optional<std::string> callbackRate{};
+    std::optional<decimal> activatePrice{};
+    std::optional<decimal> callbackRate{};
     std::optional<std::uint64_t> createTime{};
     std::optional<std::uint64_t> updateTime{};
     std::optional<std::uint64_t> triggerTime{};
