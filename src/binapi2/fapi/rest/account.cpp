@@ -6,6 +6,8 @@
 
 #include <binapi2/fapi/rest/generated_endpoints.hpp>
 
+#include <binapi2/fapi/query.hpp>
+
 #include "common.hpp"
 
 namespace binapi2::fapi::rest {
@@ -45,13 +47,9 @@ account_service::balances(callback_type<std::vector<types::futures_account_balan
 result<std::vector<types::position_risk>>
 account_service::position_risk(const types::position_risk_request& request)
 {
-    query_map query;
-    if (request.symbol) {
-        query["symbol"] = *request.symbol;
-    }
     return owner_.execute<std::vector<types::position_risk>>(position_risk_endpoint.method,
                                                              std::string{ position_risk_endpoint.path },
-                                                             query,
+                                                             to_query_map(request),
                                                              position_risk_endpoint.signed_request);
 }
 
@@ -81,13 +79,9 @@ account_service::account_config(callback_type<types::account_config_response> ca
 result<std::vector<types::symbol_config_entry>>
 account_service::symbol_config(const types::symbol_config_request& request)
 {
-    query_map query;
-    if (request.symbol) {
-        query["symbol"] = *request.symbol;
-    }
     return owner_.execute<std::vector<types::symbol_config_entry>>(symbol_config_endpoint.method,
                                                                     std::string{ symbol_config_endpoint.path },
-                                                                    query,
+                                                                    to_query_map(request),
                                                                     symbol_config_endpoint.signed_request);
 }
 
@@ -132,28 +126,9 @@ account_service::get_position_mode(callback_type<types::position_mode_response> 
 result<std::vector<types::income_history_entry>>
 account_service::income_history(const types::income_history_request& request)
 {
-    query_map query;
-    if (request.symbol) {
-        query["symbol"] = *request.symbol;
-    }
-    if (request.incomeType) {
-        query["incomeType"] = *request.incomeType;
-    }
-    if (request.startTime) {
-        query["startTime"] = std::to_string(*request.startTime);
-    }
-    if (request.endTime) {
-        query["endTime"] = std::to_string(*request.endTime);
-    }
-    if (request.page) {
-        query["page"] = std::to_string(*request.page);
-    }
-    if (request.limit) {
-        query["limit"] = std::to_string(*request.limit);
-    }
     return owner_.execute<std::vector<types::income_history_entry>>(income_history_endpoint.method,
                                                                     std::string{ income_history_endpoint.path },
-                                                                    query,
+                                                                    to_query_map(request),
                                                                     income_history_endpoint.signed_request);
 }
 
@@ -168,13 +143,9 @@ account_service::income_history(const types::income_history_request& request,
 result<std::vector<types::symbol_leverage_brackets>>
 account_service::leverage_brackets(const types::leverage_bracket_request& request)
 {
-    query_map query;
-    if (request.symbol) {
-        query["symbol"] = *request.symbol;
-    }
     return owner_.execute<std::vector<types::symbol_leverage_brackets>>(leverage_brackets_endpoint.method,
                                                                         std::string{ leverage_brackets_endpoint.path },
-                                                                        query,
+                                                                        to_query_map(request),
                                                                         leverage_brackets_endpoint.signed_request);
 }
 
@@ -189,11 +160,9 @@ account_service::leverage_brackets(const types::leverage_bracket_request& reques
 result<types::commission_rate_response>
 account_service::commission_rate(const types::commission_rate_request& request)
 {
-    query_map query;
-    query["symbol"] = request.symbol;
     return owner_.execute<types::commission_rate_response>(commission_rate_endpoint.method,
                                                            std::string{ commission_rate_endpoint.path },
-                                                           query,
+                                                           to_query_map(request),
                                                            commission_rate_endpoint.signed_request);
 }
 
@@ -223,12 +192,9 @@ account_service::rate_limit_order(callback_type<std::vector<types::rate_limit>> 
 result<types::download_id_response>
 account_service::download_id_transaction(const types::download_id_request& request)
 {
-    query_map query;
-    query["startTime"] = std::to_string(request.startTime);
-    query["endTime"] = std::to_string(request.endTime);
     return owner_.execute<types::download_id_response>(download_id_transaction_endpoint.method,
                                                        std::string{ download_id_transaction_endpoint.path },
-                                                       query,
+                                                       to_query_map(request),
                                                        download_id_transaction_endpoint.signed_request);
 }
 
@@ -243,11 +209,9 @@ account_service::download_id_transaction(const types::download_id_request& reque
 result<types::download_link_response>
 account_service::download_link_transaction(const types::download_link_request& request)
 {
-    query_map query;
-    query["downloadId"] = request.downloadId;
     return owner_.execute<types::download_link_response>(download_link_transaction_endpoint.method,
                                                          std::string{ download_link_transaction_endpoint.path },
-                                                         query,
+                                                         to_query_map(request),
                                                          download_link_transaction_endpoint.signed_request);
 }
 
@@ -263,12 +227,9 @@ account_service::download_link_transaction(const types::download_link_request& r
 result<types::download_id_response>
 account_service::download_id_order(const types::download_id_request& request)
 {
-    query_map query;
-    query["startTime"] = std::to_string(request.startTime);
-    query["endTime"] = std::to_string(request.endTime);
     return owner_.execute<types::download_id_response>(download_id_order_endpoint.method,
                                                        std::string{ download_id_order_endpoint.path },
-                                                       query,
+                                                       to_query_map(request),
                                                        download_id_order_endpoint.signed_request);
 }
 
@@ -283,11 +244,9 @@ account_service::download_id_order(const types::download_id_request& request,
 result<types::download_link_response>
 account_service::download_link_order(const types::download_link_request& request)
 {
-    query_map query;
-    query["downloadId"] = request.downloadId;
     return owner_.execute<types::download_link_response>(download_link_order_endpoint.method,
                                                          std::string{ download_link_order_endpoint.path },
-                                                         query,
+                                                         to_query_map(request),
                                                          download_link_order_endpoint.signed_request);
 }
 
@@ -302,12 +261,9 @@ account_service::download_link_order(const types::download_link_request& request
 result<types::download_id_response>
 account_service::download_id_trade(const types::download_id_request& request)
 {
-    query_map query;
-    query["startTime"] = std::to_string(request.startTime);
-    query["endTime"] = std::to_string(request.endTime);
     return owner_.execute<types::download_id_response>(download_id_trade_endpoint.method,
                                                        std::string{ download_id_trade_endpoint.path },
-                                                       query,
+                                                       to_query_map(request),
                                                        download_id_trade_endpoint.signed_request);
 }
 
@@ -322,11 +278,9 @@ account_service::download_id_trade(const types::download_id_request& request,
 result<types::download_link_response>
 account_service::download_link_trade(const types::download_link_request& request)
 {
-    query_map query;
-    query["downloadId"] = request.downloadId;
     return owner_.execute<types::download_link_response>(download_link_trade_endpoint.method,
                                                          std::string{ download_link_trade_endpoint.path },
-                                                         query,
+                                                         to_query_map(request),
                                                          download_link_trade_endpoint.signed_request);
 }
 
@@ -356,11 +310,9 @@ account_service::get_bnb_burn(callback_type<types::bnb_burn_status_response> cal
 result<types::bnb_burn_status_response>
 account_service::toggle_bnb_burn(const types::toggle_bnb_burn_request& request)
 {
-    query_map query;
-    query["feeBurn"] = request.feeBurn;
     return owner_.execute<types::bnb_burn_status_response>(toggle_bnb_burn_endpoint.method,
                                                            std::string{ toggle_bnb_burn_endpoint.path },
-                                                           query,
+                                                           to_query_map(request),
                                                            toggle_bnb_burn_endpoint.signed_request);
 }
 
@@ -375,13 +327,9 @@ account_service::toggle_bnb_burn(const types::toggle_bnb_burn_request& request,
 result<types::quantitative_rules_response>
 account_service::quantitative_rules(const types::quantitative_rules_request& request)
 {
-    query_map query;
-    if (request.symbol) {
-        query["symbol"] = *request.symbol;
-    }
     return owner_.execute<types::quantitative_rules_response>(quantitative_rules_endpoint.method,
                                                               std::string{ quantitative_rules_endpoint.path },
-                                                              query,
+                                                              to_query_map(request),
                                                               quantitative_rules_endpoint.signed_request);
 }
 
@@ -396,11 +344,9 @@ account_service::quantitative_rules(const types::quantitative_rules_request& req
 result<types::pm_account_info_response>
 account_service::pm_account_info(const types::pm_account_info_request& request)
 {
-    query_map query;
-    query["asset"] = request.asset;
     return owner_.execute<types::pm_account_info_response>(pm_account_info_endpoint.method,
                                                            std::string{ pm_account_info_endpoint.path },
-                                                           query,
+                                                           to_query_map(request),
                                                            pm_account_info_endpoint.signed_request);
 }
 

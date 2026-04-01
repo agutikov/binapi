@@ -4,6 +4,7 @@
 
 #include <binapi2/fapi/rest/market_data.hpp>
 
+#include <binapi2/fapi/query.hpp>
 #include <binapi2/fapi/rest/generated_endpoints.hpp>
 
 #include "common.hpp"
@@ -41,13 +42,9 @@ market_data_service::server_time(callback_type<types::server_time_response> call
 result<types::exchange_info_response>
 market_data_service::exchange_info(const types::exchange_info_request& request)
 {
-    query_map query;
-    if (request.symbol) {
-        query["symbol"] = *request.symbol;
-    }
     return owner_.execute<types::exchange_info_response>(exchange_info_endpoint.method,
                                                          std::string{ exchange_info_endpoint.path },
-                                                         query,
+                                                         to_query_map(request),
                                                          exchange_info_endpoint.signed_request);
 }
 
@@ -62,12 +59,8 @@ market_data_service::exchange_info(const types::exchange_info_request& request,
 result<types::order_book_response>
 market_data_service::order_book(const types::order_book_request& request)
 {
-    query_map query{ { "symbol", request.symbol } };
-    if (request.limit) {
-        query["limit"] = std::to_string(*request.limit);
-    }
     return owner_.execute<types::order_book_response>(
-        order_book_endpoint.method, std::string{ order_book_endpoint.path }, query, order_book_endpoint.signed_request);
+        order_book_endpoint.method, std::string{ order_book_endpoint.path }, to_query_map(request), order_book_endpoint.signed_request);
 }
 
 void
@@ -80,13 +73,9 @@ market_data_service::order_book(const types::order_book_request& request, callba
 result<std::vector<types::recent_trade>>
 market_data_service::recent_trades(const types::recent_trades_request& request)
 {
-    query_map query{ { "symbol", request.symbol } };
-    if (request.limit) {
-        query["limit"] = std::to_string(*request.limit);
-    }
     return owner_.execute<std::vector<types::recent_trade>>(recent_trades_endpoint.method,
                                                             std::string{ recent_trades_endpoint.path },
-                                                            query,
+                                                            to_query_map(request),
                                                             recent_trades_endpoint.signed_request);
 }
 
@@ -101,22 +90,9 @@ market_data_service::recent_trades(const types::recent_trades_request& request,
 result<std::vector<types::aggregate_trade>>
 market_data_service::aggregate_trades(const types::aggregate_trades_request& request)
 {
-    query_map query{ { "symbol", request.symbol } };
-    if (request.fromId) {
-        query["fromId"] = std::to_string(*request.fromId);
-    }
-    if (request.startTime) {
-        query["startTime"] = std::to_string(*request.startTime);
-    }
-    if (request.endTime) {
-        query["endTime"] = std::to_string(*request.endTime);
-    }
-    if (request.limit) {
-        query["limit"] = std::to_string(*request.limit);
-    }
     return owner_.execute<std::vector<types::aggregate_trade>>(aggregate_trades_endpoint.method,
                                                                std::string{ aggregate_trades_endpoint.path },
-                                                               query,
+                                                               to_query_map(request),
                                                                aggregate_trades_endpoint.signed_request);
 }
 
@@ -131,18 +107,8 @@ market_data_service::aggregate_trades(const types::aggregate_trades_request& req
 result<std::vector<types::kline>>
 market_data_service::klines(const types::kline_request& request)
 {
-    query_map query{ { "symbol", request.symbol }, { "interval", to_string(request.interval) } };
-    if (request.startTime) {
-        query["startTime"] = std::to_string(*request.startTime);
-    }
-    if (request.endTime) {
-        query["endTime"] = std::to_string(*request.endTime);
-    }
-    if (request.limit) {
-        query["limit"] = std::to_string(*request.limit);
-    }
     return owner_.execute<std::vector<types::kline>>(
-        klines_endpoint.method, std::string{ klines_endpoint.path }, query, klines_endpoint.signed_request);
+        klines_endpoint.method, std::string{ klines_endpoint.path }, to_query_map(request), klines_endpoint.signed_request);
 }
 
 void
@@ -155,21 +121,9 @@ market_data_service::klines(const types::kline_request& request, callback_type<s
 result<std::vector<types::kline>>
 market_data_service::continuous_klines(const types::continuous_kline_request& request)
 {
-    query_map query{ { "pair", request.pair },
-                     { "contractType", to_string(request.contractType) },
-                     { "interval", to_string(request.interval) } };
-    if (request.startTime) {
-        query["startTime"] = std::to_string(*request.startTime);
-    }
-    if (request.endTime) {
-        query["endTime"] = std::to_string(*request.endTime);
-    }
-    if (request.limit) {
-        query["limit"] = std::to_string(*request.limit);
-    }
     return owner_.execute<std::vector<types::kline>>(continuous_klines_endpoint.method,
                                                      std::string{ continuous_klines_endpoint.path },
-                                                     query,
+                                                     to_query_map(request),
                                                      continuous_klines_endpoint.signed_request);
 }
 
@@ -184,19 +138,9 @@ market_data_service::continuous_klines(const types::continuous_kline_request& re
 result<std::vector<types::kline>>
 market_data_service::index_price_klines(const types::index_price_kline_request& request)
 {
-    query_map query{ { "pair", request.pair }, { "interval", to_string(request.interval) } };
-    if (request.startTime) {
-        query["startTime"] = std::to_string(*request.startTime);
-    }
-    if (request.endTime) {
-        query["endTime"] = std::to_string(*request.endTime);
-    }
-    if (request.limit) {
-        query["limit"] = std::to_string(*request.limit);
-    }
     return owner_.execute<std::vector<types::kline>>(index_price_klines_endpoint.method,
                                                      std::string{ index_price_klines_endpoint.path },
-                                                     query,
+                                                     to_query_map(request),
                                                      index_price_klines_endpoint.signed_request);
 }
 
@@ -211,19 +155,9 @@ market_data_service::index_price_klines(const types::index_price_kline_request& 
 result<std::vector<types::kline>>
 market_data_service::mark_price_klines(const types::kline_request& request)
 {
-    query_map query{ { "symbol", request.symbol }, { "interval", to_string(request.interval) } };
-    if (request.startTime) {
-        query["startTime"] = std::to_string(*request.startTime);
-    }
-    if (request.endTime) {
-        query["endTime"] = std::to_string(*request.endTime);
-    }
-    if (request.limit) {
-        query["limit"] = std::to_string(*request.limit);
-    }
     return owner_.execute<std::vector<types::kline>>(mark_price_klines_endpoint.method,
                                                      std::string{ mark_price_klines_endpoint.path },
-                                                     query,
+                                                     to_query_map(request),
                                                      mark_price_klines_endpoint.signed_request);
 }
 
@@ -237,19 +171,9 @@ market_data_service::mark_price_klines(const types::kline_request& request, call
 result<std::vector<types::kline>>
 market_data_service::premium_index_klines(const types::kline_request& request)
 {
-    query_map query{ { "symbol", request.symbol }, { "interval", to_string(request.interval) } };
-    if (request.startTime) {
-        query["startTime"] = std::to_string(*request.startTime);
-    }
-    if (request.endTime) {
-        query["endTime"] = std::to_string(*request.endTime);
-    }
-    if (request.limit) {
-        query["limit"] = std::to_string(*request.limit);
-    }
     return owner_.execute<std::vector<types::kline>>(premium_index_klines_endpoint.method,
                                                      std::string{ premium_index_klines_endpoint.path },
-                                                     query,
+                                                     to_query_map(request),
                                                      premium_index_klines_endpoint.signed_request);
 }
 
@@ -264,12 +188,8 @@ market_data_service::premium_index_klines(const types::kline_request& request,
 result<types::book_ticker>
 market_data_service::book_ticker(const types::book_ticker_request& request)
 {
-    query_map query;
-    if (request.symbol) {
-        query["symbol"] = *request.symbol;
-    }
     return owner_.execute<types::book_ticker>(
-        book_ticker_endpoint.method, std::string{ book_ticker_endpoint.path }, query, book_ticker_endpoint.signed_request);
+        book_ticker_endpoint.method, std::string{ book_ticker_endpoint.path }, to_query_map(request), book_ticker_endpoint.signed_request);
 }
 
 void
@@ -295,12 +215,8 @@ market_data_service::book_tickers(callback_type<std::vector<types::book_ticker>>
 result<types::price_ticker>
 market_data_service::price_ticker(const types::price_ticker_request& request)
 {
-    query_map query;
-    if (request.symbol) {
-        query["symbol"] = *request.symbol;
-    }
     return owner_.execute<types::price_ticker>(
-        price_ticker_endpoint.method, std::string{ price_ticker_endpoint.path }, query, price_ticker_endpoint.signed_request);
+        price_ticker_endpoint.method, std::string{ price_ticker_endpoint.path }, to_query_map(request), price_ticker_endpoint.signed_request);
 }
 
 void
@@ -326,12 +242,8 @@ market_data_service::price_tickers(callback_type<std::vector<types::price_ticker
 result<types::ticker_24hr>
 market_data_service::ticker_24hr(const types::ticker_24hr_request& request)
 {
-    query_map query;
-    if (request.symbol) {
-        query["symbol"] = *request.symbol;
-    }
     return owner_.execute<types::ticker_24hr>(
-        ticker_24hr_endpoint.method, std::string{ ticker_24hr_endpoint.path }, query, ticker_24hr_endpoint.signed_request);
+        ticker_24hr_endpoint.method, std::string{ ticker_24hr_endpoint.path }, to_query_map(request), ticker_24hr_endpoint.signed_request);
 }
 
 void
@@ -357,12 +269,8 @@ market_data_service::ticker_24hrs(callback_type<std::vector<types::ticker_24hr>>
 result<types::mark_price>
 market_data_service::mark_price(const types::mark_price_request& request)
 {
-    query_map query;
-    if (request.symbol) {
-        query["symbol"] = *request.symbol;
-    }
     return owner_.execute<types::mark_price>(
-        mark_price_endpoint.method, std::string{ mark_price_endpoint.path }, query, mark_price_endpoint.signed_request);
+        mark_price_endpoint.method, std::string{ mark_price_endpoint.path }, to_query_map(request), mark_price_endpoint.signed_request);
 }
 
 void
@@ -388,22 +296,9 @@ market_data_service::mark_prices(callback_type<std::vector<types::mark_price>> c
 result<std::vector<types::funding_rate_history_entry>>
 market_data_service::funding_rate_history(const types::funding_rate_history_request& request)
 {
-    query_map query;
-    if (request.symbol) {
-        query["symbol"] = *request.symbol;
-    }
-    if (request.startTime) {
-        query["startTime"] = std::to_string(*request.startTime);
-    }
-    if (request.endTime) {
-        query["endTime"] = std::to_string(*request.endTime);
-    }
-    if (request.limit) {
-        query["limit"] = std::to_string(*request.limit);
-    }
     return owner_.execute<std::vector<types::funding_rate_history_entry>>(funding_rate_history_endpoint.method,
                                                                           std::string{ funding_rate_history_endpoint.path },
-                                                                          query,
+                                                                          to_query_map(request),
                                                                           funding_rate_history_endpoint.signed_request);
 }
 
@@ -435,7 +330,7 @@ market_data_service::open_interest(const types::open_interest_request& request)
 {
     return owner_.execute<types::open_interest>(open_interest_endpoint.method,
                                                 std::string{ open_interest_endpoint.path },
-                                                { { "symbol", request.symbol } },
+                                                to_query_map(request),
                                                 open_interest_endpoint.signed_request);
 }
 
@@ -452,7 +347,7 @@ market_data_service::open_interest_statistics(const types::futures_data_request&
     return owner_.execute<std::vector<types::open_interest_statistics_entry>>(
         open_interest_statistics_endpoint.method,
         std::string{ open_interest_statistics_endpoint.path },
-        detail::make_futures_data_query(request),
+        to_query_map(request),
         open_interest_statistics_endpoint.signed_request);
 }
 
@@ -469,7 +364,7 @@ market_data_service::top_long_short_account_ratio(const types::futures_data_requ
 {
     return owner_.execute<std::vector<types::long_short_ratio_entry>>(top_long_short_account_ratio_endpoint.method,
                                                                       std::string{ top_long_short_account_ratio_endpoint.path },
-                                                                      detail::make_futures_data_query(request),
+                                                                      to_query_map(request),
                                                                       top_long_short_account_ratio_endpoint.signed_request);
 }
 
@@ -487,7 +382,7 @@ market_data_service::top_trader_long_short_ratio(const types::futures_data_reque
 {
     return owner_.execute<std::vector<types::long_short_ratio_entry>>(top_trader_long_short_ratio_endpoint.method,
                                                                       std::string{ top_trader_long_short_ratio_endpoint.path },
-                                                                      detail::make_futures_data_query(request),
+                                                                      to_query_map(request),
                                                                       top_trader_long_short_ratio_endpoint.signed_request);
 }
 
@@ -505,7 +400,7 @@ market_data_service::long_short_ratio(const types::futures_data_request& request
 {
     return owner_.execute<std::vector<types::long_short_ratio_entry>>(long_short_ratio_endpoint.method,
                                                                       std::string{ long_short_ratio_endpoint.path },
-                                                                      detail::make_futures_data_query(request),
+                                                                      to_query_map(request),
                                                                       long_short_ratio_endpoint.signed_request);
 }
 
@@ -522,7 +417,7 @@ market_data_service::taker_buy_sell_volume(const types::futures_data_request& re
 {
     return owner_.execute<std::vector<types::taker_buy_sell_volume_entry>>(taker_buy_sell_volume_endpoint.method,
                                                                            std::string{ taker_buy_sell_volume_endpoint.path },
-                                                                           detail::make_futures_data_query(request),
+                                                                           to_query_map(request),
                                                                            taker_buy_sell_volume_endpoint.signed_request);
 }
 
@@ -537,16 +432,9 @@ market_data_service::taker_buy_sell_volume(const types::futures_data_request& re
 result<std::vector<types::recent_trade>>
 market_data_service::historical_trades(const types::historical_trades_request& request)
 {
-    query_map query{ { "symbol", request.symbol } };
-    if (request.limit) {
-        query["limit"] = std::to_string(*request.limit);
-    }
-    if (request.fromId) {
-        query["fromId"] = std::to_string(*request.fromId);
-    }
     return owner_.execute<std::vector<types::recent_trade>>(historical_trades_endpoint.method,
                                                             std::string{ historical_trades_endpoint.path },
-                                                            query,
+                                                            to_query_map(request),
                                                             historical_trades_endpoint.signed_request);
 }
 
@@ -561,18 +449,8 @@ market_data_service::historical_trades(const types::historical_trades_request& r
 result<std::vector<types::basis_entry>>
 market_data_service::basis(const types::basis_request& request)
 {
-    query_map query{ { "pair", request.pair }, { "contractType", to_string(request.contractType) }, { "period", to_string(request.period) } };
-    if (request.limit) {
-        query["limit"] = std::to_string(*request.limit);
-    }
-    if (request.startTime) {
-        query["startTime"] = std::to_string(*request.startTime);
-    }
-    if (request.endTime) {
-        query["endTime"] = std::to_string(*request.endTime);
-    }
     return owner_.execute<std::vector<types::basis_entry>>(
-        basis_endpoint.method, std::string{ basis_endpoint.path }, query, basis_endpoint.signed_request);
+        basis_endpoint.method, std::string{ basis_endpoint.path }, to_query_map(request), basis_endpoint.signed_request);
 }
 
 void
@@ -585,13 +463,9 @@ market_data_service::basis(const types::basis_request& request, callback_type<st
 result<types::price_ticker>
 market_data_service::price_ticker_v2(const types::price_ticker_v2_request& request)
 {
-    query_map query;
-    if (request.symbol) {
-        query["symbol"] = *request.symbol;
-    }
     return owner_.execute<types::price_ticker>(price_ticker_v2_endpoint.method,
                                                    std::string{ price_ticker_v2_endpoint.path },
-                                                   query,
+                                                   to_query_map(request),
                                                    price_ticker_v2_endpoint.signed_request);
 }
 
@@ -621,10 +495,9 @@ market_data_service::price_tickers_v2(callback_type<std::vector<types::price_tic
 result<std::vector<types::delivery_price_entry>>
 market_data_service::delivery_price(const types::delivery_price_request& request)
 {
-    query_map query{ { "pair", request.pair } };
     return owner_.execute<std::vector<types::delivery_price_entry>>(delivery_price_endpoint.method,
                                                                      std::string{ delivery_price_endpoint.path },
-                                                                     query,
+                                                                     to_query_map(request),
                                                                      delivery_price_endpoint.signed_request);
 }
 
@@ -639,13 +512,9 @@ market_data_service::delivery_price(const types::delivery_price_request& request
 result<std::vector<types::composite_index_info>>
 market_data_service::composite_index_info(const types::composite_index_info_request& request)
 {
-    query_map query;
-    if (request.symbol) {
-        query["symbol"] = *request.symbol;
-    }
     return owner_.execute<std::vector<types::composite_index_info>>(composite_index_info_endpoint.method,
                                                                      std::string{ composite_index_info_endpoint.path },
-                                                                     query,
+                                                                     to_query_map(request),
                                                                      composite_index_info_endpoint.signed_request);
 }
 
@@ -660,10 +529,9 @@ market_data_service::composite_index_info(const types::composite_index_info_requ
 result<types::index_constituents_response>
 market_data_service::index_constituents(const types::index_constituents_request& request)
 {
-    query_map query{ { "symbol", request.symbol } };
     return owner_.execute<types::index_constituents_response>(index_constituents_endpoint.method,
                                                               std::string{ index_constituents_endpoint.path },
-                                                              query,
+                                                              to_query_map(request),
                                                               index_constituents_endpoint.signed_request);
 }
 
@@ -678,13 +546,9 @@ market_data_service::index_constituents(const types::index_constituents_request&
 result<std::vector<types::asset_index>>
 market_data_service::asset_index(const types::asset_index_request& request)
 {
-    query_map query;
-    if (request.symbol) {
-        query["symbol"] = *request.symbol;
-    }
     return owner_.execute<std::vector<types::asset_index>>(asset_index_endpoint.method,
                                                                   std::string{ asset_index_endpoint.path },
-                                                                  query,
+                                                                  to_query_map(request),
                                                                   asset_index_endpoint.signed_request);
 }
 
@@ -699,13 +563,9 @@ market_data_service::asset_index(const types::asset_index_request& request,
 result<types::insurance_fund_response>
 market_data_service::insurance_fund(const types::insurance_fund_request& request)
 {
-    query_map query;
-    if (request.symbol) {
-        query["symbol"] = *request.symbol;
-    }
     return owner_.execute<types::insurance_fund_response>(insurance_fund_endpoint.method,
                                                                      std::string{ insurance_fund_endpoint.path },
-                                                                     query,
+                                                                     to_query_map(request),
                                                                      insurance_fund_endpoint.signed_request);
 }
 
@@ -720,12 +580,8 @@ market_data_service::insurance_fund(const types::insurance_fund_request& request
 result<std::vector<types::adl_risk_entry>>
 market_data_service::adl_risk(const types::adl_risk_request& request)
 {
-    query_map query;
-    if (request.symbol) {
-        query["symbol"] = *request.symbol;
-    }
     return owner_.execute<std::vector<types::adl_risk_entry>>(
-        adl_risk_endpoint.method, std::string{ adl_risk_endpoint.path }, query, adl_risk_endpoint.signed_request);
+        adl_risk_endpoint.method, std::string{ adl_risk_endpoint.path }, to_query_map(request), adl_risk_endpoint.signed_request);
 }
 
 void
@@ -738,9 +594,8 @@ market_data_service::adl_risk(const types::adl_risk_request& request, callback_t
 result<types::order_book_response>
 market_data_service::rpi_depth(const types::rpi_depth_request& request)
 {
-    query_map query{ { "symbol", request.symbol } };
     return owner_.execute<types::order_book_response>(
-        rpi_depth_endpoint.method, std::string{ rpi_depth_endpoint.path }, query, rpi_depth_endpoint.signed_request);
+        rpi_depth_endpoint.method, std::string{ rpi_depth_endpoint.path }, to_query_map(request), rpi_depth_endpoint.signed_request);
 }
 
 void
