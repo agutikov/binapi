@@ -4,9 +4,10 @@
 
 #include <binapi2/fapi/rest/trade.hpp>
 
+#include <binapi2/fapi/client.hpp>
 #include <binapi2/fapi/rest/generated_endpoints.hpp>
 
-#include "common.hpp"
+#include <boost/cobalt/task.hpp>
 
 namespace binapi2::fapi::rest {
 
@@ -17,11 +18,10 @@ trade_service::test_order(const types::test_new_order_request& request)
         test_order_endpoint.method, std::string{ test_order_endpoint.path }, to_query_map(request), test_order_endpoint.signed_request);
 }
 
-void
-trade_service::test_order(const types::test_new_order_request& request, callback_type<types::order_response> callback)
+boost::cobalt::task<result<types::order_response>>
+trade_service::async_test_order(const types::new_order_request& request)
 {
-    detail::post_callback(owner_.context(),
-                          [this, request, callback = std::move(callback)]() mutable { callback(test_order(request)); });
+    co_return test_order(request);
 }
 
 result<std::vector<types::order_response>>
@@ -31,12 +31,10 @@ trade_service::batch_orders(const types::batch_orders_request& request)
         batch_orders_endpoint.method, std::string{ batch_orders_endpoint.path }, to_query_map(request), batch_orders_endpoint.signed_request);
 }
 
-void
-trade_service::batch_orders(const types::batch_orders_request& request,
-                            callback_type<std::vector<types::order_response>> callback)
+boost::cobalt::task<result<std::vector<types::order_response>>>
+trade_service::async_batch_orders(const types::batch_orders_request& request)
 {
-    detail::post_callback(owner_.context(),
-                          [this, request, callback = std::move(callback)]() mutable { callback(batch_orders(request)); });
+    co_return batch_orders(request);
 }
 
 result<std::vector<types::order_response>>
@@ -49,13 +47,10 @@ trade_service::modify_batch_orders(const types::batch_orders_request& request)
                                                               modify_batch_orders_endpoint.signed_request);
 }
 
-void
-trade_service::modify_batch_orders(const types::batch_orders_request& request,
-                                   callback_type<std::vector<types::order_response>> callback)
+boost::cobalt::task<result<std::vector<types::order_response>>>
+trade_service::async_modify_batch_orders(const types::batch_orders_request& request)
 {
-    detail::post_callback(
-        owner_.context(),
-        [this, request, callback = std::move(callback)]() mutable { callback(modify_batch_orders(request)); });
+    co_return modify_batch_orders(request);
 }
 
 result<std::vector<types::order_response>>
@@ -86,13 +81,10 @@ trade_service::cancel_batch_orders(const types::cancel_multiple_orders_request& 
                                                               cancel_batch_orders_endpoint.signed_request);
 }
 
-void
-trade_service::cancel_batch_orders(const types::cancel_multiple_orders_request& request,
-                                   callback_type<std::vector<types::order_response>> callback)
+boost::cobalt::task<result<std::vector<types::order_response>>>
+trade_service::async_cancel_batch_orders(const types::cancel_multiple_orders_request& request)
 {
-    detail::post_callback(
-        owner_.context(),
-        [this, request, callback = std::move(callback)]() mutable { callback(cancel_batch_orders(request)); });
+    co_return cancel_batch_orders(request);
 }
 
 result<std::vector<types::algo_order_response>>
@@ -105,10 +97,10 @@ trade_service::open_algo_orders()
                                                                    open_algo_orders_endpoint.signed_request);
 }
 
-void
-trade_service::open_algo_orders(callback_type<std::vector<types::algo_order_response>> callback)
+boost::cobalt::task<result<std::vector<types::algo_order_response>>>
+trade_service::async_open_algo_orders()
 {
-    detail::post_callback(owner_.context(), [this, callback = std::move(callback)]() mutable { callback(open_algo_orders()); });
+    co_return open_algo_orders();
 }
 
 result<types::code_msg_response>
@@ -121,11 +113,10 @@ trade_service::cancel_all_algo_orders()
                                                     cancel_all_algo_orders_endpoint.signed_request);
 }
 
-void
-trade_service::cancel_all_algo_orders(callback_type<types::code_msg_response> callback)
+boost::cobalt::task<result<types::code_msg_response>>
+trade_service::async_cancel_all_algo_orders()
 {
-    detail::post_callback(owner_.context(),
-                          [this, callback = std::move(callback)]() mutable { callback(cancel_all_algo_orders()); });
+    co_return cancel_all_algo_orders();
 }
 
 result<types::code_msg_response>
@@ -136,11 +127,10 @@ trade_service::tradfi_perps(const types::tradfi_perps_request& /*request*/)
         tradfi_perps_endpoint.method, std::string{ tradfi_perps_endpoint.path }, query, tradfi_perps_endpoint.signed_request);
 }
 
-void
-trade_service::tradfi_perps(const types::tradfi_perps_request& request, callback_type<types::code_msg_response> callback)
+boost::cobalt::task<result<types::code_msg_response>>
+trade_service::async_tradfi_perps(const types::tradfi_perps_request& request)
 {
-    detail::post_callback(owner_.context(),
-                          [this, request, callback = std::move(callback)]() mutable { callback(tradfi_perps(request)); });
+    co_return tradfi_perps(request);
 }
 
 } // namespace binapi2::fapi::rest

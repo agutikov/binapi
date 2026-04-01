@@ -7,7 +7,7 @@
 #include <binapi2/fapi/rest/endpoint_traits.hpp>
 #include <binapi2/fapi/result.hpp>
 
-#include <functional>
+#include <boost/cobalt/task.hpp>
 
 namespace binapi2::fapi {
 class client;
@@ -18,18 +18,18 @@ namespace binapi2::fapi::rest {
 class service
 {
 public:
-    template<typename T>
-    using callback_type = std::function<void(result<T>)>;
-
     explicit service(client& owner) noexcept : owner_(owner) {}
 
+    // Sync execute.
     template<class Request>
         requires has_endpoint_traits<Request>
     [[nodiscard]] auto execute(const Request& request) -> result<typename endpoint_traits<Request>::response_type>;
 
+    // Async execute.
     template<class Request>
         requires has_endpoint_traits<Request>
-    void async_execute(const Request& request, callback_type<typename endpoint_traits<Request>::response_type> callback);
+    [[nodiscard]] auto async_execute(const Request& request)
+        -> boost::cobalt::task<result<typename endpoint_traits<Request>::response_type>>;
 
 protected:
     client& owner_;

@@ -7,6 +7,8 @@
 #include <binapi2/fapi/rest/service.hpp>
 #include <binapi2/fapi/types/market_data.hpp>
 
+#include <boost/cobalt/task.hpp>
+
 #include <vector>
 
 namespace binapi2::fapi::rest {
@@ -46,46 +48,46 @@ public:
     // Methods for shared request types (kline_request used by 3 endpoints,
     // futures_data_request used by 5 endpoints).
     [[nodiscard]] result<std::vector<types::kline>> klines(const types::kline_request& request);
-    void klines(const types::kline_request& request, callback_type<std::vector<types::kline>> callback);
+    [[nodiscard]] boost::cobalt::task<result<std::vector<types::kline>>> async_klines(const types::kline_request& request);
     [[nodiscard]] result<std::vector<types::kline>> mark_price_klines(const types::kline_request& request);
-    void mark_price_klines(const types::kline_request& request, callback_type<std::vector<types::kline>> callback);
+    [[nodiscard]] boost::cobalt::task<result<std::vector<types::kline>>> async_mark_price_klines(const types::kline_request& request);
     [[nodiscard]] result<std::vector<types::kline>> premium_index_klines(const types::kline_request& request);
-    void premium_index_klines(const types::kline_request& request, callback_type<std::vector<types::kline>> callback);
+    [[nodiscard]] boost::cobalt::task<result<std::vector<types::kline>>> async_premium_index_klines(const types::kline_request& request);
 
     [[nodiscard]] result<std::vector<types::open_interest_statistics_entry>> open_interest_statistics(
         const types::futures_data_request& request);
-    void open_interest_statistics(const types::futures_data_request& request,
-                                  callback_type<std::vector<types::open_interest_statistics_entry>> callback);
+    [[nodiscard]] boost::cobalt::task<result<std::vector<types::open_interest_statistics_entry>>> async_open_interest_statistics(
+        const types::futures_data_request& request);
     [[nodiscard]] result<std::vector<types::long_short_ratio_entry>> top_long_short_account_ratio(
         const types::futures_data_request& request);
-    void top_long_short_account_ratio(const types::futures_data_request& request,
-                                      callback_type<std::vector<types::long_short_ratio_entry>> callback);
+    [[nodiscard]] boost::cobalt::task<result<std::vector<types::long_short_ratio_entry>>> async_top_long_short_account_ratio(
+        const types::futures_data_request& request);
     [[nodiscard]] result<std::vector<types::long_short_ratio_entry>> top_trader_long_short_ratio(
         const types::futures_data_request& request);
-    void top_trader_long_short_ratio(const types::futures_data_request& request,
-                                     callback_type<std::vector<types::long_short_ratio_entry>> callback);
+    [[nodiscard]] boost::cobalt::task<result<std::vector<types::long_short_ratio_entry>>> async_top_trader_long_short_ratio(
+        const types::futures_data_request& request);
     [[nodiscard]] result<std::vector<types::long_short_ratio_entry>> long_short_ratio(
         const types::futures_data_request& request);
-    void long_short_ratio(const types::futures_data_request& request,
-                          callback_type<std::vector<types::long_short_ratio_entry>> callback);
+    [[nodiscard]] boost::cobalt::task<result<std::vector<types::long_short_ratio_entry>>> async_long_short_ratio(
+        const types::futures_data_request& request);
     [[nodiscard]] result<std::vector<types::taker_buy_sell_volume_entry>> taker_buy_sell_volume(
         const types::futures_data_request& request);
-    void taker_buy_sell_volume(const types::futures_data_request& request,
-                               callback_type<std::vector<types::taker_buy_sell_volume_entry>> callback);
+    [[nodiscard]] boost::cobalt::task<result<std::vector<types::taker_buy_sell_volume_entry>>> async_taker_buy_sell_volume(
+        const types::futures_data_request& request);
 
     // Parameterless list endpoints (no request type).
     [[nodiscard]] result<std::vector<types::book_ticker>> book_tickers();
-    void book_tickers(callback_type<std::vector<types::book_ticker>> callback);
+    [[nodiscard]] boost::cobalt::task<result<std::vector<types::book_ticker>>> async_book_tickers();
     [[nodiscard]] result<std::vector<types::price_ticker>> price_tickers();
-    void price_tickers(callback_type<std::vector<types::price_ticker>> callback);
+    [[nodiscard]] boost::cobalt::task<result<std::vector<types::price_ticker>>> async_price_tickers();
     [[nodiscard]] result<std::vector<types::price_ticker>> price_tickers_v2();
-    void price_tickers_v2(callback_type<std::vector<types::price_ticker>> callback);
+    [[nodiscard]] boost::cobalt::task<result<std::vector<types::price_ticker>>> async_price_tickers_v2();
     [[nodiscard]] result<std::vector<types::ticker_24hr>> ticker_24hrs();
-    void ticker_24hrs(callback_type<std::vector<types::ticker_24hr>> callback);
+    [[nodiscard]] boost::cobalt::task<result<std::vector<types::ticker_24hr>>> async_ticker_24hrs();
     [[nodiscard]] result<std::vector<types::mark_price>> mark_prices();
-    void mark_prices(callback_type<std::vector<types::mark_price>> callback);
+    [[nodiscard]] boost::cobalt::task<result<std::vector<types::mark_price>>> async_mark_prices();
     [[nodiscard]] result<std::vector<types::funding_rate_info>> funding_rate_info();
-    void funding_rate_info(callback_type<std::vector<types::funding_rate_info>> callback);
+    [[nodiscard]] boost::cobalt::task<result<std::vector<types::funding_rate_info>>> async_funding_rate_info();
 };
 
 } // namespace binapi2::fapi::rest

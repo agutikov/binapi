@@ -39,7 +39,6 @@ set(BINAPI2_FAPI_HEADERS
 set(BINAPI2_FAPI_SOURCES
     client.cpp
     rest/account.cpp
-    rest/common.cpp
     rest/convert.cpp
     rest/market_data.cpp
     rest/trade.cpp
@@ -65,10 +64,13 @@ target_include_directories(binapi2_fapi
         ${CMAKE_SOURCE_DIR}/include
 )
 
+find_package(Boost REQUIRED COMPONENTS cobalt)
+
 target_link_libraries(
     binapi2_fapi
     PUBLIC
         glaze::glaze
+        Boost::cobalt
         ZLIB::ZLIB
         OpenSSL::Crypto
         OpenSSL::SSL

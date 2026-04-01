@@ -11,8 +11,8 @@
 #include <binapi2/fapi/websocket_api/endpoint_traits.hpp>
 
 #include <boost/asio/io_context.hpp>
+#include <boost/cobalt/task.hpp>
 
-#include <functional>
 #include <string>
 #include <type_traits>
 
@@ -21,18 +21,15 @@ namespace binapi2::fapi::websocket_api {
 class client
 {
 public:
-    template<typename T>
-    using callback_type = std::function<void(result<T>)>;
-
     client(boost::asio::io_context& io_context, config cfg);
 
+    // Connection.
     [[nodiscard]] result<void> connect();
-    void connect(callback_type<void> callback);
+    [[nodiscard]] boost::cobalt::task<result<void>> async_connect();
     [[nodiscard]] result<void> close();
-    void close(callback_type<void> callback);
+    [[nodiscard]] boost::cobalt::task<result<void>> async_close();
 
     // Generic execute for request types with ws endpoint traits.
-    // Injects auth for signed requests (those inheriting from websocket_api_signed_request).
     template<class Request>
         requires has_ws_endpoint_traits<Request>
     [[nodiscard]] auto execute(const Request& request)
@@ -40,35 +37,34 @@ public:
 
     template<class Request>
         requires has_ws_endpoint_traits<Request>
-    void async_execute(
-        const Request& request,
-        callback_type<types::websocket_api_response<typename endpoint_traits<Request>::response_type>> callback);
+    [[nodiscard]] auto async_execute(const Request& request)
+        -> boost::cobalt::task<result<types::websocket_api_response<typename endpoint_traits<Request>::response_type>>>;
 
-    // Session logon (unique auth flow, not generic).
+    // Session logon (unique auth flow).
     [[nodiscard]] result<types::websocket_api_response<types::session_logon_result>> session_logon();
-    void session_logon(callback_type<types::websocket_api_response<types::session_logon_result>> callback);
+    [[nodiscard]] boost::cobalt::task<result<types::websocket_api_response<types::session_logon_result>>> async_session_logon();
 
     // Parameterless signed endpoints.
     [[nodiscard]] result<types::websocket_api_response<types::account_information>> account_status();
-    void account_status(callback_type<types::websocket_api_response<types::account_information>> callback);
+    [[nodiscard]] boost::cobalt::task<result<types::websocket_api_response<types::account_information>>> async_account_status();
     [[nodiscard]] result<types::websocket_api_response<types::account_information>> account_status_v2();
-    void account_status_v2(callback_type<types::websocket_api_response<types::account_information>> callback);
+    [[nodiscard]] boost::cobalt::task<result<types::websocket_api_response<types::account_information>>> async_account_status_v2();
     [[nodiscard]] result<types::websocket_api_response<std::vector<types::futures_account_balance>>> account_balance();
-    void account_balance(callback_type<types::websocket_api_response<std::vector<types::futures_account_balance>>> callback);
+    [[nodiscard]] boost::cobalt::task<result<types::websocket_api_response<std::vector<types::futures_account_balance>>>> async_account_balance();
 
-    // Shared request type: position_risk_request used by v1 and v2.
+    // Shared request type: position used by v1 and v2.
     [[nodiscard]] result<types::websocket_api_response<std::vector<types::position_risk>>>
     account_position_v2(const types::websocket_api_position_request& request);
-    void account_position_v2(const types::websocket_api_position_request& request,
-                             callback_type<types::websocket_api_response<std::vector<types::position_risk>>> callback);
+    [[nodiscard]] boost::cobalt::task<result<types::websocket_api_response<std::vector<types::position_risk>>>>
+    async_account_position_v2(const types::websocket_api_position_request& request);
 
     // Shared request type: user_data_stream used by start/ping/stop.
     [[nodiscard]] result<types::websocket_api_response<types::websocket_api_listen_key_result>> user_data_stream_start();
-    void user_data_stream_start(callback_type<types::websocket_api_response<types::websocket_api_listen_key_result>> callback);
+    [[nodiscard]] boost::cobalt::task<result<types::websocket_api_response<types::websocket_api_listen_key_result>>> async_user_data_stream_start();
     [[nodiscard]] result<types::websocket_api_response<types::websocket_api_listen_key_result>> user_data_stream_ping();
-    void user_data_stream_ping(callback_type<types::websocket_api_response<types::websocket_api_listen_key_result>> callback);
+    [[nodiscard]] boost::cobalt::task<result<types::websocket_api_response<types::websocket_api_listen_key_result>>> async_user_data_stream_ping();
     [[nodiscard]] result<types::websocket_api_response<types::empty_response>> user_data_stream_stop();
-    void user_data_stream_stop(callback_type<types::websocket_api_response<types::empty_response>> callback);
+    [[nodiscard]] boost::cobalt::task<result<types::websocket_api_response<types::empty_response>>> async_user_data_stream_stop();
 
     // Request type aliases for generic execute.
     using book_ticker_request = types::websocket_api_book_ticker_request;
@@ -88,7 +84,6 @@ private:
     std::string next_id();
     std::uint64_t id_counter_{};
 
-    // Internal helpers.
     template<typename Response, typename Params>
     result<types::websocket_api_response<Response>>
     send_rpc(std::string_view method, const Params& params);

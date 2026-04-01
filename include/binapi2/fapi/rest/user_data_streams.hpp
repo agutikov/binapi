@@ -7,7 +7,7 @@
 #include <binapi2/fapi/result.hpp>
 #include <binapi2/fapi/types/common.hpp>
 
-#include <functional>
+#include <boost/cobalt/task.hpp>
 
 namespace binapi2::fapi {
 class client;
@@ -18,17 +18,14 @@ namespace binapi2::fapi::rest {
 class user_data_stream_service
 {
 public:
-    template<typename T>
-    using callback_type = std::function<void(result<T>)>;
-
     explicit user_data_stream_service(client& owner) noexcept;
 
     [[nodiscard]] result<types::listen_key_response> start();
-    void start(callback_type<types::listen_key_response> callback);
+    [[nodiscard]] boost::cobalt::task<result<types::listen_key_response>> async_start();
     [[nodiscard]] result<types::listen_key_response> keepalive();
-    void keepalive(callback_type<types::listen_key_response> callback);
+    [[nodiscard]] boost::cobalt::task<result<types::listen_key_response>> async_keepalive();
     [[nodiscard]] result<types::empty_response> close();
-    void close(callback_type<types::empty_response> callback);
+    [[nodiscard]] boost::cobalt::task<result<types::empty_response>> async_close();
 
 private:
     client& owner_;

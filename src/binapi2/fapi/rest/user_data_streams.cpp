@@ -4,9 +4,10 @@
 
 #include <binapi2/fapi/rest/user_data_streams.hpp>
 
+#include <binapi2/fapi/client.hpp>
 #include <binapi2/fapi/rest/generated_endpoints.hpp>
 
-#include "common.hpp"
+#include <boost/cobalt/task.hpp>
 
 namespace binapi2::fapi::rest {
 
@@ -21,10 +22,10 @@ user_data_stream_service::start()
                                                       start_listen_key_endpoint.signed_request);
 }
 
-void
-user_data_stream_service::start(callback_type<types::listen_key_response> callback)
+boost::cobalt::task<result<types::listen_key_response>>
+user_data_stream_service::async_start()
 {
-    detail::post_callback(owner_.context(), [this, callback = std::move(callback)]() mutable { callback(start()); });
+    co_return start();
 }
 
 result<types::listen_key_response>
@@ -36,10 +37,10 @@ user_data_stream_service::keepalive()
                                                       keepalive_listen_key_endpoint.signed_request);
 }
 
-void
-user_data_stream_service::keepalive(callback_type<types::listen_key_response> callback)
+boost::cobalt::task<result<types::listen_key_response>>
+user_data_stream_service::async_keepalive()
 {
-    detail::post_callback(owner_.context(), [this, callback = std::move(callback)]() mutable { callback(keepalive()); });
+    co_return keepalive();
 }
 
 result<types::empty_response>
@@ -51,10 +52,10 @@ user_data_stream_service::close()
                                                  close_listen_key_endpoint.signed_request);
 }
 
-void
-user_data_stream_service::close(callback_type<types::empty_response> callback)
+boost::cobalt::task<result<types::empty_response>>
+user_data_stream_service::async_close()
 {
-    detail::post_callback(owner_.context(), [this, callback = std::move(callback)]() mutable { callback(close()); });
+    co_return close();
 }
 
 } // namespace binapi2::fapi::rest

@@ -165,13 +165,11 @@ client::execute(const Request& request)
 
 template<class Request>
     requires has_ws_endpoint_traits<Request>
-void
-client::async_execute(
-    const Request& request,
-    callback_type<types::websocket_api_response<typename endpoint_traits<Request>::response_type>> callback)
+auto
+client::async_execute(const Request& request)
+    -> boost::cobalt::task<result<types::websocket_api_response<typename endpoint_traits<Request>::response_type>>>
 {
-    boost::asio::post(io_context_,
-                      [this, request, callback = std::move(callback)]() mutable { callback(execute(request)); });
+    co_return execute(request);
 }
 
 // Explicit instantiations for all trait-enabled request types.
@@ -194,24 +192,24 @@ template auto client::execute(const types::websocket_api_algo_order_place_reques
 template auto client::execute(const types::websocket_api_algo_order_cancel_request&)
     -> result<types::websocket_api_response<types::code_msg_response>>;
 
-template void client::async_execute(const types::websocket_api_book_ticker_request&,
-    callback_type<types::websocket_api_response<types::book_ticker>>);
-template void client::async_execute(const types::websocket_api_price_ticker_request&,
-    callback_type<types::websocket_api_response<types::price_ticker>>);
-template void client::async_execute(const types::websocket_api_order_place_request&,
-    callback_type<types::websocket_api_response<types::order_response>>);
-template void client::async_execute(const types::websocket_api_order_query_request&,
-    callback_type<types::websocket_api_response<types::order_response>>);
-template void client::async_execute(const types::websocket_api_order_cancel_request&,
-    callback_type<types::websocket_api_response<types::order_response>>);
-template void client::async_execute(const types::websocket_api_order_modify_request&,
-    callback_type<types::websocket_api_response<types::order_response>>);
-template void client::async_execute(const types::websocket_api_position_request&,
-    callback_type<types::websocket_api_response<std::vector<types::position_risk>>>);
-template void client::async_execute(const types::websocket_api_algo_order_place_request&,
-    callback_type<types::websocket_api_response<types::algo_order_response>>);
-template void client::async_execute(const types::websocket_api_algo_order_cancel_request&,
-    callback_type<types::websocket_api_response<types::code_msg_response>>);
+template auto client::async_execute(const types::websocket_api_book_ticker_request&)
+    -> boost::cobalt::task<result<types::websocket_api_response<types::book_ticker>>>;
+template auto client::async_execute(const types::websocket_api_price_ticker_request&)
+    -> boost::cobalt::task<result<types::websocket_api_response<types::price_ticker>>>;
+template auto client::async_execute(const types::websocket_api_order_place_request&)
+    -> boost::cobalt::task<result<types::websocket_api_response<types::order_response>>>;
+template auto client::async_execute(const types::websocket_api_order_query_request&)
+    -> boost::cobalt::task<result<types::websocket_api_response<types::order_response>>>;
+template auto client::async_execute(const types::websocket_api_order_cancel_request&)
+    -> boost::cobalt::task<result<types::websocket_api_response<types::order_response>>>;
+template auto client::async_execute(const types::websocket_api_order_modify_request&)
+    -> boost::cobalt::task<result<types::websocket_api_response<types::order_response>>>;
+template auto client::async_execute(const types::websocket_api_position_request&)
+    -> boost::cobalt::task<result<types::websocket_api_response<std::vector<types::position_risk>>>>;
+template auto client::async_execute(const types::websocket_api_algo_order_place_request&)
+    -> boost::cobalt::task<result<types::websocket_api_response<types::algo_order_response>>>;
+template auto client::async_execute(const types::websocket_api_algo_order_cancel_request&)
+    -> boost::cobalt::task<result<types::websocket_api_response<types::code_msg_response>>>;
 
 // --- Connection ---
 
@@ -221,10 +219,10 @@ client::connect()
     return transport_.connect(cfg_.websocket_api_host, cfg_.websocket_api_port, cfg_.websocket_api_target);
 }
 
-void
-client::connect(callback_type<void> callback)
+boost::cobalt::task<result<void>>
+client::async_connect()
 {
-    boost::asio::post(io_context_, [this, callback = std::move(callback)]() mutable { callback(connect()); });
+    co_return co_await transport_.async_connect(cfg_.websocket_api_host, cfg_.websocket_api_port, cfg_.websocket_api_target);
 }
 
 result<void>
@@ -233,10 +231,10 @@ client::close()
     return transport_.close();
 }
 
-void
-client::close(callback_type<void> callback)
+boost::cobalt::task<result<void>>
+client::async_close()
 {
-    boost::asio::post(io_context_, [this, callback = std::move(callback)]() mutable { callback(close()); });
+    co_return co_await transport_.async_close();
 }
 
 // --- Session logon (unique auth flow) ---
@@ -261,10 +259,10 @@ client::session_logon()
     return send_rpc<types::session_logon_result>(session_logon_method, params);
 }
 
-void
-client::session_logon(callback_type<types::websocket_api_response<types::session_logon_result>> callback)
+boost::cobalt::task<result<types::websocket_api_response<types::session_logon_result>>>
+client::async_session_logon()
 {
-    boost::asio::post(io_context_, [this, callback = std::move(callback)]() mutable { callback(session_logon()); });
+    co_return session_logon();
 }
 
 // --- Parameterless signed endpoints ---
@@ -275,10 +273,10 @@ client::account_status()
     return send_rpc<types::account_information>(account_status_method, make_signed_request_base());
 }
 
-void
-client::account_status(callback_type<types::websocket_api_response<types::account_information>> callback)
+boost::cobalt::task<result<types::websocket_api_response<types::account_information>>>
+client::async_account_status()
 {
-    boost::asio::post(io_context_, [this, callback = std::move(callback)]() mutable { callback(account_status()); });
+    co_return account_status();
 }
 
 result<types::websocket_api_response<types::account_information>>
@@ -287,10 +285,10 @@ client::account_status_v2()
     return send_rpc<types::account_information>(account_status_v2_method, make_signed_request_base());
 }
 
-void
-client::account_status_v2(callback_type<types::websocket_api_response<types::account_information>> callback)
+boost::cobalt::task<result<types::websocket_api_response<types::account_information>>>
+client::async_account_status_v2()
 {
-    boost::asio::post(io_context_, [this, callback = std::move(callback)]() mutable { callback(account_status_v2()); });
+    co_return account_status_v2();
 }
 
 result<types::websocket_api_response<std::vector<types::futures_account_balance>>>
@@ -299,13 +297,13 @@ client::account_balance()
     return send_rpc<std::vector<types::futures_account_balance>>(account_balance_method, make_signed_request_base());
 }
 
-void
-client::account_balance(callback_type<types::websocket_api_response<std::vector<types::futures_account_balance>>> callback)
+boost::cobalt::task<result<types::websocket_api_response<std::vector<types::futures_account_balance>>>>
+client::async_account_balance()
 {
-    boost::asio::post(io_context_, [this, callback = std::move(callback)]() mutable { callback(account_balance()); });
+    co_return account_balance();
 }
 
-// --- Shared: position v2 (same request type, different method) ---
+// --- Shared: position v2 ---
 
 result<types::websocket_api_response<std::vector<types::position_risk>>>
 client::account_position_v2(const types::websocket_api_position_request& request)
@@ -313,15 +311,13 @@ client::account_position_v2(const types::websocket_api_position_request& request
     return send_rpc<std::vector<types::position_risk>>(account_position_v2_method, inject_auth(request));
 }
 
-void
-client::account_position_v2(const types::websocket_api_position_request& request,
-                            callback_type<types::websocket_api_response<std::vector<types::position_risk>>> callback)
+boost::cobalt::task<result<types::websocket_api_response<std::vector<types::position_risk>>>>
+client::async_account_position_v2(const types::websocket_api_position_request& request)
 {
-    boost::asio::post(io_context_,
-                      [this, request, callback = std::move(callback)]() mutable { callback(account_position_v2(request)); });
+    co_return account_position_v2(request);
 }
 
-// --- Shared: user data stream (same request type, 3 methods) ---
+// --- Shared: user data stream ---
 
 result<types::websocket_api_response<types::websocket_api_listen_key_result>>
 client::user_data_stream_start()
@@ -330,10 +326,10 @@ client::user_data_stream_start()
     return send_rpc<types::websocket_api_listen_key_result>(user_data_stream_start_method, params);
 }
 
-void
-client::user_data_stream_start(callback_type<types::websocket_api_response<types::websocket_api_listen_key_result>> callback)
+boost::cobalt::task<result<types::websocket_api_response<types::websocket_api_listen_key_result>>>
+client::async_user_data_stream_start()
 {
-    boost::asio::post(io_context_, [this, callback = std::move(callback)]() mutable { callback(user_data_stream_start()); });
+    co_return user_data_stream_start();
 }
 
 result<types::websocket_api_response<types::websocket_api_listen_key_result>>
@@ -343,10 +339,10 @@ client::user_data_stream_ping()
     return send_rpc<types::websocket_api_listen_key_result>(user_data_stream_ping_method, params);
 }
 
-void
-client::user_data_stream_ping(callback_type<types::websocket_api_response<types::websocket_api_listen_key_result>> callback)
+boost::cobalt::task<result<types::websocket_api_response<types::websocket_api_listen_key_result>>>
+client::async_user_data_stream_ping()
 {
-    boost::asio::post(io_context_, [this, callback = std::move(callback)]() mutable { callback(user_data_stream_ping()); });
+    co_return user_data_stream_ping();
 }
 
 result<types::websocket_api_response<types::empty_response>>
@@ -356,10 +352,10 @@ client::user_data_stream_stop()
     return send_rpc<types::empty_response>(user_data_stream_stop_method, params);
 }
 
-void
-client::user_data_stream_stop(callback_type<types::websocket_api_response<types::empty_response>> callback)
+boost::cobalt::task<result<types::websocket_api_response<types::empty_response>>>
+client::async_user_data_stream_stop()
 {
-    boost::asio::post(io_context_, [this, callback = std::move(callback)]() mutable { callback(user_data_stream_stop()); });
+    co_return user_data_stream_stop();
 }
 
 } // namespace binapi2::fapi::websocket_api

@@ -4,9 +4,10 @@
 
 #include <binapi2/fapi/rest/account.hpp>
 
+#include <binapi2/fapi/client.hpp>
 #include <binapi2/fapi/rest/generated_endpoints.hpp>
 
-#include "common.hpp"
+#include <boost/cobalt/task.hpp>
 
 namespace binapi2::fapi::rest {
 
@@ -19,10 +20,10 @@ account_service::account_information()
                                                       account_information_endpoint.signed_request);
 }
 
-void
-account_service::account_information(callback_type<types::account_information> callback)
+boost::cobalt::task<result<types::account_information>>
+account_service::async_account_information()
 {
-    detail::post_callback(owner_.context(), [this, callback = std::move(callback)]() mutable { callback(account_information()); });
+    co_return account_information();
 }
 
 result<std::vector<types::futures_account_balance>>
@@ -34,10 +35,10 @@ account_service::balances()
                                                                        account_balances_endpoint.signed_request);
 }
 
-void
-account_service::balances(callback_type<std::vector<types::futures_account_balance>> callback)
+boost::cobalt::task<result<std::vector<types::futures_account_balance>>>
+account_service::async_balances()
 {
-    detail::post_callback(owner_.context(), [this, callback = std::move(callback)]() mutable { callback(balances()); });
+    co_return balances();
 }
 
 result<types::account_config_response>
@@ -49,10 +50,10 @@ account_service::account_config()
                                                           account_config_endpoint.signed_request);
 }
 
-void
-account_service::account_config(callback_type<types::account_config_response> callback)
+boost::cobalt::task<result<types::account_config_response>>
+account_service::async_account_config()
 {
-    detail::post_callback(owner_.context(), [this, callback = std::move(callback)]() mutable { callback(account_config()); });
+    co_return account_config();
 }
 
 result<types::multi_assets_mode_response>
@@ -64,10 +65,10 @@ account_service::get_multi_assets_mode()
                                                              get_multi_assets_mode_endpoint.signed_request);
 }
 
-void
-account_service::get_multi_assets_mode(callback_type<types::multi_assets_mode_response> callback)
+boost::cobalt::task<result<types::multi_assets_mode_response>>
+account_service::async_get_multi_assets_mode()
 {
-    detail::post_callback(owner_.context(), [this, callback = std::move(callback)]() mutable { callback(get_multi_assets_mode()); });
+    co_return get_multi_assets_mode();
 }
 
 result<types::position_mode_response>
@@ -79,10 +80,10 @@ account_service::get_position_mode()
                                                          get_position_mode_endpoint.signed_request);
 }
 
-void
-account_service::get_position_mode(callback_type<types::position_mode_response> callback)
+boost::cobalt::task<result<types::position_mode_response>>
+account_service::async_get_position_mode()
 {
-    detail::post_callback(owner_.context(), [this, callback = std::move(callback)]() mutable { callback(get_position_mode()); });
+    co_return get_position_mode();
 }
 
 result<std::vector<types::rate_limit>>
@@ -94,10 +95,10 @@ account_service::rate_limit_order()
                                                           rate_limit_order_endpoint.signed_request);
 }
 
-void
-account_service::rate_limit_order(callback_type<std::vector<types::rate_limit>> callback)
+boost::cobalt::task<result<std::vector<types::rate_limit>>>
+account_service::async_rate_limit_order()
 {
-    detail::post_callback(owner_.context(), [this, callback = std::move(callback)]() mutable { callback(rate_limit_order()); });
+    co_return rate_limit_order();
 }
 
 result<types::bnb_burn_status_response>
@@ -109,10 +110,10 @@ account_service::get_bnb_burn()
                                                            get_bnb_burn_endpoint.signed_request);
 }
 
-void
-account_service::get_bnb_burn(callback_type<types::bnb_burn_status_response> callback)
+boost::cobalt::task<result<types::bnb_burn_status_response>>
+account_service::async_get_bnb_burn()
 {
-    detail::post_callback(owner_.context(), [this, callback = std::move(callback)]() mutable { callback(get_bnb_burn()); });
+    co_return get_bnb_burn();
 }
 
 result<types::download_id_response>
@@ -124,12 +125,10 @@ account_service::download_id_transaction(const types::download_id_request& reque
                                                        download_id_transaction_endpoint.signed_request);
 }
 
-void
-account_service::download_id_transaction(const types::download_id_request& request,
-                                         callback_type<types::download_id_response> callback)
+boost::cobalt::task<result<types::download_id_response>>
+account_service::async_download_id_transaction(const types::download_id_request& request)
 {
-    detail::post_callback(owner_.context(),
-                          [this, request, callback = std::move(callback)]() mutable { callback(download_id_transaction(request)); });
+    co_return download_id_transaction(request);
 }
 
 result<types::download_link_response>
@@ -141,13 +140,10 @@ account_service::download_link_transaction(const types::download_link_request& r
                                                          download_link_transaction_endpoint.signed_request);
 }
 
-void
-account_service::download_link_transaction(const types::download_link_request& request,
-                                           callback_type<types::download_link_response> callback)
+boost::cobalt::task<result<types::download_link_response>>
+account_service::async_download_link_transaction(const types::download_link_request& request)
 {
-    detail::post_callback(
-        owner_.context(),
-        [this, request, callback = std::move(callback)]() mutable { callback(download_link_transaction(request)); });
+    co_return download_link_transaction(request);
 }
 
 result<types::download_id_response>
@@ -159,12 +155,10 @@ account_service::download_id_order(const types::download_id_request& request)
                                                        download_id_order_endpoint.signed_request);
 }
 
-void
-account_service::download_id_order(const types::download_id_request& request,
-                                   callback_type<types::download_id_response> callback)
+boost::cobalt::task<result<types::download_id_response>>
+account_service::async_download_id_order(const types::download_id_request& request)
 {
-    detail::post_callback(owner_.context(),
-                          [this, request, callback = std::move(callback)]() mutable { callback(download_id_order(request)); });
+    co_return download_id_order(request);
 }
 
 result<types::download_link_response>
@@ -176,12 +170,10 @@ account_service::download_link_order(const types::download_link_request& request
                                                          download_link_order_endpoint.signed_request);
 }
 
-void
-account_service::download_link_order(const types::download_link_request& request,
-                                     callback_type<types::download_link_response> callback)
+boost::cobalt::task<result<types::download_link_response>>
+account_service::async_download_link_order(const types::download_link_request& request)
 {
-    detail::post_callback(owner_.context(),
-                          [this, request, callback = std::move(callback)]() mutable { callback(download_link_order(request)); });
+    co_return download_link_order(request);
 }
 
 result<types::download_id_response>
@@ -193,12 +185,10 @@ account_service::download_id_trade(const types::download_id_request& request)
                                                        download_id_trade_endpoint.signed_request);
 }
 
-void
-account_service::download_id_trade(const types::download_id_request& request,
-                                   callback_type<types::download_id_response> callback)
+boost::cobalt::task<result<types::download_id_response>>
+account_service::async_download_id_trade(const types::download_id_request& request)
 {
-    detail::post_callback(owner_.context(),
-                          [this, request, callback = std::move(callback)]() mutable { callback(download_id_trade(request)); });
+    co_return download_id_trade(request);
 }
 
 result<types::download_link_response>
@@ -210,12 +200,10 @@ account_service::download_link_trade(const types::download_link_request& request
                                                          download_link_trade_endpoint.signed_request);
 }
 
-void
-account_service::download_link_trade(const types::download_link_request& request,
-                                     callback_type<types::download_link_response> callback)
+boost::cobalt::task<result<types::download_link_response>>
+account_service::async_download_link_trade(const types::download_link_request& request)
 {
-    detail::post_callback(owner_.context(),
-                          [this, request, callback = std::move(callback)]() mutable { callback(download_link_trade(request)); });
+    co_return download_link_trade(request);
 }
 
 } // namespace binapi2::fapi::rest

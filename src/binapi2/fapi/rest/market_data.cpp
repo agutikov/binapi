@@ -4,9 +4,10 @@
 
 #include <binapi2/fapi/rest/market_data.hpp>
 
+#include <binapi2/fapi/client.hpp>
 #include <binapi2/fapi/rest/generated_endpoints.hpp>
 
-#include "common.hpp"
+#include <boost/cobalt/task.hpp>
 
 namespace binapi2::fapi::rest {
 
@@ -17,11 +18,10 @@ market_data_service::klines(const types::kline_request& request)
         klines_endpoint.method, std::string{ klines_endpoint.path }, to_query_map(request), klines_endpoint.signed_request);
 }
 
-void
-market_data_service::klines(const types::kline_request& request, callback_type<std::vector<types::kline>> callback)
+boost::cobalt::task<result<std::vector<types::kline>>>
+market_data_service::async_klines(const types::kline_request& request)
 {
-    detail::post_callback(owner_.context(),
-                          [this, request, callback = std::move(callback)]() mutable { callback(klines(request)); });
+    co_return klines(request);
 }
 
 result<std::vector<types::kline>>
@@ -33,11 +33,10 @@ market_data_service::mark_price_klines(const types::kline_request& request)
                                                      mark_price_klines_endpoint.signed_request);
 }
 
-void
-market_data_service::mark_price_klines(const types::kline_request& request, callback_type<std::vector<types::kline>> callback)
+boost::cobalt::task<result<std::vector<types::kline>>>
+market_data_service::async_mark_price_klines(const types::kline_request& request)
 {
-    detail::post_callback(owner_.context(),
-                          [this, request, callback = std::move(callback)]() mutable { callback(mark_price_klines(request)); });
+    co_return mark_price_klines(request);
 }
 
 result<std::vector<types::kline>>
@@ -49,12 +48,10 @@ market_data_service::premium_index_klines(const types::kline_request& request)
                                                      premium_index_klines_endpoint.signed_request);
 }
 
-void
-market_data_service::premium_index_klines(const types::kline_request& request,
-                                          callback_type<std::vector<types::kline>> callback)
+boost::cobalt::task<result<std::vector<types::kline>>>
+market_data_service::async_premium_index_klines(const types::kline_request& request)
 {
-    detail::post_callback(owner_.context(),
-                          [this, request, callback = std::move(callback)]() mutable { callback(premium_index_klines(request)); });
+    co_return premium_index_klines(request);
 }
 
 result<std::vector<types::book_ticker>>
@@ -64,10 +61,10 @@ market_data_service::book_tickers()
         book_ticker_endpoint.method, std::string{ book_ticker_endpoint.path }, {}, book_ticker_endpoint.signed_request);
 }
 
-void
-market_data_service::book_tickers(callback_type<std::vector<types::book_ticker>> callback)
+boost::cobalt::task<result<std::vector<types::book_ticker>>>
+market_data_service::async_book_tickers()
 {
-    detail::post_callback(owner_.context(), [this, callback = std::move(callback)]() mutable { callback(book_tickers()); });
+    co_return book_tickers();
 }
 
 result<std::vector<types::price_ticker>>
@@ -77,10 +74,10 @@ market_data_service::price_tickers()
         price_ticker_endpoint.method, std::string{ price_ticker_endpoint.path }, {}, price_ticker_endpoint.signed_request);
 }
 
-void
-market_data_service::price_tickers(callback_type<std::vector<types::price_ticker>> callback)
+boost::cobalt::task<result<std::vector<types::price_ticker>>>
+market_data_service::async_price_tickers()
 {
-    detail::post_callback(owner_.context(), [this, callback = std::move(callback)]() mutable { callback(price_tickers()); });
+    co_return price_tickers();
 }
 
 result<std::vector<types::price_ticker>>
@@ -92,10 +89,10 @@ market_data_service::price_tickers_v2()
                                                                 price_ticker_v2_endpoint.signed_request);
 }
 
-void
-market_data_service::price_tickers_v2(callback_type<std::vector<types::price_ticker>> callback)
+boost::cobalt::task<result<std::vector<types::price_ticker>>>
+market_data_service::async_price_tickers_v2()
 {
-    detail::post_callback(owner_.context(), [this, callback = std::move(callback)]() mutable { callback(price_tickers_v2()); });
+    co_return price_tickers_v2();
 }
 
 result<std::vector<types::ticker_24hr>>
@@ -105,10 +102,10 @@ market_data_service::ticker_24hrs()
         ticker_24hr_endpoint.method, std::string{ ticker_24hr_endpoint.path }, {}, ticker_24hr_endpoint.signed_request);
 }
 
-void
-market_data_service::ticker_24hrs(callback_type<std::vector<types::ticker_24hr>> callback)
+boost::cobalt::task<result<std::vector<types::ticker_24hr>>>
+market_data_service::async_ticker_24hrs()
 {
-    detail::post_callback(owner_.context(), [this, callback = std::move(callback)]() mutable { callback(ticker_24hrs()); });
+    co_return ticker_24hrs();
 }
 
 result<std::vector<types::mark_price>>
@@ -118,10 +115,10 @@ market_data_service::mark_prices()
         mark_price_endpoint.method, std::string{ mark_price_endpoint.path }, {}, mark_price_endpoint.signed_request);
 }
 
-void
-market_data_service::mark_prices(callback_type<std::vector<types::mark_price>> callback)
+boost::cobalt::task<result<std::vector<types::mark_price>>>
+market_data_service::async_mark_prices()
 {
-    detail::post_callback(owner_.context(), [this, callback = std::move(callback)]() mutable { callback(mark_prices()); });
+    co_return mark_prices();
 }
 
 result<std::vector<types::funding_rate_info>>
@@ -133,10 +130,10 @@ market_data_service::funding_rate_info()
                                                                  funding_rate_info_endpoint.signed_request);
 }
 
-void
-market_data_service::funding_rate_info(callback_type<std::vector<types::funding_rate_info>> callback)
+boost::cobalt::task<result<std::vector<types::funding_rate_info>>>
+market_data_service::async_funding_rate_info()
 {
-    detail::post_callback(owner_.context(), [this, callback = std::move(callback)]() mutable { callback(funding_rate_info()); });
+    co_return funding_rate_info();
 }
 
 result<std::vector<types::open_interest_statistics_entry>>
@@ -149,12 +146,10 @@ market_data_service::open_interest_statistics(const types::futures_data_request&
         open_interest_statistics_endpoint.signed_request);
 }
 
-void
-market_data_service::open_interest_statistics(const types::futures_data_request& request,
-                                              callback_type<std::vector<types::open_interest_statistics_entry>> callback)
+boost::cobalt::task<result<std::vector<types::open_interest_statistics_entry>>>
+market_data_service::async_open_interest_statistics(const types::futures_data_request& request)
 {
-    detail::post_callback(owner_.context(),
-                          [this, request, callback = std::move(callback)]() mutable { callback(open_interest_statistics(request)); });
+    co_return open_interest_statistics(request);
 }
 
 result<std::vector<types::long_short_ratio_entry>>
@@ -166,13 +161,10 @@ market_data_service::top_long_short_account_ratio(const types::futures_data_requ
                                                                       top_long_short_account_ratio_endpoint.signed_request);
 }
 
-void
-market_data_service::top_long_short_account_ratio(const types::futures_data_request& request,
-                                                  callback_type<std::vector<types::long_short_ratio_entry>> callback)
+boost::cobalt::task<result<std::vector<types::long_short_ratio_entry>>>
+market_data_service::async_top_long_short_account_ratio(const types::futures_data_request& request)
 {
-    detail::post_callback(owner_.context(), [this, request, callback = std::move(callback)]() mutable {
-        callback(top_long_short_account_ratio(request));
-    });
+    co_return top_long_short_account_ratio(request);
 }
 
 result<std::vector<types::long_short_ratio_entry>>
@@ -184,13 +176,10 @@ market_data_service::top_trader_long_short_ratio(const types::futures_data_reque
                                                                       top_trader_long_short_ratio_endpoint.signed_request);
 }
 
-void
-market_data_service::top_trader_long_short_ratio(const types::futures_data_request& request,
-                                                 callback_type<std::vector<types::long_short_ratio_entry>> callback)
+boost::cobalt::task<result<std::vector<types::long_short_ratio_entry>>>
+market_data_service::async_top_trader_long_short_ratio(const types::futures_data_request& request)
 {
-    detail::post_callback(owner_.context(), [this, request, callback = std::move(callback)]() mutable {
-        callback(top_trader_long_short_ratio(request));
-    });
+    co_return top_trader_long_short_ratio(request);
 }
 
 result<std::vector<types::long_short_ratio_entry>>
@@ -202,12 +191,10 @@ market_data_service::long_short_ratio(const types::futures_data_request& request
                                                                       long_short_ratio_endpoint.signed_request);
 }
 
-void
-market_data_service::long_short_ratio(const types::futures_data_request& request,
-                                      callback_type<std::vector<types::long_short_ratio_entry>> callback)
+boost::cobalt::task<result<std::vector<types::long_short_ratio_entry>>>
+market_data_service::async_long_short_ratio(const types::futures_data_request& request)
 {
-    detail::post_callback(owner_.context(),
-                          [this, request, callback = std::move(callback)]() mutable { callback(long_short_ratio(request)); });
+    co_return long_short_ratio(request);
 }
 
 result<std::vector<types::taker_buy_sell_volume_entry>>
@@ -219,12 +206,10 @@ market_data_service::taker_buy_sell_volume(const types::futures_data_request& re
                                                                            taker_buy_sell_volume_endpoint.signed_request);
 }
 
-void
-market_data_service::taker_buy_sell_volume(const types::futures_data_request& request,
-                                           callback_type<std::vector<types::taker_buy_sell_volume_entry>> callback)
+boost::cobalt::task<result<std::vector<types::taker_buy_sell_volume_entry>>>
+market_data_service::async_taker_buy_sell_volume(const types::futures_data_request& request)
 {
-    detail::post_callback(owner_.context(),
-                          [this, request, callback = std::move(callback)]() mutable { callback(taker_buy_sell_volume(request)); });
+    co_return taker_buy_sell_volume(request);
 }
 
 } // namespace binapi2::fapi::rest

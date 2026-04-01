@@ -1,6 +1,6 @@
 # binapi2 Design Documentation
 
-C++ client library for **Binance USD-M Futures API**. Built on C++23, Boost.Beast/ASIO, OpenSSL, and Glaze JSON.
+C++ client library for **Binance USD-M Futures API**. Built on C++23, Boost.Beast/ASIO/Cobalt, OpenSSL, and Glaze JSON.
 
 ---
 
@@ -66,7 +66,7 @@ CLI --> TRS
 CLI --> CVS
 CLI --> UDS
 
-SVC --> CLI : execute(request)
+SVC --> CLI : execute / async_execute
 SVC --> ET : endpoint_traits<Request>
 SVC --> QRY : to_query_map(request)
 
@@ -88,6 +88,74 @@ WS --> BWSAPI
 
 ---
 
+## Async Model
+
+All I/O is built on **Boost.Cobalt** C++20 coroutines. The async implementation is the primary layer; sync wraps async.
+
+```plantuml
+@startuml
+skinparam classAttributeIconSize 0
+
+package "Transport (async primary)" {
+  class http_client {
+    +async_request(...) : cobalt::task<result<http_response>>
+    +request(...) : result<http_response>
+    .. sync wraps async via cobalt::run() ..
+  }
+
+  class websocket_client {
+    +async_connect(...) : cobalt::task<result<void>>
+    +async_write_text(...) : cobalt::task<result<void>>
+    +async_read_text() : cobalt::task<result<string>>
+    +async_close() : cobalt::task<result<void>>
+    .. sync wrappers ..
+    +connect(...) : result<void>
+    +write_text(...) : result<void>
+    +read_text() : result<string>
+    +close() : result<void>
+  }
+}
+
+package "Client" {
+  class client {
+    +execute<Request>(request) : result<response_type>
+    +async_execute<Request>(request) : cobalt::task<result<response_type>>
+  }
+}
+
+package "Service" {
+  class "rest::service" as svc {
+    +execute<Request>(request) : result<response_type>
+    +async_execute<Request>(request) : cobalt::task<result<response_type>>
+  }
+}
+
+svc --> client : delegates
+client --> http_client : async_request / request
+@enduml
+```
+
+**Transport**: `http_client::async_request()` uses `co_await` at each I/O step (resolve, connect, TLS handshake, write, read) — non-blocking, yields to the event loop between steps. `request()` wraps it with `cobalt::run()`.
+
+**No callbacks**: the old `callback_type<T> = std::function<void(result<T>)>` pattern is removed. Async methods return `cobalt::task<result<T>>` which is awaitable.
+
+**Usage:**
+```cpp
+// Sync:
+auto result = client.trade.execute(new_order_request{...});
+
+// Async (in a coroutine):
+auto result = co_await client.trade.async_execute(new_order_request{...});
+
+// Async entry point:
+boost::cobalt::main co_main(int, char*[]) {
+    auto result = co_await client.market_data.async_execute(ping_request{});
+    co_return 0;
+}
+```
+
+---
+
 ## Generic Request Dispatch
 
 The core design pattern: **request types carry all the information needed to dispatch an API call**.
@@ -102,7 +170,7 @@ class "rest::service" as SVC {
   #owner_ : client&
   --
   +execute<Request>(request) : result<response_type>
-  +async_execute<Request>(request, callback) : void
+  +async_execute<Request>(request) : task<result<response_type>>
 }
 
 class "rest::endpoint_traits<Request>" as ET <<specialization>> {
@@ -133,15 +201,16 @@ class "market_data_service" as MDS {
   ... (type aliases)
   --
   klines(kline_request) : named method
+  async_klines(kline_request) : task
   .. (shared request type methods)
 }
 
 class "client" as CLI {
   +execute<Request>(request) : result<response_type>
-  +async_execute<Request>(request, callback) : void
+  +async_execute<Request>(request) : task<result<response_type>>
   --
-  +execute<Response>(method, path, query, signed)
-  +async_execute<Response>(method, path, query, signed, callback)
+  -prepare_and_send(method, path, query, signed) : result<http_response>
+  -async_prepare_and_send(method, path, query, signed) : task<result<http_response>>
 }
 
 MDS --|> SVC
@@ -157,19 +226,7 @@ ET --> EM
 1. `service::execute(request)` looks up `endpoint_traits<Request>` at compile time to get the endpoint metadata and response type
 2. `to_query_map(request)` uses `glz::reflect<T>` to serialize the request struct fields into a `query_map`, skipping `std::optional` nullopts and converting enums via `to_string()`
 3. `client::execute<Response>()` handles signing, query string encoding, HTTP transport, and JSON response deserialization
-
-**Usage:**
-```cpp
-// Via service (grouped by domain):
-auto result = client.market_data.execute(exchange_info_request{});
-auto result = client.trade.execute(new_order_request{.symbol = "BTCUSDT", ...});
-
-// Or directly on client:
-auto result = client.execute(types::cancel_order_request{.symbol = "BTCUSDT", .orderId = 123});
-
-// Async:
-client.trade.async_execute(new_order_request{...}, [](auto result) { ... });
-```
+4. `async_execute` follows the same path but uses `co_await` through `async_prepare_and_send` → `http_client::async_request`
 
 ### WebSocket API
 
@@ -179,7 +236,7 @@ skinparam classAttributeIconSize 0
 
 class "websocket_api::client" as WSC {
   +execute<Request>(request) : result<ws_response<response_type>>
-  +async_execute<Request>(request, callback) : void
+  +async_execute<Request>(request) : task<result<ws_response<response_type>>>
   --
   -inject_auth(request) : Request
   -send_rpc<Response>(method, params) : result<ws_response<Response>>
@@ -202,21 +259,11 @@ WSC ..> WET : resolves method + response
 @enduml
 ```
 
-**How it works:**
-
-1. `ws::client::execute(request)` looks up `ws::endpoint_traits<Request>` to get the RPC method name and response type
-2. If the request type inherits from `websocket_api_signed_request`, auth fields (apiKey, timestamp, recvWindow, signature) are injected automatically
-3. The request is serialized into a JSON-RPC envelope `{id, method, params}` and sent over the WebSocket connection
-
-**Usage:**
-```cpp
-ws_client.execute(websocket_api_order_place_request{.symbol = "BTCUSDT", .side = "BUY", ...});
-ws_client.execute(websocket_api_book_ticker_request{.symbol = "BTCUSDT"});
-```
-
 ---
 
 ## Request Flow
+
+### Sync
 
 ```plantuml
 @startuml
@@ -233,16 +280,48 @@ User -> SVC: execute(kline_request{symbol, interval, ...})
 SVC -> ET: endpoint_traits<kline_request>::endpoint
 ET --> SVC: {GET, "/fapi/v1/klines", unsigned}
 SVC -> QM: to_query_map(request)
-QM -> QM: reflect fields via glz::reflect<T>
-QM -> QM: skip nullopt, stringify enums
 QM --> SVC: query_map{"symbol":"BTCUSDT","interval":"1h",...}
 SVC -> C: execute<vector<kline>>(GET, path, query, false)
+C -> C: prepare_and_send(method, path, query, signed)
 C -> S: inject_auth_query + sign_query (if signed)
-C -> H: request(GET, path?query, "", api_key)
-H -> B: HTTPS GET /fapi/v1/klines?symbol=BTCUSDT&interval=1h
+C -> H: request(method, target, body, content_type, api_key)
+note right: cobalt::run(async_request(...))
+H -> B: HTTPS GET /fapi/v1/klines?...
 B --> H: JSON response
-H --> C: http_response{status, body}
-C -> C: decode_response<vector<kline>>(response)
+H --> C: result<http_response>
+C -> C: decode_response<vector<kline>>
+C --> User: result<vector<kline>>
+@enduml
+```
+
+### Async
+
+```plantuml
+@startuml
+actor "User\n(coroutine)" as User
+participant "service" as SVC
+participant "client" as C
+participant "http_client" as H
+participant "Binance REST" as B
+
+User -> SVC: co_await async_execute(kline_request{...})
+SVC -> C: co_await async_execute(request)
+C -> C: co_await async_prepare_and_send(...)
+C -> H: co_await async_request(...)
+
+H -> H: co_await resolver.async_resolve(...)
+note right: yields to event loop
+H -> H: co_await async_connect(...)
+note right: yields to event loop
+H -> H: co_await async_handshake(...)
+note right: yields to event loop
+H -> H: co_await async_write(...)
+note right: yields to event loop
+H -> H: co_await async_read(...)
+note right: yields to event loop
+
+H --> C: result<http_response>
+C -> C: decode_response<vector<kline>>
 C --> User: result<vector<kline>>
 @enduml
 ```
@@ -315,7 +394,7 @@ end
 
 ### Request → Endpoint Mapping
 
-Request types with a 1:1 endpoint mapping have `endpoint_traits` (REST) or `ws::endpoint_traits` (WebSocket API) specializations. These are dispatched generically via `execute(request)`.
+Request types with a 1:1 endpoint mapping have `endpoint_traits` (REST) or `ws::endpoint_traits` (WebSocket API) specializations. These are dispatched generically via `execute(request)` / `async_execute(request)`.
 
 Shared request types (used by multiple endpoints) retain named service methods:
 
@@ -342,7 +421,7 @@ Shared request types (used by multiple endpoints) retain named service methods:
 
 ## Access Modes
 
-Every method supports **synchronous** (returns `result<T>`) and **asynchronous** (takes `callback_type<T>`, invoked via `io_context`) access.
+Every method supports **synchronous** (returns `result<T>`) and **asynchronous** (returns `cobalt::task<result<T>>`) access. Sync wraps async via `cobalt::run()`.
 
 | Access Mode | Transport | Authentication | Latency | Use Case |
 |---|---|---|---|---|
@@ -355,15 +434,15 @@ Every method supports **synchronous** (returns `result<T>`) and **asynchronous**
 
 ## Service Classes
 
-Services inherit from `rest::service` which provides generic `execute(request)` / `async_execute(request, callback)`. Each service pulls request types from the `types` namespace via `using` declarations.
+Services inherit from `rest::service` which provides generic `execute(request)` / `async_execute(request)`. Each service pulls request types from the `types` namespace via `using` declarations. Named methods have both sync (`method`) and async (`async_method`) variants.
 
 ### 1. Market Data Service (`rest::market_data_service`)
 
 Public endpoints. No authentication required.
 
-Generic (via `execute`): `ping_request`, `server_time_request`, `exchange_info_request`, `order_book_request`, `recent_trades_request`, `aggregate_trades_request`, `continuous_kline_request`, `index_price_kline_request`, `book_ticker_request`, `price_ticker_request`, `ticker_24hr_request`, `mark_price_request`, `funding_rate_history_request`, `open_interest_request`, `historical_trades_request`, `basis_request`, `price_ticker_v2_request`, `delivery_price_request`, `composite_index_info_request`, `index_constituents_request`, `asset_index_request`, `insurance_fund_request`, `adl_risk_request`, `rpi_depth_request`, `trading_schedule_request`
+Generic (via `execute` / `async_execute`): `ping_request`, `server_time_request`, `exchange_info_request`, `order_book_request`, `recent_trades_request`, `aggregate_trades_request`, `continuous_kline_request`, `index_price_kline_request`, `book_ticker_request`, `price_ticker_request`, `ticker_24hr_request`, `mark_price_request`, `funding_rate_history_request`, `open_interest_request`, `historical_trades_request`, `basis_request`, `price_ticker_v2_request`, `delivery_price_request`, `composite_index_info_request`, `index_constituents_request`, `asset_index_request`, `insurance_fund_request`, `adl_risk_request`, `rpi_depth_request`, `trading_schedule_request`
 
-Named methods: `klines`, `mark_price_klines`, `premium_index_klines` (shared `kline_request`); `open_interest_statistics`, `top_long_short_account_ratio`, `top_trader_long_short_ratio`, `long_short_ratio`, `taker_buy_sell_volume` (shared `futures_data_request`); `book_tickers`, `price_tickers`, `price_tickers_v2`, `ticker_24hrs`, `mark_prices`, `funding_rate_info` (parameterless)
+Named methods: `klines` / `async_klines`, `mark_price_klines` / `async_mark_price_klines`, `premium_index_klines` / `async_premium_index_klines` (shared `kline_request`); `open_interest_statistics` / `async_open_interest_statistics`, `top_long_short_account_ratio` / `async_top_long_short_account_ratio`, `top_trader_long_short_ratio` / `async_top_trader_long_short_ratio`, `long_short_ratio` / `async_long_short_ratio`, `taker_buy_sell_volume` / `async_taker_buy_sell_volume` (shared `futures_data_request`); `book_tickers` / `async_book_tickers`, `price_tickers` / `async_price_tickers`, `price_tickers_v2` / `async_price_tickers_v2`, `ticker_24hrs` / `async_ticker_24hrs`, `mark_prices` / `async_mark_prices`, `funding_rate_info` / `async_funding_rate_info` (parameterless)
 
 ### 2. Account Service (`rest::account_service`)
 
@@ -371,7 +450,7 @@ Signed endpoints.
 
 Generic: `position_risk_request`, `symbol_config_request`, `income_history_request`, `leverage_bracket_request`, `commission_rate_request`, `toggle_bnb_burn_request`, `quantitative_rules_request`, `pm_account_info_request`
 
-Named methods: `account_information`, `balances`, `account_config`, `get_multi_assets_mode`, `get_position_mode`, `rate_limit_order`, `get_bnb_burn` (parameterless); `download_id_*`, `download_link_*` (shared request types)
+Named methods: `account_information` / `async_account_information`, `balances` / `async_balances`, `account_config` / `async_account_config`, `get_multi_assets_mode` / `async_get_multi_assets_mode`, `get_position_mode` / `async_get_position_mode`, `rate_limit_order` / `async_rate_limit_order`, `get_bnb_burn` / `async_get_bnb_burn` (parameterless); `download_id_*` / `async_download_id_*`, `download_link_*` / `async_download_link_*` (shared request types)
 
 ### 3. Trade Service (`rest::trade_service`)
 
@@ -379,7 +458,7 @@ Signed endpoints.
 
 Generic: `new_order_request`, `modify_order_request`, `cancel_order_request`, `query_order_request`, `cancel_all_open_orders_request`, `auto_cancel_request`, `query_open_order_request`, `all_open_orders_request`, `all_orders_request`, `position_info_v3_request`, `adl_quantile_request`, `force_orders_request`, `account_trade_request`, `change_position_mode_request`, `change_multi_assets_mode_request`, `change_leverage_request`, `change_margin_type_request`, `modify_isolated_margin_request`, `position_margin_history_request`, `order_modify_history_request`, `new_algo_order_request`, `cancel_algo_order_request`, `query_algo_order_request`, `all_algo_orders_request`
 
-Named methods: `test_order` (alias collision), `batch_orders`, `modify_batch_orders`, `cancel_batch_orders` (special serialization); `open_algo_orders`, `cancel_all_algo_orders`, `tradfi_perps` (parameterless)
+Named methods: `test_order` / `async_test_order`, `batch_orders` / `async_batch_orders`, `modify_batch_orders` / `async_modify_batch_orders`, `cancel_batch_orders` / `async_cancel_batch_orders` (special); `open_algo_orders` / `async_open_algo_orders`, `cancel_all_algo_orders` / `async_cancel_all_algo_orders`, `tradfi_perps` / `async_tradfi_perps` (parameterless)
 
 ### 4. Convert Service (`rest::convert_service`)
 
@@ -387,13 +466,13 @@ Fully generic: `quote_request`, `accept_request`, `order_status_request`
 
 ### 5. User Data Stream Service (`rest::user_data_stream_service`)
 
-Named methods: `start`, `keepalive`, `close`
+Named methods: `start` / `async_start`, `keepalive` / `async_keepalive`, `close` / `async_close`
 
 ### 6. WebSocket API (`websocket_api::client`)
 
-Generic (via `execute`): `order_place_request`, `order_query_request`, `order_cancel_request`, `order_modify_request`, `position_request`, `book_ticker_request`, `price_ticker_request`, `algo_order_place_request`, `algo_order_cancel_request`
+Generic (via `execute` / `async_execute`): `order_place_request`, `order_query_request`, `order_cancel_request`, `order_modify_request`, `position_request`, `book_ticker_request`, `price_ticker_request`, `algo_order_place_request`, `algo_order_cancel_request`
 
-Named methods: `session_logon`, `account_status/v2`, `account_balance`, `account_position_v2` (shared type), `user_data_stream_start/ping/stop` (shared type), `connect`, `close`
+Named methods: `session_logon` / `async_session_logon`, `account_status` / `async_account_status`, `account_status_v2` / `async_account_status_v2`, `account_balance` / `async_account_balance`, `account_position_v2` / `async_account_position_v2` (shared type), `user_data_stream_start` / `async_user_data_stream_start`, `user_data_stream_ping` / `async_user_data_stream_ping`, `user_data_stream_stop` / `async_user_data_stream_stop` (shared type), `connect` / `async_connect`, `close` / `async_close`
 
 ### 7. Market Streams (`streams::market_streams`)
 
@@ -481,11 +560,12 @@ error --> error_code
 |---|---|---|
 | Boost.ASIO | Async I/O, event loop | Required |
 | Boost.Beast | HTTP/WebSocket protocol | Required |
+| Boost.Cobalt | C++20 coroutines (async transport) | Required |
 | OpenSSL | TLS (HTTPS/WSS) + HMAC-SHA256 signing | Required |
 | ZLIB | Response compression | Required |
 | Glaze | Compile-time JSON serialization + struct reflection | Bundled (header-only) |
 | DTF | Datetime formatting | Bundled (header-only) |
 
-**Build:** CMake 3.10+, C++23 compiler.
+**Build:** CMake 3.10+, C++23 compiler, Boost 1.84+.
 
 [implementation_status.md]: /docs/implementation_status.md

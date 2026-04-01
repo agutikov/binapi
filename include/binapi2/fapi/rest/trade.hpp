@@ -7,6 +7,8 @@
 #include <binapi2/fapi/rest/service.hpp>
 #include <binapi2/fapi/types/trade.hpp>
 
+#include <boost/cobalt/task.hpp>
+
 #include <vector>
 
 namespace binapi2::fapi::rest {
@@ -44,22 +46,21 @@ public:
 
     // Methods for shared/special request types.
     [[nodiscard]] result<types::order_response> test_order(const types::new_order_request& request);
-    void test_order(const types::new_order_request& request, callback_type<types::order_response> callback);
+    [[nodiscard]] boost::cobalt::task<result<types::order_response>> async_test_order(const types::new_order_request& request);
     [[nodiscard]] result<std::vector<types::order_response>> batch_orders(const types::batch_orders_request& request);
-    void batch_orders(const types::batch_orders_request& request, callback_type<std::vector<types::order_response>> callback);
+    [[nodiscard]] boost::cobalt::task<result<std::vector<types::order_response>>> async_batch_orders(const types::batch_orders_request& request);
     [[nodiscard]] result<std::vector<types::order_response>> modify_batch_orders(const types::batch_orders_request& request);
-    void modify_batch_orders(const types::batch_orders_request& request, callback_type<std::vector<types::order_response>> callback);
+    [[nodiscard]] boost::cobalt::task<result<std::vector<types::order_response>>> async_modify_batch_orders(const types::batch_orders_request& request);
     [[nodiscard]] result<std::vector<types::order_response>> cancel_batch_orders(const types::cancel_multiple_orders_request& request);
-    void cancel_batch_orders(const types::cancel_multiple_orders_request& request,
-                             callback_type<std::vector<types::order_response>> callback);
+    [[nodiscard]] boost::cobalt::task<result<std::vector<types::order_response>>> async_cancel_batch_orders(const types::cancel_multiple_orders_request& request);
 
     // Parameterless endpoints.
     [[nodiscard]] result<std::vector<types::algo_order_response>> open_algo_orders();
-    void open_algo_orders(callback_type<std::vector<types::algo_order_response>> callback);
+    [[nodiscard]] boost::cobalt::task<result<std::vector<types::algo_order_response>>> async_open_algo_orders();
     [[nodiscard]] result<types::code_msg_response> cancel_all_algo_orders();
-    void cancel_all_algo_orders(callback_type<types::code_msg_response> callback);
+    [[nodiscard]] boost::cobalt::task<result<types::code_msg_response>> async_cancel_all_algo_orders();
     [[nodiscard]] result<types::code_msg_response> tradfi_perps(const types::tradfi_perps_request& request = {});
-    void tradfi_perps(const types::tradfi_perps_request& request, callback_type<types::code_msg_response> callback);
+    [[nodiscard]] boost::cobalt::task<result<types::code_msg_response>> async_tradfi_perps(const types::tradfi_perps_request& request = {});
 };
 
 } // namespace binapi2::fapi::rest

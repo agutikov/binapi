@@ -1,24 +1,20 @@
 #include <binapi2/fapi/client.hpp>
 
-#include <boost/asio/io_context.hpp>
+#include <boost/cobalt/main.hpp>
 
 #include <iostream>
 
-int
-main()
+boost::cobalt::main co_main(int, char*[])
 {
     boost::asio::io_context io;
     binapi2::fapi::client client{ io, {} };
 
-    client.market_data.async_execute(binapi2::fapi::types::ping_request{}, [&](binapi2::fapi::result<binapi2::fapi::types::empty_response> result) {
-        if (!result) {
-            std::cerr << result.err.message << '\n';
-            return;
-        }
+    auto result = co_await client.market_data.async_execute(binapi2::fapi::types::ping_request{});
+    if (!result) {
+        std::cerr << result.err.message << '\n';
+        co_return 1;
+    }
 
-        std::cout << "ping ok\n";
-    });
-
-    io.run();
-    return 0;
+    std::cout << "ping ok\n";
+    co_return 0;
 }
