@@ -62,8 +62,17 @@ struct decimal
     explicit constexpr decimal(int128_t raw, raw_tag) : value(raw) {}
 
     /// Construct from an integer with arbitrary scale.
-    /// Scales the value to 18 decimal places. Throws if the result overflows.
-    constexpr decimal(int128_t raw, int input_scale);
+    /// Scales the value to 18 decimal places.
+    constexpr decimal(int128_t raw, int input_scale) : value(raw)
+    {
+        if (input_scale < scale) {
+            for (int i = 0; i < scale - input_scale; ++i)
+                value *= 10;
+        } else if (input_scale > scale) {
+            for (int i = 0; i < input_scale - scale; ++i)
+                value /= 10;
+        }
+    }
 
     /// Parse from a decimal string. Throws std::overflow_error if the integer
     /// part is too large, std::invalid_argument if more than 18 fractional digits.

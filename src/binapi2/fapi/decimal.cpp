@@ -211,17 +211,7 @@ decimal::decimal(const char* s) : value(parse_decimal(std::string_view(s))) {}
 decimal::decimal(const std::string& s) : value(parse_decimal(std::string_view(s))) {}
 decimal::decimal(std::string_view s) : value(parse_decimal(s)) {}
 
-constexpr decimal::decimal(int128_t raw, int input_scale) : value(raw)
-{
-    // Scale from input_scale to 18.
-    if (input_scale < scale) {
-        for (int i = 0; i < scale - input_scale; ++i)
-            value *= 10;
-    } else if (input_scale > scale) {
-        for (int i = 0; i < input_scale - scale; ++i)
-            value /= 10;
-    }
-}
+
 
 // -- to_string --
 

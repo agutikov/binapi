@@ -41,6 +41,12 @@ add_subdirectory(src/binapi2/fapi)
 add_subdirectory(examples/binapi)
 add_subdirectory(examples/binapi2/fapi)
 
+option(BINAPI2_WITH_TESTS "Build binapi2 tests" ON)
+if(BINAPI2_WITH_TESTS)
+    enable_testing()
+    add_subdirectory(tests/binapi2/fapi)
+endif()
+
 if(PROJECT_IS_TOP_LEVEL AND UNIX)
     execute_process(
         COMMAND ${CMAKE_COMMAND} -E create_symlink
