@@ -12,6 +12,7 @@
 #include <binapi2/fapi/transport/websocket_client.hpp>
 
 #include <binapi2/fapi/error.hpp>
+#include <binapi2/fapi/transport_logger.hpp>
 #include <binapi2/fapi/transport/ssl_context.hpp>
 
 #include <boost/asio/connect.hpp>
@@ -65,9 +66,33 @@ websocket_client::async_connect(std::string host, std::string port, std::string 
                 { error_code::websocket, 0, 0, ERR_error_string(ERR_get_error(), nullptr), {} });
         }
 
+        if (cfg_.logger) {
+            cfg_.logger({ transport_direction::sent, "CONN", "resolve",
+                          host + ":" + port, 0, {}, {} });
+        }
         auto endpoints = co_await impl_->resolver.async_resolve(host, port, boost::cobalt::use_op);
+        if (cfg_.logger) {
+            std::string ep_list;
+            for (const auto& ep : endpoints) {
+                if (!ep_list.empty()) ep_list += ", ";
+                ep_list += ep.endpoint().address().to_string() + ":" + std::to_string(ep.endpoint().port());
+            }
+            cfg_.logger({ transport_direction::received, "CONN", "resolve",
+                          host, 0, ep_list, {} });
+        }
 
+        if (cfg_.logger) {
+            cfg_.logger({ transport_direction::sent, "CONN", "tcp_connect",
+                          host + ":" + port, 0, {}, {} });
+        }
         co_await boost::asio::async_connect(impl_->stream.next_layer().next_layer(), endpoints, boost::cobalt::use_op);
+        if (cfg_.logger) {
+            auto& sock = impl_->stream.next_layer().next_layer();
+            cfg_.logger({ transport_direction::received, "CONN", "tcp_connect",
+                          sock.remote_endpoint().address().to_string() + ":"
+                              + std::to_string(sock.remote_endpoint().port()),
+                          0, {}, {} });
+        }
 
         // Install a ping/pong handler. Binance sends periodic pings and
         // expects a pong within a timeout window; failure to respond causes
@@ -81,10 +106,26 @@ websocket_client::async_connect(std::string host, std::string port, std::string 
             }
         });
 
+        if (cfg_.logger) {
+            cfg_.logger({ transport_direction::sent, "CONN", "ssl_handshake",
+                          host, 0, {}, {} });
+        }
         co_await impl_->stream.next_layer().async_handshake(
             boost::asio::ssl::stream_base::client, boost::cobalt::use_op);
+        if (cfg_.logger) {
+            cfg_.logger({ transport_direction::received, "CONN", "ssl_handshake",
+                          SSL_get_version(impl_->stream.next_layer().native_handle()), 0, {}, {} });
+        }
 
+        if (cfg_.logger) {
+            cfg_.logger({ transport_direction::sent, "CONN", "ws_handshake",
+                          host + target, 0, {}, {} });
+        }
         co_await impl_->stream.async_handshake(host, target, boost::cobalt::use_op);
+        if (cfg_.logger) {
+            cfg_.logger({ transport_direction::received, "CONN", "ws_handshake",
+                          host + target, 0, {}, {} });
+        }
 
         impl_->connected = true;
         co_return result<void>::success();
@@ -98,6 +139,9 @@ boost::cobalt::task<result<void>>
 websocket_client::async_write_text(std::string message)
 {
     try {
+        if (cfg_.logger) {
+            cfg_.logger({ transport_direction::sent, "WS", "WS", "", 0, message, {} });
+        }
         co_await impl_->stream.async_write(boost::asio::buffer(message), boost::cobalt::use_op);
         co_return result<void>::success();
     }
@@ -115,6 +159,9 @@ websocket_client::async_read_text()
         impl_->buffer.consume(impl_->buffer.size());
         co_await impl_->stream.async_read(impl_->buffer, boost::cobalt::use_op);
         std::string data = boost::beast::buffers_to_string(impl_->buffer.data());
+        if (cfg_.logger) {
+            cfg_.logger({ transport_direction::received, "WS", "WS", "", 0, data, {} });
+        }
         co_return result<std::string>::success(std::move(data));
     }
     catch (const boost::system::system_error& e) {

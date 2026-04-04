@@ -11,6 +11,7 @@
 #include <binapi2/fapi/transport/http_client.hpp>
 
 #include <binapi2/fapi/error.hpp>
+#include <binapi2/fapi/transport_logger.hpp>
 #include <binapi2/fapi/transport/ssl_context.hpp>
 
 #include <boost/asio/connect.hpp>
@@ -24,7 +25,22 @@
 
 #include <openssl/err.h>
 
+#include <sstream>
+
 namespace binapi2::fapi::transport {
+
+// Serialize a Beast HTTP message (request or response) to a string
+// including the start line and all headers.
+template<bool IsRequest, class Body, class Fields>
+static std::string
+serialize_message(const boost::beast::http::message<IsRequest, Body, Fields>& msg)
+{
+    std::ostringstream oss;
+    // Beast's http::serializer can write the header portion.
+    // For simplicity use the operator<< overload which writes the full message.
+    oss << msg;
+    return oss.str();
+}
 
 http_client::http_client(boost::asio::io_context& io_context, config cfg) :
     session_base(std::move(cfg)), io_context_(io_context)
@@ -58,11 +74,44 @@ http_client::async_request(boost::beast::http::verb method,
                 { error_code::transport, 0, 0, ERR_error_string(ERR_get_error(), nullptr), {} });
         }
 
+        if (cfg_.logger) {
+            cfg_.logger({ transport_direction::sent, "CONN", "resolve",
+                          cfg_.rest_host + ":" + cfg_.rest_port, 0, {}, {} });
+        }
         auto endpoints = co_await resolver.async_resolve(cfg_.rest_host, cfg_.rest_port, boost::cobalt::use_op);
 
-        co_await asio::async_connect(stream.next_layer(), endpoints, boost::cobalt::use_op);
+        if (cfg_.logger) {
+            std::string ep_list;
+            for (const auto& ep : endpoints) {
+                if (!ep_list.empty()) ep_list += ", ";
+                ep_list += ep.endpoint().address().to_string() + ":" + std::to_string(ep.endpoint().port());
+            }
+            cfg_.logger({ transport_direction::received, "CONN", "resolve",
+                          cfg_.rest_host, 0, ep_list, {} });
+        }
 
+        if (cfg_.logger) {
+            cfg_.logger({ transport_direction::sent, "CONN", "tcp_connect",
+                          cfg_.rest_host + ":" + cfg_.rest_port, 0, {}, {} });
+        }
+        co_await asio::async_connect(stream.next_layer(), endpoints, boost::cobalt::use_op);
+        if (cfg_.logger) {
+            auto& sock = stream.next_layer();
+            cfg_.logger({ transport_direction::received, "CONN", "tcp_connect",
+                          sock.remote_endpoint().address().to_string() + ":"
+                              + std::to_string(sock.remote_endpoint().port()),
+                          0, {}, {} });
+        }
+
+        if (cfg_.logger) {
+            cfg_.logger({ transport_direction::sent, "CONN", "ssl_handshake",
+                          cfg_.rest_host, 0, {}, {} });
+        }
         co_await stream.async_handshake(asio::ssl::stream_base::client, boost::cobalt::use_op);
+        if (cfg_.logger) {
+            cfg_.logger({ transport_direction::received, "CONN", "ssl_handshake",
+                          SSL_get_version(stream.native_handle()), 0, {}, {} });
+        }
 
         http::request<http::string_body> req{ method, target, 11 };
         req.set(http::field::host, cfg_.rest_host);
@@ -78,11 +127,24 @@ http_client::async_request(boost::beast::http::verb method,
             req.prepare_payload();
         }
 
+        if (cfg_.logger) {
+            cfg_.logger({ transport_direction::sent, "HTTP",
+                          std::string(http::to_string(method)), target, 0,
+                          req.body(), serialize_message(req) });
+        }
+
         co_await http::async_write(stream, req, boost::cobalt::use_op);
 
         beast::flat_buffer buffer;
         http::response<http::string_body> response;
         co_await http::async_read(stream, buffer, response, boost::cobalt::use_op);
+
+        if (cfg_.logger) {
+            cfg_.logger({ transport_direction::received, "HTTP",
+                          std::string(http::to_string(method)), target,
+                          static_cast<int>(response.result_int()),
+                          response.body(), serialize_message(response) });
+        }
 
         boost::system::error_code shutdown_ec;
         stream.shutdown(shutdown_ec);

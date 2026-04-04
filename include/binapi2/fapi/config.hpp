@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <binapi2/fapi/transport_logger.hpp>
+
 #include <cstdint>
 #include <string>
 
@@ -46,6 +48,13 @@ struct config
 
     std::string user_agent{ "binapi2-fapi/0.1.0" };
 
+    /// @brief Optional callback for transport-level logging.
+    ///
+    /// When set, the HTTP and WebSocket transport layers invoke this callback
+    /// for every message sent or received, providing the raw method, target,
+    /// status, and body.  When null (default), no logging overhead is incurred.
+    transport_logger logger{};
+
     /// @brief When true the config targets the Binance Futures testnet.
     bool testnet{ false };
 
@@ -58,7 +67,7 @@ struct config
     [[nodiscard]] static config testnet_config()
     {
         config cfg;
-        cfg.rest_host = "testnet.binancefuture.com";
+        cfg.rest_host = "demo-fapi.binance.com";
         cfg.websocket_api_host = "testnet.binancefuture.com";
         cfg.websocket_api_target = "/ws-fapi/v1";
         cfg.stream_host = "fstream.binancefuture.com";
