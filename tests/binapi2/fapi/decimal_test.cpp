@@ -361,7 +361,7 @@ TEST(DecimalMulOperator, MulEquals) {
 
 TEST(DecimalMulOperator, OverflowThrows) {
     // operator* throws std::overflow_error when result exceeds int128.
-    EXPECT_THROW(decimal::max() * decimal::max(), std::overflow_error);
+    EXPECT_THROW((void)(decimal::max() * decimal::max()), std::overflow_error);
 }
 
 // ============================================================================
@@ -471,7 +471,7 @@ TEST(DecimalDiv, WithRemainder) {
 }
 
 TEST(DecimalDiv, DivideByZeroThrows) {
-    EXPECT_THROW(div(decimal("1.0"), decimal("0")), std::domain_error);
+    EXPECT_THROW((void)div(decimal("1.0"), decimal("0")), std::domain_error);
 }
 
 TEST(DecimalDiv, DivideZero) {

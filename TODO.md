@@ -3,47 +3,23 @@
 
 
 
+examples/binapi2
 
+refactor - completely rewrite, remove old simple outdated examples
 
-
-add googletest
-add cmake option BINAPI2_WITH_TESTS
-
-
-add comprehensive complete test for decimal type
-
-
---------------------------------------------------------------------------------
-
-
-Unit tests
-
-Analyze what can be tested in binapi2 with unit tests?
-
-Comprehensive and intensive testing of decimal type
-cover all corner cases, especially for multiplication and division
-add limits to the type
-
-
-
-
-
-
---------------------------------------------------------------------------------
-
-examples
-
-refactor
-
-binapi2-fapi-demo client tool
+binapi2-fapi-demo-cli - client tool
 - 2 verbosity levels
     - print jsons
     - print http
 - all readonly requests and streams
+    - very basic - sync
+    - other async
 - some other requests
     - rest
     - wsapi
 - local order book demo
+
+split implementation into fine grained files making it not only demo client, but also an example of library usage
 
 
 
