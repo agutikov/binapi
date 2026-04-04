@@ -15,6 +15,9 @@ binapi2 validation against postman
 
 binapi2 connect to testnet
 
+test all methods
+
+
 --------------------------------------------------------------------------------
 
 

@@ -32,24 +32,28 @@ namespace binapi2::fapi::transport {
 // Pimpl body. Owns the SSL context, resolver, Beast WebSocket stream, and
 // read buffer. The SSL context is created once at construction time (unlike
 // the HTTP client which creates one per request) because the WebSocket
-// connection is long-lived.
+// connection is long-lived.  The resolver and stream are created lazily in
+// async_connect using the coroutine's executor so that cobalt::run() (used
+// by the sync wrappers) can drive completions on its internal io_context.
 struct websocket_client::impl
 {
-    impl(boost::asio::io_context& io_context, config cfg) :
-        ssl_ctx(make_ssl_context()), resolver(io_context), stream(io_context, ssl_ctx), cfg(std::move(cfg))
+    explicit impl(config cfg) :
+        ssl_ctx(make_ssl_context()), cfg(std::move(cfg))
     {
     }
 
+    using ws_stream = boost::beast::websocket::stream<boost::asio::ssl::stream<boost::asio::ip::tcp::socket>>;
+
     boost::asio::ssl::context ssl_ctx;
-    boost::asio::ip::tcp::resolver resolver;
-    boost::beast::websocket::stream<boost::asio::ssl::stream<boost::asio::ip::tcp::socket>> stream;
+    std::optional<boost::asio::ip::tcp::resolver> resolver;
+    std::optional<ws_stream> stream;
     boost::beast::flat_buffer buffer;
     config cfg;
     bool connected{ false };
 };
 
-websocket_client::websocket_client(boost::asio::io_context& io_context, config cfg) :
-    session_base(cfg), impl_(std::make_unique<impl>(io_context, std::move(cfg)))
+websocket_client::websocket_client(boost::asio::io_context& /*io_context*/, config cfg) :
+    session_base(cfg), impl_(std::make_unique<impl>(std::move(cfg)))
 {
 }
 
@@ -61,7 +65,13 @@ boost::cobalt::task<result<void>>
 websocket_client::async_connect(std::string host, std::string port, std::string target)
 {
     try {
-        if (!SSL_set_tlsext_host_name(impl_->stream.next_layer().native_handle(), host.c_str())) {
+        // Create I/O objects on the coroutine's executor so that cobalt::run()
+        // (used by sync wrappers) can drive their completions.
+        auto executor = co_await boost::cobalt::this_coro::executor;
+        impl_->resolver.emplace(executor);
+        impl_->stream.emplace(executor, impl_->ssl_ctx);
+
+        if (!SSL_set_tlsext_host_name(impl_->stream->next_layer().native_handle(), host.c_str())) {
             co_return result<void>::failure(
                 { error_code::websocket, 0, 0, ERR_error_string(ERR_get_error(), nullptr), {} });
         }
@@ -70,7 +80,7 @@ websocket_client::async_connect(std::string host, std::string port, std::string 
             cfg_.logger({ transport_direction::sent, "CONN", "resolve",
                           host + ":" + port, 0, {}, {} });
         }
-        auto endpoints = co_await impl_->resolver.async_resolve(host, port, boost::cobalt::use_op);
+        auto endpoints = co_await impl_->resolver->async_resolve(host, port, boost::cobalt::use_op);
         if (cfg_.logger) {
             std::string ep_list;
             for (const auto& ep : endpoints) {
@@ -85,9 +95,9 @@ websocket_client::async_connect(std::string host, std::string port, std::string 
             cfg_.logger({ transport_direction::sent, "CONN", "tcp_connect",
                           host + ":" + port, 0, {}, {} });
         }
-        co_await boost::asio::async_connect(impl_->stream.next_layer().next_layer(), endpoints, boost::cobalt::use_op);
+        co_await boost::asio::async_connect(impl_->stream->next_layer().next_layer(), endpoints, boost::cobalt::use_op);
         if (cfg_.logger) {
-            auto& sock = impl_->stream.next_layer().next_layer();
+            auto& sock = impl_->stream->next_layer().next_layer();
             cfg_.logger({ transport_direction::received, "CONN", "tcp_connect",
                           sock.remote_endpoint().address().to_string() + ":"
                               + std::to_string(sock.remote_endpoint().port()),
@@ -99,10 +109,10 @@ websocket_client::async_connect(std::string host, std::string port, std::string 
         // the server to drop the connection. The pong is sent synchronously
         // here because we are inside a control callback where async writes
         // are not permitted by Beast.
-        impl_->stream.control_callback([this](boost::beast::websocket::frame_type kind, boost::beast::string_view) {
+        impl_->stream->control_callback([this](boost::beast::websocket::frame_type kind, boost::beast::string_view) {
             if (kind == boost::beast::websocket::frame_type::ping) {
                 boost::system::error_code ignored;
-                impl_->stream.pong({}, ignored);
+                impl_->stream->pong({}, ignored);
             }
         });
 
@@ -110,18 +120,18 @@ websocket_client::async_connect(std::string host, std::string port, std::string 
             cfg_.logger({ transport_direction::sent, "CONN", "ssl_handshake",
                           host, 0, {}, {} });
         }
-        co_await impl_->stream.next_layer().async_handshake(
+        co_await impl_->stream->next_layer().async_handshake(
             boost::asio::ssl::stream_base::client, boost::cobalt::use_op);
         if (cfg_.logger) {
             cfg_.logger({ transport_direction::received, "CONN", "ssl_handshake",
-                          SSL_get_version(impl_->stream.next_layer().native_handle()), 0, {}, {} });
+                          SSL_get_version(impl_->stream->next_layer().native_handle()), 0, {}, {} });
         }
 
         if (cfg_.logger) {
             cfg_.logger({ transport_direction::sent, "CONN", "ws_handshake",
                           host + target, 0, {}, {} });
         }
-        co_await impl_->stream.async_handshake(host, target, boost::cobalt::use_op);
+        co_await impl_->stream->async_handshake(host, target, boost::cobalt::use_op);
         if (cfg_.logger) {
             cfg_.logger({ transport_direction::received, "CONN", "ws_handshake",
                           host + target, 0, {}, {} });
@@ -142,7 +152,7 @@ websocket_client::async_write_text(std::string message)
         if (cfg_.logger) {
             cfg_.logger({ transport_direction::sent, "WS", "WS", "", 0, message, {} });
         }
-        co_await impl_->stream.async_write(boost::asio::buffer(message), boost::cobalt::use_op);
+        co_await impl_->stream->async_write(boost::asio::buffer(message), boost::cobalt::use_op);
         co_return result<void>::success();
     }
     catch (const boost::system::system_error& e) {
@@ -157,7 +167,7 @@ websocket_client::async_read_text()
         // Drain the buffer before each read to prevent stale data from
         // accumulating across successive reads on the same flat_buffer.
         impl_->buffer.consume(impl_->buffer.size());
-        co_await impl_->stream.async_read(impl_->buffer, boost::cobalt::use_op);
+        co_await impl_->stream->async_read(impl_->buffer, boost::cobalt::use_op);
         std::string data = boost::beast::buffers_to_string(impl_->buffer.data());
         if (cfg_.logger) {
             cfg_.logger({ transport_direction::received, "WS", "WS", "", 0, data, {} });
@@ -177,7 +187,7 @@ websocket_client::async_close()
     }
 
     try {
-        co_await impl_->stream.async_close(boost::beast::websocket::close_code::normal, boost::cobalt::use_op);
+        co_await impl_->stream->async_close(boost::beast::websocket::close_code::normal, boost::cobalt::use_op);
         impl_->connected = false;
         co_return result<void>::success();
     }

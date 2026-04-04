@@ -65,9 +65,14 @@ http_client::async_request(boost::beast::http::verb method,
     namespace http = beast::http;
 
     try {
+        // Use the coroutine's own executor for all I/O objects.  This is
+        // critical: cobalt::run() (used by the sync wrapper) creates its own
+        // internal io_context, so objects bound to the user's io_context_
+        // would never see their completions dispatched.
+        auto executor = co_await boost::cobalt::this_coro::executor;
         asio::ssl::context ssl_ctx = make_ssl_context();
-        asio::ip::tcp::resolver resolver{ io_context_ };
-        asio::ssl::stream<asio::ip::tcp::socket> stream{ io_context_, ssl_ctx };
+        asio::ip::tcp::resolver resolver{ executor };
+        asio::ssl::stream<asio::ip::tcp::socket> stream{ executor, ssl_ctx };
 
         if (!SSL_set_tlsext_host_name(stream.native_handle(), cfg_.rest_host.c_str())) {
             co_return result<http_response>::failure(
