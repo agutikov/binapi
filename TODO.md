@@ -6,18 +6,12 @@
 
 
 
+add googletest
+add cmake option BINAPI2_WITH_TESTS
 
-decimal mult and div
-- options:
-    - with boost::multiprecision
-    - manual with int256 and overflow detection
-- always return 3 result parts
-    - to detect overflow after mult
-    - result:
-        - actual result of precision (10^-18), max value limit 10^20
-        - error - small reminder of type 10^-(18+36)
-        - overflow - big error of type 10^()
-        - special types for reminders and overflow
+
+add comprehensive complete test for decimal type
+
 
 --------------------------------------------------------------------------------
 
@@ -31,9 +25,6 @@ cover all corner cases, especially for multiplication and division
 add limits to the type
 
 
-
-add googletest
-add cmake option BINAPI2_WITH_TESTS
 
 
 

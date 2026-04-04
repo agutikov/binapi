@@ -19,6 +19,7 @@
 #include <iosfwd>
 #include <string>
 #include <string_view>
+#include <utility>
 
 namespace binapi2::fapi::types {
 
@@ -37,10 +38,17 @@ struct decimal
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
     using int128_t = __int128;
+    using uint128_t = unsigned __int128;
 #pragma GCC diagnostic pop
+
 
     static constexpr int scale = 18;
     static constexpr int128_t scale_factor = static_cast<int128_t>(1'000'000'000) * 1'000'000'000;
+
+    /// Maximum valid decimal number: 10^19 (raw 10^37).
+    /// Guarantees: max + max fits in int128 (no hardware overflow on +/-).
+    static constexpr decimal max() { return decimal(max_raw_, raw_tag{}); }
+    static constexpr decimal min() { return decimal(min_raw_, raw_tag{}); }
 
     int128_t value{}; ///< Unscaled integer: actual_value = value * 10^(-scale).
 
@@ -65,18 +73,27 @@ struct decimal
 
     // -- String conversion --
 
-    /// Serialize to a decimal string, trimming trailing zeros after the decimal
-    /// point. E.g. 1500000000000000000 -> "1.5", 0 -> "0".
+    /// Serialize to a decimal string with a decimal point, trimming trailing
+    /// zeros but always keeping at least one fractional digit.
+    /// E.g. 1500000000000000000 -> "1.5", 0 -> "0.0", 1e18 -> "1.0".
     [[nodiscard]] std::string to_string() const;
 
-    /// Approximate double conversion. Precision may be lost for large values.
-    [[nodiscard]] double to_double() const;
+    /// Convert to double. Returns {value, fits} where fits==true means the
+    /// raw int128 round-trips through double without precision loss.
+    [[nodiscard]] std::pair<double, bool> to_double() const;
+
+    /// Convert to long double. Returns {value, fits} where fits==true means the
+    /// raw int128 round-trips through long double without precision loss.
+    [[nodiscard]] std::pair<long double, bool> to_long_double() const;
 
     // -- Queries --
 
     [[nodiscard]] constexpr bool is_zero() const { return value == 0; }
     [[nodiscard]] constexpr bool is_negative() const { return value < 0; }
     [[nodiscard]] constexpr bool is_positive() const { return value > 0; }
+
+    /// True if value is within [min, max]. False indicates overflow from arithmetic.
+    [[nodiscard]] constexpr bool is_valid() const { return value >= min_raw_ && value <= max_raw_; }
 
     // -- Comparison (trivial — same scale, just compare the int128) --
 
@@ -88,19 +105,69 @@ struct decimal
     [[nodiscard]] constexpr decimal operator-(const decimal& rhs) const { return decimal(value - rhs.value, raw_tag{}); }
     [[nodiscard]] constexpr decimal operator-() const { return decimal(-value, raw_tag{}); }
 
-    /// Multiplication: (a * 10^-18) * (b * 10^-18) = (a*b) * 10^-36,
-    /// so we divide by 10^18 to get back to the correct scale.
-    [[nodiscard]] constexpr decimal operator*(const decimal& rhs) const
-    {
-        return decimal(value * rhs.value / scale_factor, raw_tag{});
-    }
+    /// Multiplication via 256-bit intermediate. Truncates sub-10^-18 remainder.
+    /// Throws std::overflow_error if the result exceeds int128 range.
+    [[nodiscard]] decimal operator*(const decimal& rhs) const;
+    decimal& operator*=(const decimal& rhs);
 
     constexpr decimal& operator+=(const decimal& rhs) { value += rhs.value; return *this; }
     constexpr decimal& operator-=(const decimal& rhs) { value -= rhs.value; return *this; }
-    constexpr decimal& operator*=(const decimal& rhs) { return *this = *this * rhs; }
+
+private:
+    // Raw int128 limits: 10^37 (decimal 10^19). 2 * 10^37 < 2^127, so +/- of two
+    // valid decimals never overflows the underlying int128.
+    static constexpr int128_t max_raw_ =
+        scale_factor * (static_cast<int128_t>(10'000'000'000) * 1'000'000'000); // 10^37
+    static constexpr int128_t min_raw_ = -max_raw_;
 };
 
+/// Remainder from decimal mul/div. Separate type prevents accidental
+/// arithmetic with decimal values.
+///
+/// For mul(a,b): value = |a.value * b.value| % 10^18, at scale 10^-36.
+/// For div(a,b): value = |a.value * 10^18| % |b.value|; actual error = value / |b.value| * 10^-18.
+/// Sign follows the sign of the result.
+struct decimal_error
+{
+    decimal::int128_t value{};
+    [[nodiscard]] constexpr bool is_zero() const { return value == 0; }
+    [[nodiscard]] constexpr auto operator<=>(const decimal_error&) const = default;
+    /// Scientific notation of the raw int128 value.
+    [[nodiscard]] std::string to_string() const;
+};
+
+/// Overflow from decimal mul/div — nonzero means result exceeded int128 range.
+/// Separate type prevents accidental arithmetic with decimal values.
+struct decimal_overflow
+{
+    decimal::int128_t value{};
+    [[nodiscard]] constexpr bool is_zero() const { return value == 0; }
+    [[nodiscard]] constexpr auto operator<=>(const decimal_overflow&) const = default;
+    /// Scientific notation of the raw int128 value.
+    [[nodiscard]] std::string to_string() const;
+};
+
+/// Complete result of decimal mul or div.
+struct decimal_result
+{
+    decimal value;              ///< Main result at scale 10^-18.
+    decimal_error error;        ///< Precision remainder (scale depends on operation).
+    decimal_overflow overflow;  ///< Nonzero if result exceeded int128 range.
+
+    [[nodiscard]] constexpr bool is_exact() const { return error.is_zero() && overflow.is_zero(); }
+    [[nodiscard]] constexpr bool has_overflow() const { return !overflow.is_zero(); }
+};
+
+/// Safe multiplication via 256-bit intermediate with overflow detection.
+[[nodiscard]] decimal_result mul(decimal a, decimal b);
+
+/// Safe division via 256-bit intermediate with overflow detection.
+/// Throws std::domain_error on division by zero.
+[[nodiscard]] decimal_result div(decimal a, decimal b);
+
 std::ostream& operator<<(std::ostream& os, const decimal& d);
+std::ostream& operator<<(std::ostream& os, const decimal_error& e);
+std::ostream& operator<<(std::ostream& os, const decimal_overflow& o);
 
 } // namespace binapi2::fapi::types
 
