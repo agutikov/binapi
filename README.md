@@ -1,176 +1,359 @@
 # binapi
-Binance API implemented in C++ for both synchronous and asynchronous way.
 
-# Donate
-BTC: 3BJKvx6LyKB2J5KgRBqst415KKmwQE5eQX
+C++ client library for the Binance cryptocurrency exchange API.
 
-# Motivation
-This implementation has been developed as a consequence of the lack of suitable alternatives as part of my multiuser trading platform project.
+Two library versions coexist in this repository:
 
-# REST API
-- [Test connectivity](https://github.com/binance/binance-spot-api-docs/blob/master/rest-api.md#test-connectivity) -> `api::ping()`
-- [Check server time](https://github.com/binance/binance-spot-api-docs/blob/master/rest-api.md#check-server-time) -> `api::time()`
-- [Exchange information](https://github.com/binance/binance-spot-api-docs/blob/master/rest-api.md#exchange-information) -> `api::exchange_info()`
-- [Account information](https://github.com/binance/binance-spot-api-docs/blob/master/rest-api.md#account-information-user_data) -> `api::account_info()`
-- [Order book](https://github.com/binance/binance-spot-api-docs/blob/master/rest-api.md#order-book) -> `api::depth()`
-- [Recent trades list](https://github.com/binance/binance-spot-api-docs/blob/master/rest-api.md#recent-trades-list) -> `api::trades()`
-- [Aggregate trades list](https://github.com/binance/binance-spot-api-docs/blob/master/rest-api.md#compressedaggregate-trades-list) -> `api::agg_trades()`
-- [24hr ticker price change statistics](https://github.com/binance/binance-spot-api-docs/blob/master/rest-api.md#24hr-ticker-price-change-statistics) -> `api::_24hrs_ticker()`
-- [Symbol price ticker](https://github.com/binance/binance-spot-api-docs/blob/master/rest-api.md#symbol-price-ticker) -> `api::price()`
-- [New order](https://github.com/binance/binance-spot-api-docs/blob/master/rest-api.md#new-order--trade) -> `api::new_order()`
-- [Query order](https://github.com/binance/binance-spot-api-docs/blob/master/rest-api.md#query-order-user_data) -> `api::order_info()`
-- [Test new order](https://github.com/binance/binance-spot-api-docs/blob/master/rest-api.md#test-new-order-trade) -> `api::new_test_order()`
-- [Cancel order](https://github.com/binance/binance-spot-api-docs/blob/master/rest-api.md#cancel-order-trade) -> `api::cancel_order()`
-- [Current open orders](https://github.com/binance/binance-spot-api-docs/blob/master/rest-api.md#current-open-orders-user_data) -> `api::open_orders()`
-- [All orders](https://github.com/binance/binance-spot-api-docs/blob/master/rest-api.md#all-orders-user_data) -> `api::all_orders()`
-- [Account trade list](https://github.com/binance/binance-spot-api-docs/blob/master/rest-api.md#account-trade-list-user_data) -> `api::my_trades()`
-- [Start user data stream](https://github.com/binance/binance-spot-api-docs/blob/master/rest-api.md#start-user-data-stream-user_stream) -> `api::start_user_data_stream()`
-- [Keepalive user data stream](https://github.com/binance/binance-spot-api-docs/blob/master/rest-api.md#keepalive-user-data-stream-user_stream) -> `api::ping_user_data_stream()`
-- [Close user data stream](https://github.com/binance/binance-spot-api-docs/blob/master/rest-api.md#close-user-data-stream-user_stream) -> `api::close_user_data_stream()`
+| Version | Namespace | API | C++ | Async model |
+|---------|-----------|-----|-----|-------------|
+| **binapi** (v1) | `binapi::rest`, `binapi::ws` | Spot | C++14 | Callbacks |
+| **binapi2** (v2) | `binapi2::fapi` | USD-M Futures | C++23 | Boost.Cobalt coroutines |
 
-# WebSocket API
-- [Partial Book Depth Streams](https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-streams.md#partial-book-depth-streams) -> `websockets::part_depth()`
-- [Diff. Depth Stream](https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-streams.md#diff-depth-stream) -> `websockets::diff_depth()`
-- [Kline/Candlestick Streams](https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-streams.md#klinecandlestick-streams) -> `websockets::klines()`
-- [Trade Streams](https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-streams.md#trade-streams) -> `websockets::trade()`
-- [Aggregate Trade Streams](https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-streams.md#aggregate-trade-streams) -> `websockets::agg_trade()`
-- [Individual Symbol Mini Ticker Stream](https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-streams.md#individual-symbol-mini-ticker-stream) -> `websockets::mini_ticker()`
-- [All Market Mini Tickers Stream](https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-streams.md#all-market-mini-tickers-stream) -> `websockets::mini_tickers()`
-- [Individual Symbol Ticker Streams](https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-streams.md#individual-symbol-ticker-streams) -> `websockets::market()`
-- [All Market Tickers Stream](https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-streams.md#all-market-tickers-stream) -> `websockets::markets()`
-- [Individual Symbol Book Ticker Streams](https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-streams.md#individual-symbol-book-ticker-streams) -> `websockets::book()`
-- [All Book Tickers Stream](https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-streams.md#all-book-tickers-stream) -> `websockets::books()`
-- [User Data Streams](https://github.com/binance-exchange/binance-official-api-docs/blob/master/user-data-stream.md) -> `websockets::userdata()`
+binapi2 is the actively developed version.  binapi v1 is maintained for
+backward compatibility.
 
-# Implementation details
-The project is written using C++14 and [boost](https://www.boost.org/) (at least version 1.70). [boost.beast](https://www.boost.org/doc/libs/1_73_0/libs/beast/index.html) is used to interact with the network.
+## Quick start
 
-# Synchronous example
+```bash
+# Clone (with submodules for glaze and Binance docs)
+git clone --recurse-submodules <repo-url>
+cd binapi
+
+# Build
+./build.sh
+
+# Run unit tests
+./test.sh
+
+# Try the demo CLI (uses testnet by default)
+export BINANCE_API_KEY="your-testnet-key"
+export BINANCE_SECRET_KEY="your-testnet-secret"
+
+./_build/examples/binapi2/fapi/demo-cli/binapi2-fapi-demo-cli ping
+./_build/examples/binapi2/fapi/demo-cli/binapi2-fapi-demo-cli -v time
+./_build/examples/binapi2/fapi/demo-cli/binapi2-fapi-demo-cli -v order-book BTCUSDT 5
+```
+
+### Minimal example (binapi2)
+
 ```cpp
-#include "binapi/api.hpp"
-
+#include <binapi2/fapi/client.hpp>
 #include <boost/asio/io_context.hpp>
-
 #include <iostream>
 
 int main() {
-    const std::string pk = "...";
-    const std::string sk = "...";
+    binapi2::fapi::config cfg;       // production by default
+    cfg.api_key    = "...";
+    cfg.secret_key = "...";
 
-    boost::asio::io_context ioctx;
-    binapi::rest::api api(
-        ioctx
-        ,"api.binance.com"
-        ,"443"
-        ,pk
-        ,sk
-        ,10000 // recvWindow
-    );
+    boost::asio::io_context io;
+    binapi2::fapi::client client(io, cfg);
 
-    auto account = api.account_info();
-    if ( !account ) {
-        std::cerr << "account info error: " << account.errmsg << std::endl;
-        return EXIT_FAILURE;
+    // Public endpoint — no auth needed.
+    auto r = client.market_data.execute(binapi2::fapi::types::ping_request{});
+    if (!r) {
+        std::cerr << r.err.message << "\n";
+        return 1;
     }
 
-    std::cout << "account info: " << account.v << std::endl << std::endl;
-
-    return EXIT_SUCCESS;
+    // Authenticated endpoint.
+    auto bal = client.account.balances();
+    if (bal) {
+        for (auto& b : *bal)
+            std::cout << b.asset << ": " << b.balance << "\n";
+    }
 }
-
 ```
 
-# Asynchronous example
+### Coroutine example
+
 ```cpp
-#include "binapi/api.hpp"
-
-#include <boost/asio/io_context.hpp>
-
-#include <iostream>
-
-int main() {
-    const std::string pk = "...";
-    const std::string sk = "...";
-
-    boost::asio::io_context ioctx;
-    binapi::rest::api api(
-        ioctx
-        ,"api.binance.com"
-        ,"443"
-        ,pk
-        ,sk
-        ,10000 // recvWindow
-    );
-
-    api.account_info([](const char *fl, int ec, std::string errmsg, binapi::rest::account_info_t res) {
-        if ( ec ) {
-            std::cerr << "account info error: fl=" << fl << ", ec=" << ec << ", emsg=" << errmsg << std::endl;
-            return false;
-        }
-
-        std::cout << "account info: " << res << std::endl;
-
-        return true;
-    });
-
-    ioctx.run();
-
-    return EXIT_SUCCESS;
+boost::cobalt::task<void> run(binapi2::fapi::client& client) {
+    auto r = co_await client.market_data.async_execute(
+        binapi2::fapi::types::order_book_request{.symbol = "BTCUSDT", .limit = 5});
+    if (r)
+        std::cout << "best bid: " << r->bids[0].price << "\n";
 }
 ```
 
-# WebSocket example
-```cpp
-#include <binapi/api.hpp>
-#include <binapi/websocket.hpp>
+## Build
 
-#include <boost/asio/io_context.hpp>
+### Requirements
 
-#include <iostream>
+| Dependency | Notes |
+|------------|-------|
+| C++23 compiler | GCC 13+ or Clang 17+ |
+| CMake 3.20+ | |
+| Boost | Beast, ASIO, Cobalt (coroutines) |
+| OpenSSL | TLS for HTTPS and WSS |
+| zlib | Compression |
+| [Glaze](https://github.com/stephenberry/glaze) | JSON serialization (bundled in `deps/glaze/`) |
 
-int main() {
-    boost::asio::io_context ioctx;
+### Build commands
 
-    binapi::ws::websockets ws{
-         ioctx
-        ,"stream.binance.com"
-        ,"9443"
-    };
+```bash
+./build.sh                    # CMake Release build
 
-    ws.part_depth("BTCUSDT",
-        [](const char *fl, int ec, std::string emsg, auto depths) {
-            if ( ec ) {
-                std::cerr << "subscribe depth error: fl=" << fl << ", ec=" << ec << ", emsg=" << emsg << std::endl;
-
-                return false;
-            }
-
-            std::cout << "depths: " << depths << std::endl;
-
-            return true;
-        }
-    );
-
-    ws.trade("BTCUSDT",
-        [](const char *fl, int ec, std::string emsg, auto trades) {
-            if ( ec ) {
-                std::cerr << "subscribe trades error: fl=" << fl << ", ec=" << ec << ", emsg=" << emsg << std::endl;
-
-                return false;
-            }
-
-            std::cout << "trades: " << trades << std::endl;
-
-            return true;
-        }
-    );
-
-    ioctx.run();
-
-    return EXIT_SUCCESS;
-}
+# Or manually:
+cmake -S . -B _build -DCMAKE_BUILD_TYPE=Release
+cmake --build _build -j16
 ```
 
-# Tools (will write later...)
-- filters
-- report generators
+### CMake options
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `BINAPI2_WITH_TESTS` | `ON` | Build unit and integration tests |
+
+### Run tests
+
+```bash
+./test.sh                     # all unit tests via ctest
+```
+
+## Dependencies
+
+**External (system-installed):**
+- [Boost](https://www.boost.org/) (Beast, ASIO, Cobalt)
+- [OpenSSL](https://www.openssl.org/)
+- [zlib](https://zlib.net/)
+
+**Bundled (git submodules in `deps/`):**
+- [Glaze](https://github.com/stephenberry/glaze) -- header-only compile-time JSON library
+
+**Test-only:**
+- [Google Test](https://github.com/google/googletest)
+
+## Architecture
+
+See [docs/DESIGN.md](docs/DESIGN.md) for the full architecture documentation with
+PlantUML diagrams.  Key design points:
+
+- **Generic dispatch** -- request types carry all API metadata via `endpoint_traits<Request>`.
+  A single `execute(request)` call resolves the HTTP method, path, security level,
+  and response type at compile time.
+- **Async-primary** -- all I/O is implemented as `boost::cobalt::task<result<T>>` coroutines.
+  Synchronous `execute()` is a thin wrapper via `cobalt::run()`.
+- **Service groups** -- endpoints are organized into `market_data_service`, `account_service`,
+  `trade_service`, `convert_service`, and `user_data_stream_service`.
+- **Result monad** -- every fallible operation returns `result<T>` (success value or
+  typed error with HTTP status, Binance error code, and message).
+- **Custom types** -- `decimal` (128-bit fixed-point) for all monetary values,
+  `timestamp_ms` (typed wrapper around `uint64_t`) for all timestamps.
+
+```
+binapi2::fapi::client
+  |
+  +-- market_data    (service)     -- public REST endpoints
+  +-- account        (service)     -- authenticated account info
+  +-- trade          (service)     -- order management
+  +-- convert        (service)     -- asset conversion
+  +-- user_data_streams            -- listen key lifecycle
+  |
+  +-- transport::http_client       -- Boost.Beast HTTPS
+  +-- transport::websocket_client  -- Boost.Beast WSS
+  |
+  +-- websocket_api::client        -- authenticated WS-API (RPC-style)
+  +-- streams::market_streams      -- market data subscriptions
+  +-- streams::user_streams        -- account/position updates
+  +-- streams::local_order_book    -- synchronized local order book
+```
+
+## Documentation
+
+### API reference
+
+Generate Doxygen HTML documentation:
+
+```bash
+./scripts/gen_docs.sh
+# Open _docs/html/index.html
+```
+
+### Data types and implementation status
+
+| Document | Description |
+|----------|-------------|
+| [docs/implementation_status.md](docs/implementation_status.md) | Per-endpoint coverage matrix (implemented/partial/TBD) |
+| [docs/data_types.md](docs/data_types.md) | All C++ types with field-level status (complete/partial/extra) |
+| [docs/DESIGN.md](docs/DESIGN.md) | Architecture, async model, request flow, stream lifecycle |
+
+### Binance API reference (local)
+
+The `docs/api/` directory contains a local copy of the official Binance USD-M
+Futures API documentation in three formats:
+
+```
+docs/api/
+  html/       -- mirrored HTML pages from developers.binance.com
+  json/       -- structured JSON (extracted from HTML)
+  md/         -- Markdown conversion
+  binance-api-postman/     -- official Postman collections and environments
+  binance-spot-api-docs/   -- official Binance spot API docs (git submodule)
+```
+
+### Scripts for grabbing API reference
+
+Three scripts in `scripts/api/docs/` form a pipeline for maintaining a local
+copy of the Binance public API documentation:
+
+| Script | Description |
+|--------|-------------|
+| `download-usdm-api-reference.sh` | `wget` mirror of the USD-M Futures docs from developers.binance.com to `docs/api/html/` |
+| `extract_usdm_docs_to_json.py` | Parse the mirrored HTML into structured JSON (endpoint path, method, parameters, response examples) in `docs/api/json/` |
+| `convert_usdm_json_to_markdown.py` | Convert the JSON docs to Markdown in `docs/api/md/` |
+
+Usage:
+
+```bash
+# 1. Download (requires wget)
+./scripts/api/docs/download-usdm-api-reference.sh
+
+# 2. Extract HTML -> JSON (requires Python with lxml, orjson)
+python3 scripts/api/docs/extract_usdm_docs_to_json.py \
+    --input-dir docs/api/html/developers.binance.com/docs/derivatives/usds-margined-futures \
+    --output-dir docs/api/json/developers.binance.com/docs/derivatives/usds-margined-futures
+
+# 3. Convert JSON -> Markdown
+python3 scripts/api/docs/convert_usdm_json_to_markdown.py \
+    --input-dir docs/api/json/developers.binance.com/docs/derivatives/usds-margined-futures \
+    --output-dir docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures
+```
+
+## Testing
+
+### Unit tests
+
+Located in `tests/binapi2/fapi/`.  Run with:
+
+```bash
+./test.sh
+```
+
+| Test | What it covers |
+|------|---------------|
+| `signing_test` | HMAC-SHA256 signing, query string construction, percent-encoding |
+| `enums_test` | Enum JSON serialization round-trips |
+| `decimal_test` | 128-bit decimal arithmetic, parsing, formatting |
+| `json_query_test` | Request struct serialization, query parameter conversion |
+| `result_test` | `result<T>` monad semantics |
+| `postman_validation_test` | Validates all 95 endpoints against the official Binance Postman collection (path, method, parameters) |
+
+### Integration tests
+
+The integration test exercises the full client stack (TLS, HTTP, JSON
+deserialization) against a mock Binance API server running in Docker.
+
+```bash
+# Start the mock server
+./scripts/api/postman_mock/start.sh
+
+# Run the integration test
+./scripts/api/postman_mock/run_test.sh
+
+# Stop the mock server
+./scripts/api/postman_mock/stop.sh
+```
+
+The mock server uses `@jordanwalsh23/postman-local-mock-server` with the
+official Binance Postman collection enriched with response examples from the
+API documentation.  A merge script (`scripts/api/postman_mock/merge_responses.py`)
+injects the responses into the collection at start time.
+
+Infrastructure is in `compose/postman-mock/` (Dockerfile, docker-compose, response
+files, mapping config).
+
+Tested endpoints: ping, server time, exchange info, order book, recent trades,
+klines, price ticker, book ticker, mark price, funding rate history, account
+information, balances, position risk, query order, open orders, listen key
+(start/keepalive/close).
+
+## Examples
+
+The demo CLI at `examples/binapi2/fapi/demo-cli/` demonstrates every library
+feature.  Each source file covers a different area:
+
+| File | Area |
+|------|------|
+| `cmd_market_data.cpp` | Public REST endpoints (ping, time, depth, trades, klines, tickers) |
+| `cmd_account.cpp` | Account info, balances, positions, income history |
+| `cmd_trade.cpp` | Order placement, cancellation, queries |
+| `cmd_ws_api.cpp` | WebSocket API (authenticated RPC: logon, place/cancel orders) |
+| `cmd_stream.cpp` | Market data WebSocket streams (klines, depth, tickers, liquidations) |
+| `cmd_user_stream.cpp` | User data streams (listen key lifecycle, account updates) |
+| `cmd_order_book.cpp` | Live synchronized local order book |
+
+### Usage
+
+```bash
+binapi2-fapi-demo-cli [flags] <command> [args...]
+
+Flags:
+  -v          Print JSON responses
+  -vv         Print JSON + transport log
+  -vvv        Print JSON + full HTTP headers
+  --live      Production endpoints
+  --testnet   Testnet endpoints (default)
+```
+
+### HOWTO: fetch market data
+
+```bash
+# Server time
+./binapi2-fapi-demo-cli -v time
+
+# Order book (top 5 levels)
+./binapi2-fapi-demo-cli -v order-book BTCUSDT 5
+
+# Klines (1-hour candles, last 10)
+./binapi2-fapi-demo-cli -v klines BTCUSDT 1h 10
+
+# All mark prices
+./binapi2-fapi-demo-cli -v mark-prices
+```
+
+### HOWTO: place and manage orders (testnet)
+
+```bash
+export BINANCE_API_KEY="your-testnet-key"
+export BINANCE_SECRET_KEY="your-testnet-secret"
+
+# Test order (validated but not placed)
+./binapi2-fapi-demo-cli -v test-order BTCUSDT BUY LIMIT --quantity 0.001 --price 50000 --tif GTC
+
+# Place a real order
+./binapi2-fapi-demo-cli -v new-order BTCUSDT BUY LIMIT --quantity 0.001 --price 50000 --tif GTC
+
+# Query order status
+./binapi2-fapi-demo-cli -v query-order BTCUSDT 123456789
+
+# Cancel order
+./binapi2-fapi-demo-cli -v cancel-order BTCUSDT 123456789
+```
+
+### HOWTO: stream market data
+
+```bash
+# Live order book (synchronized via WebSocket depth stream + REST snapshot)
+./binapi2-fapi-demo-cli order-book-live BTCUSDT 10
+
+# Kline stream
+./binapi2-fapi-demo-cli stream-kline BTCUSDT 1m
+
+# All book tickers (real-time best bid/ask for every symbol)
+./binapi2-fapi-demo-cli stream-all-book-tickers
+```
+
+### HOWTO: use the WebSocket API
+
+```bash
+# Authenticated WebSocket session
+./binapi2-fapi-demo-cli -v ws-logon
+
+# Place order via WebSocket API
+./binapi2-fapi-demo-cli -v ws-order-place BTCUSDT BUY LIMIT --quantity 0.001 --price 50000 --tif GTC
+```
+
+## License
+
+[Apache License 2.0](LICENSE)
