@@ -340,7 +340,7 @@ TEST(FapiConfig, TestnetConfigHasTestnetTrue)
 TEST(FapiConfig, TestnetConfigRestHost)
 {
     auto cfg = config::testnet_config();
-    EXPECT_EQ(cfg.rest_host, "testnet.binancefuture.com");
+    EXPECT_EQ(cfg.rest_host, "demo-fapi.binance.com");
 }
 
 TEST(FapiConfig, TestnetConfigWebsocketApiHost)

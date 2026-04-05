@@ -30,3 +30,11 @@ add_executable(json_query_test json_query_test.cpp)
 target_link_libraries(json_query_test PRIVATE binapi2_fapi GTest::gtest_main)
 target_compile_options(json_query_test PRIVATE)
 gtest_discover_tests(json_query_test DISCOVERY_MODE PRE_TEST)
+
+add_executable(postman_validation_test postman_validation_test.cpp)
+target_link_libraries(postman_validation_test PRIVATE binapi2_fapi GTest::gtest_main)
+target_compile_options(postman_validation_test PRIVATE)
+target_compile_definitions(postman_validation_test PRIVATE
+    POSTMAN_JSON_PATH="${CMAKE_SOURCE_DIR}/docs/api/binance-api-postman/collections/Binance Derivatives Trading USDS Futures API.json"
+)
+gtest_discover_tests(postman_validation_test DISCOVERY_MODE PRE_TEST)
