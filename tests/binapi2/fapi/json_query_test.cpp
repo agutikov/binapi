@@ -65,7 +65,7 @@ TEST(JsonRoundTrip, ServerTimeResponse)
     constexpr std::string_view input = R"({"serverTime":1234567890123})";
     auto resp = parse_json<server_time_response>(input);
 
-    EXPECT_EQ(resp.serverTime, 1234567890123ULL);
+    EXPECT_EQ(resp.serverTime, timestamp_ms{1234567890123ULL});
 
     auto json2 = to_json(resp);
     auto resp2 = parse_json<server_time_response>(json2);
@@ -235,7 +235,7 @@ TEST(JsonRoundTrip, OrderResponse)
     ASSERT_TRUE(resp.priceRate.has_value());
     EXPECT_EQ(*resp.priceRate, decimal("0.3"));
     ASSERT_TRUE(resp.updateTime.has_value());
-    EXPECT_EQ(*resp.updateTime, 1566818724722ULL);
+    EXPECT_EQ(*resp.updateTime, timestamp_ms{1566818724722ULL});
     ASSERT_TRUE(resp.workingType.has_value());
     EXPECT_EQ(*resp.workingType, working_type::contract_price);
     ASSERT_TRUE(resp.priceProtect.has_value());

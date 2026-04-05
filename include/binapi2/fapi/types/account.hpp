@@ -12,6 +12,7 @@
 
 #include <binapi2/fapi/types/decimal.hpp>
 #include <binapi2/fapi/types/enums.hpp>
+#include <binapi2/fapi/types/timestamp.hpp>
 
 #include <glaze/glaze.hpp>
 
@@ -43,7 +44,7 @@ struct account_asset
     decimal availableBalance{};
     decimal maxWithdrawAmount{};
     std::optional<bool> marginAvailable{};
-    std::uint64_t updateTime{};
+    timestamp_ms updateTime{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Account-Information-V3.md
@@ -67,7 +68,7 @@ struct account_position
     std::optional<decimal> isolatedMargin{};
     std::optional<decimal> notional{};
     std::optional<decimal> isolatedWallet{};
-    std::uint64_t updateTime{};
+    timestamp_ms updateTime{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Account-Information-V3.md
@@ -77,7 +78,7 @@ struct account_information
     bool canTrade{};
     bool canDeposit{};
     bool canWithdraw{};
-    std::uint64_t updateTime{};
+    timestamp_ms updateTime{};
     std::optional<bool> multiAssetsMargin{};
     std::optional<int> tradeGroupId{};
     decimal totalInitialMargin{};
@@ -106,7 +107,7 @@ struct futures_account_balance
     decimal availableBalance{};
     decimal maxWithdrawAmount{};
     bool marginAvailable{};
-    std::uint64_t updateTime{};
+    timestamp_ms updateTime{};
 };
 
 // ---------------------------------------------------------------------------
@@ -137,7 +138,7 @@ struct position_risk
     position_side positionSide{};
     decimal notional{};
     decimal isolatedWallet{};
-    std::uint64_t updateTime{};
+    timestamp_ms updateTime{};
 };
 
 // ---------------------------------------------------------------------------
@@ -154,7 +155,7 @@ struct account_config_response
     bool dualSidePosition{};
     bool multiAssetsMargin{};
     std::optional<int> tradeGroupId{};
-    std::uint64_t updateTime{};
+    timestamp_ms updateTime{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Symbol-Config.md
@@ -194,8 +195,8 @@ struct income_history_request
 {
     std::optional<std::string> symbol{};
     std::optional<std::string> incomeType{};
-    std::optional<std::uint64_t> startTime{};
-    std::optional<std::uint64_t> endTime{};
+    std::optional<timestamp_ms> startTime{};
+    std::optional<timestamp_ms> endTime{};
     std::optional<int> page{};
     std::optional<int> limit{};
 };
@@ -208,7 +209,7 @@ struct income_history_entry
     decimal income{};
     std::string asset{};
     std::string info{};
-    std::uint64_t time{};
+    timestamp_ms time{};
     std::uint64_t tranId{};
     std::string tradeId{};
 };
@@ -264,14 +265,14 @@ struct commission_rate_response
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Get-Download-Id-For-Futures-Transaction-History.md
 struct download_id_request
 {
-    std::uint64_t startTime{};
-    std::uint64_t endTime{};
+    timestamp_ms startTime{};
+    timestamp_ms endTime{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Get-Download-Id-For-Futures-Transaction-History.md
 struct download_id_response
 {
-    std::uint64_t avgCostTimestampOfLast30d{};
+    timestamp_ms avgCostTimestampOfLast30d{};
     std::string downloadId{};
 };
 
@@ -288,7 +289,7 @@ struct download_link_response
     std::string status{};
     std::string url{};
     bool notified{};
-    std::uint64_t expirationTimestamp{};
+    timestamp_ms expirationTimestamp{};
     bool isExpired{};
 };
 
@@ -312,7 +313,7 @@ struct toggle_bnb_burn_request
 struct trading_status_indicator
 {
     bool isLocked{};
-    std::uint64_t plannedRecoverTime{};
+    timestamp_ms plannedRecoverTime{};
     std::string indicator{};
     double value{};
     double triggerValue{};
@@ -328,7 +329,7 @@ struct quantitative_rules_request
 struct quantitative_rules_response
 {
     std::map<std::string, std::vector<trading_status_indicator>> indicators{};
-    std::uint64_t updateTime{};
+    timestamp_ms updateTime{};
 };
 
 // ---------------------------------------------------------------------------

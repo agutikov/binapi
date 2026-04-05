@@ -13,6 +13,8 @@
 #pragma once
 
 #include <cstdint>
+#include <iosfwd>
+#include <ostream>
 #include <string>
 
 namespace binapi2::fapi::types {
@@ -34,9 +36,24 @@ struct timestamp_ms
 
     /// @brief Convert to the query-string representation expected by Binance.
     [[nodiscard]] std::string to_string() const { return std::to_string(value); }
+
+    friend std::ostream& operator<<(std::ostream& os, const timestamp_ms& ts) { return os << ts.value; }
 };
 
 } // namespace binapi2::fapi::types
+
+// -- fmt formatting -----------------------------------------------------------
+
+#include <fmt/format.h>
+
+template<>
+struct fmt::formatter<binapi2::fapi::types::timestamp_ms> : fmt::formatter<std::uint64_t>
+{
+    auto format(const binapi2::fapi::types::timestamp_ms& ts, format_context& ctx) const
+    {
+        return fmt::formatter<std::uint64_t>::format(ts.value, ctx);
+    }
+};
 
 // -- Glaze JSON serialization ------------------------------------------------
 // On the wire a timestamp is a plain JSON integer.

@@ -94,7 +94,7 @@ main()
     {
         auto r = c.market_data.execute(types::server_time_request{});
         if (check("server_time", r)) {
-            if (r->serverTime == 0) {
+            if (r->serverTime.value == 0) {
                 std::cerr << "FAIL server_time: serverTime is 0\n";
                 ++failures;
                 --passed;

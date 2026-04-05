@@ -12,6 +12,7 @@
 
 #include <binapi2/fapi/types/decimal.hpp>
 #include <binapi2/fapi/types/enums.hpp>
+#include <binapi2/fapi/types/timestamp.hpp>
 
 #include <glaze/glaze.hpp>
 
@@ -42,7 +43,7 @@ struct rate_limit
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Check-Server-Time.md
 struct server_time_response
 {
-    std::uint64_t serverTime{};
+    timestamp_ms serverTime{};
 };
 
 /// Standard Binance error response body (HTTP 4xx/5xx).
@@ -99,8 +100,8 @@ struct symbol_info
     std::string symbol{};
     std::string pair{};
     contract_type contractType{};
-    std::uint64_t deliveryDate{};
-    std::uint64_t onboardDate{};
+    timestamp_ms deliveryDate{};
+    timestamp_ms onboardDate{};
     contract_status status{};
     decimal maintMarginPercent{};
     decimal requiredMarginPercent{};
@@ -128,7 +129,7 @@ struct symbol_info
 struct exchange_info_response
 {
     std::string timezone{};
-    std::uint64_t serverTime{};
+    timestamp_ms serverTime{};
     std::vector<glz::generic> exchangeFilters{};
     std::vector<rate_limit> rateLimits{};
     std::vector<exchange_info_asset> assets{};

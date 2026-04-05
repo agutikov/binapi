@@ -5,6 +5,7 @@
 #pragma once
 
 #include <binapi2/fapi/types/decimal.hpp>
+#include <binapi2/fapi/types/timestamp.hpp>
 
 #include <glaze/glaze.hpp>
 #include <cstdint>
@@ -27,7 +28,7 @@ struct convert_quote_response {
     std::string quoteId{};
     decimal ratio{};
     decimal inverseRatio{};
-    std::uint64_t validTimestamp{};
+    timestamp_ms validTimestamp{};
     decimal toAmount{};
     decimal fromAmount{};
 };
@@ -40,7 +41,7 @@ struct convert_accept_request {
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/convert/Accept-Quote.md
 struct convert_accept_response {
     std::string orderId{};
-    std::uint64_t createTime{};
+    timestamp_ms createTime{};
     std::string orderStatus{};
 };
 
@@ -60,7 +61,7 @@ struct convert_order_status_response {
     decimal toAmount{};
     decimal ratio{};
     decimal inverseRatio{};
-    std::uint64_t createTime{};
+    timestamp_ms createTime{};
 };
 
 } // namespace binapi2::fapi::types
