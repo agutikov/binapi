@@ -1,0 +1,103 @@
+[
+  {
+    "file": "ping.json",
+    "endpoints": [{"method": "GET", "path": "/fapi/v1/ping"}]
+  },
+  {
+    "file": "server_time.json",
+    "endpoints": [{"method": "GET", "path": "/fapi/v1/time"}]
+  },
+  {
+    "file": "exchange_info.json",
+    "endpoints": [{"method": "GET", "path": "/fapi/v1/exchangeInfo"}]
+  },
+  {
+    "file": "depth.json",
+    "endpoints": [{"method": "GET", "path": "/fapi/v1/depth"}]
+  },
+  {
+    "file": "trades.json",
+    "endpoints": [
+      {"method": "GET", "path": "/fapi/v1/trades"},
+      {"method": "GET", "path": "/fapi/v1/historicalTrades"}
+    ]
+  },
+  {
+    "file": "klines.json",
+    "endpoints": [
+      {"method": "GET", "path": "/fapi/v1/klines"},
+      {"method": "GET", "path": "/fapi/v1/continuousKlines"},
+      {"method": "GET", "path": "/fapi/v1/indexPriceKlines"},
+      {"method": "GET", "path": "/fapi/v1/markPriceKlines"},
+      {"method": "GET", "path": "/fapi/v1/premiumIndexKlines"}
+    ]
+  },
+  {
+    "file": "ticker_price.json",
+    "endpoints": [
+      {"method": "GET", "path": "/fapi/v1/ticker/price"},
+      {"method": "GET", "path": "/fapi/v2/ticker/price"}
+    ]
+  },
+  {
+    "file": "ticker_book.json",
+    "endpoints": [{"method": "GET", "path": "/fapi/v1/ticker/bookTicker"}]
+  },
+  {
+    "file": "premium_index.json",
+    "endpoints": [{"method": "GET", "path": "/fapi/v1/premiumIndex"}]
+  },
+  {
+    "file": "funding_rate.json",
+    "endpoints": [{"method": "GET", "path": "/fapi/v1/fundingRate"}]
+  },
+  {
+    "file": "account.json",
+    "endpoints": [
+      {"method": "GET", "path": "/fapi/v3/account"},
+      {"method": "GET", "path": "/fapi/v2/account"}
+    ]
+  },
+  {
+    "file": "balance.json",
+    "endpoints": [
+      {"method": "GET", "path": "/fapi/v3/balance"},
+      {"method": "GET", "path": "/fapi/v2/balance"}
+    ]
+  },
+  {
+    "file": "position_risk.json",
+    "endpoints": [
+      {"method": "GET", "path": "/fapi/v2/positionRisk"},
+      {"method": "GET", "path": "/fapi/v3/positionRisk"}
+    ]
+  },
+  {
+    "file": "order.json",
+    "endpoints": [
+      {"method": "GET", "path": "/fapi/v1/order"},
+      {"method": "POST", "path": "/fapi/v1/order"},
+      {"method": "PUT", "path": "/fapi/v1/order"},
+      {"method": "DELETE", "path": "/fapi/v1/order"},
+      {"method": "POST", "path": "/fapi/v1/order/test"},
+      {"method": "GET", "path": "/fapi/v1/openOrder"}
+    ]
+  },
+  {
+    "file": "open_orders.json",
+    "endpoints": [
+      {"method": "GET", "path": "/fapi/v1/openOrders"},
+      {"method": "GET", "path": "/fapi/v1/allOrders"},
+      {"method": "GET", "path": "/fapi/v1/forceOrders"},
+      {"method": "GET", "path": "/fapi/v1/userTrades"}
+    ]
+  },
+  {
+    "file": "listen_key.json",
+    "endpoints": [
+      {"method": "POST", "path": "/fapi/v1/listenKey"},
+      {"method": "PUT", "path": "/fapi/v1/listenKey"},
+      {"method": "DELETE", "path": "/fapi/v1/listenKey"}
+    ]
+  }
+]

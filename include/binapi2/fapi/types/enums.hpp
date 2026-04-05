@@ -163,6 +163,7 @@ enum class order_status
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 enum class stp_mode
 {
+    none,
     expire_taker,
     expire_both,
     expire_maker,
@@ -460,6 +461,8 @@ to_string(order_status value)
 to_string(stp_mode value)
 {
     switch (value) {
+        case stp_mode::none:
+            return "NONE";
         case stp_mode::expire_taker:
             return "EXPIRE_TAKER";
         case stp_mode::expire_both:
@@ -467,7 +470,7 @@ to_string(stp_mode value)
         case stp_mode::expire_maker:
             return "EXPIRE_MAKER";
     }
-    return "EXPIRE_TAKER";
+    return "NONE";
 }
 
 [[nodiscard]] inline std::string
@@ -816,7 +819,7 @@ template<>
 struct glz::meta<binapi2::fapi::types::stp_mode>
 {
     using enum binapi2::fapi::types::stp_mode;
-    static constexpr auto value = enumerate("EXPIRE_TAKER", expire_taker, "EXPIRE_BOTH", expire_both, "EXPIRE_MAKER", expire_maker);
+    static constexpr auto value = enumerate("NONE", none, "EXPIRE_TAKER", expire_taker, "EXPIRE_BOTH", expire_both, "EXPIRE_MAKER", expire_maker);
 };
 
 template<>

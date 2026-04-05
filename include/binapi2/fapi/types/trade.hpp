@@ -81,6 +81,7 @@ struct order_response
     std::optional<std::uint64_t> goodTillDate{};
     std::optional<decimal> activatePrice{};
     std::optional<decimal> priceRate{};
+    std::optional<std::uint64_t> time{};       ///< Order creation time (ms). Present in query/list responses.
     std::optional<std::uint64_t> updateTime{};
 };
 
@@ -523,6 +524,8 @@ struct glz::meta<binapi2::fapi::types::order_response>
                                          &T::activatePrice,
                                          "priceRate",
                                          &T::priceRate,
+                                         "time",
+                                         &T::time,
                                          "updateTime",
                                          &T::updateTime);
 };

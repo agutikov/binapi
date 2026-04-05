@@ -1,0 +1,312 @@
+// SPDX-License-Identifier: Apache-2.0
+//
+// Integration test: exercises the binapi2 client against the Postman mock server
+// (nginx with static JSON responses and TLS).
+//
+// Prerequisites:
+//   1. scripts/api/postman_mock/start.sh   (generates certs, starts docker compose)
+//   2. Set SSL_CERT_FILE to the mock server's CA cert so OpenSSL trusts it.
+//
+// The test binary accepts two optional env vars:
+//   MOCK_HOST  — default "localhost"
+//   MOCK_PORT  — default "8443"
+
+#include <binapi2/fapi/client.hpp>
+#include <binapi2/fapi/types/common.hpp>
+#include <binapi2/fapi/types/market_data.hpp>
+#include <binapi2/fapi/types/trade.hpp>
+
+#include <boost/asio/io_context.hpp>
+
+#include <cstdlib>
+#include <iostream>
+#include <string>
+
+namespace {
+
+using namespace binapi2::fapi;
+
+// ---------------------------------------------------------------------------
+// Helpers.
+// ---------------------------------------------------------------------------
+
+std::string
+env_or(const char* name, const char* fallback)
+{
+    const char* v = std::getenv(name);
+    return v ? v : fallback;
+}
+
+int failures = 0;
+int passed = 0;
+
+template<typename T>
+bool
+check(const char* name, const result<T>& r)
+{
+    if (!r) {
+        std::cerr << "FAIL " << name << ": [" << static_cast<int>(r.err.code) << "] "
+                  << r.err.message << "\n";
+        if (!r.err.payload.empty())
+            std::cerr << "     payload: " << r.err.payload << "\n";
+        ++failures;
+        return false;
+    }
+    std::cout << "  OK " << name << "\n";
+    ++passed;
+    return true;
+}
+
+} // anonymous namespace
+
+// ===========================================================================
+
+int
+main()
+{
+    const auto host = env_or("MOCK_HOST", "localhost");
+    const auto port = env_or("MOCK_PORT", "8443");
+
+    std::cout << "binapi2 integration test against mock server " << host << ":" << port << "\n\n";
+
+    config cfg;
+    cfg.rest_host = host;
+    cfg.rest_port = port;
+    cfg.api_key = "test-api-key";
+    cfg.secret_key = "test-secret-key";
+
+    boost::asio::io_context io;
+    client c(io, cfg);
+
+    // =======================================================================
+    // 1. Public market data endpoints (no auth).
+    // =======================================================================
+
+    std::cout << "--- Market data ---\n";
+
+    // Ping
+    {
+        auto r = c.market_data.execute(types::ping_request{});
+        check("ping", r);
+    }
+
+    // Server time
+    {
+        auto r = c.market_data.execute(types::server_time_request{});
+        if (check("server_time", r)) {
+            if (r->serverTime == 0) {
+                std::cerr << "FAIL server_time: serverTime is 0\n";
+                ++failures;
+                --passed;
+            }
+        }
+    }
+
+    // Exchange info
+    {
+        auto r = c.market_data.execute(types::exchange_info_request{});
+        if (check("exchange_info", r)) {
+            if (r->symbols.empty()) {
+                std::cerr << "FAIL exchange_info: symbols array is empty\n";
+                ++failures;
+                --passed;
+            }
+        }
+    }
+
+    // Order book
+    {
+        auto r = c.market_data.execute(types::order_book_request{.symbol = "BTCUSDT", .limit = 5});
+        if (check("order_book", r)) {
+            if (r->bids.empty() || r->asks.empty()) {
+                std::cerr << "FAIL order_book: bids or asks empty\n";
+                ++failures;
+                --passed;
+            }
+        }
+    }
+
+    // Recent trades
+    {
+        auto r = c.market_data.execute(types::recent_trades_request{.symbol = "BTCUSDT"});
+        if (check("recent_trades", r)) {
+            if (r->empty()) {
+                std::cerr << "FAIL recent_trades: empty array\n";
+                ++failures;
+                --passed;
+            }
+        }
+    }
+
+    // Klines
+    {
+        auto r = c.market_data.klines(
+            types::kline_request{.symbol = "BTCUSDT", .interval = types::kline_interval::h1});
+        if (check("klines", r)) {
+            if (r->empty()) {
+                std::cerr << "FAIL klines: empty array\n";
+                ++failures;
+                --passed;
+            }
+        }
+    }
+
+    // Price ticker
+    {
+        auto r = c.market_data.execute(types::price_ticker_request{.symbol = "BTCUSDT"});
+        if (check("price_ticker", r)) {
+            if (r->symbol.empty()) {
+                std::cerr << "FAIL price_ticker: symbol empty\n";
+                ++failures;
+                --passed;
+            }
+        }
+    }
+
+    // Book ticker
+    {
+        auto r = c.market_data.execute(types::book_ticker_request{.symbol = "BTCUSDT"});
+        if (check("book_ticker", r)) {
+            if (r->symbol.empty()) {
+                std::cerr << "FAIL book_ticker: symbol empty\n";
+                ++failures;
+                --passed;
+            }
+        }
+    }
+
+    // Mark price
+    {
+        auto r = c.market_data.execute(types::mark_price_request{.symbol = "BTCUSDT"});
+        if (check("mark_price", r)) {
+            if (r->symbol.empty()) {
+                std::cerr << "FAIL mark_price: symbol empty\n";
+                ++failures;
+                --passed;
+            }
+        }
+    }
+
+    // Funding rate history
+    {
+        auto r = c.market_data.execute(types::funding_rate_history_request{.symbol = "BTCUSDT"});
+        if (check("funding_rate_history", r)) {
+            if (r->empty()) {
+                std::cerr << "FAIL funding_rate_history: empty array\n";
+                ++failures;
+                --passed;
+            }
+        }
+    }
+
+    // =======================================================================
+    // 2. Account endpoints (signed).
+    // =======================================================================
+
+    std::cout << "\n--- Account ---\n";
+
+    // Account information
+    {
+        auto r = c.account.account_information();
+        if (check("account_information", r)) {
+            if (r->assets.empty()) {
+                std::cerr << "FAIL account_information: assets empty\n";
+                ++failures;
+                --passed;
+            }
+        }
+    }
+
+    // Balances
+    {
+        auto r = c.account.balances();
+        if (check("balances", r)) {
+            if (r->empty()) {
+                std::cerr << "FAIL balances: empty array\n";
+                ++failures;
+                --passed;
+            }
+        }
+    }
+
+    // Position risk
+    {
+        auto r = c.account.execute(types::position_risk_request{});
+        if (check("position_risk", r)) {
+            if (r->empty()) {
+                std::cerr << "FAIL position_risk: empty array\n";
+                ++failures;
+                --passed;
+            }
+        }
+    }
+
+    // =======================================================================
+    // 3. Trade endpoints (signed).
+    // =======================================================================
+
+    std::cout << "\n--- Trade ---\n";
+
+    // Query order
+    {
+        auto r = c.trade.execute(types::query_order_request{.symbol = "BTCUSDT", .orderId = 22542179});
+        if (check("query_order", r)) {
+            if (r->symbol != "BTCUSDT") {
+                std::cerr << "FAIL query_order: unexpected symbol: " << r->symbol << "\n";
+                ++failures;
+                --passed;
+            }
+        }
+    }
+
+    // All open orders
+    {
+        auto r = c.trade.execute(types::all_open_orders_request{});
+        if (check("all_open_orders", r)) {
+            if (r->empty()) {
+                std::cerr << "FAIL all_open_orders: empty array\n";
+                ++failures;
+                --passed;
+            }
+        }
+    }
+
+    // =======================================================================
+    // 4. User data streams.
+    // =======================================================================
+
+    std::cout << "\n--- User data streams ---\n";
+
+    // Start listen key
+    {
+        auto r = c.user_data_streams.start();
+        if (check("start_listen_key", r)) {
+            if (r->listenKey.empty()) {
+                std::cerr << "FAIL start_listen_key: listenKey empty\n";
+                ++failures;
+                --passed;
+            }
+        }
+    }
+
+    // Keepalive listen key
+    {
+        auto r = c.user_data_streams.keepalive();
+        check("keepalive_listen_key", r);
+    }
+
+    // Close listen key
+    {
+        auto r = c.user_data_streams.close();
+        check("close_listen_key", r);
+    }
+
+    // =======================================================================
+    // Summary.
+    // =======================================================================
+
+    std::cout << "\n========================================\n";
+    std::cout << "Passed: " << passed << "  Failed: " << failures << "\n";
+
+    return failures > 0 ? 1 : 0;
+}

@@ -38,3 +38,5 @@ target_compile_definitions(postman_validation_test PRIVATE
     POSTMAN_JSON_PATH="${CMAKE_SOURCE_DIR}/docs/api/binance-api-postman/collections/Binance Derivatives Trading USDS Futures API.json"
 )
 gtest_discover_tests(postman_validation_test DISCOVERY_MODE PRE_TEST)
+
+add_subdirectory(integration/postman_mock)

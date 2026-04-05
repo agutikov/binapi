@@ -3,17 +3,26 @@
 
 
 
+time
 
-binapi2 validation against postman
 
-docs/api/binance-api-postman/collections/Binance Derivatives Trading USDS Futures API.json
 
-What is postman?
-Can we validate binapi2 against postman?
-How this can be done?
-What is required?
-What to setup and how?
-How we will run binapi2 tests?
+--------------------------------------------------------------------------------
+
+
+update README.md
+
+investiage the project and cover all topics
+- quck start, build
+- binapi versions
+- dependences
+- documentation, api reference, data types and implementation status
+- scripts for grabbing binance public REST and WebSocket api reference and convertion to JSON and Markdown
+- architecture (refer to docs/DESIGN.md)
+- testing: unit tests, integration tests
+- examples, HOWTOs
+
+
 
 
 
@@ -29,6 +38,15 @@ test all methods
 
 
 ??? Key storage
+
+---
+
+
+binapi2-fapi-demo-cli load keys from storage
+
+
+---
+
 
 binapi2 connect to real account
 

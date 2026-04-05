@@ -1,0 +1,22 @@
+services:
+  mock-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${MOCK_PORT:-8443}:3555"
+    volumes:
+      - ./workdir/collection.json:/app/collection.json:ro
+      - ./certs/server.key:/app/certs/server.key:ro
+      - ./certs/server.crt:/app/certs/server.crt:ro
+    command: >
+      --collection /app/collection.json
+      --port 3555
+      --key /app/certs/server.key
+      --cert /app/certs/server.crt
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- --no-check-certificate https://localhost:3555/fapi/v1/ping || exit 1"]
+      interval: 2s
+      timeout: 2s
+      retries: 10
+      start_period: 2s

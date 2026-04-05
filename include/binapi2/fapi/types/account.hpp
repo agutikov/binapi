@@ -511,6 +511,9 @@ template<>
 struct glz::meta<binapi2::fapi::types::position_risk>
 {
     using T = binapi2::fapi::types::position_risk;
+    // Binance sends isAutoAddMargin as string "true"/"false".
+    static constexpr auto read_auto_add = [](T& s, const std::string& v) { s.isAutoAddMargin = (v == "true"); };
+    static constexpr auto write_auto_add = [](const T& s) -> std::string { return s.isAutoAddMargin ? "true" : "false"; };
     static constexpr auto value = object("symbol",
                                          &T::symbol,
                                          "positionAmt",
@@ -534,7 +537,7 @@ struct glz::meta<binapi2::fapi::types::position_risk>
                                          "isolatedMargin",
                                          &T::isolatedMargin,
                                          "isAutoAddMargin",
-                                         &T::isAutoAddMargin,
+                                         glz::custom<read_auto_add, write_auto_add>,
                                          "positionSide",
                                          &T::positionSide,
                                          "notional",
@@ -571,12 +574,15 @@ template<>
 struct glz::meta<binapi2::fapi::types::symbol_config_entry>
 {
     using T = binapi2::fapi::types::symbol_config_entry;
+    // Binance sends isAutoAddMargin as string "true"/"false".
+    static constexpr auto read_auto_add = [](T& s, const std::string& v) { s.isAutoAddMargin = (v == "true"); };
+    static constexpr auto write_auto_add = [](const T& s) -> std::string { return s.isAutoAddMargin ? "true" : "false"; };
     static constexpr auto value = object("symbol",
                                          &T::symbol,
                                          "marginType",
                                          &T::marginType,
                                          "isAutoAddMargin",
-                                         &T::isAutoAddMargin,
+                                         glz::custom<read_auto_add, write_auto_add>,
                                          "leverage",
                                          &T::leverage,
                                          "maxNotionalValue",
