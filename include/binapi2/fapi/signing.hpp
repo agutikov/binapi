@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <binapi2/fapi/types/timestamp.hpp>
+
 #include <cstdint>
 #include <map>
 #include <string>
@@ -54,7 +56,7 @@ build_query_string(const query_map& query);
 /// @param recv_window    Server-side timestamp tolerance in milliseconds.
 /// @param timestamp_ms   Current UTC time in milliseconds since epoch.
 void
-inject_auth_query(query_map& query, std::uint64_t recv_window, std::uint64_t timestamp_ms);
+inject_auth_query(query_map& query, std::uint64_t recv_window, types::timestamp_ms timestamp);
 
 /// @brief Compute and insert the `signature` parameter into @p query.
 ///

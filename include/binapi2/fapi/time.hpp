@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <binapi2/fapi/types/timestamp.hpp>
+
 #include <chrono>
 #include <cstdint>
 
@@ -19,11 +21,11 @@ namespace binapi2::fapi {
 /// endpoint.  The value comes from `std::chrono::system_clock`, so it is
 /// subject to NTP adjustments.
 /// @return Milliseconds since 1970-01-01T00:00:00Z.
-[[nodiscard]] inline std::uint64_t
+[[nodiscard]] inline types::timestamp_ms
 current_timestamp_ms()
 {
-    return static_cast<std::uint64_t>(
-        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count());
+    return types::timestamp_ms{static_cast<std::uint64_t>(
+        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count())};
 }
 
 } // namespace binapi2::fapi

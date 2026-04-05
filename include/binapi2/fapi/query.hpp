@@ -12,6 +12,7 @@
 #include <binapi2/fapi/signing.hpp>
 #include <binapi2/fapi/types/decimal.hpp>
 #include <binapi2/fapi/types/enums.hpp>
+#include <binapi2/fapi/types/timestamp.hpp>
 
 #include <glaze/glaze.hpp>
 
@@ -62,6 +63,12 @@ inline void
 to_query_value(std::uint64_t value, std::string& out)
 {
     out = std::to_string(value);
+}
+
+inline void
+to_query_value(const types::timestamp_ms& value, std::string& out)
+{
+    out = value.to_string();
 }
 
 inline void
