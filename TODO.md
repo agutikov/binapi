@@ -13,6 +13,17 @@
 review and update documents in docs/binapi2 according to current state, remove plans
 
 
+
+--------------------------------------------------------------------------------
+
+
+
+Throughput benchmarks w/o WS transport.
+    - record some samples from testnet
+        - or generate if no keys available
+    - write a benchmark that repeats those samples
+
+
 --------------------------------------------------------------------------------
 
 
@@ -22,14 +33,8 @@ user streams
 and other clarifications
 
 
+parsing json into variant
 
---------------------------------------------------------------------------------
-
-
-
-Throughput benchmarks w/o WS transport.
-    - record some samples from testnet
-    - write a benchmark that repeats those samples
 
 
 --------------------------------------------------------------------------------

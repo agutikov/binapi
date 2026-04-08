@@ -16,6 +16,7 @@
 #include <cstdint>
 #include <optional>
 #include <string>
+#include <variant>
 #include <vector>
 
 namespace binapi2::fapi::types {
@@ -284,6 +285,20 @@ struct strategy_update_event_t
 };
 
 
+/// @brief Variant of all user data stream event types.
+using user_stream_event_t = std::variant<
+    account_update_event_t,
+    order_trade_update_event_t,
+    margin_call_event_t,
+    listen_key_expired_event_t,
+    account_config_update_event_t,
+    trade_lite_event_t,
+    algo_order_update_event_t,
+    conditional_order_trigger_reject_event_t,
+    grid_update_event_t,
+    strategy_update_event_t
+>;
+
 } // namespace binapi2::fapi::types
 
 template<>
@@ -358,88 +373,6 @@ struct glz::meta<binapi2::fapi::types::listen_key_expired_event_t>
     static constexpr auto value = object("e", &T::event_type, "E", &T::event_time, "T", &T::transaction_time, "listenKey", &T::listen_key);
 };
 
-template<>
-struct glz::meta<binapi2::fapi::types::composite_index_constituent_t>
-{
-    using T = binapi2::fapi::types::composite_index_constituent_t;
-    static constexpr auto value = object("b", &T::base_asset, "q", &T::quote_asset, "w", &T::weight_in_quantity, "W", &T::weight_in_pct, "i", &T::index_price);
-};
-
-template<>
-struct glz::meta<binapi2::fapi::types::composite_index_stream_event_t>
-{
-    using T = binapi2::fapi::types::composite_index_stream_event_t;
-    static constexpr auto value = object("e", &T::event_type, "E", &T::event_time, "s", &T::symbol, "p", &T::price, "C", &T::base_asset_type, "c", &T::composition);
-};
-
-template<>
-struct glz::meta<binapi2::fapi::types::contract_info_bracket_t>
-{
-    using T = binapi2::fapi::types::contract_info_bracket_t;
-    static constexpr auto value =
-        object("bs", &T::notional_bracket, "bnf", &T::bracket_floor, "bnc", &T::bracket_cap, "mmr", &T::maint_margin_ratio, "cf", &T::calc_factor, "mi", &T::min_leverage, "ma", &T::max_leverage);
-};
-
-template<>
-struct glz::meta<binapi2::fapi::types::contract_info_stream_event_t>
-{
-    using T = binapi2::fapi::types::contract_info_stream_event_t;
-    static constexpr auto value = object("e",
-                                         &T::event_type,
-                                         "E",
-                                         &T::event_time,
-                                         "s",
-                                         &T::symbol,
-                                         "ps",
-                                         &T::pair,
-                                         "ct",
-                                         &T::contractType,
-                                         "dt",
-                                         &T::delivery_time,
-                                         "ot",
-                                         &T::onboard_time,
-                                         "cs",
-                                         &T::contractStatus,
-                                         "bks",
-                                         &T::brackets);
-};
-
-template<>
-struct glz::meta<binapi2::fapi::types::asset_index_stream_event_t>
-{
-    using T = binapi2::fapi::types::asset_index_stream_event_t;
-    static constexpr auto value = object("e",
-                                         &T::event_type,
-                                         "E",
-                                         &T::event_time,
-                                         "s",
-                                         &T::symbol,
-                                         "i",
-                                         &T::index_price,
-                                         "b",
-                                         &T::bid_buffer,
-                                         "a",
-                                         &T::ask_buffer,
-                                         "B",
-                                         &T::bid_rate,
-                                         "A",
-                                         &T::ask_rate,
-                                         "q",
-                                         &T::auto_exch_bid_buffer,
-                                         "g",
-                                         &T::auto_exch_ask_buffer,
-                                         "Q",
-                                         &T::auto_exch_bid_rate,
-                                         "G",
-                                         &T::auto_exch_ask_rate);
-};
-
-template<>
-struct glz::meta<binapi2::fapi::types::trading_session_stream_event_t>
-{
-    using T = binapi2::fapi::types::trading_session_stream_event_t;
-    static constexpr auto value = object("e", &T::event_type, "E", &T::event_time, "t", &T::session_start_time, "T", &T::session_end_time, "S", &T::session_type);
-};
 
 template<>
 struct glz::meta<binapi2::fapi::types::account_config_leverage_t>
