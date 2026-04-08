@@ -70,7 +70,7 @@ http_client::async_request(boost::beast::http::verb method,
         // internal io_context, so objects bound to the user's io_context_
         // would never see their completions dispatched.
         auto executor = co_await boost::cobalt::this_coro::executor;
-        asio::ssl::context ssl_ctx = make_ssl_context();
+        asio::ssl::context ssl_ctx = make_ssl_context(cfg_.ca_cert_file);
         asio::ip::tcp::resolver resolver{ executor };
         asio::ssl::stream<asio::ip::tcp::socket> stream{ executor, ssl_ctx };
 

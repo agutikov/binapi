@@ -11,10 +11,13 @@
 namespace binapi2::fapi::transport {
 
 boost::asio::ssl::context
-make_ssl_context()
+make_ssl_context(const std::string& ca_cert_file)
 {
     boost::asio::ssl::context ctx{ boost::asio::ssl::context::tls_client };
     ctx.set_default_verify_paths();
+    if (!ca_cert_file.empty()) {
+        ctx.load_verify_file(ca_cert_file);
+    }
     ctx.set_verify_mode(boost::asio::ssl::verify_peer);
     return ctx;
 }

@@ -38,7 +38,7 @@ namespace binapi2::fapi::transport {
 struct websocket_client::impl
 {
     explicit impl(config cfg, detail::io_thread* io = nullptr) :
-        ssl_ctx(make_ssl_context()), cfg(std::move(cfg)), io(io)
+        ssl_ctx(make_ssl_context(cfg.ca_cert_file)), cfg(std::move(cfg)), io(io)
     {
     }
 

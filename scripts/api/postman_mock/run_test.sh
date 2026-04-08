@@ -22,4 +22,8 @@ if [[ ! -f "$CERT" ]]; then
     exit 1
 fi
 
-SSL_CERT_FILE="$CERT" exec "$BIN" "$@"
+LOG_DIR="$REPO_ROOT/testnet_output/postman_mock"
+mkdir -p "$LOG_DIR"
+
+SSL_CERT_FILE="$CERT" "$BIN" "$@" 2>&1 | tee "$LOG_DIR/run_test.log"
+exit ${PIPESTATUS[0]}

@@ -48,6 +48,12 @@ struct config
 
     std::string user_agent{ "binapi2-fapi/0.1.0" };
 
+    /// @brief Optional path to a CA certificate file (PEM) for TLS verification.
+    /// When set, the transport uses this file instead of (in addition to) the
+    /// system default CA paths. Useful for self-signed certificates (e.g. mock
+    /// servers) or custom CA bundles.
+    std::string ca_cert_file{};
+
     /// @brief Optional callback for transport-level logging.
     ///
     /// When set, the HTTP and WebSocket transport layers invoke this callback

@@ -62,6 +62,12 @@ public:
     /// @param cfg        Configuration containing the stream endpoint URL.
     market_streams(boost::asio::io_context& io_context, config cfg);
 
+    /// @brief Construct a market streams client driven by an io_thread.
+    /// Fixes persistent WebSocket connection lifetime across sync calls.
+    /// @param io  The io_thread that owns the io_context.
+    /// @param cfg Configuration containing the stream endpoint URL.
+    market_streams(detail::io_thread& io, config cfg);
+
     // -- Aggregate trade stream --
 
     /// @brief Connect to the aggregate trade stream for a symbol.

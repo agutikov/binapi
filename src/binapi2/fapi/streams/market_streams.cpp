@@ -93,6 +93,11 @@ market_streams::market_streams(boost::asio::io_context& io_context, config cfg) 
 {
 }
 
+market_streams::market_streams(fapi::detail::io_thread& io, config cfg) :
+    io_context_(io.context()), transport_(io, cfg), cfg_(std::move(cfg))
+{
+}
+
 result<void>
 market_streams::connect_aggregate_trade(const aggregate_trade_subscription& subscription)
 {

@@ -18,6 +18,7 @@ Throughput benchmarks.
 --------------------------------------------------------------------------------
 
 
+write document about:
 
 connection pooling
 What is it in our implementation context?
@@ -45,6 +46,7 @@ Mapping between:
 Is it possible to have?
 - one io context in multiple threads
 - one thread with multiple io contexts
+- in binapi2
 
 
 --------------------------------------------------------------------------------

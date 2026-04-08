@@ -74,6 +74,7 @@ main()
     cfg.rest_port = port;
     cfg.api_key = "test-api-key";
     cfg.secret_key = "test-secret-key";
+    cfg.ca_cert_file = env_or("SSL_CERT_FILE", "");
 
     boost::asio::io_context io;
     client c(io, cfg);

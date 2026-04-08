@@ -6,9 +6,8 @@
 
 #include "cmd_stream.hpp"
 
+#include <binapi2/fapi/detail/io_thread.hpp>
 #include <binapi2/fapi/streams/market_streams.hpp>
-
-#include <boost/asio/io_context.hpp>
 #include <spdlog/spdlog.h>
 
 #include <iostream>
@@ -19,7 +18,7 @@ int cmd_stream_book_ticker(const args_t& args)
 {
     if (args.empty()) { std::cerr << "usage: stream-book-ticker <symbol>\n"; return 1; }
 
-    boost::asio::io_context io;
+    binapi2::fapi::detail::io_thread io;
     binapi2::fapi::streams::market_streams streams{ io, make_config() };
 
     spdlog::info("connecting to book_ticker_t stream for {}", args[0]);
@@ -45,7 +44,7 @@ int cmd_stream_mark_price(const args_t& args)
 {
     if (args.empty()) { std::cerr << "usage: stream-mark-price <symbol>\n"; return 1; }
 
-    boost::asio::io_context io;
+    binapi2::fapi::detail::io_thread io;
     binapi2::fapi::streams::market_streams streams{ io, make_config() };
 
     spdlog::info("connecting to mark_price_t stream for {}", args[0]);
@@ -71,7 +70,7 @@ int cmd_stream_kline(const args_t& args)
 {
     if (args.size() < 2) { std::cerr << "usage: stream-kline_t <symbol> <interval>\n"; return 1; }
 
-    boost::asio::io_context io;
+    binapi2::fapi::detail::io_thread io;
     binapi2::fapi::streams::market_streams streams{ io, make_config() };
 
     spdlog::info("connecting to kline_t stream for {} {}", args[0], args[1]);
@@ -98,7 +97,7 @@ int cmd_stream_ticker(const args_t& args)
 {
     if (args.empty()) { std::cerr << "usage: stream-ticker <symbol>\n"; return 1; }
 
-    boost::asio::io_context io;
+    binapi2::fapi::detail::io_thread io;
     binapi2::fapi::streams::market_streams streams{ io, make_config() };
 
     spdlog::info("connecting to ticker stream for {}", args[0]);
@@ -122,7 +121,7 @@ int cmd_stream_depth(const args_t& args)
 {
     if (args.empty()) { std::cerr << "usage: stream-depth <symbol> [levels]\n"; return 1; }
 
-    boost::asio::io_context io;
+    binapi2::fapi::detail::io_thread io;
     binapi2::fapi::streams::market_streams streams{ io, make_config() };
 
     binapi2::fapi::streams::partial_book_depth_subscription sub;
@@ -148,7 +147,7 @@ int cmd_stream_depth(const args_t& args)
 
 int cmd_stream_all_book_tickers(const args_t& /*args*/)
 {
-    boost::asio::io_context io;
+    binapi2::fapi::detail::io_thread io;
     binapi2::fapi::streams::market_streams streams{ io, make_config() };
 
     spdlog::info("connecting to all_book_tickers stream");
@@ -169,7 +168,7 @@ int cmd_stream_all_book_tickers(const args_t& /*args*/)
 
 int cmd_stream_all_tickers(const args_t& /*args*/)
 {
-    boost::asio::io_context io;
+    binapi2::fapi::detail::io_thread io;
     binapi2::fapi::streams::market_streams streams{ io, make_config() };
 
     spdlog::info("connecting to all_market_tickers stream");
@@ -190,7 +189,7 @@ int cmd_stream_all_tickers(const args_t& /*args*/)
 
 int cmd_stream_all_mini_tickers(const args_t& /*args*/)
 {
-    boost::asio::io_context io;
+    binapi2::fapi::detail::io_thread io;
     binapi2::fapi::streams::market_streams streams{ io, make_config() };
 
     spdlog::info("connecting to all_market_mini_tickers stream");
@@ -213,7 +212,7 @@ int cmd_stream_liquidation(const args_t& args)
 {
     if (args.empty()) { std::cerr << "usage: stream-liquidation <symbol>\n"; return 1; }
 
-    boost::asio::io_context io;
+    binapi2::fapi::detail::io_thread io;
     binapi2::fapi::streams::market_streams streams{ io, make_config() };
 
     spdlog::info("connecting to liquidation_order stream for {}", args[0]);

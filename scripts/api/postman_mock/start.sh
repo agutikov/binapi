@@ -32,6 +32,7 @@ if [[ ! -f "$CERT_DIR/server.crt" || ! -f "$CERT_DIR/server.key" ]]; then
         -out "$CERT_DIR/server.crt" \
         -days 365 -nodes \
         -subj '/CN=localhost' \
+        -addext 'basicConstraints=critical,CA:TRUE' \
         -addext 'subjectAltName=DNS:localhost,IP:127.0.0.1' \
         2>/dev/null
     echo "Certificate: $CERT_DIR/server.crt"
