@@ -14,22 +14,22 @@ Source: `include/binapi2/fapi/types/enums.hpp`
 
 | Type | Doc | Status | Notes |
 |---|---|---|---|
-| `security_type` | (internal) | complete | Not from API docs |
-| `order_side` | [common-definition.md] | complete | |
-| `order_type` | [common-definition.md] | complete | |
-| `time_in_force` | [common-definition.md] | complete | |
-| `kline_interval` | [common-definition.md] | complete | |
-| `position_side` | [common-definition.md] | complete | |
-| `working_type` | [common-definition.md] | complete | |
-| `response_type` | [common-definition.md] | complete | |
-| `margin_type` | [common-definition.md] | complete | |
-| `contract_type` | [common-definition.md] | complete | Extra: `tradifi_perpetual` (undocumented) |
-| `contract_status` | [common-definition.md] | complete | |
-| `order_status` | [common-definition.md] | complete | |
-| `stp_mode` | [common-definition.md] | complete | |
-| `price_match` | [common-definition.md] | complete | |
-| `income_type` | [common-definition.md] | complete | |
-| `futures_data_period` | [common-definition.md] | complete | |
+| `security_type_t (internal) | complete | Not from API docs |
+| `order_side_t` | [common-definition.md] | complete | |
+| `order_type_t` | [common-definition.md] | complete | |
+| `time_in_force_t` | [common-definition.md] | complete | |
+| `kline_interval_t` | [common-definition.md] | complete | |
+| `position_side_t` | [common-definition.md] | complete | |
+| `working_type_t` | [common-definition.md] | complete | |
+| `response_type_t` | [common-definition.md] | complete | |
+| `margin_type_t` | [common-definition.md] | complete | |
+| `contract_type_t` | [common-definition.md] | complete | Extra: `tradifi_perpetual` (undocumented) |
+| `contract_status_t` | [common-definition.md] | complete | |
+| `order_status_t` | [common-definition.md] | complete | |
+| `stp_mode_t` | [common-definition.md] | complete | |
+| `price_match_t` | [common-definition.md] | complete | |
+| `income_type_t` | [common-definition.md] | complete | |
+| `futures_data_period_t` | [common-definition.md] | complete | |
 
 [common-definition.md]: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 
@@ -40,16 +40,16 @@ Source: `include/binapi2/fapi/types/common.hpp`
 
 | Type | Doc | Status | Notes |
 |---|---|---|---|
-| `empty_response` | (internal) | complete | |
-| `rate_limit` | [common-definition.md] | complete | |
-| `server_time_response` | [Check-Server-Time.md] | complete | |
-| `binance_error_document` | [error-code.md] | complete | |
-| `price_level` | [Order-Book.md] | complete | |
-| `exchange_info_asset` | [Exchange-Information.md] | complete | |
-| `symbol_filter` | [Exchange-Information.md] | complete | |
-| `symbol_info` | [Exchange-Information.md] | complete | |
-| `exchange_info_response` | [Exchange-Information.md] | complete | |
-| `listen_key_response` | [Start-User-Data-Stream.md] | complete | |
+| `empty_response_t` | (internal) | complete | |
+| `rate_limit_t` | [common-definition.md] | complete | |
+| `server_time_response_t` | [Check-Server-Time.md] | complete | |
+| `binance_error_document_t` | [error-code.md] | complete | |
+| `price_level_t` | [Order-Book.md] | complete | |
+| `exchange_info_asset_t` | [Exchange-Information.md] | complete | |
+| `symbol_filter_t` | [Exchange-Information.md] | complete | |
+| `symbol_info_t` | [Exchange-Information.md] | complete | |
+| `exchange_info_response_t` | [Exchange-Information.md] | complete | |
+| `listen_key_response_t` | [Start-User-Data-Stream.md] | complete | |
 
 [Check-Server-Time.md]: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Check-Server-Time.md
 [error-code.md]: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/error-code.md
@@ -64,60 +64,60 @@ Source: `include/binapi2/fapi/types/market_data.hpp`
 
 | Type | Doc | Status | Notes |
 |---|---|---|---|
-| `ping_request` | [Check-Server-Time.md] | complete | |
-| `server_time_request` | [Check-Server-Time.md] | complete | |
-| `exchange_info_request` | [Exchange-Information.md] | complete | |
-| `order_book_request` | [Order-Book.md] | complete | |
-| `order_book_response` | [Order-Book.md] | complete | |
-| `recent_trades_request` | [Recent-Trades-List.md] | complete | |
-| `recent_trade` | [Recent-Trades-List.md] | complete | |
-| `aggregate_trades_request` | [Compressed-Aggregate-Trades-List.md] | complete | |
-| `aggregate_trade` | [Compressed-Aggregate-Trades-List.md] | complete | |
-| `historical_trades_request` | [Old-Trades-Lookup.md] | complete | |
-| `kline_request` | [Kline-Candlestick-Data.md] | complete | |
-| `continuous_kline_request` | [Continuous-Contract-Kline.md] | complete | |
-| `index_price_kline_request` | [Index-Price-Kline.md] | complete | |
-| `kline` | [Kline-Candlestick-Data.md] | complete | |
-| `book_ticker_request` | [Symbol-Order-Book-Ticker.md] | complete | |
-| `book_ticker` | [Symbol-Order-Book-Ticker.md] | complete | Extra: `lastUpdateId` not in doc |
-| `price_ticker_request` | [Symbol-Price-Ticker.md] | complete | |
-| `price_ticker` | [Symbol-Price-Ticker.md] | complete | |
-| `ticker_24hr_request` | [24hr-Ticker.md] | complete | |
-| `ticker_24hr` | [24hr-Ticker.md] | complete | |
-| `mark_price_request` | [Mark-Price.md] | complete | |
-| `mark_price` | [Mark-Price.md] | complete | |
-| `funding_rate_history_request` | [Get-Funding-Rate-History.md] | complete | |
-| `funding_rate_history_entry` | [Get-Funding-Rate-History.md] | complete | |
-| `funding_rate_info` | [Get-Funding-Rate-Info.md] | complete | |
-| `open_interest_request` | [Open-Interest.md] | complete | |
-| `open_interest` | [Open-Interest.md] | complete | |
-| `futures_data_request` | [Open-Interest-Statistics.md] | complete | |
-| `open_interest_statistics_entry` | [Open-Interest-Statistics.md] | complete | |
-| `long_short_ratio_entry` | [Long-Short-Ratio.md] | complete | Also used for Top-Long-Short-Account-Ratio, Top-Trader-Long-Short-Ratio |
-| `taker_buy_sell_volume_entry` | [Taker-BuySell-Volume.md] | complete | |
-| `basis_request` | [Basis.md] | complete | |
-| `basis_entry` | [Basis.md] | complete | |
-| `price_ticker_v2_request` | [Symbol-Price-Ticker-v2.md] | complete | |
-| `delivery_price_request` | [Delivery-Price.md] | complete | |
-| `delivery_price_entry` | [Delivery-Price.md] | complete | |
-| `composite_index_info_request` | [Composite-Index.md] | complete | |
-| `composite_index_base_asset` | [Composite-Index.md] | complete | |
-| `composite_index_info` | [Composite-Index.md] | complete | |
-| `index_constituents_request` | [Index-Constituents.md] | complete | |
-| `index_constituent` | [Index-Constituents.md] | complete | |
-| `index_constituents_response` | [Index-Constituents.md] | complete | |
-| `asset_index_request` | [Multi-Assets-Mode-Asset-Index.md] | complete | |
-| `asset_index` | [Multi-Assets-Mode-Asset-Index.md] | complete | |
-| `insurance_fund_request` | [Insurance-Fund-Balance.md] | complete | |
-| `insurance_fund_asset` | [Insurance-Fund-Balance.md] | complete | |
-| `insurance_fund_response` | [Insurance-Fund-Balance.md] | complete | |
-| `adl_risk_request` | [ADL-Risk.md] | complete | |
-| `adl_risk_entry` | [ADL-Risk.md] | complete | |
-| `rpi_depth_request` | [Order-Book-RPI.md] | complete | |
-| `trading_schedule_request` | [Trading-Schedule.md] | complete | |
-| `trading_session_entry` | [Trading-Schedule.md] | complete | |
-| `market_schedule` | [Trading-Schedule.md] | complete | |
-| `trading_schedule_response` | [Trading-Schedule.md] | complete | |
+| `ping_request_t` | [Check-Server-Time.md] | complete | |
+| `server_time_request_t` | [Check-Server-Time.md] | complete | |
+| `exchange_info_request_t` | [Exchange-Information.md] | complete | |
+| `order_book_request_t` | [Order-Book.md] | complete | |
+| `order_book_response_t` | [Order-Book.md] | complete | |
+| `recent_trades_request_t` | [Recent-Trades-List.md] | complete | |
+| `recent_trade_t` | [Recent-Trades-List.md] | complete | |
+| `aggregate_trades_request_t` | [Compressed-Aggregate-Trades-List.md] | complete | |
+| `aggregate_trade_t` | [Compressed-Aggregate-Trades-List.md] | complete | |
+| `historical_trades_request_t` | [Old-Trades-Lookup.md] | complete | |
+| `kline_request_t` | [Kline-Candlestick-Data.md] | complete | |
+| `continuous_kline_request_t` | [Continuous-Contract-Kline.md] | complete | |
+| `index_price_kline_request_t` | [Index-Price-Kline.md] | complete | |
+| `kline_t` | [Kline-Candlestick-Data.md] | complete | |
+| `book_ticker_request_t` | [Symbol-Order-Book-Ticker.md] | complete | |
+| `book_ticker_t` | [Symbol-Order-Book-Ticker.md] | complete | Extra: `lastUpdateId` not in doc |
+| `price_ticker_request_t` | [Symbol-Price-Ticker.md] | complete | |
+| `price_ticker_t` | [Symbol-Price-Ticker.md] | complete | |
+| `ticker_24hr_request_t` | [24hr-Ticker.md] | complete | |
+| `ticker_24hr_t` | [24hr-Ticker.md] | complete | |
+| `mark_price_request_t` | [Mark-Price.md] | complete | |
+| `mark_price_t` | [Mark-Price.md] | complete | |
+| `funding_rate_history_request_t` | [Get-Funding-Rate-History.md] | complete | |
+| `funding_rate_history_entry_t` | [Get-Funding-Rate-History.md] | complete | |
+| `funding_rate_info_t` | [Get-Funding-Rate-Info.md] | complete | |
+| `open_interest_request_t` | [Open-Interest.md] | complete | |
+| `open_interest_t` | [Open-Interest.md] | complete | |
+| `futures_data_request_t` | [Open-Interest-Statistics.md] | complete | |
+| `open_interest_statistics_entry_t` | [Open-Interest-Statistics.md] | complete | |
+| `long_short_ratio_entry_t` | [Long-Short-Ratio.md] | complete | Also used for Top-Long-Short-Account-Ratio, Top-Trader-Long-Short-Ratio |
+| `taker_buy_sell_volume_entry_t` | [Taker-BuySell-Volume.md] | complete | |
+| `basis_request_t` | [Basis.md] | complete | |
+| `basis_entry_t` | [Basis.md] | complete | |
+| `price_ticker_v2_request_t` | [Symbol-Price-Ticker-v2.md] | complete | |
+| `delivery_price_request_t` | [Delivery-Price.md] | complete | |
+| `delivery_price_entry_t` | [Delivery-Price.md] | complete | |
+| `composite_index_info_request_t` | [Composite-Index.md] | complete | |
+| `composite_index_base_asset_t` | [Composite-Index.md] | complete | |
+| `composite_index_info_t` | [Composite-Index.md] | complete | |
+| `index_constituents_request_t` | [Index-Constituents.md] | complete | |
+| `index_constituent_t` | [Index-Constituents.md] | complete | |
+| `index_constituents_response_t` | [Index-Constituents.md] | complete | |
+| `asset_index_request_t` | [Multi-Assets-Mode-Asset-Index.md] | complete | |
+| `asset_index_t` | [Multi-Assets-Mode-Asset-Index.md] | complete | |
+| `insurance_fund_request_t` | [Insurance-Fund-Balance.md] | complete | |
+| `insurance_fund_asset_t` | [Insurance-Fund-Balance.md] | complete | |
+| `insurance_fund_response_t` | [Insurance-Fund-Balance.md] | complete | |
+| `adl_risk_request_t` | [ADL-Risk.md] | complete | |
+| `adl_risk_entry_t` | [ADL-Risk.md] | complete | |
+| `rpi_depth_request_t` | [Order-Book-RPI.md] | complete | |
+| `trading_schedule_request_t` | [Trading-Schedule.md] | complete | |
+| `trading_session_entry_t` | [Trading-Schedule.md] | complete | |
+| `market_schedule_t` | [Trading-Schedule.md] | complete | |
+| `trading_schedule_response_t` | [Trading-Schedule.md] | complete | |
 
 Note: Mark-Price-Kline-Candlestick-Data and Premium-Index-Kline-Data endpoints have no dedicated request types; they reuse `kline_request`/`kline` at the endpoint level.
 
@@ -155,35 +155,35 @@ Source: `include/binapi2/fapi/types/account.hpp`
 
 | Type | Doc | Status | Notes |
 |---|---|---|---|
-| `account_asset` | [Account-Information-V3.md] | complete | |
-| `account_position` | [Account-Information-V3.md] | complete | |
-| `account_information` | [Account-Information-V3.md] | complete | |
-| `futures_account_balance` | [Futures-Account-Balance-V3.md] | complete | |
-| `position_risk_request` | [Position-Information-V2.md] | complete | |
-| `position_risk` | [Position-Information-V2.md] | complete | |
-| `account_config_response` | [Account-Config.md] | complete | |
-| `symbol_config_request` | [Symbol-Config.md] | complete | |
-| `symbol_config_entry` | [Symbol-Config.md] | complete | |
-| `multi_assets_mode_response` | [Get-Current-Multi-Assets-Mode.md] | complete | |
-| `position_mode_response` | [Get-Current-Position-Mode.md] | complete | |
-| `income_history_request` | [Get-Income-History.md] | complete | |
-| `income_history_entry` | [Get-Income-History.md] | complete | |
-| `leverage_bracket_request` | [Notional-and-Leverage-Brackets.md] | complete | |
-| `leverage_bracket_entry` | [Notional-and-Leverage-Brackets.md] | complete | |
-| `symbol_leverage_brackets` | [Notional-and-Leverage-Brackets.md] | complete | |
-| `commission_rate_request` | [User-Commission-Rate.md] | complete | |
-| `commission_rate_response` | [User-Commission-Rate.md] | complete | |
-| `download_id_request` | [Get-Download-Id-Transaction.md] | complete | |
-| `download_id_response` | [Get-Download-Id-Transaction.md] | complete | |
-| `download_link_request` | [Get-Transaction-Download-Link.md] | complete | |
-| `download_link_response` | [Get-Transaction-Download-Link.md] | complete | |
-| `bnb_burn_status_response` | [Get-BNB-Burn-Status.md] | complete | |
-| `toggle_bnb_burn_request` | [Toggle-BNB-Burn.md] | complete | |
-| `trading_status_indicator` | [Quantitative-Rules.md] | complete | |
-| `quantitative_rules_request` | [Quantitative-Rules.md] | complete | |
-| `quantitative_rules_response` | [Quantitative-Rules.md] | complete | |
-| `pm_account_info_request` | [portfolio-margin-endpoints.md] | complete | |
-| `pm_account_info_response` | [portfolio-margin-endpoints.md] | complete | |
+| `account_asset_t` | [Account-Information-V3.md] | complete | |
+| `account_position_t` | [Account-Information-V3.md] | complete | |
+| `account_information_t` | [Account-Information-V3.md] | complete | |
+| `futures_account_balance_t` | [Futures-Account-Balance-V3.md] | complete | |
+| `position_risk_request_t` | [Position-Information-V2.md] | complete | |
+| `position_risk_t` | [Position-Information-V2.md] | complete | |
+| `account_config_response_t` | [Account-Config.md] | complete | |
+| `symbol_config_request_t` | [Symbol-Config.md] | complete | |
+| `symbol_config_entry_t` | [Symbol-Config.md] | complete | |
+| `multi_assets_mode_response_t` | [Get-Current-Multi-Assets-Mode.md] | complete | |
+| `position_mode_response_t` | [Get-Current-Position-Mode.md] | complete | |
+| `income_history_request_t` | [Get-Income-History.md] | complete | |
+| `income_history_entry_t` | [Get-Income-History.md] | complete | |
+| `leverage_bracket_request_t` | [Notional-and-Leverage-Brackets.md] | complete | |
+| `leverage_bracket_entry_t` | [Notional-and-Leverage-Brackets.md] | complete | |
+| `symbol_leverage_brackets_t` | [Notional-and-Leverage-Brackets.md] | complete | |
+| `commission_rate_request_t` | [User-Commission-Rate.md] | complete | |
+| `commission_rate_response_t` | [User-Commission-Rate.md] | complete | |
+| `download_id_request_t` | [Get-Download-Id-Transaction.md] | complete | |
+| `download_id_response_t` | [Get-Download-Id-Transaction.md] | complete | |
+| `download_link_request_t` | [Get-Transaction-Download-Link.md] | complete | |
+| `download_link_response_t` | [Get-Transaction-Download-Link.md] | complete | |
+| `bnb_burn_status_response_t` | [Get-BNB-Burn-Status.md] | complete | |
+| `toggle_bnb_burn_request_t` | [Toggle-BNB-Burn.md] | complete | |
+| `trading_status_indicator_t` | [Quantitative-Rules.md] | complete | |
+| `quantitative_rules_request_t` | [Quantitative-Rules.md] | complete | |
+| `quantitative_rules_response_t` | [Quantitative-Rules.md] | complete | |
+| `pm_account_info_request_t` | [portfolio-margin-endpoints.md] | complete | |
+| `pm_account_info_response_t` | [portfolio-margin-endpoints.md] | complete | |
 
 [Account-Information-V3.md]: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Account-Information-V3.md
 [Futures-Account-Balance-V3.md]: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Futures-Account-Balance-V3.md
@@ -209,45 +209,45 @@ Source: `include/binapi2/fapi/types/trade.hpp`
 
 | Type | Doc | Status | Notes |
 |---|---|---|---|
-| `new_order_request` | [New-Order-Test.md] | complete | |
-| `order_response` | [New-Order-Test.md] | complete | |
-| `modify_order_request` | [Modify-Order.md] | complete | |
-| `cancel_order_request` | [Cancel-Order.md] | complete | |
-| `query_order_request` | [Query-Order.md] | complete | |
-| `test_new_order_request` | [New-Order-Test.md] | complete | Alias for `new_order_request` |
-| `batch_orders_request` | [Place-Multiple-Orders.md] | complete | |
-| `cancel_multiple_orders_request` | [Cancel-Multiple-Orders.md] | complete | |
-| `cancel_all_open_orders_request` | [Cancel-All-Open-Orders.md] | complete | |
-| `code_msg_response` | [error-code.md] | complete | |
-| `auto_cancel_request` | [Auto-Cancel-All-Open-Orders.md] | complete | |
-| `auto_cancel_response` | [Auto-Cancel-All-Open-Orders.md] | complete | |
-| `query_open_order_request` | [Query-Current-Open-Order.md] | complete | |
-| `all_open_orders_request` | [Current-All-Open-Orders.md] | complete | |
-| `all_orders_request` | [All-Orders.md] | complete | |
-| `position_risk_v3` | [Position-Information-V3.md] | complete | |
-| `position_info_v3_request` | [Position-Information-V3.md] | complete | |
-| `adl_quantile_values` | [Position-ADL-Quantile.md] | complete | |
-| `adl_quantile_entry` | [Position-ADL-Quantile.md] | complete | |
-| `adl_quantile_request` | [Position-ADL-Quantile.md] | complete | |
-| `force_orders_request` | [Users-Force-Orders.md] | complete | |
-| `account_trade_request` | [Account-Trade-List.md] | complete | |
-| `account_trade_entry` | [Account-Trade-List.md] | complete | |
-| `change_position_mode_request` | [Change-Position-Mode.md] | complete | |
-| `change_multi_assets_mode_request` | [Change-Multi-Assets-Mode.md] | complete | |
-| `change_leverage_request` | [Change-Initial-Leverage.md] | complete | |
-| `change_leverage_response` | [Change-Initial-Leverage.md] | complete | |
-| `change_margin_type_request` | [Change-Margin-Type.md] | complete | |
-| `modify_isolated_margin_request` | [Modify-Isolated-Position-Margin.md] | complete | |
-| `modify_isolated_margin_response` | [Modify-Isolated-Position-Margin.md] | complete | |
-| `position_margin_history_request` | [Get-Position-Margin-Change-History.md] | complete | |
-| `position_margin_history_entry` | [Get-Position-Margin-Change-History.md] | complete | |
-| `order_modify_history_request` | [Get-Order-Modify-History.md] | complete | |
-| `new_algo_order_request` | [New-Algo-Order.md] | complete | |
-| `algo_order_response` | [New-Algo-Order.md] | complete | |
-| `cancel_algo_order_request` | [Cancel-Algo-Order.md] | complete | |
-| `query_algo_order_request` | [Query-Algo-Order.md] | complete | |
-| `all_algo_orders_request` | [Query-All-Algo-Orders.md] | complete | |
-| `tradfi_perps_request` | [TradFi-Perps.md] | complete | |
+| `new_order_request_t` | [New-Order-Test.md] | complete | |
+| `order_response_t` | [New-Order-Test.md] | complete | |
+| `modify_order_request_t` | [Modify-Order.md] | complete | |
+| `cancel_order_request_t` | [Cancel-Order.md] | complete | |
+| `query_order_request_t` | [Query-Order.md] | complete | |
+| `test_new_order_request_t` | [New-Order-Test.md] | complete | Alias for `new_order_request_t` |
+| `batch_orders_request_t` | [Place-Multiple-Orders.md] | complete | |
+| `cancel_multiple_orders_request_t` | [Cancel-Multiple-Orders.md] | complete | |
+| `cancel_all_open_orders_request_t` | [Cancel-All-Open-Orders.md] | complete | |
+| `code_msg_response_t` | [error-code.md] | complete | |
+| `auto_cancel_request_t` | [Auto-Cancel-All-Open-Orders.md] | complete | |
+| `auto_cancel_response_t` | [Auto-Cancel-All-Open-Orders.md] | complete | |
+| `query_open_order_request_t` | [Query-Current-Open-Order.md] | complete | |
+| `all_open_orders_request_t` | [Current-All-Open-Orders.md] | complete | |
+| `all_orders_request_t` | [All-Orders.md] | complete | |
+| `position_risk_v3_t` | [Position-Information-V3.md] | complete | |
+| `position_info_v3_request_t` | [Position-Information-V3.md] | complete | |
+| `adl_quantile_values_t` | [Position-ADL-Quantile.md] | complete | |
+| `adl_quantile_entry_t` | [Position-ADL-Quantile.md] | complete | |
+| `adl_quantile_request_t` | [Position-ADL-Quantile.md] | complete | |
+| `force_orders_request_t` | [Users-Force-Orders.md] | complete | |
+| `account_trade_request_t` | [Account-Trade-List.md] | complete | |
+| `account_trade_entry_t` | [Account-Trade-List.md] | complete | |
+| `change_position_mode_request_t` | [Change-Position-Mode.md] | complete | |
+| `change_multi_assets_mode_request_t` | [Change-Multi-Assets-Mode.md] | complete | |
+| `change_leverage_request_t` | [Change-Initial-Leverage.md] | complete | |
+| `change_leverage_response_t` | [Change-Initial-Leverage.md] | complete | |
+| `change_margin_type_request_t` | [Change-Margin-Type.md] | complete | |
+| `modify_isolated_margin_request_t` | [Modify-Isolated-Position-Margin.md] | complete | |
+| `modify_isolated_margin_response_t` | [Modify-Isolated-Position-Margin.md] | complete | |
+| `position_margin_history_request_t` | [Get-Position-Margin-Change-History.md] | complete | |
+| `position_margin_history_entry_t` | [Get-Position-Margin-Change-History.md] | complete | |
+| `order_modify_history_request_t` | [Get-Order-Modify-History.md] | complete | |
+| `new_algo_order_request_t` | [New-Algo-Order.md] | complete | |
+| `algo_order_response_t` | [New-Algo-Order.md] | complete | |
+| `cancel_algo_order_request_t` | [Cancel-Algo-Order.md] | complete | |
+| `query_algo_order_request_t` | [Query-Algo-Order.md] | complete | |
+| `all_algo_orders_request_t` | [Query-All-Algo-Orders.md] | complete | |
+| `tradfi_perps_request_t` | [TradFi-Perps.md] | complete | |
 
 [New-Order-Test.md]: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/New-Order-Test.md
 [Modify-Order.md]: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Modify-Order.md
@@ -284,28 +284,28 @@ Source: `include/binapi2/fapi/types/streams.hpp`
 
 | Type | Doc | Status | Notes |
 |---|---|---|---|
-| `book_ticker_stream_event` | [Individual-Symbol-Book-Ticker-Streams.md] | complete | |
-| `aggregate_trade_stream_event` | [Aggregate-Trade-Streams.md] | complete | |
-| `mark_price_stream_event` | [Mark-Price-Stream.md] | complete | |
-| `all_market_mark_price_stream_event` | [Mark-Price-Stream-All.md] | complete | |
-| `depth_stream_event` | [Diff-Book-Depth-Streams.md] | complete | |
-| `mini_ticker_stream_event` | [All-Market-Mini-Tickers-Stream.md] | complete | |
-| `all_market_mini_ticker_stream_event` | [All-Market-Mini-Tickers-Stream.md] | complete | |
-| `ticker_stream_event` | [All-Market-Tickers-Streams.md] | complete | |
-| `all_market_ticker_stream_event` | [All-Market-Tickers-Streams.md] | complete | |
-| `liquidation_order_stream_data` | [All-Market-Liquidation-Order-Streams.md] | complete | |
-| `liquidation_order_stream_event` | [All-Market-Liquidation-Order-Streams.md] | complete | |
-| `kline_stream_data` | [Kline-Candlestick-Streams.md] | complete | |
-| `kline_stream_event` | [Kline-Candlestick-Streams.md] | complete | |
-| `continuous_contract_kline_stream_data` | [Continuous-Contract-Kline-Streams.md] | complete | |
-| `continuous_contract_kline_stream_event` | [Continuous-Contract-Kline-Streams.md] | complete | |
-| `composite_index_constituent` | [Composite-Index-Streams.md] | complete | |
-| `composite_index_stream_event` | [Composite-Index-Streams.md] | complete | |
-| `contract_info_bracket` | [Contract-Info-Stream.md] | complete | |
-| `contract_info_stream_event` | [Contract-Info-Stream.md] | complete | |
-| `asset_index_stream_event` | [Asset-Index-Stream.md] | complete | |
-| `all_asset_index_stream_event` | [Asset-Index-Stream.md] | complete | |
-| `trading_session_stream_event` | [Trading-Session-Stream.md] | complete | |
+| `book_ticker_stream_event_t` | [Individual-Symbol-Book-Ticker-Streams.md] | complete | |
+| `aggregate_trade_stream_event_t` | [Aggregate-Trade-Streams.md] | complete | |
+| `mark_price_stream_event_t` | [Mark-Price-Stream.md] | complete | |
+| `all_market_mark_price_stream_event_t` | [Mark-Price-Stream-All.md] | complete | |
+| `depth_stream_event_t` | [Diff-Book-Depth-Streams.md] | complete | |
+| `mini_ticker_stream_event_t` | [All-Market-Mini-Tickers-Stream.md] | complete | |
+| `all_market_mini_ticker_stream_event_t` | [All-Market-Mini-Tickers-Stream.md] | complete | |
+| `ticker_stream_event_t` | [All-Market-Tickers-Streams.md] | complete | |
+| `all_market_ticker_stream_event_t` | [All-Market-Tickers-Streams.md] | complete | |
+| `liquidation_order_stream_data_t` | [All-Market-Liquidation-Order-Streams.md] | complete | |
+| `liquidation_order_stream_event_t` | [All-Market-Liquidation-Order-Streams.md] | complete | |
+| `kline_stream_data_t` | [Kline-Candlestick-Streams.md] | complete | |
+| `kline_stream_event_t` | [Kline-Candlestick-Streams.md] | complete | |
+| `continuous_contract_kline_stream_data_t` | [Continuous-Contract-Kline-Streams.md] | complete | |
+| `continuous_contract_kline_stream_event_t` | [Continuous-Contract-Kline-Streams.md] | complete | |
+| `composite_index_constituent_t` | [Composite-Index-Streams.md] | complete | |
+| `composite_index_stream_event_t` | [Composite-Index-Streams.md] | complete | |
+| `contract_info_bracket_t` | [Contract-Info-Stream.md] | complete | |
+| `contract_info_stream_event_t` | [Contract-Info-Stream.md] | complete | |
+| `asset_index_stream_event_t` | [Asset-Index-Stream.md] | complete | |
+| `all_asset_index_stream_event_t` | [Asset-Index-Stream.md] | complete | |
+| `trading_session_stream_event_t` | [Trading-Session-Stream.md] | complete | |
 
 [Individual-Symbol-Book-Ticker-Streams.md]: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Individual-Symbol-Book-Ticker-Streams.md
 [Aggregate-Trade-Streams.md]: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Aggregate-Trade-Streams.md
@@ -329,27 +329,27 @@ Source: `include/binapi2/fapi/types/streams.hpp`
 
 | Type | Doc | Status | Notes |
 |---|---|---|---|
-| `account_update_balance` | [Event-Balance-and-Position-Update.md] | complete | |
-| `account_update_position` | [Event-Balance-and-Position-Update.md] | complete | |
-| `account_update_data` | [Event-Balance-and-Position-Update.md] | complete | |
-| `account_update_event` | [Event-Balance-and-Position-Update.md] | complete | |
-| `order_trade_update_order` | [Event-Order-Update.md] | complete | |
-| `order_trade_update_event` | [Event-Order-Update.md] | complete | |
-| `margin_call_position` | [Event-Margin-Call.md] | complete | |
-| `margin_call_event` | [Event-Margin-Call.md] | complete | |
-| `listen_key_expired_event` | [Event-User-Data-Stream-Expired.md] | complete | Extra: has `T` field not in doc |
-| `account_config_leverage` | [Event-Account-Config-Update.md] | complete | |
-| `account_config_multi_assets` | [Event-Account-Config-Update.md] | complete | |
-| `account_config_update_event` | [Event-Account-Config-Update.md] | complete | |
-| `trade_lite_event` | [Event-Trade-Lite.md] | complete | |
-| `algo_order_update_data` | [Event-Algo-Order-Update.md] | complete | |
-| `algo_order_update_event` | [Event-Algo-Order-Update.md] | complete | |
-| `conditional_order_reject_data` | [Event-Conditional-Order-Trigger-Reject.md] | complete | |
-| `conditional_order_trigger_reject_event` | [Event-Conditional-Order-Trigger-Reject.md] | complete | |
-| `grid_update_data` | [Event-GRID-UPDATE.md] | complete | |
-| `grid_update_event` | [Event-GRID-UPDATE.md] | complete | |
-| `strategy_update_data` | [Event-STRATEGY-UPDATE.md] | complete | |
-| `strategy_update_event` | [Event-STRATEGY-UPDATE.md] | complete | |
+| `account_update_balance_t` | [Event-Balance-and-Position-Update.md] | complete | |
+| `account_update_position_t` | [Event-Balance-and-Position-Update.md] | complete | |
+| `account_update_data_t` | [Event-Balance-and-Position-Update.md] | complete | |
+| `account_update_event_t` | [Event-Balance-and-Position-Update.md] | complete | |
+| `order_trade_update_order_t` | [Event-Order-Update.md] | complete | |
+| `order_trade_update_event_t` | [Event-Order-Update.md] | complete | |
+| `margin_call_position_t` | [Event-Margin-Call.md] | complete | |
+| `margin_call_event_t` | [Event-Margin-Call.md] | complete | |
+| `listen_key_expired_event_t` | [Event-User-Data-Stream-Expired.md] | complete | Extra: has `T` field not in doc |
+| `account_config_leverage_t` | [Event-Account-Config-Update.md] | complete | |
+| `account_config_multi_assets_t` | [Event-Account-Config-Update.md] | complete | |
+| `account_config_update_event_t` | [Event-Account-Config-Update.md] | complete | |
+| `trade_lite_event_t` | [Event-Trade-Lite.md] | complete | |
+| `algo_order_update_data_t` | [Event-Algo-Order-Update.md] | complete | |
+| `algo_order_update_event_t` | [Event-Algo-Order-Update.md] | complete | |
+| `conditional_order_reject_data_t` | [Event-Conditional-Order-Trigger-Reject.md] | complete | |
+| `conditional_order_trigger_reject_event_t` | [Event-Conditional-Order-Trigger-Reject.md] | complete | |
+| `grid_update_data_t` | [Event-GRID-UPDATE.md] | complete | |
+| `grid_update_event_t` | [Event-GRID-UPDATE.md] | complete | |
+| `strategy_update_data_t` | [Event-STRATEGY-UPDATE.md] | complete | |
+| `strategy_update_event_t` | [Event-STRATEGY-UPDATE.md] | complete | |
 
 [Event-Balance-and-Position-Update.md]: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Balance-and-Position-Update.md
 [Event-Order-Update.md]: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Order-Update.md
@@ -369,12 +369,12 @@ Source: `include/binapi2/fapi/types/convert.hpp`
 
 | Type | Doc | Status | Notes |
 |---|---|---|---|
-| `convert_quote_request` | [Send-quote-request.md] | complete | |
-| `convert_quote_response` | [Send-quote-request.md] | complete | |
-| `convert_accept_request` | [Accept-Quote.md] | complete | |
-| `convert_accept_response` | [Accept-Quote.md] | complete | |
-| `convert_order_status_request` | [Order-Status.md] | complete | |
-| `convert_order_status_response` | [Order-Status.md] | complete | |
+| `convert_quote_request_t` | [Send-quote-request.md] | complete | |
+| `convert_quote_response_t` | [Send-quote-request.md] | complete | |
+| `convert_accept_request_t` | [Accept-Quote.md] | complete | |
+| `convert_accept_response_t` | [Accept-Quote.md] | complete | |
+| `convert_order_status_request_t` | [Order-Status.md] | complete | |
+| `convert_order_status_response_t` | [Order-Status.md] | complete | |
 
 [Send-quote-request.md]: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/convert/Send-quote-request.md
 [Accept-Quote.md]: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/convert/Accept-Quote.md
@@ -387,23 +387,23 @@ Source: `include/binapi2/fapi/types/websocket_api.hpp`
 
 | Type | Doc | Status | Notes |
 |---|---|---|---|
-| `websocket_api_error` | [websocket-api-general-info.md] | complete | |
-| `session_logon_request` | [websocket-api-general-info.md] | complete | |
-| `websocket_api_status` | [websocket-api-general-info.md] | complete | |
-| `session_logon_result` | [websocket-api-general-info.md] | complete | |
-| `websocket_api_signed_request` | [websocket-api-general-info.md] | complete | |
-| `websocket_api_order_place_request` | [WS-New-Order.md] | complete | |
-| `websocket_api_order_query_request` | [WS-Query-Order.md] | complete | |
-| `websocket_api_order_cancel_request` | [WS-Cancel-Order.md] | complete | |
-| `websocket_api_book_ticker_request` | [WS-Symbol-Order-Book-Ticker.md] | complete | |
-| `websocket_api_price_ticker_request` | [WS-Symbol-Price-Ticker.md] | complete | |
-| `websocket_api_order_modify_request` | [WS-Modify-Order.md] | complete | |
-| `websocket_api_position_request` | [WS-Position-Information.md] | complete | |
-| `websocket_api_algo_order_place_request` | [WS-New-Algo-Order.md] | complete | |
-| `websocket_api_algo_order_cancel_request` | [WS-Cancel-Algo-Order.md] | complete | |
-| `websocket_api_user_data_stream_request` | [Start-User-Data-Stream-Wsp.md] | complete | |
-| `websocket_api_listen_key_result` | [Start-User-Data-Stream-Wsp.md] | complete | |
-| `websocket_api_response<T>` | [websocket-api-general-info.md] | complete | |
+| `websocket_api_error_t` | [websocket-api-general-info.md] | complete | |
+| `session_logon_request_t` | [websocket-api-general-info.md] | complete | |
+| `websocket_api_status_t` | [websocket-api-general-info.md] | complete | |
+| `session_logon_result_t` | [websocket-api-general-info.md] | complete | |
+| `websocket_api_signed_request_t` | [websocket-api-general-info.md] | complete | |
+| `websocket_api_order_place_request_t` | [WS-New-Order.md] | complete | |
+| `websocket_api_order_query_request_t` | [WS-Query-Order.md] | complete | |
+| `websocket_api_order_cancel_request_t` | [WS-Cancel-Order.md] | complete | |
+| `websocket_api_book_ticker_request_t` | [WS-Symbol-Order-Book-Ticker.md] | complete | |
+| `websocket_api_price_ticker_request_t` | [WS-Symbol-Price-Ticker.md] | complete | |
+| `websocket_api_order_modify_request_t` | [WS-Modify-Order.md] | complete | |
+| `websocket_api_position_request_t` | [WS-Position-Information.md] | complete | |
+| `websocket_api_algo_order_place_request_t` | [WS-New-Algo-Order.md] | complete | |
+| `websocket_api_algo_order_cancel_request_t` | [WS-Cancel-Algo-Order.md] | complete | |
+| `websocket_api_user_data_stream_request_t` | [Start-User-Data-Stream-Wsp.md] | complete | |
+| `websocket_api_listen_key_result_t` | [Start-User-Data-Stream-Wsp.md] | complete | |
+| `websocket_api_response<T>_t` | [websocket-api-general-info.md] | complete | |
 
 [websocket-api-general-info.md]: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-api-general-info.md
 [WS-New-Order.md]: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/websocket-api/New-Order.md

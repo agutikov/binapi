@@ -7,19 +7,19 @@
 
 
 
-for all enum types - specify value of enum items
 
 what happen if enum parser gets unknown string?
 if serialization gets unknown enum value?
 
 
 
-tests for enum_set
+write tests for enum_set
 
 
 
 
-convert vectors of enums into enum_set
+convert vectors of enums into enum_set in include/binapi2/fapi/types
+where semantically field is a set (not sequence)
 
 
 
@@ -29,10 +29,13 @@ maybe type would be useful in future
 
 
 
-update docs/data_types.md
-update docs/DESIGN.md
 
 
+scripts that runs all binapi2-fapi-demo-cli requests with testnet
+    - REST
+    - WebSocket API
+    - WebSocket streams
+save requests, responses and logs into separate file for every command
 
 
 
@@ -46,11 +49,6 @@ test all methods
 
 
 
-
-
-
-
-script that runs all requests with testnet
 
 
 

@@ -21,44 +21,44 @@ namespace binapi2::fapi::types {
 /// are required to call an endpoint.
 enum class security_type_t
 {
-    none,
-    market_data,
-    user_stream,
-    user_data,
-    trade,
+    none = 0,
+    market_data = 1,
+    user_stream = 2,
+    user_data = 3,
+    trade = 4,
 };
 
 /// Order side: buy or sell.
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 enum class order_side_t
 {
-    buy,
-    sell,
+    buy = 0,
+    sell = 1,
 };
 
 /// Order type: LIMIT, MARKET, and conditional order variants (STOP, TAKE_PROFIT, etc.).
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 enum class order_type_t
 {
-    limit,
-    market,
-    stop,              ///< Stop-limit order (requires price + stopPrice).
-    stop_market,       ///< Stop-market order (requires stopPrice only).
-    take_profit,       ///< Take-profit limit order.
-    take_profit_market,///< Take-profit market order.
-    trailing_stop_market,
+    limit = 0,
+    market = 1,
+    stop = 2,              ///< Stop-limit order (requires price + stopPrice).
+    stop_market = 3,       ///< Stop-market order (requires stopPrice only).
+    take_profit = 4,       ///< Take-profit limit order.
+    take_profit_market = 5,///< Take-profit market order.
+    trailing_stop_market = 6,
 };
 
 /// Time-in-force policy for order lifetime.
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 enum class time_in_force_t
 {
-    gtc,  ///< Good Till Cancel.
-    ioc,  ///< Immediate Or Cancel.
-    fok,  ///< Fill Or Kill.
-    gtx,  ///< Good Till Crossing (post-only).
-    gtd,  ///< Good Till Date.
-    rpi,  ///< Retail Price Improvement.
+    gtc = 0,  ///< Good Till Cancel.
+    ioc = 1,  ///< Immediate Or Cancel.
+    fok = 2,  ///< Fill Or Kill.
+    gtx = 3,  ///< Good Till Crossing (post-only).
+    gtd = 4,  ///< Good Till Date.
+    rpi = 5,  ///< Retail Price Improvement.
 };
 
 /// Kline/candlestick interval. Prefixed by unit: m=minutes, h=hours, d=days, w=weeks, mo=months.
@@ -66,21 +66,21 @@ enum class time_in_force_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 enum class kline_interval_t
 {
-    m1,
-    m3,
-    m5,
-    m15,
-    m30,
-    h1,
-    h2,
-    h4,
-    h6,
-    h8,
-    h12,
-    d1,
-    d3,
-    w1,
-    mo1,
+    m1 = 0,
+    m3 = 1,
+    m5 = 2,
+    m15 = 3,
+    m30 = 4,
+    h1 = 5,
+    h2 = 6,
+    h4 = 7,
+    h6 = 8,
+    h8 = 9,
+    h12 = 10,
+    d1 = 11,
+    d3 = 12,
+    w1 = 13,
+    mo1 = 14,
 };
 
 /// Position side for hedge mode. "both" is used in one-way mode.
@@ -88,40 +88,40 @@ enum class kline_interval_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 enum class position_side_t
 {
-    both,
-    long_side,   ///< Maps to "LONG" on the wire (avoids C++ keyword).
-    short_side,  ///< Maps to "SHORT" on the wire (avoids C++ keyword).
+    both = 0,
+    long_side = 1,   ///< Maps to "LONG" on the wire (avoids C++ keyword).
+    short_side = 2,  ///< Maps to "SHORT" on the wire (avoids C++ keyword).
 };
 
 /// Price type used for triggering conditional orders.
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 enum class working_type_t
 {
-    mark_price_t,
-    contract_price,
+    mark_price_t = 0,
+    contract_price = 1,
 };
 
 /// Controls the detail level of order placement responses.
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 enum class response_type_t
 {
-    ack,
-    result,
+    ack = 0,
+    result = 1,
 };
 
 /// Position margin mode: isolated or cross (crossed).
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 enum class margin_type_t
 {
-    isolated,
-    crossed,
+    isolated = 0,
+    crossed = 1,
 };
 
 /// Futures margining type (USD-M vs COIN-M).
 enum class futures_type_t
 {
-    u_margined,
-    coin_margined,
+    u_margined = 0,
+    coin_margined = 1,
 };
 
 [[nodiscard]] inline std::string
@@ -137,10 +137,10 @@ to_string(futures_type_t value)
 /// Position control side for POSITION_RISK_CONTROL filters.
 enum class position_control_side_t
 {
-    none,
-    long_side,
-    short_side,
-    both,
+    none = 0,
+    long_side = 1,
+    short_side = 2,
+    both = 3,
 };
 
 [[nodiscard]] inline std::string
@@ -158,11 +158,11 @@ to_string(position_control_side_t value)
 /// Trading permission type for symbol permissionSets.
 enum class trading_permission_t
 {
-    grid,
-    copy,
-    dca,
-    rpi,
-    psb,
+    grid = 0,
+    copy = 1,
+    dca = 2,
+    rpi = 3,
+    psb = 4,
 };
 
 [[nodiscard]] inline std::string
@@ -182,28 +182,28 @@ to_string(trading_permission_t value)
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 enum class contract_type_t
 {
-    perpetual,
-    current_month,
-    next_month,
-    current_quarter,
-    next_quarter,
-    perpetual_delivering,
-    current_quarter_delivering,
-    tradifi_perpetual,
+    perpetual = 0,
+    current_month = 1,
+    next_month = 2,
+    current_quarter = 3,
+    next_quarter = 4,
+    perpetual_delivering = 5,
+    current_quarter_delivering = 6,
+    tradifi_perpetual = 7,
 };
 
 /// Trading status of a futures contract through its lifecycle.
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 enum class contract_status_t
 {
-    pending_trading,
-    trading,
-    pre_delivering,
-    delivering,
-    delivered,
-    pre_settle,
-    settling,
-    close,
+    pending_trading = 0,
+    trading = 1,
+    pre_delivering = 2,
+    delivering = 3,
+    delivered = 4,
+    pre_settle = 5,
+    settling = 6,
+    close = 7,
 };
 
 /// Order execution status. Note: new_order maps to API string "NEW"
@@ -211,13 +211,13 @@ enum class contract_status_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 enum class order_status_t
 {
-    new_order,
-    partially_filled,
-    filled,
-    canceled,
-    rejected,
-    expired,
-    expired_in_match,
+    new_order = 0,
+    partially_filled = 1,
+    filled = 2,
+    canceled = 3,
+    rejected = 4,
+    expired = 5,
+    expired_in_match = 6,
 };
 
 /// Self-Trade Prevention mode. Controls which side is expired when
@@ -225,10 +225,10 @@ enum class order_status_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 enum class stp_mode_t
 {
-    none,
-    expire_taker,
-    expire_both,
-    expire_maker,
+    none = 0,
+    expire_taker = 1,
+    expire_both = 2,
+    expire_maker = 3,
 };
 
 /// Price match mode for order placement. Determines how the order price
@@ -237,15 +237,15 @@ enum class stp_mode_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 enum class price_match_t
 {
-    none,
-    opponent,
-    opponent_5,
-    opponent_10,
-    opponent_20,
-    queue,
-    queue_5,
-    queue_10,
-    queue_20,
+    none = 0,
+    opponent = 1,
+    opponent_5 = 2,
+    opponent_10 = 3,
+    opponent_20 = 4,
+    queue = 5,
+    queue_5 = 6,
+    queue_10 = 7,
+    queue_20 = 8,
 };
 
 /// Classification of account income/transaction entries returned by
@@ -253,25 +253,25 @@ enum class price_match_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 enum class income_type_t
 {
-    transfer,
-    welcome_bonus,
-    realized_pnl,
-    funding_fee,
-    commission,
-    insurance_clear,
-    referral_kickback,
-    commission_rebate,
-    api_rebate,
-    contest_reward,
-    cross_collateral_transfer,
-    options_premium_fee,
-    options_settle_profit,
-    internal_transfer,
-    auto_exchange,
-    delivered_settelment,
-    coin_swap_deposit,
-    coin_swap_withdraw,
-    position_limit_increase_fee,
+    transfer = 0,
+    welcome_bonus = 1,
+    realized_pnl = 2,
+    funding_fee = 3,
+    commission = 4,
+    insurance_clear = 5,
+    referral_kickback = 6,
+    commission_rebate = 7,
+    api_rebate = 8,
+    contest_reward = 9,
+    cross_collateral_transfer = 10,
+    options_premium_fee = 11,
+    options_settle_profit = 12,
+    internal_transfer = 13,
+    auto_exchange = 14,
+    delivered_settelment = 15,
+    coin_swap_deposit = 16,
+    coin_swap_withdraw = 17,
+    position_limit_increase_fee = 18,
 };
 
 /// Aggregation period for futures statistics endpoints (open interest stats,
@@ -280,15 +280,15 @@ enum class income_type_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 enum class futures_data_period_t
 {
-    m5,
-    m15,
-    m30,
-    h1,
-    h2,
-    h4,
-    h6,
-    h12,
-    d1,
+    m5 = 0,
+    m15 = 1,
+    m30 = 2,
+    h1 = 3,
+    h2 = 4,
+    h4 = 5,
+    h6 = 6,
+    h12 = 7,
+    d1 = 8,
 };
 
 [[nodiscard]] inline std::string
@@ -638,13 +638,13 @@ to_string(futures_data_period_t value)
 /// Execution type in order update events.
 enum class execution_type_t
 {
-    new_order,
-    partial_fill,
-    fill,
-    canceled,
-    rejected,
-    expired,
-    trade,
+    new_order = 0,
+    partial_fill = 1,
+    fill = 2,
+    canceled = 3,
+    rejected = 4,
+    expired = 5,
+    trade = 6,
 };
 
 [[nodiscard]] inline std::string
@@ -665,12 +665,12 @@ to_string(execution_type_t value)
 /// Rate limit type from exchange info.
 enum class rate_limit_type_t
 {
-    request_weight,
-    orders,
-    orders_1s,
-    orders_1m,
-    orders_1h,
-    orders_1d,
+    request_weight = 0,
+    orders = 1,
+    orders_1s = 2,
+    orders_1m = 3,
+    orders_1h = 4,
+    orders_1d = 5,
 };
 
 [[nodiscard]] inline std::string
@@ -690,10 +690,10 @@ to_string(rate_limit_type_t value)
 /// Rate limit interval unit.
 enum class rate_limit_interval_t
 {
-    second,
-    minute,
-    hour,
-    day,
+    second = 0,
+    minute = 1,
+    hour = 2,
+    day = 3,
 };
 
 [[nodiscard]] inline std::string
@@ -711,8 +711,8 @@ to_string(rate_limit_interval_t value)
 /// Auto-close type for forced liquidation/ADL orders.
 enum class auto_close_type_t
 {
-    liquidation,
-    adl,
+    liquidation = 0,
+    adl = 1,
 };
 
 [[nodiscard]] inline std::string
@@ -728,8 +728,8 @@ to_string(auto_close_type_t value)
 /// Isolated margin delta direction.
 enum class delta_type_t
 {
-    add,
-    reduce,
+    add = 1,
+    reduce = 2,
 };
 
 [[nodiscard]] inline std::string
@@ -745,8 +745,8 @@ to_string(delta_type_t value)
 /// Algo order type.
 enum class algo_type_t
 {
-    twap,
-    vp,
+    twap = 0,
+    vp = 1,
 };
 
 [[nodiscard]] inline std::string
@@ -762,11 +762,11 @@ to_string(algo_type_t value)
 /// Algo order status.
 enum class algo_status_t
 {
-    working,
-    cancelled,
-    rejected,
-    expired,
-    triggered,
+    working = 0,
+    cancelled = 1,
+    rejected = 2,
+    expired = 3,
+    triggered = 4,
 };
 
 [[nodiscard]] inline std::string

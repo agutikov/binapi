@@ -17,14 +17,14 @@ namespace binapi2::fapi {
 /// value to decide recovery strategy (retry, reconnect, abort, etc.).
 enum class error_code
 {
-    none = 0,           ///< No error -- the operation succeeded.
-    invalid_argument,   ///< Caller supplied an invalid or missing parameter.
-    transport,          ///< Network-level failure (DNS, TLS, TCP timeout, etc.).
-    http_status,        ///< Server returned a non-2xx HTTP status not mapped to a Binance error.
-    json,               ///< Response body could not be parsed as valid JSON.
-    binance,            ///< Binance-specific error; see `error::binance_code` for details.
-    websocket,          ///< WebSocket protocol error (handshake, frame, unexpected close).
-    internal,           ///< Unexpected library-internal failure (bug).
+    none = 0,               ///< No error -- the operation succeeded.
+    invalid_argument = 1,   ///< Caller supplied an invalid or missing parameter.
+    transport = 2,          ///< Network-level failure (DNS, TLS, TCP timeout, etc.).
+    http_status = 3,        ///< Server returned a non-2xx HTTP status not mapped to a Binance error.
+    json = 4,               ///< Response body could not be parsed as valid JSON.
+    binance = 5,            ///< Binance-specific error; see `error::binance_code` for details.
+    websocket = 6,          ///< WebSocket protocol error (handshake, frame, unexpected close).
+    internal = 7,           ///< Unexpected library-internal failure (bug).
 };
 
 /// @brief Rich error descriptor produced by every fapi operation that can fail.

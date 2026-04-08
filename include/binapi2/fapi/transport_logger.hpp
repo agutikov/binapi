@@ -14,7 +14,7 @@
 namespace binapi2::fapi {
 
 /// @brief Direction of the logged message.
-enum class transport_direction { sent, received };
+enum class transport_direction { sent = 0, received = 1 };
 
 /// @brief A single transport-level log entry describing an HTTP request/response
 ///        or a WebSocket message.
