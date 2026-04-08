@@ -39,9 +39,17 @@ public:
     using message_handler = std::function<bool(const std::string&)>;
 
     /// @brief Construct a WebSocket client driven by an io_thread.
+    ///
+    /// Both async and sync methods are available.
     /// @param io  The io_thread that owns the io_context.
     /// @param cfg Configuration containing endpoint and credential settings.
     websocket_client(detail::io_thread& io, config cfg);
+
+    /// @brief Construct an async-only WebSocket client (no io_thread).
+    ///
+    /// Only async methods may be called; sync wrappers will return an error.
+    /// @param cfg Configuration containing endpoint and credential settings.
+    explicit websocket_client(config cfg);
 
     /// @brief Destructor; releases the pimpl resources.
     ~websocket_client();

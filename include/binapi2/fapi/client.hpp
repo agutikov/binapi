@@ -34,6 +34,7 @@
 #include <glaze/glaze.hpp>
 
 #include <memory>
+#include <stdexcept>
 #include <string>
 #include <type_traits>
 #include <utility>
@@ -83,15 +84,23 @@ decode_response(const transport::http_response& response)
 
 } // namespace detail
 
+/// @brief Tag type selecting async-only mode (no background io_thread).
+struct async_mode_t { explicit async_mode_t() = default; };
+
+/// @brief Tag constant for constructing a client in async-only mode.
+inline constexpr async_mode_t async_mode{};
+
 /// @brief USD-M Futures API client.
 ///
 /// Owns the HTTP transport and configuration, and exposes domain-specific
 /// service objects (market_data, trade, account, convert, user_data_streams)
 /// for organized access to Binance endpoints.
 ///
-/// All network I/O is implemented as boost::cobalt coroutines (async_execute).
-/// The synchronous execute methods wrap the coroutine via cobalt::run and block
-/// until completion, so they must not be called from within a coroutine context.
+/// Supports two construction modes:
+///   - **Sync + async** (default): creates a background io_thread so both sync
+///     and async methods work. Sync methods block the caller via run_sync().
+///   - **Async-only** (with @ref async_mode tag): no io_thread is created.
+///     Only async methods (co_await) may be used; sync calls return errors.
 ///
 /// Two execution styles are available:
 ///   - **Low-level**: caller specifies HTTP verb, path, query map, and signing flag.
@@ -100,15 +109,35 @@ decode_response(const transport::http_response& response)
 class client
 {
 public:
-    /// @brief Construct a client. Owns an io_context and a background I/O thread.
+    /// @brief Construct a client with sync + async support.
+    ///
+    /// Creates a background io_thread. Both sync and async methods work.
     explicit client(config cfg);
+
+    /// @brief Construct an async-only client (no background thread).
+    ///
+    /// Only async methods (co_await) may be used. Sync calls return errors.
+    client(config cfg, async_mode_t);
 
     ~client();
 
     [[nodiscard]] config& configuration() noexcept;
     [[nodiscard]] const config& configuration() const noexcept;
-    [[nodiscard]] boost::asio::io_context& context() noexcept;
     [[nodiscard]] transport::http_client& transport() noexcept;
+
+    /// @brief Whether this client was constructed with an io_thread (sync capable).
+    [[nodiscard]] bool has_io_thread() const noexcept;
+
+    /// @brief Spawn a cobalt task on the io_thread and block until completion.
+    ///
+    /// Only available when constructed with an io_thread (not async_mode).
+    /// @throws std::logic_error if called in async-only mode.
+    template<typename T>
+    T run_sync(boost::cobalt::task<T> task)
+    {
+        if (!io_thread_) throw std::logic_error("run_sync requires io_thread (not async_mode)");
+        return io_thread_->run_sync(std::move(task));
+    }
 
     /// @brief Access the WebSocket API client (lazy: connects on first use).
     [[nodiscard]] websocket_api::client& ws_api();
@@ -212,7 +241,7 @@ public:
     rest::user_data_stream_service user_data_streams;
 
 private:
-    detail::io_thread io_thread_;
+    std::unique_ptr<detail::io_thread> io_thread_;  // nullptr in async-only mode
     config cfg_;
     transport::http_client http_;
 

@@ -109,7 +109,12 @@ encode_rpc_request(const std::string& id, std::string_view method, const Params&
 } // namespace
 
 client::client(fapi::detail::io_thread& io, config cfg) :
-    io_context_(io.context()), cfg_(std::move(cfg)), transport_(io, cfg_)
+    cfg_(std::move(cfg)), transport_(io, cfg_)
+{
+}
+
+client::client(config cfg) :
+    cfg_(std::move(cfg)), transport_(cfg_)
 {
 }
 
@@ -157,6 +162,28 @@ client::send_rpc(std::string_view method, const Params& params)
     return decode_rpc_response<Response>(*raw);
 }
 
+template<typename Response, typename Params>
+boost::cobalt::task<result<types::websocket_api_response_t<Response>>>
+client::async_send_rpc(std::string_view method, const Params& params)
+{
+    auto payload = encode_rpc_request(next_id(), method, params);
+    if (!payload) {
+        co_return result<types::websocket_api_response_t<Response>>::failure(payload.err);
+    }
+
+    auto write_result = co_await transport_.async_write_text(*payload);
+    if (!write_result) {
+        co_return result<types::websocket_api_response_t<Response>>::failure(write_result.err);
+    }
+
+    auto raw = co_await transport_.async_read_text();
+    if (!raw) {
+        co_return result<types::websocket_api_response_t<Response>>::failure(raw.err);
+    }
+
+    co_return decode_rpc_response<Response>(*raw);
+}
+
 // Conditionally injects authentication fields into a request. Uses
 // if-constexpr to check at compile time whether the request type inherits
 // from websocket_api_signed_request_t; unsigned request types pass through
@@ -200,7 +227,8 @@ auto
 client::async_execute(const Request& request)
     -> boost::cobalt::task<result<types::websocket_api_response_t<typename endpoint_traits<Request>::response_type_t>>>
 {
-    co_return execute(request);
+    using traits = endpoint_traits<Request>;
+    co_return co_await async_send_rpc<typename traits::response_type_t>(traits::method, inject_auth(request));
 }
 
 // Explicit instantiations for all trait-enabled request types.
@@ -298,7 +326,21 @@ client::session_logon()
 boost::cobalt::task<result<types::websocket_api_response_t<types::session_logon_result_t>>>
 client::async_session_logon()
 {
-    co_return session_logon();
+    query_map auth_query;
+    inject_auth_query(auth_query, cfg_.recv_window, current_timestamp_ms());
+    auth_query["apiKey"] = cfg_.api_key;
+
+    const auto canonical = build_query_string(auth_query);
+    const auto signature = hmac_sha256_hex(cfg_.secret_key, canonical);
+
+    types::session_logon_request_t params{
+        .apiKey = cfg_.api_key,
+        .timestamp = std::stoull(auth_query["timestamp"]),
+        .recvWindow = std::stoull(auth_query["recvWindow"]),
+        .signature = signature,
+    };
+
+    co_return co_await async_send_rpc<types::session_logon_result_t>(session_logon_method, params);
 }
 
 // --- Parameterless signed endpoints ---
@@ -312,7 +354,7 @@ client::account_status()
 boost::cobalt::task<result<types::websocket_api_response_t<types::account_information_t>>>
 client::async_account_status()
 {
-    co_return account_status();
+    co_return co_await async_send_rpc<types::account_information_t>(account_status_method, make_signed_request_base());
 }
 
 result<types::websocket_api_response_t<types::account_information_t>>
@@ -324,7 +366,7 @@ client::account_status_v2()
 boost::cobalt::task<result<types::websocket_api_response_t<types::account_information_t>>>
 client::async_account_status_v2()
 {
-    co_return account_status_v2();
+    co_return co_await async_send_rpc<types::account_information_t>(account_status_v2_method, make_signed_request_base());
 }
 
 result<types::websocket_api_response_t<std::vector<types::futures_account_balance_t>>>
@@ -336,7 +378,7 @@ client::account_balance()
 boost::cobalt::task<result<types::websocket_api_response_t<std::vector<types::futures_account_balance_t>>>>
 client::async_account_balance()
 {
-    co_return account_balance();
+    co_return co_await async_send_rpc<std::vector<types::futures_account_balance_t>>(account_balance_method, make_signed_request_base());
 }
 
 // --- Shared: position v2 ---
@@ -350,7 +392,7 @@ client::account_position_v2(const types::websocket_api_position_request_t& reque
 boost::cobalt::task<result<types::websocket_api_response_t<std::vector<types::position_risk_t>>>>
 client::async_account_position_v2(const types::websocket_api_position_request_t& request)
 {
-    co_return account_position_v2(request);
+    co_return co_await async_send_rpc<std::vector<types::position_risk_t>>(account_position_v2_method, inject_auth(request));
 }
 
 // --- Shared: user data stream ---
@@ -365,7 +407,8 @@ client::user_data_stream_start()
 boost::cobalt::task<result<types::websocket_api_response_t<types::websocket_api_listen_key_result_t>>>
 client::async_user_data_stream_start()
 {
-    co_return user_data_stream_start();
+    types::websocket_api_user_data_stream_request_t params{ .apiKey = cfg_.api_key };
+    co_return co_await async_send_rpc<types::websocket_api_listen_key_result_t>(user_data_stream_start_method, params);
 }
 
 result<types::websocket_api_response_t<types::websocket_api_listen_key_result_t>>
@@ -378,7 +421,8 @@ client::user_data_stream_ping()
 boost::cobalt::task<result<types::websocket_api_response_t<types::websocket_api_listen_key_result_t>>>
 client::async_user_data_stream_ping()
 {
-    co_return user_data_stream_ping();
+    types::websocket_api_user_data_stream_request_t params{ .apiKey = cfg_.api_key };
+    co_return co_await async_send_rpc<types::websocket_api_listen_key_result_t>(user_data_stream_ping_method, params);
 }
 
 result<types::websocket_api_response_t<types::empty_response_t>>
@@ -391,7 +435,8 @@ client::user_data_stream_stop()
 boost::cobalt::task<result<types::websocket_api_response_t<types::empty_response_t>>>
 client::async_user_data_stream_stop()
 {
-    co_return user_data_stream_stop();
+    types::websocket_api_user_data_stream_request_t params{ .apiKey = cfg_.api_key };
+    co_return co_await async_send_rpc<types::empty_response_t>(user_data_stream_stop_method, params);
 }
 
 } // namespace binapi2::fapi::websocket_api

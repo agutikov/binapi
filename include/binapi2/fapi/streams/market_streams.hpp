@@ -57,10 +57,14 @@ public:
     using all_asset_index_handler = std::function<bool(const types::all_asset_index_stream_event&)>; ///< Handler for all asset index events.
     using trading_session_handler = std::function<bool(const types::trading_session_stream_event_t&)>; ///< Handler for trading session events.
 
-    /// @brief Construct a market streams client.
+    /// @brief Construct a market streams client with sync + async support.
     /// @param io  The io_thread that owns the io_context.
     /// @param cfg Configuration containing the stream endpoint URL.
     market_streams(detail::io_thread& io, config cfg);
+
+    /// @brief Construct an async-only market streams client (no io_thread).
+    /// @param cfg Configuration containing the stream endpoint URL.
+    explicit market_streams(config cfg);
 
     // -- Aggregate trade stream --
 
@@ -376,8 +380,23 @@ public:
     /// @brief Async overload with completion callback.
     void close(void_callback callback);
 
+    // -- Async (cobalt::task) transport access --
+
+    /// @brief Asynchronously connect to a stream endpoint.
+    /// @param target Full WebSocket target path (e.g. "/ws/btcusdt@bookTicker").
+    [[nodiscard]] boost::cobalt::task<result<void>> async_connect(std::string target);
+
+    /// @brief Asynchronously read a single raw text frame.
+    [[nodiscard]] boost::cobalt::task<result<std::string>> async_read_text();
+
+    /// @brief Asynchronously close the stream connection.
+    [[nodiscard]] boost::cobalt::task<result<void>> async_close();
+
+    /// @brief Access the stream config (for building target paths externally).
+    [[nodiscard]] const config& configuration() const noexcept { return cfg_; }
+
 private:
-    boost::asio::io_context& io_context_;
+    boost::asio::io_context* io_context_{};  // nullptr in async-only mode
     transport::websocket_client transport_;
     config cfg_;
 };

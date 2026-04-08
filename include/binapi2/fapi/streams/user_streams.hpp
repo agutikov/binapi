@@ -59,10 +59,14 @@ public:
         strategy_update_handler on_strategy_update{};              ///< Called on strategy updates.
     };
 
-    /// @brief Construct a user streams client.
+    /// @brief Construct a user streams client with sync + async support.
     /// @param io  The io_thread that owns the io_context.
     /// @param cfg Configuration containing endpoint and credential settings.
     user_streams(detail::io_thread& io, config cfg);
+
+    /// @brief Construct an async-only user streams client (no io_thread).
+    /// @param cfg Configuration containing endpoint and credential settings.
+    explicit user_streams(config cfg);
 
     /// @brief Connect to the user data stream using a listen key.
     /// @param listen_key The listen key obtained from the REST or WebSocket API.
@@ -107,8 +111,19 @@ public:
     /// @brief Async overload with completion callback.
     void close(void_callback callback);
 
+    // -- Async (cobalt::task) transport access --
+
+    /// @brief Asynchronously connect using a listen key.
+    [[nodiscard]] boost::cobalt::task<result<void>> async_connect(std::string listen_key);
+
+    /// @brief Asynchronously read a single raw text frame.
+    [[nodiscard]] boost::cobalt::task<result<std::string>> async_read_text();
+
+    /// @brief Asynchronously close the connection.
+    [[nodiscard]] boost::cobalt::task<result<void>> async_close();
+
 private:
-    boost::asio::io_context& io_context_;
+    boost::asio::io_context* io_context_{};  // nullptr in async-only mode
     transport::websocket_client transport_;
     config cfg_;
 };

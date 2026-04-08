@@ -89,7 +89,12 @@ read_stream_loop(transport::websocket_client& transport, Handler handler)
 } // namespace
 
 market_streams::market_streams(fapi::detail::io_thread& io, config cfg) :
-    io_context_(io.context()), transport_(io, cfg), cfg_(std::move(cfg))
+    io_context_(&io.context()), transport_(io, cfg), cfg_(std::move(cfg))
+{
+}
+
+market_streams::market_streams(config cfg) :
+    transport_(cfg), cfg_(std::move(cfg))
 {
 }
 
@@ -103,7 +108,7 @@ market_streams::connect_aggregate_trade(const aggregate_trade_subscription& subs
 void
 market_streams::connect_aggregate_trade(const aggregate_trade_subscription& subscription, void_callback callback)
 {
-    boost::asio::post(io_context_, [this, subscription, callback = std::move(callback)]() mutable {
+    boost::asio::post(*io_context_, [this, subscription, callback = std::move(callback)]() mutable {
         callback(connect_aggregate_trade(subscription));
     });
 }
@@ -119,7 +124,7 @@ market_streams::connect_mark_price(const mark_price_subscription& subscription)
 void
 market_streams::connect_mark_price(const mark_price_subscription& subscription, void_callback callback)
 {
-    boost::asio::post(io_context_, [this, subscription, callback = std::move(callback)]() mutable {
+    boost::asio::post(*io_context_, [this, subscription, callback = std::move(callback)]() mutable {
         callback(connect_mark_price(subscription));
     });
 }
@@ -134,7 +139,7 @@ market_streams::connect_book_ticker(const book_ticker_subscription& subscription
 void
 market_streams::connect_book_ticker(const book_ticker_subscription& subscription, void_callback callback)
 {
-    boost::asio::post(io_context_, [this, subscription, callback = std::move(callback)]() mutable {
+    boost::asio::post(*io_context_, [this, subscription, callback = std::move(callback)]() mutable {
         callback(connect_book_ticker(subscription));
     });
 }
@@ -149,7 +154,7 @@ market_streams::connect_diff_book_depth(const diff_book_depth_subscription& subs
 void
 market_streams::connect_diff_book_depth(const diff_book_depth_subscription& subscription, void_callback callback)
 {
-    boost::asio::post(io_context_, [this, subscription, callback = std::move(callback)]() mutable {
+    boost::asio::post(*io_context_, [this, subscription, callback = std::move(callback)]() mutable {
         callback(connect_diff_book_depth(subscription));
     });
 }
@@ -164,7 +169,7 @@ market_streams::connect_mini_ticker(const mini_ticker_subscription& subscription
 void
 market_streams::connect_mini_ticker(const mini_ticker_subscription& subscription, void_callback callback)
 {
-    boost::asio::post(io_context_, [this, subscription, callback = std::move(callback)]() mutable {
+    boost::asio::post(*io_context_, [this, subscription, callback = std::move(callback)]() mutable {
         callback(connect_mini_ticker(subscription));
     });
 }
@@ -179,7 +184,7 @@ market_streams::connect_all_market_mini_tickers(const all_market_mini_ticker_sub
 void
 market_streams::connect_all_market_mini_tickers(const all_market_mini_ticker_subscription& subscription, void_callback callback)
 {
-    boost::asio::post(io_context_, [this, subscription, callback = std::move(callback)]() mutable {
+    boost::asio::post(*io_context_, [this, subscription, callback = std::move(callback)]() mutable {
         callback(connect_all_market_mini_tickers(subscription));
     });
 }
@@ -194,7 +199,7 @@ market_streams::connect_ticker(const ticker_subscription& subscription)
 void
 market_streams::connect_ticker(const ticker_subscription& subscription, void_callback callback)
 {
-    boost::asio::post(io_context_, [this, subscription, callback = std::move(callback)]() mutable {
+    boost::asio::post(*io_context_, [this, subscription, callback = std::move(callback)]() mutable {
         callback(connect_ticker(subscription));
     });
 }
@@ -209,7 +214,7 @@ market_streams::connect_all_market_tickers(const all_market_ticker_subscription&
 void
 market_streams::connect_all_market_tickers(const all_market_ticker_subscription& subscription, void_callback callback)
 {
-    boost::asio::post(io_context_, [this, subscription, callback = std::move(callback)]() mutable {
+    boost::asio::post(*io_context_, [this, subscription, callback = std::move(callback)]() mutable {
         callback(connect_all_market_tickers(subscription));
     });
 }
@@ -224,7 +229,7 @@ market_streams::connect_all_book_tickers(const all_book_ticker_subscription&)
 void
 market_streams::connect_all_book_tickers(const all_book_ticker_subscription& subscription, void_callback callback)
 {
-    boost::asio::post(io_context_, [this, subscription, callback = std::move(callback)]() mutable {
+    boost::asio::post(*io_context_, [this, subscription, callback = std::move(callback)]() mutable {
         callback(connect_all_book_tickers(subscription));
     });
 }
@@ -242,7 +247,7 @@ market_streams::connect_liquidation_order(const liquidation_order_subscription& 
 void
 market_streams::connect_liquidation_order(const liquidation_order_subscription& subscription, void_callback callback)
 {
-    boost::asio::post(io_context_, [this, subscription, callback = std::move(callback)]() mutable {
+    boost::asio::post(*io_context_, [this, subscription, callback = std::move(callback)]() mutable {
         callback(connect_liquidation_order(subscription));
     });
 }
@@ -258,7 +263,7 @@ void
 market_streams::connect_all_market_liquidation_orders(const all_market_liquidation_order_subscription& subscription,
                                                       void_callback callback)
 {
-    boost::asio::post(io_context_, [this, subscription, callback = std::move(callback)]() mutable {
+    boost::asio::post(*io_context_, [this, subscription, callback = std::move(callback)]() mutable {
         callback(connect_all_market_liquidation_orders(subscription));
     });
 }
@@ -284,7 +289,7 @@ market_streams::connect_partial_book_depth(const partial_book_depth_subscription
 void
 market_streams::connect_partial_book_depth(const partial_book_depth_subscription& subscription, void_callback callback)
 {
-    boost::asio::post(io_context_, [this, subscription, callback = std::move(callback)]() mutable {
+    boost::asio::post(*io_context_, [this, subscription, callback = std::move(callback)]() mutable {
         callback(connect_partial_book_depth(subscription));
     });
 }
@@ -300,7 +305,7 @@ market_streams::connect_kline(const kline_subscription& subscription)
 void
 market_streams::connect_kline(const kline_subscription& subscription, void_callback callback)
 {
-    boost::asio::post(io_context_, [this, subscription, callback = std::move(callback)]() mutable {
+    boost::asio::post(*io_context_, [this, subscription, callback = std::move(callback)]() mutable {
         callback(connect_kline(subscription));
     });
 }
@@ -320,7 +325,7 @@ void
 market_streams::connect_continuous_contract_kline(const continuous_contract_kline_subscription& subscription,
                                                   void_callback callback)
 {
-    boost::asio::post(io_context_, [this, subscription, callback = std::move(callback)]() mutable {
+    boost::asio::post(*io_context_, [this, subscription, callback = std::move(callback)]() mutable {
         callback(connect_continuous_contract_kline(subscription));
     });
 }
@@ -334,7 +339,7 @@ market_streams::read_aggregate_trade_loop(aggregate_trade_handler handler)
 void
 market_streams::read_aggregate_trade_loop(aggregate_trade_handler handler, void_callback callback)
 {
-    boost::asio::post(io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
+    boost::asio::post(*io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
         callback(read_aggregate_trade_loop(std::move(handler)));
     });
 }
@@ -348,7 +353,7 @@ market_streams::read_mark_price_loop(mark_price_handler handler)
 void
 market_streams::read_mark_price_loop(mark_price_handler handler, void_callback callback)
 {
-    boost::asio::post(io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
+    boost::asio::post(*io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
         callback(read_mark_price_loop(std::move(handler)));
     });
 }
@@ -362,7 +367,7 @@ market_streams::read_book_ticker_loop(book_ticker_handler handler)
 void
 market_streams::read_book_ticker_loop(book_ticker_handler handler, void_callback callback)
 {
-    boost::asio::post(io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
+    boost::asio::post(*io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
         callback(read_book_ticker_loop(std::move(handler)));
     });
 }
@@ -376,7 +381,7 @@ market_streams::read_diff_book_depth_loop(depth_handler handler)
 void
 market_streams::read_diff_book_depth_loop(depth_handler handler, void_callback callback)
 {
-    boost::asio::post(io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
+    boost::asio::post(*io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
         callback(read_diff_book_depth_loop(std::move(handler)));
     });
 }
@@ -390,7 +395,7 @@ market_streams::read_mini_ticker_loop(mini_ticker_handler handler)
 void
 market_streams::read_mini_ticker_loop(mini_ticker_handler handler, void_callback callback)
 {
-    boost::asio::post(io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
+    boost::asio::post(*io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
         callback(read_mini_ticker_loop(std::move(handler)));
     });
 }
@@ -404,7 +409,7 @@ market_streams::read_all_market_mini_tickers_loop(all_market_mini_ticker_handler
 void
 market_streams::read_all_market_mini_tickers_loop(all_market_mini_ticker_handler handler, void_callback callback)
 {
-    boost::asio::post(io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
+    boost::asio::post(*io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
         callback(read_all_market_mini_tickers_loop(std::move(handler)));
     });
 }
@@ -418,7 +423,7 @@ market_streams::read_ticker_loop(ticker_handler handler)
 void
 market_streams::read_ticker_loop(ticker_handler handler, void_callback callback)
 {
-    boost::asio::post(io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
+    boost::asio::post(*io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
         callback(read_ticker_loop(std::move(handler)));
     });
 }
@@ -432,7 +437,7 @@ market_streams::read_all_market_tickers_loop(all_market_ticker_handler handler)
 void
 market_streams::read_all_market_tickers_loop(all_market_ticker_handler handler, void_callback callback)
 {
-    boost::asio::post(io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
+    boost::asio::post(*io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
         callback(read_all_market_tickers_loop(std::move(handler)));
     });
 }
@@ -446,7 +451,7 @@ market_streams::read_all_book_tickers_loop(book_ticker_handler handler)
 void
 market_streams::read_all_book_tickers_loop(book_ticker_handler handler, void_callback callback)
 {
-    boost::asio::post(io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
+    boost::asio::post(*io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
         callback(read_all_book_tickers_loop(std::move(handler)));
     });
 }
@@ -460,7 +465,7 @@ market_streams::read_liquidation_order_loop(liquidation_order_handler handler)
 void
 market_streams::read_liquidation_order_loop(liquidation_order_handler handler, void_callback callback)
 {
-    boost::asio::post(io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
+    boost::asio::post(*io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
         callback(read_liquidation_order_loop(std::move(handler)));
     });
 }
@@ -474,7 +479,7 @@ market_streams::read_all_market_liquidation_orders_loop(liquidation_order_handle
 void
 market_streams::read_all_market_liquidation_orders_loop(liquidation_order_handler handler, void_callback callback)
 {
-    boost::asio::post(io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
+    boost::asio::post(*io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
         callback(read_all_market_liquidation_orders_loop(std::move(handler)));
     });
 }
@@ -488,7 +493,7 @@ market_streams::read_partial_book_depth_loop(depth_handler handler)
 void
 market_streams::read_partial_book_depth_loop(depth_handler handler, void_callback callback)
 {
-    boost::asio::post(io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
+    boost::asio::post(*io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
         callback(read_partial_book_depth_loop(std::move(handler)));
     });
 }
@@ -502,7 +507,7 @@ market_streams::read_kline_loop(kline_handler handler)
 void
 market_streams::read_kline_loop(kline_handler handler, void_callback callback)
 {
-    boost::asio::post(io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
+    boost::asio::post(*io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
         callback(read_kline_loop(std::move(handler)));
     });
 }
@@ -516,7 +521,7 @@ market_streams::read_continuous_contract_kline_loop(continuous_contract_kline_ha
 void
 market_streams::read_continuous_contract_kline_loop(continuous_contract_kline_handler handler, void_callback callback)
 {
-    boost::asio::post(io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
+    boost::asio::post(*io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
         callback(read_continuous_contract_kline_loop(std::move(handler)));
     });
 }
@@ -532,7 +537,7 @@ market_streams::connect_all_market_mark_price(const all_market_mark_price_subscr
 void
 market_streams::connect_all_market_mark_price(const all_market_mark_price_subscription& subscription, void_callback callback)
 {
-    boost::asio::post(io_context_, [this, subscription, callback = std::move(callback)]() mutable {
+    boost::asio::post(*io_context_, [this, subscription, callback = std::move(callback)]() mutable {
         callback(connect_all_market_mark_price(subscription));
     });
 }
@@ -550,7 +555,7 @@ market_streams::connect_composite_index(const composite_index_subscription& subs
 void
 market_streams::connect_composite_index(const composite_index_subscription& subscription, void_callback callback)
 {
-    boost::asio::post(io_context_, [this, subscription, callback = std::move(callback)]() mutable {
+    boost::asio::post(*io_context_, [this, subscription, callback = std::move(callback)]() mutable {
         callback(connect_composite_index(subscription));
     });
 }
@@ -565,7 +570,7 @@ market_streams::connect_contract_info(const contract_info_subscription&)
 void
 market_streams::connect_contract_info(const contract_info_subscription& subscription, void_callback callback)
 {
-    boost::asio::post(io_context_, [this, subscription, callback = std::move(callback)]() mutable {
+    boost::asio::post(*io_context_, [this, subscription, callback = std::move(callback)]() mutable {
         callback(connect_contract_info(subscription));
     });
 }
@@ -583,7 +588,7 @@ market_streams::connect_asset_index(const asset_index_subscription& subscription
 void
 market_streams::connect_asset_index(const asset_index_subscription& subscription, void_callback callback)
 {
-    boost::asio::post(io_context_, [this, subscription, callback = std::move(callback)]() mutable {
+    boost::asio::post(*io_context_, [this, subscription, callback = std::move(callback)]() mutable {
         callback(connect_asset_index(subscription));
     });
 }
@@ -598,7 +603,7 @@ market_streams::connect_all_asset_index(const all_asset_index_subscription&)
 void
 market_streams::connect_all_asset_index(const all_asset_index_subscription& subscription, void_callback callback)
 {
-    boost::asio::post(io_context_, [this, subscription, callback = std::move(callback)]() mutable {
+    boost::asio::post(*io_context_, [this, subscription, callback = std::move(callback)]() mutable {
         callback(connect_all_asset_index(subscription));
     });
 }
@@ -613,7 +618,7 @@ market_streams::connect_trading_session(const trading_session_subscription&)
 void
 market_streams::connect_trading_session(const trading_session_subscription& subscription, void_callback callback)
 {
-    boost::asio::post(io_context_, [this, subscription, callback = std::move(callback)]() mutable {
+    boost::asio::post(*io_context_, [this, subscription, callback = std::move(callback)]() mutable {
         callback(connect_trading_session(subscription));
     });
 }
@@ -631,7 +636,7 @@ market_streams::connect_rpi_diff_book_depth(const rpi_diff_book_depth_subscripti
 void
 market_streams::connect_rpi_diff_book_depth(const rpi_diff_book_depth_subscription& subscription, void_callback callback)
 {
-    boost::asio::post(io_context_, [this, subscription, callback = std::move(callback)]() mutable {
+    boost::asio::post(*io_context_, [this, subscription, callback = std::move(callback)]() mutable {
         callback(connect_rpi_diff_book_depth(subscription));
     });
 }
@@ -645,7 +650,7 @@ market_streams::read_all_market_mark_price_loop(all_market_mark_price_handler ha
 void
 market_streams::read_all_market_mark_price_loop(all_market_mark_price_handler handler, void_callback callback)
 {
-    boost::asio::post(io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
+    boost::asio::post(*io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
         callback(read_all_market_mark_price_loop(std::move(handler)));
     });
 }
@@ -659,7 +664,7 @@ market_streams::read_composite_index_loop(composite_index_handler handler)
 void
 market_streams::read_composite_index_loop(composite_index_handler handler, void_callback callback)
 {
-    boost::asio::post(io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
+    boost::asio::post(*io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
         callback(read_composite_index_loop(std::move(handler)));
     });
 }
@@ -673,7 +678,7 @@ market_streams::read_contract_info_loop(contract_info_handler handler)
 void
 market_streams::read_contract_info_loop(contract_info_handler handler, void_callback callback)
 {
-    boost::asio::post(io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
+    boost::asio::post(*io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
         callback(read_contract_info_loop(std::move(handler)));
     });
 }
@@ -687,7 +692,7 @@ market_streams::read_asset_index_loop(asset_index_handler handler)
 void
 market_streams::read_asset_index_loop(asset_index_handler handler, void_callback callback)
 {
-    boost::asio::post(io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
+    boost::asio::post(*io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
         callback(read_asset_index_loop(std::move(handler)));
     });
 }
@@ -701,7 +706,7 @@ market_streams::read_all_asset_index_loop(all_asset_index_handler handler)
 void
 market_streams::read_all_asset_index_loop(all_asset_index_handler handler, void_callback callback)
 {
-    boost::asio::post(io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
+    boost::asio::post(*io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
         callback(read_all_asset_index_loop(std::move(handler)));
     });
 }
@@ -715,7 +720,7 @@ market_streams::read_trading_session_loop(trading_session_handler handler)
 void
 market_streams::read_trading_session_loop(trading_session_handler handler, void_callback callback)
 {
-    boost::asio::post(io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
+    boost::asio::post(*io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
         callback(read_trading_session_loop(std::move(handler)));
     });
 }
@@ -729,7 +734,7 @@ market_streams::read_rpi_diff_book_depth_loop(depth_handler handler)
 void
 market_streams::read_rpi_diff_book_depth_loop(depth_handler handler, void_callback callback)
 {
-    boost::asio::post(io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
+    boost::asio::post(*io_context_, [this, handler = std::move(handler), callback = std::move(callback)]() mutable {
         callback(read_rpi_diff_book_depth_loop(std::move(handler)));
     });
 }
@@ -743,7 +748,7 @@ market_streams::connect_combined(const std::string& target)
 void
 market_streams::connect_combined(const std::string& target, void_callback callback)
 {
-    boost::asio::post(io_context_,
+    boost::asio::post(*io_context_,
                       [this, target, callback = std::move(callback)]() mutable { callback(connect_combined(target)); });
 }
 
@@ -823,7 +828,27 @@ market_streams::close()
 void
 market_streams::close(void_callback callback)
 {
-    boost::asio::post(io_context_, [this, callback = std::move(callback)]() mutable { callback(close()); });
+    boost::asio::post(*io_context_, [this, callback = std::move(callback)]() mutable { callback(close()); });
+}
+
+// --- Async (cobalt::task) transport access ---
+
+boost::cobalt::task<result<void>>
+market_streams::async_connect(std::string target)
+{
+    co_return co_await transport_.async_connect(cfg_.stream_host, cfg_.stream_port, std::move(target));
+}
+
+boost::cobalt::task<result<std::string>>
+market_streams::async_read_text()
+{
+    co_return co_await transport_.async_read_text();
+}
+
+boost::cobalt::task<result<void>>
+market_streams::async_close()
+{
+    co_return co_await transport_.async_close();
 }
 
 } // namespace binapi2::fapi::streams

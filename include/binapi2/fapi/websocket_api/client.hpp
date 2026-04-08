@@ -33,10 +33,14 @@ namespace binapi2::fapi::websocket_api {
 class client
 {
 public:
-    /// @brief Construct a WebSocket API client.
+    /// @brief Construct a WebSocket API client with sync + async support.
     /// @param io  The io_thread that owns the io_context.
     /// @param cfg Configuration with endpoint URL and API credentials.
     client(detail::io_thread& io, config cfg);
+
+    /// @brief Construct an async-only WebSocket API client (no io_thread).
+    /// @param cfg Configuration with endpoint URL and API credentials.
+    explicit client(config cfg);
 
     // -- Connection management --
 
@@ -173,7 +177,6 @@ public:
     using algo_order_cancel_request = types::websocket_api_algo_order_cancel_request_t; ///< Alias for algo order cancellation request type.
 
 private:
-    boost::asio::io_context& io_context_;
     config cfg_;
     transport::websocket_client transport_;
 
@@ -191,6 +194,11 @@ private:
     template<typename Response, typename Params>
     result<types::websocket_api_response_t<Response>>
     send_rpc(std::string_view method, const Params& params);
+
+    /// @brief Async counterpart of send_rpc — uses co_await on transport async methods.
+    template<typename Response, typename Params>
+    boost::cobalt::task<result<types::websocket_api_response_t<Response>>>
+    async_send_rpc(std::string_view method, const Params& params);
 
     /// @brief Build a base signed request populated with API key, timestamp, and signature.
     /// @return A signed request base suitable for authenticated endpoints.

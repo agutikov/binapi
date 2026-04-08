@@ -28,7 +28,12 @@
 namespace binapi2::fapi::streams {
 
 user_streams::user_streams(fapi::detail::io_thread& io, config cfg) :
-    io_context_(io.context()), transport_(io, cfg), cfg_(std::move(cfg))
+    io_context_(&io.context()), transport_(io, cfg), cfg_(std::move(cfg))
+{
+}
+
+user_streams::user_streams(config cfg) :
+    transport_(cfg), cfg_(std::move(cfg))
 {
 }
 
@@ -42,7 +47,7 @@ user_streams::connect(const std::string& listen_key)
 void
 user_streams::connect(const std::string& listen_key, void_callback callback)
 {
-    boost::asio::post(io_context_,
+    boost::asio::post(*io_context_,
                       [this, listen_key, callback = std::move(callback)]() mutable { callback(connect(listen_key)); });
 }
 
@@ -108,7 +113,7 @@ user_streams::read_loop(account_update_handler account_handler,
                         listen_key_expired_handler listen_key_expired,
                         void_callback callback)
 {
-    boost::asio::post(io_context_,
+    boost::asio::post(*io_context_,
                       [this,
                        account_handler = std::move(account_handler),
                        order_handler = std::move(order_handler),
@@ -206,7 +211,7 @@ user_streams::read_loop(const handlers& h)
 void
 user_streams::read_loop(const handlers& h, void_callback callback)
 {
-    boost::asio::post(io_context_,
+    boost::asio::post(*io_context_,
                       [this, h, callback = std::move(callback)]() mutable { callback(read_loop(h)); });
 }
 
@@ -219,7 +224,28 @@ user_streams::close()
 void
 user_streams::close(void_callback callback)
 {
-    boost::asio::post(io_context_, [this, callback = std::move(callback)]() mutable { callback(close()); });
+    boost::asio::post(*io_context_, [this, callback = std::move(callback)]() mutable { callback(close()); });
+}
+
+// --- Async (cobalt::task) transport access ---
+
+boost::cobalt::task<result<void>>
+user_streams::async_connect(std::string listen_key)
+{
+    const auto target = cfg_.stream_base_target + "/" + listen_key;
+    co_return co_await transport_.async_connect(cfg_.stream_host, cfg_.stream_port, target);
+}
+
+boost::cobalt::task<result<std::string>>
+user_streams::async_read_text()
+{
+    co_return co_await transport_.async_read_text();
+}
+
+boost::cobalt::task<result<void>>
+user_streams::async_close()
+{
+    co_return co_await transport_.async_close();
 }
 
 } // namespace binapi2::fapi::streams

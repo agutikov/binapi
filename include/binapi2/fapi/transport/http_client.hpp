@@ -39,6 +39,12 @@ public:
     /// @param cfg Configuration containing the REST endpoint URL and credentials.
     http_client(detail::io_thread& io, config cfg);
 
+    /// @brief Construct an async-only HTTP client (no io_thread).
+    ///
+    /// Only async_request may be called; the sync request() will return an error.
+    /// @param cfg Configuration containing the REST endpoint URL and credentials.
+    explicit http_client(config cfg);
+
     /// @brief Send an HTTP request asynchronously (primary implementation).
     ///
     /// Establishes a TLS connection, sends the request, and co_returns the
@@ -74,7 +80,7 @@ public:
                                                 const std::string& api_key);
 
 private:
-    detail::io_thread& io_;
+    detail::io_thread* io_{};  // nullptr in async-only mode
 };
 
 } // namespace binapi2::fapi::transport
