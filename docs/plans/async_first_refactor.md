@@ -407,6 +407,246 @@ After Phases 1-6, the `(io_thread&, config)` constructors are unused everywhere.
 
 ---
 
+## Phase 7: Unified traits and typed async_execute across all APIs
+
+**Goal:** Every API component (REST services, WS API, streams) follows the same pattern:
+1. Request types inherit a service tag
+2. Traits map request → endpoint metadata + response type
+3. A single constrained `async_execute` template handles all dispatch
+4. No named methods except for truly custom serialization
+
+### Design: Service tag inheritance
+
+Each request type inherits an empty tag that identifies which service it belongs to:
+
+```cpp
+// Tag base types (in types/request_tags.hpp)
+struct rest_market_data_tag {};
+struct rest_account_tag {};
+struct rest_trade_tag {};
+struct rest_convert_tag {};
+struct rest_user_data_stream_tag {};
+struct ws_api_tag {};
+struct stream_tag {};
+```
+
+Request types inherit the appropriate tag:
+
+```cpp
+struct ping_request_t : rest_market_data_tag {};
+struct exchange_info_request_t : rest_market_data_tag { ... };
+struct new_order_request_t : rest_trade_tag { ... };
+struct convert_quote_request_t : rest_convert_tag { ... };
+
+// WS API
+struct websocket_api_book_ticker_request_t : ws_api_tag { ... };
+
+// Streams
+struct book_ticker_subscription : stream_tag { symbol_t symbol; };
+```
+
+### Design: Concepts per service
+
+```cpp
+template<class T>
+concept is_market_data_request = std::derived_from<T, rest_market_data_tag>
+                              && rest::has_endpoint_traits<T>;
+
+template<class T>
+concept is_account_request = std::derived_from<T, rest_account_tag>
+                          && rest::has_endpoint_traits<T>;
+
+// etc.
+```
+
+### Design: Constrained service async_execute
+
+```cpp
+class market_data_service : public service {
+public:
+    using service::service;
+
+    template<class Request>
+        requires is_market_data_request<Request>
+    [[nodiscard]] auto async_execute(const Request& request)
+        -> boost::cobalt::task<result<typename rest::endpoint_traits<Request>::response_type_t>>
+    {
+        co_return co_await pipeline_.async_execute(request);
+    }
+
+    // Type aliases for discoverability
+    using ping_request = types::ping_request_t;
+    using server_time_request = types::server_time_request_t;
+    using exchange_info_request = types::exchange_info_request_t;
+    // ... all request types belonging to this service
+};
+```
+
+### Design: Eliminate named REST methods
+
+**Parameterless endpoints** get their own request types:
+
+```cpp
+// Before: named method because no request type existed
+async_balances() → pipeline_.async_execute<vector<balance_t>>(endpoint...)
+
+// After: request type with traits
+struct balances_request_t : rest_account_tag {};
+
+template<> struct endpoint_traits<balances_request_t> {
+    using response_type_t = std::vector<futures_account_balance_t>;
+    static constexpr auto& endpoint = account_balances_endpoint;
+};
+
+// Usage: c.account.async_execute(balances_request_t{})
+```
+
+**Shared request types** (same struct used by multiple endpoints) get distinct wrapper types:
+
+```cpp
+// Before: kline_request_t shared by klines, mark_price_klines, premium_index_klines
+// Three named methods with different endpoints
+
+// After: distinct request types wrapping the same fields
+struct klines_request_t : rest_market_data_tag {
+    symbol_t symbol; kline_interval_t interval; ...
+};
+struct mark_price_klines_request_t : rest_market_data_tag {
+    symbol_t symbol; kline_interval_t interval; ...
+};
+struct premium_index_klines_request_t : rest_market_data_tag {
+    symbol_t symbol; kline_interval_t interval; ...
+};
+
+// Each gets its own endpoint_traits → generic execute handles all three
+```
+
+**Custom serialization** (batch_orders, cancel_batch_orders, session_logon) — these remain as named methods on the service because the query construction is non-standard.
+
+### Design: Stream traits
+
+```cpp
+// Stream traits map subscription → target path + event type
+template<class Subscription>
+struct stream_traits;
+
+template<>
+struct stream_traits<types::book_ticker_subscription> {
+    using event_type = types::book_ticker_stream_event_t;
+    static std::string target(const config& cfg, const types::book_ticker_subscription& sub) {
+        std::string s = sub.symbol.str();
+        std::ranges::transform(s, s.begin(), ::tolower);
+        return cfg.stream_base_target + "/" + s + "@bookTicker";
+    }
+};
+
+template<class T>
+concept has_stream_traits = requires {
+    typename stream_traits<T>::event_type;
+};
+```
+
+Typed stream methods on `market_streams`:
+
+```cpp
+class market_streams {
+public:
+    // Generic typed connect
+    template<class Subscription>
+        requires has_stream_traits<Subscription>
+    [[nodiscard]] boost::cobalt::task<result<void>>
+    async_connect(const Subscription& sub)
+    {
+        return transport_.async_connect(cfg_.stream_host, cfg_.stream_port,
+                                       stream_traits<Subscription>::target(cfg_, sub));
+    }
+
+    // Generic typed read
+    template<class Event>
+    [[nodiscard]] boost::cobalt::task<result<Event>>
+    async_read_event()
+    {
+        auto msg = co_await transport_.async_read_text();
+        if (!msg) co_return result<Event>::failure(msg.err);
+        Event event{};
+        glz::context ctx{};
+        if (auto ec = glz::read<detail::json_read_opts>(event, *msg, ctx))
+            co_return result<Event>::failure({error_code::json, 0, 0, glz::format_error(ec, *msg), *msg});
+        co_return result<Event>::success(std::move(event));
+    }
+
+    // Low-level access remains
+    boost::cobalt::task<result<void>> async_connect(std::string target);
+    boost::cobalt::task<result<std::string>> async_read_text();
+    boost::cobalt::task<result<void>> async_close();
+};
+```
+
+Usage:
+
+```cpp
+// Typed — trait-driven
+co_await streams.async_connect(types::book_ticker_subscription{.symbol = "BTCUSDT"});
+auto event = co_await streams.async_read_event<types::book_ticker_stream_event_t>();
+
+// Low-level — raw text
+co_await streams.async_connect("/ws/btcusdt@bookTicker");
+auto msg = co_await streams.async_read_text();
+```
+
+### Design: WS API traits
+
+Same pattern. Named methods like `async_account_status` become request types:
+
+```cpp
+struct ws_account_status_request_t : ws_api_tag {};
+
+template<> struct endpoint_traits<ws_account_status_request_t> {
+    using response_type_t = account_information_t;
+    static constexpr auto& method = account_status_method;
+};
+
+// session_logon stays as named method (custom auth flow)
+```
+
+### Changes summary
+
+| Component | Current named methods | After | Remaining named |
+|---|---|---|---|
+| REST market_data | 14 | 0 | 0 (all via traits) |
+| REST account | 13 | 0 | 0 |
+| REST trade | 7 | 3 | batch_orders, modify_batch_orders, cancel_batch_orders |
+| REST convert | 0 | 0 | 0 |
+| REST user_data_streams | 3 | 0 | 0 |
+| WS API | 8 named | 1 | session_logon (custom auth) |
+| Streams | 0 typed | 0 named | typed via stream_traits |
+
+### New files
+- `types/request_tags.hpp` — tag base types
+- `streams/stream_traits.hpp` — stream subscription → target + event mapping
+
+### Modified files
+- All request type headers — add tag inheritance
+- `rest/endpoint_traits.hpp` — add traits for new parameterless request types
+- `websocket_api/endpoint_traits.hpp` — add traits for new parameterless ws request types
+- All REST service headers — replace named methods with constrained `async_execute` + using declarations
+- `websocket_api/client.hpp` — replace named methods with constrained `async_execute`
+- `streams/market_streams.hpp` — add typed `async_connect(sub)` and `async_read_event<Event>()`
+- All REST service `.cpp` files — delete named method implementations (most become empty)
+- `websocket_api/client.cpp` — delete named method implementations
+
+### Files touched
+- New: `types/request_tags.hpp`, `streams/stream_traits.hpp`
+- Modify: `types/common.hpp`, `types/market_data.hpp`, `types/trade.hpp`, `types/account.hpp`, `types/websocket_api.hpp`, `types/subscriptions.hpp`
+- Modify: `rest/endpoint_traits.hpp`, `websocket_api/endpoint_traits.hpp`
+- Modify: `rest/market_data.hpp`, `rest/account.hpp`, `rest/trade.hpp`, `rest/convert.hpp`, `rest/user_data_streams.hpp`
+- Modify: `rest/service.hpp`
+- Modify: `websocket_api/client.hpp`, `websocket_api/client.cpp`
+- Modify: `streams/market_streams.hpp`, `streams/market_streams.cpp`
+- Modify: `rest/account.cpp`, `rest/market_data.cpp`, `rest/trade.cpp`, `rest/user_data_streams.cpp` (most shrink to near-empty)
+
+---
+
 ## Phase 8: Add sync bridging tests
 
 **Goal:** Add tests that verify all sync bridging variants work correctly: `io_thread::run_sync`, future via `cobalt::spawn`, callback via `cobalt::spawn`.
@@ -674,6 +914,8 @@ Phase 0 ─── Rewrite tests to async              ✅ DONE
         │
         Phase 6 ─── Rewrite local_order_book      ✅ DONE
           │
+          Phase 7 ─── Unified traits across all APIs
+          │
           Phase 8 ─── Add sync bridging tests
           │
           Phase 9 ─── Rename and restructure examples
@@ -711,7 +953,7 @@ Phase 9 is the final step — examples restructured last.
 | 4: Streams sync removal | ~30 | ~700 | -670 |
 | 5: Client cleanup | ~10 | ~60 | -50 |
 | 6: Local order book | ~80 | ~120 | -40 |
-| 7: Constructor cleanup | ~0 | ~50 | -50 |
+| 7: Unified traits | ~300 | ~500 | -200 |
 | 8: Sync bridging tests | ~80 | ~0 | +80 |
 | 9: Examples restructure | ~300 | ~500 | -200 |
-| **Total** | **~710** | **~1860** | **-1150** |
+| **Total** | **~960** | **~2310** | **-1350** |

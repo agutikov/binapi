@@ -38,9 +38,8 @@ REST benchmark with postman mock
 
 
 
-connection pooling for REST
+connection pooling for REST and WSAPI
 
-is it possible to pool connections for streams or ws_api?
 
 update benchmark
 
@@ -50,7 +49,14 @@ update benchmark
 
 thread pool
 
-update both benchmarks
+example of stream pipelining:
+    - network thread
+    - parser thread
+    - logic thread with local order book
+
+
+
+I don't think auto-balanced thread bool is feasible now, right?
 
 
 --------------------------------------------------------------------------------
