@@ -647,7 +647,90 @@ template<> struct endpoint_traits<ws_account_status_request_t> {
 
 ---
 
-## Phase 8: Add sync bridging tests
+## Phase 8: Stream subscriptions as typed async generators
+
+**Goal:** `async_subscribe(subscription)` returns a typed `cobalt::generator` that yields parsed events. The event type is deduced from `stream_traits<Subscription>::event_type`.
+
+### Design
+
+A subscription is a generator factory. The caller provides a subscription value, gets back a generator that:
+1. Connects to the stream endpoint (target from `stream_traits`)
+2. Reads frames in a loop
+3. Parses each frame into the event type
+4. `co_yield`s the parsed result
+
+```cpp
+auto stream = co_await streams.subscribe(
+    types::book_ticker_subscription{.symbol = "BTCUSDT"});
+
+while (auto event = co_await stream.next()) {
+    // event is result<book_ticker_stream_event_t>
+    std::cout << event->best_bid_price << "\n";
+}
+```
+
+### Implementation
+
+```cpp
+template<class Event>
+using event_generator = boost::cobalt::generator<result<Event>>;
+
+class market_streams {
+public:
+    // Returns a generator that connects, then yields parsed events.
+    template<class Subscription>
+        requires has_stream_traits<Subscription>
+    event_generator<typename stream_traits<Subscription>::event_type>
+    subscribe(const Subscription& sub);
+
+    // Low-level access remains for combined streams, raw text, etc.
+    boost::cobalt::task<result<void>> async_connect(std::string target);
+    boost::cobalt::task<result<std::string>> async_read_text();
+    boost::cobalt::task<result<void>> async_close();
+};
+```
+
+Generator implementation:
+
+```cpp
+template<class Subscription>
+    requires has_stream_traits<Subscription>
+event_generator<typename stream_traits<Subscription>::event_type>
+market_streams::subscribe(const Subscription& sub)
+{
+    using Event = typename stream_traits<Subscription>::event_type;
+    
+    auto conn = co_await async_connect(stream_traits<Subscription>::target(cfg_, sub));
+    if (!conn) {
+        co_yield result<Event>::failure(conn.err);
+        co_return;
+    }
+
+    while (true) {
+        co_yield co_await async_read_event<Event>();
+    }
+}
+```
+
+The generator owns the connection lifecycle. When the generator is destroyed, the connection should be closed (via destructor or explicit close).
+
+### Key considerations
+
+- **Generator lifetime** — the generator holds a reference to `market_streams` (and thus to the transport). The caller must keep `market_streams` alive while the generator is in use.
+- **Cancellation** — destroying the generator stops reading. No explicit `unsubscribe` needed for single-stream connections.
+- **Combined streams** — the generator pattern works for single-stream subscriptions. Combined streams (multiple topics on one connection) use the low-level `async_connect` + `async_subscribe` + `async_read_text` path.
+- **Error handling** — transport errors are yielded as `result<Event>::failure`. The caller decides whether to break or retry.
+- **Stream recorder** — raw frame recording should be integrated into `async_read_event` (call recorder before parsing).
+- **cobalt::generator** — Boost.Cobalt provides `generator<T>` which supports `co_yield` and is awaitable via `co_await gen.next()`. Each `next()` resumes the generator until the next yield.
+
+### Files touched
+- Modify: `streams/market_streams.hpp` — add `subscribe()` template + `event_generator` alias
+- Modify: `streams/market_streams.cpp` — (generator body is in header since it's a template)
+- New tests to verify generator pattern works
+
+---
+
+## Phase 9: Add sync bridging tests (renumbered from 8)
 
 **Goal:** Add tests that verify all sync bridging variants work correctly: `io_thread::run_sync`, future via `cobalt::spawn`, callback via `cobalt::spawn`.
 
@@ -669,7 +752,7 @@ These tests exercise `detail::io_thread` and the bridging patterns independently
 
 ---
 
-## Phase 9: Rename and restructure examples
+## Phase 10: Rename and restructure examples
 
 **Goal:** Two example apps with clear roles:
 - `async-demo-cli` — the full-featured CLI, uses `cobalt::main`, pure async
@@ -914,11 +997,13 @@ Phase 0 ─── Rewrite tests to async              ✅ DONE
         │
         Phase 6 ─── Rewrite local_order_book      ✅ DONE
           │
-          Phase 7 ─── Unified traits across all APIs    🔧 IN PROGRESS
+          Phase 7 ─── Unified traits across all APIs     ✅ DONE
           │
-          Phase 8 ─── Add sync bridging tests
+          Phase 8 ─── Stream generators
           │
-          Phase 9 ─── Rename and restructure examples
+          Phase 9 ─── Add sync bridging tests
+          │
+          Phase 10 ── Rename and restructure examples
 ```
 
 Build and run tests after every phase. Examples may be temporarily disabled (comment out `add_subdirectory` in CMake) during Phases 1-7 since they use sync API that's being removed. Tests (converted in Phase 0) stay green throughout.
@@ -954,6 +1039,7 @@ Phase 9 is the final step — examples restructured last.
 | 5: Client cleanup | ~10 | ~60 | -50 |
 | 6: Local order book | ~80 | ~120 | -40 |
 | 7: Unified traits | ~300 | ~500 | -200 |
-| 8: Sync bridging tests | ~80 | ~0 | +80 |
-| 9: Examples restructure | ~300 | ~500 | -200 |
-| **Total** | **~960** | **~2310** | **-1350** |
+| 8: Stream generators | ~60 | ~20 | +40 |
+| 9: Sync bridging tests | ~80 | ~0 | +80 |
+| 10: Examples restructure | ~300 | ~500 | -200 |
+| **Total** | **~1020** | **~2330** | **-1310** |

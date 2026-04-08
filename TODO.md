@@ -5,32 +5,9 @@
 
 
 
-streams:
-    - subscription is a generator?
-    - so async_subscribe should return a generator/stream instance
-    - generator can yeld messages, or
-        - template method can yeld parsed data types
-        - but type was provided while subscription and can't be "stored" in the instance
-        - so return data type will be stored in the generator/stream type, like type of std::vector
-
-
----
 
 
 
-
-streams.md: what's missing
-    - application buffering
-    - separate connections (transport) from subscriptions
-    - flexible composition:
-        - multiple connections
-        - multiple subscriptions per connection
-        - balancing???
-    - auto-reconnect
-    - keepalive
-
-
----
 
 
 review and update documents in docs/binapi2 according to current state, remove plans
@@ -55,7 +32,29 @@ REST benchmark with postman mock
 connection pooling for REST and WSAPI
 
 
-update benchmark
+---
+
+connection-related refactoring for streams
+
+streams:
+    - mapping stream/generator-connection-service
+    - what is market_streams or user_streams now?
+
+
+streams.md: what's missing
+    - application buffering
+    - separate connections (transport) from subscriptions
+    - flexible composition:
+        - multiple connections
+        - multiple subscriptions per connection
+        - balancing???
+    - auto-reconnect
+    - keepalive
+
+
+---
+
+update benchmarks
 
 
 --------------------------------------------------------------------------------
