@@ -46,6 +46,7 @@ set(BINAPI2_FAPI_SOURCES
     rest/account.cpp
     rest/convert.cpp
     rest/market_data.cpp
+    rest/pipeline.cpp
     rest/trade.cpp
     rest/user_data_streams.cpp
     signing.cpp

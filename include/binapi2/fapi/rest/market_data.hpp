@@ -63,19 +63,16 @@ public:
 
     /// @brief Fetch standard klines (candlestick data) for a symbol.
     /// @param request  Kline parameters (symbol, interval, limit, time range).
-    [[nodiscard]] result<std::vector<types::kline_t>> klines(const types::kline_request_t& request);
     /// @brief Async variant of klines.
     [[nodiscard]] boost::cobalt::task<result<std::vector<types::kline_t>>> async_klines(const types::kline_request_t& request);
 
     /// @brief Fetch mark price klines for a symbol.
     /// @param request  Kline parameters (same type as klines; routed to the mark price kline_t endpoint).
-    [[nodiscard]] result<std::vector<types::kline_t>> mark_price_klines(const types::kline_request_t& request);
     /// @brief Async variant of mark_price_klines.
     [[nodiscard]] boost::cobalt::task<result<std::vector<types::kline_t>>> async_mark_price_klines(const types::kline_request_t& request);
 
     /// @brief Fetch premium index klines for a symbol.
     /// @param request  Kline parameters (same type; routed to the premium index kline_t endpoint).
-    [[nodiscard]] result<std::vector<types::kline_t>> premium_index_klines(const types::kline_request_t& request);
     /// @brief Async variant of premium_index_klines.
     [[nodiscard]] boost::cobalt::task<result<std::vector<types::kline_t>>> async_premium_index_klines(const types::kline_request_t& request);
 
@@ -120,32 +117,26 @@ public:
         const types::futures_data_request_t& request);
 
     /// @brief Fetch best book ticker for all symbols.
-    [[nodiscard]] result<std::vector<types::book_ticker_t>> book_tickers();
     /// @brief Async variant of book_tickers.
     [[nodiscard]] boost::cobalt::task<result<std::vector<types::book_ticker_t>>> async_book_tickers();
 
     /// @brief Fetch latest price for all symbols (v1).
-    [[nodiscard]] result<std::vector<types::price_ticker_t>> price_tickers();
     /// @brief Async variant of price_tickers.
     [[nodiscard]] boost::cobalt::task<result<std::vector<types::price_ticker_t>>> async_price_tickers();
 
     /// @brief Fetch latest price for all symbols (v2).
-    [[nodiscard]] result<std::vector<types::price_ticker_t>> price_tickers_v2();
     /// @brief Async variant of price_tickers_v2.
     [[nodiscard]] boost::cobalt::task<result<std::vector<types::price_ticker_t>>> async_price_tickers_v2();
 
     /// @brief Fetch 24-hour rolling statistics for all symbols.
-    [[nodiscard]] result<std::vector<types::ticker_24hr_t>> ticker_24hrs();
     /// @brief Async variant of ticker_24hrs.
     [[nodiscard]] boost::cobalt::task<result<std::vector<types::ticker_24hr_t>>> async_ticker_24hrs();
 
     /// @brief Fetch mark price and funding rate for all symbols.
-    [[nodiscard]] result<std::vector<types::mark_price_t>> mark_prices();
     /// @brief Async variant of mark_prices.
     [[nodiscard]] boost::cobalt::task<result<std::vector<types::mark_price_t>>> async_mark_prices();
 
     /// @brief Fetch funding rate information for all symbols.
-    [[nodiscard]] result<std::vector<types::funding_rate_info_t>> funding_rate_info_t();
     /// @brief Async variant of funding_rate_info_t.
     [[nodiscard]] boost::cobalt::task<result<std::vector<types::funding_rate_info_t>>> async_funding_rate_info();
 };

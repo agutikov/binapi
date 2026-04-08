@@ -3,7 +3,7 @@
 // Parse the JSON response fixtures from compose/postman-mock/responses/
 // and verify they deserialize into the corresponding binapi2 types.
 
-#include <binapi2/fapi/client.hpp>
+#include <binapi2/fapi/detail/decode.hpp>
 #include <binapi2/fapi/types/account.hpp>
 #include <binapi2/fapi/types/common.hpp>
 #include <binapi2/fapi/types/market_data.hpp>

@@ -66,19 +66,16 @@ public:
 
     /// @brief Submit a test order (validated but not placed on the matching engine).
     /// @param request  Order parameters (same type as new_order; routed to /order/test).
-    [[nodiscard]] result<types::order_response_t> test_order(const types::new_order_request_t& request);
     /// @brief Async variant of test_order.
     [[nodiscard]] boost::cobalt::task<result<types::order_response_t>> async_test_order(const types::new_order_request_t& request);
 
     /// @brief Place up to 5 orders in a single request.
     /// @param request  Batch of order parameters serialized as a JSON array in the query.
-    [[nodiscard]] result<std::vector<types::order_response_t>> batch_orders(const types::batch_orders_request_t& request);
     /// @brief Async variant of batch_orders.
     [[nodiscard]] boost::cobalt::task<result<std::vector<types::order_response_t>>> async_batch_orders(const types::batch_orders_request_t& request);
 
     /// @brief Modify up to 5 orders in a single request.
     /// @param request  Batch of order modification parameters.
-    [[nodiscard]] result<std::vector<types::order_response_t>> modify_batch_orders(const types::batch_orders_request_t& request);
     /// @brief Async variant of modify_batch_orders.
     [[nodiscard]] boost::cobalt::task<result<std::vector<types::order_response_t>>> async_modify_batch_orders(const types::batch_orders_request_t& request);
 
@@ -89,23 +86,19 @@ public:
     /// repeated key-value pairs.
     ///
     /// @param request  Lists of order IDs and/or client order IDs to cancel.
-    [[nodiscard]] result<std::vector<types::order_response_t>> cancel_batch_orders(const types::cancel_multiple_orders_request_t& request);
     /// @brief Async variant of cancel_batch_orders.
     [[nodiscard]] boost::cobalt::task<result<std::vector<types::order_response_t>>> async_cancel_batch_orders(const types::cancel_multiple_orders_request_t& request);
 
     /// @brief Fetch all currently open algo (VP/TWAP) orders.
-    [[nodiscard]] result<std::vector<types::algo_order_response_t>> open_algo_orders();
     /// @brief Async variant of open_algo_orders.
     [[nodiscard]] boost::cobalt::task<result<std::vector<types::algo_order_response_t>>> async_open_algo_orders();
 
     /// @brief Cancel all open algo orders.
-    [[nodiscard]] result<types::code_msg_response_t> cancel_all_algo_orders();
     /// @brief Async variant of cancel_all_algo_orders.
     [[nodiscard]] boost::cobalt::task<result<types::code_msg_response_t>> async_cancel_all_algo_orders();
 
     /// @brief TradFi perpetual contract endpoint.
     /// @param request  Optional request parameters (defaults to empty).
-    [[nodiscard]] result<types::code_msg_response_t> tradfi_perps(const types::tradfi_perps_request_t& request);
     /// @brief Async variant of tradfi_perps.
     [[nodiscard]] boost::cobalt::task<result<types::code_msg_response_t>> async_tradfi_perps(const types::tradfi_perps_request_t& request);
 };
