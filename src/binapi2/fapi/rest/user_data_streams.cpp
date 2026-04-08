@@ -33,7 +33,10 @@ user_data_stream_service::start()
 boost::cobalt::task<result<types::listen_key_response_t>>
 user_data_stream_service::async_start()
 {
-    co_return start();
+    co_return co_await owner_.async_execute<types::listen_key_response_t>(start_listen_key_endpoint.method,
+                                                                        std::string{ start_listen_key_endpoint.path },
+                                                                        {},
+                                                                        start_listen_key_endpoint.signed_request);
 }
 
 result<types::listen_key_response_t>
@@ -48,7 +51,10 @@ user_data_stream_service::keepalive()
 boost::cobalt::task<result<types::listen_key_response_t>>
 user_data_stream_service::async_keepalive()
 {
-    co_return keepalive();
+    co_return co_await owner_.async_execute<types::listen_key_response_t>(keepalive_listen_key_endpoint.method,
+                                                                        std::string{ keepalive_listen_key_endpoint.path },
+                                                                        {},
+                                                                        keepalive_listen_key_endpoint.signed_request);
 }
 
 result<types::empty_response_t>
@@ -63,7 +69,10 @@ user_data_stream_service::close()
 boost::cobalt::task<result<types::empty_response_t>>
 user_data_stream_service::async_close()
 {
-    co_return close();
+    co_return co_await owner_.async_execute<types::empty_response_t>(close_listen_key_endpoint.method,
+                                                                   std::string{ close_listen_key_endpoint.path },
+                                                                   {},
+                                                                   close_listen_key_endpoint.signed_request);
 }
 
 } // namespace binapi2::fapi::rest

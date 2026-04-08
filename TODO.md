@@ -3,118 +3,7 @@
 
 
 
-
-Can we decouple io_thread from client? Does it make sense?
-Would it then help to make more generic library code?
-
-What is fapi::client?
-Seems fapi::client has too many different responsibilities:
-    - container for services, streams and wsapi client
-    - transport
-    - io context / io_thread owner
-    - executor
-
-
-I don't think client::run_sync does have sense while io_thread already has one.
-
-How to clearly separate execution model defined while constructing:
-    - co_main
-    - io_thread
-    - std::async
-    - ... what else?
-And call model:
-    - true async - co_await
-    - with callback
-    - semi-async/hybrid - return future
-        - executed in different thread
-        - caller thread can wait on future object
-    - sync - return final resulting data
-
-In all cases the core implementation is the same and is true async,
-but with different:
-    - origin of the execution context
-    - caller
-    - communication with caller
-
-
-To answer those question we first need to analyse our API structure and requirements:
-
-
-What API types we have?
-- REST - request -> response
-    - if authentication required - auth tokens in every request
-    - within a dedicated connection
-    - in a shared connection (connection pooling)
-- WS API - also request -> response, but inside WebSocket connection instead of HTTP connection
-    - require connect (same as REST) but then logon, once per session unlike REST
-    - expected to share connection for multiple requests
-- Streams - connect and then only receive
-    - one TCP connection per stream? (is it true?)
-
-
-What execution variants we have of each of API variants?
-
-- sync
-- async
-- callback
-- loop
-
-make a table of all combinations with comments
-
-
-Do we need to support all of them?
-Or maybe don't need easy sync calls at all?
-Or maybe need only production-ready setup:
-    - REST:
-        - single thread
-        - single shared connection
-        - maybe one spare connection?
-        - or one priority connection?
-    - WSAPI:
-        - the same as for REST
-    - Streams:
-        - parse in the same thread or buffer and transfer to parser thread?
-    - dedicated threads per API?
-    - or thread per pipeline stage: serialization, network, parsing?
-
-
-I want strongly async-first architecture.
-And I want flexibility.
-And I want clean straigtforward API.
-
-Can we clearly separate?
-    - internal logic, CPU-bundled, no IO:
-        - serialization, parsing
-        - signing
-        - ...
-    - core async IO
-- combination if previous two - true async implementation
-    - ready to use in async context like cobalt::main or io_thread
-- if
-    - we want to
-        - isolate binapi2 execution
-        - or have multiple clients/threads
-        - or customize ... anything
-        - or ... what?
-    - then
-        - create io_thread
-    - and then
-        - either spawn complete async task (command, thread)
-            - and hanle results inside in true async mode
-        - or provide a callback to be called in async context
-        - or return future
-            - that caller can wait on
-        - or wait for result and return ready result
-- local order book is another level
-    - how to use it in async env?
-
-
-
-Update docs/binapi2/threading_and_io.md and docs/binapi2/DESIGN.md
-
-
-
-
+review and update documents in docs/binapi2 according to current state, remove plans
 
 
 --------------------------------------------------------------------------------
@@ -122,14 +11,15 @@ Update docs/binapi2/threading_and_io.md and docs/binapi2/DESIGN.md
 
 
 
-cmd_stream_book_ticker
-
-it's manual implementation over async transport
-where is true async stream API?
-
-maybe asio::concurrent_channel ?
-
-
+streams.md: what's missing
+    - application buffering
+    - separate connections (transport) from subscriptions
+    - flexible composition:
+        - multiple connections
+        - multiple subscriptions per connection
+        - balancing???
+    - auto-reconnect
+    - keepalive
 
 
 --------------------------------------------------------------------------------
