@@ -21,7 +21,7 @@ struct book_ticker_stream_event_t
 {
     std::string event_type{};
     std::uint64_t update_id{};
-    std::string symbol{};
+    symbol_t symbol{};
     decimal_t best_bid_price{};
     decimal_t best_bid_qty{};
     decimal_t best_ask_price{};
@@ -35,7 +35,7 @@ struct aggregate_trade_stream_event_t
 {
     std::string event_type{};
     std::uint64_t event_time{};
-    std::string symbol{};
+    symbol_t symbol{};
     std::uint64_t agg_trade_id{};
     decimal_t price{};
     decimal_t quantity{};
@@ -51,7 +51,7 @@ struct mark_price_stream_event_t
 {
     std::string event_type{};
     std::uint64_t event_time{};
-    std::string symbol{};
+    symbol_t symbol{};
     decimal_t mark_price_t{};
     std::optional<decimal_t> mark_price_avg{};
     decimal_t index_price{};
@@ -69,7 +69,7 @@ struct depth_stream_event_t
     std::string event_type{};
     std::uint64_t event_time{};
     std::uint64_t transaction_time{};
-    std::string symbol{};
+    symbol_t symbol{};
     std::uint64_t first_update_id{};
     std::uint64_t final_update_id{};
     std::uint64_t prev_final_update_id{};
@@ -82,7 +82,7 @@ struct mini_ticker_stream_event_t
 {
     std::string event_type{};
     std::uint64_t event_time{};
-    std::string symbol{};
+    symbol_t symbol{};
     decimal_t close_price{};
     decimal_t open_price{};
     decimal_t high_price{};
@@ -99,7 +99,7 @@ struct ticker_stream_event_t
 {
     std::string event_type{};
     std::uint64_t event_time{};
-    std::string symbol{};
+    symbol_t symbol{};
     decimal_t price_change{};
     decimal_t price_change_pct{};
     decimal_t weighted_avg_price{};
@@ -123,7 +123,7 @@ using all_market_ticker_stream_event = std::vector<ticker_stream_event_t>;
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/All-Market-Liquidation-Order-Streams.md
 struct liquidation_order_stream_data_t
 {
-    std::string symbol{};
+    symbol_t symbol{};
     order_side_t side{};
     order_type_t type{};
     time_in_force_t tif{};
@@ -149,7 +149,7 @@ struct kline_stream_data_t
 {
     std::uint64_t open_time{};
     std::uint64_t close_time{};
-    std::string symbol{};
+    symbol_t symbol{};
     kline_interval_t interval{};
     std::uint64_t first_trade_id{};
     std::uint64_t last_trade_id{};
@@ -171,7 +171,7 @@ struct kline_stream_event_t
 {
     std::string event_type{};
     std::uint64_t event_time{};
-    std::string symbol{};
+    symbol_t symbol{};
     kline_stream_data_t kline_t{};
 };
 
@@ -221,7 +221,7 @@ struct composite_index_stream_event_t
 {
     std::string event_type{};
     std::uint64_t event_time{};
-    std::string symbol{};
+    symbol_t symbol{};
     decimal_t price{};
     std::optional<std::string> base_asset_type{};
     std::vector<composite_index_constituent_t> composition{};
@@ -244,7 +244,7 @@ struct contract_info_stream_event_t
 {
     std::string event_type{};
     std::uint64_t event_time{};
-    std::string symbol{};
+    symbol_t symbol{};
     std::string pair{};
     contract_type_t contractType{};
     std::uint64_t delivery_time{};
@@ -258,7 +258,7 @@ struct asset_index_stream_event_t
 {
     std::string event_type{};
     std::uint64_t event_time{};
-    std::string symbol{};
+    symbol_t symbol{};
     decimal_t index_price{};
     decimal_t bid_buffer{};
     decimal_t ask_buffer{};
@@ -295,7 +295,7 @@ struct account_update_balance_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Balance-and-Position-Update.md
 struct account_update_position_t
 {
-    std::string symbol{};
+    symbol_t symbol{};
     decimal_t position_amount{};
     decimal_t entry_price{};
     decimal_t accum_realized{};
@@ -326,7 +326,7 @@ struct account_update_event_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Order-Update.md
 struct order_trade_update_order_t
 {
-    std::string symbol{};
+    symbol_t symbol{};
     std::string client_order_id{};
     order_side_t side{};
     order_type_t type{};
@@ -377,7 +377,7 @@ struct order_trade_update_event_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Margin-Call.md
 struct margin_call_position_t
 {
-    std::string symbol{};
+    symbol_t symbol{};
     position_side_t pos_side{};
     decimal_t position_amount{};
     margin_type_t margin{};
@@ -408,7 +408,7 @@ struct listen_key_expired_event_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Account-Configuration-Update-previous-Leverage-Update.md
 struct account_config_leverage_t
 {
-    std::string symbol{};
+    symbol_t symbol{};
     int leverage{};
 };
 
@@ -434,7 +434,7 @@ struct trade_lite_event_t
     std::string event_type{};
     std::uint64_t event_time{};
     std::uint64_t transaction_time{};
-    std::string symbol{};
+    symbol_t symbol{};
     decimal_t original_quantity{};
     decimal_t original_price{};
     bool is_maker{};
@@ -453,7 +453,7 @@ struct algo_order_update_data_t
     std::uint64_t algo_id{};
     algo_type_t alg_type{};
     order_type_t type{};
-    std::string symbol{};
+    symbol_t symbol{};
     order_side_t side{};
     position_side_t pos_side{};
     time_in_force_t tif{};
@@ -488,7 +488,7 @@ struct algo_order_update_event_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Conditional-Order-Trigger-Reject.md
 struct conditional_order_reject_data_t
 {
-    std::string symbol{};
+    symbol_t symbol{};
     std::uint64_t order_id{};
     std::string reject_reason{};
 };
@@ -508,7 +508,7 @@ struct grid_update_data_t
     std::uint64_t strategy_id{};
     std::string strategy_type{};
     std::string strategy_status{};
-    std::string symbol{};
+    symbol_t symbol{};
     decimal_t realized_pnl{};
     decimal_t unmatched_avg_price{};
     decimal_t unmatched_qty{};
@@ -532,7 +532,7 @@ struct strategy_update_data_t
     std::uint64_t strategy_id{};
     std::string strategy_type{};
     std::string strategy_status{};
-    std::string symbol{};
+    symbol_t symbol{};
     std::uint64_t update_time{};
     int op_code{};
 };

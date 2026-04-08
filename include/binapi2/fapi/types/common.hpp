@@ -12,6 +12,7 @@
 
 #include <binapi2/fapi/types/detail/decimal.hpp>
 #include <binapi2/fapi/types/detail/enum_set.hpp>
+#include <binapi2/fapi/types/detail/symbol.hpp>
 #include <binapi2/fapi/types/enums.hpp>
 #include <binapi2/fapi/types/detail/timestamp.hpp>
 
@@ -99,7 +100,7 @@ struct symbol_filter_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Exchange-Information.md
 struct symbol_info_t
 {
-    std::string symbol{};
+    symbol_t symbol{};
     std::string pair{};
     contract_type_t contractType{};
     timestamp_ms_t deliveryDate{};

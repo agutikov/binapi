@@ -11,6 +11,7 @@
 
 #include <binapi2/fapi/signing.hpp>
 #include <binapi2/fapi/types/detail/decimal.hpp>
+#include <binapi2/fapi/types/detail/symbol.hpp>
 #include <binapi2/fapi/types/enums.hpp>
 #include <binapi2/fapi/types/detail/timestamp.hpp>
 
@@ -45,6 +46,12 @@ inline void
 to_query_value(const std::string& value, std::string& out)
 {
     out = value;
+}
+
+inline void
+to_query_value(const types::symbol_t& value, std::string& out)
+{
+    out = value.str();
 }
 
 inline void

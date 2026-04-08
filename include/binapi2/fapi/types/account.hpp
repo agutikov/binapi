@@ -11,6 +11,7 @@
 #pragma once
 
 #include <binapi2/fapi/types/detail/decimal.hpp>
+#include <binapi2/fapi/types/detail/symbol.hpp>
 #include <binapi2/fapi/types/enums.hpp>
 #include <binapi2/fapi/types/detail/timestamp.hpp>
 
@@ -50,7 +51,7 @@ struct account_asset_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Account-Information-V3.md
 struct account_position_t
 {
-    std::string symbol{};
+    symbol_t symbol{};
     decimal_t initialMargin{};
     decimal_t maintMargin{};
     decimal_t unrealizedProfit{};
@@ -117,13 +118,13 @@ struct futures_account_balance_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Position-Information-V2.md
 struct position_risk_request_t
 {
-    std::optional<std::string> symbol{};
+    std::optional<symbol_t> symbol{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Position-Information-V2.md
 struct position_risk_t
 {
-    std::string symbol{};
+    symbol_t symbol{};
     decimal_t positionAmt{};
     decimal_t entryPrice{};
     decimal_t breakEvenPrice{};
@@ -161,13 +162,13 @@ struct account_config_response_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Symbol-Config.md
 struct symbol_config_request_t
 {
-    std::optional<std::string> symbol{};
+    std::optional<symbol_t> symbol{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Symbol-Config.md
 struct symbol_config_entry_t
 {
-    std::string symbol{};
+    symbol_t symbol{};
     margin_type_t marginType{};
     bool isAutoAddMargin{};
     int leverage{};
@@ -193,7 +194,7 @@ struct position_mode_response_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Get-Income-History.md
 struct income_history_request_t
 {
-    std::optional<std::string> symbol{};
+    std::optional<symbol_t> symbol{};
     std::optional<std::string> incomeType{};
     std::optional<timestamp_ms_t> startTime{};
     std::optional<timestamp_ms_t> endTime{};
@@ -204,7 +205,7 @@ struct income_history_request_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Get-Income-History.md
 struct income_history_entry_t
 {
-    std::string symbol{};
+    symbol_t symbol{};
     income_type_t incomeType{};
     decimal_t income{};
     std::string asset{};
@@ -221,7 +222,7 @@ struct income_history_entry_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Notional-and-Leverage-Brackets.md
 struct leverage_bracket_request_t
 {
-    std::optional<std::string> symbol{};
+    std::optional<symbol_t> symbol{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Notional-and-Leverage-Brackets.md
@@ -238,7 +239,7 @@ struct leverage_bracket_entry_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Notional-and-Leverage-Brackets.md
 struct symbol_leverage_brackets_t
 {
-    std::string symbol{};
+    symbol_t symbol{};
     std::optional<decimal_t> notionalCoef{};
     std::vector<leverage_bracket_entry_t> brackets{};
 };
@@ -246,13 +247,13 @@ struct symbol_leverage_brackets_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/User-Commission-Rate.md
 struct commission_rate_request_t
 {
-    std::string symbol{};
+    symbol_t symbol{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/User-Commission-Rate.md
 struct commission_rate_response_t
 {
-    std::string symbol{};
+    symbol_t symbol{};
     decimal_t makerCommissionRate{};
     decimal_t takerCommissionRate{};
     std::optional<decimal_t> rpiCommissionRate{};
@@ -322,7 +323,7 @@ struct trading_status_indicator_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Futures-Trading-Quantitative-Rules-Indicators.md
 struct quantitative_rules_request_t
 {
-    std::optional<std::string> symbol{};
+    std::optional<symbol_t> symbol{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Futures-Trading-Quantitative-Rules-Indicators.md

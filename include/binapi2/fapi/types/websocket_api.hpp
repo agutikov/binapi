@@ -64,7 +64,7 @@ struct websocket_api_signed_request_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/websocket-api/New-Order.md
 struct websocket_api_order_place_request_t : websocket_api_signed_request_t
 {
-    std::string symbol{};
+    symbol_t symbol{};
     order_side_t side{};
     order_type_t type{};
     std::optional<time_in_force_t> timeInForce{};
@@ -77,7 +77,7 @@ struct websocket_api_order_place_request_t : websocket_api_signed_request_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/websocket-api/Query-Order.md
 struct websocket_api_order_query_request_t : websocket_api_signed_request_t
 {
-    std::string symbol{};
+    symbol_t symbol{};
     std::optional<std::uint64_t> orderId{};
     std::optional<std::string> origClientOrderId{};
 };
@@ -85,7 +85,7 @@ struct websocket_api_order_query_request_t : websocket_api_signed_request_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/websocket-api/Cancel-Order.md
 struct websocket_api_order_cancel_request_t : websocket_api_signed_request_t
 {
-    std::string symbol{};
+    symbol_t symbol{};
     std::optional<std::uint64_t> orderId{};
     std::optional<std::string> origClientOrderId{};
 };
@@ -93,19 +93,19 @@ struct websocket_api_order_cancel_request_t : websocket_api_signed_request_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/websocket-api/Symbol-Order-Book-Ticker.md
 struct websocket_api_book_ticker_request_t
 {
-    std::optional<std::string> symbol{};
+    std::optional<symbol_t> symbol{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/websocket-api/Symbol-Price-Ticker.md
 struct websocket_api_price_ticker_request_t
 {
-    std::optional<std::string> symbol{};
+    std::optional<symbol_t> symbol{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/websocket-api/Modify-Order.md
 struct websocket_api_order_modify_request_t : websocket_api_signed_request_t
 {
-    std::string symbol{};
+    symbol_t symbol{};
     std::optional<std::uint64_t> orderId{};
     std::optional<std::string> origClientOrderId{};
     order_side_t side{};
@@ -117,13 +117,13 @@ struct websocket_api_order_modify_request_t : websocket_api_signed_request_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/websocket-api/Position-Information.md
 struct websocket_api_position_request_t : websocket_api_signed_request_t
 {
-    std::optional<std::string> symbol{};
+    std::optional<symbol_t> symbol{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/websocket-api/New-Algo-Order.md
 struct websocket_api_algo_order_place_request_t : websocket_api_signed_request_t
 {
-    std::string symbol{};
+    symbol_t symbol{};
     order_side_t side{};
     std::optional<position_side_t> positionSide{};
     order_type_t type{};

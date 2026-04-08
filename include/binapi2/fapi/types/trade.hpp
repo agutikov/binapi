@@ -30,7 +30,7 @@ namespace binapi2::fapi::types {
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/New-Order-Test.md
 struct new_order_request_t
 {
-    std::string symbol{};
+    symbol_t symbol{};
     order_side_t side{ order_side_t::buy };
     order_type_t type{ order_type_t::limit };
     std::optional<time_in_force_t> timeInForce{};
@@ -70,7 +70,7 @@ struct order_response_t
     order_status_t status{};
     decimal_t stopPrice{};
     bool closePosition{};
-    std::string symbol{};
+    symbol_t symbol{};
     time_in_force_t timeInForce{};
     order_type_t type{};
     std::optional<working_type_t> workingType{};
@@ -88,7 +88,7 @@ struct order_response_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Modify-Order.md
 struct modify_order_request_t
 {
-    std::string symbol{};
+    symbol_t symbol{};
     order_side_t side{ order_side_t::buy };
     decimal_t quantity{};
     decimal_t price{};
@@ -100,7 +100,7 @@ struct modify_order_request_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Cancel-Order.md
 struct cancel_order_request_t
 {
-    std::string symbol{};
+    symbol_t symbol{};
     std::optional<std::uint64_t> orderId{};
     std::optional<std::string> origClientOrderId{};
 };
@@ -108,7 +108,7 @@ struct cancel_order_request_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Query-Order.md
 struct query_order_request_t
 {
-    std::string symbol{};
+    symbol_t symbol{};
     std::optional<std::uint64_t> orderId{};
     std::optional<std::string> origClientOrderId{};
 };
@@ -132,7 +132,7 @@ struct batch_orders_request_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Cancel-Multiple-Orders.md
 struct cancel_multiple_orders_request_t
 {
-    std::string symbol{};
+    symbol_t symbol{};
     std::optional<std::vector<std::uint64_t>> orderIdList{};
     std::optional<std::vector<std::string>> origClientOrderIdList{};
 };
@@ -140,7 +140,7 @@ struct cancel_multiple_orders_request_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Cancel-All-Open-Orders.md
 struct cancel_all_open_orders_request_t
 {
-    std::string symbol{};
+    symbol_t symbol{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/error-code.md
@@ -155,14 +155,14 @@ struct code_msg_response_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Auto-Cancel-All-Open-Orders.md
 struct auto_cancel_request_t
 {
-    std::string symbol{};
+    symbol_t symbol{};
     std::uint64_t countdownTime{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Auto-Cancel-All-Open-Orders.md
 struct auto_cancel_response_t
 {
-    std::string symbol{};
+    symbol_t symbol{};
     std::uint64_t countdownTime{};
 };
 
@@ -173,7 +173,7 @@ struct auto_cancel_response_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Query-Current-Open-Order.md
 struct query_open_order_request_t
 {
-    std::string symbol{};
+    symbol_t symbol{};
     std::optional<std::uint64_t> orderId{};
     std::optional<std::string> origClientOrderId{};
 };
@@ -181,13 +181,13 @@ struct query_open_order_request_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Current-All-Open-Orders.md
 struct all_open_orders_request_t
 {
-    std::optional<std::string> symbol{};
+    std::optional<symbol_t> symbol{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/All-Orders.md
 struct all_orders_request_t
 {
-    std::string symbol{};
+    symbol_t symbol{};
     std::optional<std::uint64_t> orderId{};
     std::optional<timestamp_ms_t> startTime{};
     std::optional<timestamp_ms_t> endTime{};
@@ -201,7 +201,7 @@ struct all_orders_request_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Position-Information-V3.md
 struct position_risk_v3_t
 {
-    std::string symbol{};
+    symbol_t symbol{};
     position_side_t positionSide{};
     decimal_t positionAmt{};
     decimal_t entryPrice{};
@@ -226,7 +226,7 @@ struct position_risk_v3_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Position-Information-V3.md
 struct position_info_v3_request_t
 {
-    std::optional<std::string> symbol{};
+    std::optional<symbol_t> symbol{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Position-ADL-Quantile-Estimation.md
@@ -241,20 +241,20 @@ struct adl_quantile_values_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Position-ADL-Quantile-Estimation.md
 struct adl_quantile_entry_t
 {
-    std::string symbol{};
+    symbol_t symbol{};
     adl_quantile_values_t adlQuantile{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Position-ADL-Quantile-Estimation.md
 struct adl_quantile_request_t
 {
-    std::optional<std::string> symbol{};
+    std::optional<symbol_t> symbol{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Users-Force-Orders.md
 struct force_orders_request_t
 {
-    std::optional<std::string> symbol{};
+    std::optional<symbol_t> symbol{};
     std::optional<auto_close_type_t> autoCloseType{};
     std::optional<timestamp_ms_t> startTime{};
     std::optional<timestamp_ms_t> endTime{};
@@ -264,7 +264,7 @@ struct force_orders_request_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Account-Trade-List.md
 struct account_trade_request_t
 {
-    std::string symbol{};
+    symbol_t symbol{};
     std::optional<std::uint64_t> orderId{};
     std::optional<timestamp_ms_t> startTime{};
     std::optional<timestamp_ms_t> endTime{};
@@ -277,7 +277,7 @@ struct account_trade_entry_t
 {
     std::uint64_t id{};
     std::uint64_t orderId{};
-    std::string symbol{};
+    symbol_t symbol{};
     order_side_t side{};
     position_side_t positionSide{};
     decimal_t price{};
@@ -310,7 +310,7 @@ struct change_multi_assets_mode_request_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Change-Initial-Leverage.md
 struct change_leverage_request_t
 {
-    std::string symbol{};
+    symbol_t symbol{};
     int leverage{};
 };
 
@@ -319,20 +319,20 @@ struct change_leverage_response_t
 {
     int leverage{};
     decimal_t maxNotionalValue{};
-    std::string symbol{};
+    symbol_t symbol{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Change-Margin-Type.md
 struct change_margin_type_request_t
 {
-    std::string symbol{};
+    symbol_t symbol{};
     std::string marginType{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Modify-Isolated-Position-Margin.md
 struct modify_isolated_margin_request_t
 {
-    std::string symbol{};
+    symbol_t symbol{};
     std::optional<position_side_t> positionSide{};
     decimal_t amount{};
     delta_type_t type{};
@@ -350,7 +350,7 @@ struct modify_isolated_margin_response_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Get-Position-Margin-Change-History.md
 struct position_margin_history_request_t
 {
-    std::string symbol{};
+    symbol_t symbol{};
     std::optional<int> type{};
     std::optional<timestamp_ms_t> startTime{};
     std::optional<timestamp_ms_t> endTime{};
@@ -360,7 +360,7 @@ struct position_margin_history_request_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Get-Position-Margin-Change-History.md
 struct position_margin_history_entry_t
 {
-    std::string symbol{};
+    symbol_t symbol{};
     int type{};
     delta_type_t deltaType{};
     decimal_t amount{};
@@ -372,7 +372,7 @@ struct position_margin_history_entry_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Get-Order-Modify-History.md
 struct order_modify_history_request_t
 {
-    std::string symbol{};
+    symbol_t symbol{};
     std::optional<std::uint64_t> orderId{};
     std::optional<std::string> origClientOrderId{};
     std::optional<timestamp_ms_t> startTime{};
@@ -383,7 +383,7 @@ struct order_modify_history_request_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/New-Algo-Order.md
 struct new_algo_order_request_t
 {
-    std::string symbol{};
+    symbol_t symbol{};
     order_side_t side{};
     std::optional<position_side_t> positionSide{};
     order_type_t type{};
@@ -411,7 +411,7 @@ struct algo_order_response_t
     std::uint64_t algoId{};
     std::optional<std::string> clientAlgoId{};
     algo_type_t algoType{};
-    std::string symbol{};
+    symbol_t symbol{};
     order_side_t side{};
     std::optional<position_side_t> positionSide{};
     algo_status_t algoStatus{};
@@ -452,7 +452,7 @@ struct query_algo_order_request_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Query-All-Algo-Orders.md
 struct all_algo_orders_request_t
 {
-    std::string symbol{};
+    symbol_t symbol{};
     std::optional<std::uint64_t> algoId{};
     std::optional<timestamp_ms_t> startTime{};
     std::optional<timestamp_ms_t> endTime{};

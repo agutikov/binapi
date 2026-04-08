@@ -5,12 +5,6 @@
 
 
 
-add special type for symbol - make a simple wrapper for std::string
-this is not enum, but also not a random string
-maybe type would be useful in future
-
-
-
 
 
 scripts that runs all binapi2-fapi-demo-cli requests with testnet
