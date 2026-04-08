@@ -26,6 +26,11 @@ target_link_libraries(enums_test PRIVATE binapi2_fapi GTest::gtest_main)
 target_compile_options(enums_test PRIVATE)
 gtest_discover_tests(enums_test DISCOVERY_MODE PRE_TEST)
 
+add_executable(enum_set_test enum_set_test.cpp)
+target_link_libraries(enum_set_test PRIVATE binapi2_fapi GTest::gtest_main)
+target_compile_options(enum_set_test PRIVATE)
+gtest_discover_tests(enum_set_test DISCOVERY_MODE PRE_TEST)
+
 add_executable(json_query_test json_query_test.cpp)
 target_link_libraries(json_query_test PRIVATE binapi2_fapi GTest::gtest_main)
 target_compile_options(json_query_test PRIVATE)

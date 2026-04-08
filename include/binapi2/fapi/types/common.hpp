@@ -11,6 +11,7 @@
 #pragma once
 
 #include <binapi2/fapi/types/detail/decimal.hpp>
+#include <binapi2/fapi/types/detail/enum_set.hpp>
 #include <binapi2/fapi/types/enums.hpp>
 #include <binapi2/fapi/types/detail/timestamp.hpp>
 
@@ -118,12 +119,12 @@ struct symbol_info_t
     int settlePlan{};
     decimal_t triggerProtect{};
     std::vector<symbol_filter_t> filters{};
-    std::vector<order_type_t> orderTypes{};
-    std::vector<time_in_force_t> timeInForce{};
+    enum_set_t<order_type_t> orderTypes{};
+    enum_set_t<time_in_force_t> timeInForce{};
     decimal_t liquidationFee{};
     decimal_t marketTakeBound{};
     std::optional<int> maxMoveOrderLimit{};
-    std::vector<trading_permission_t> permissionSets{};
+    enum_set_t<trading_permission_t> permissionSets{};
 };
 
 /// Full exchange information response. Contains rate limits, supported assets,

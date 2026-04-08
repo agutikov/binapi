@@ -5,17 +5,6 @@
 
 
 
-
-write tests for enum_set template
-
-
-
-
-replace vectors of enums with enum_set in include/binapi2/fapi/types
-where semantically field is a set and not sequence
-
-
-
 add special type for symbol - make a simple wrapper for std::string
 this is not enum, but also not a random string
 maybe type would be useful in future

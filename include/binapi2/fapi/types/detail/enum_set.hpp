@@ -22,7 +22,7 @@ namespace binapi2::fapi::types {
 /// Usage: enum_set<my_enum> automatically sizes its bitset to enum_capacity<my_enum>.
 template<typename E>
 inline constexpr std::size_t enum_capacity =
-    std::tuple_size_v<decltype(glz::meta<E>::value.value)> / 2;
+    glz::tuple_size_v<decltype(glz::meta<E>::value.value)> / 2;
 
 /// Compile-time check that every enum value in the glaze metadata fits within
 /// the given Capacity.  Fires a static_assert at instantiation time.
@@ -30,10 +30,10 @@ template<typename E, std::size_t Capacity>
 consteval bool enum_values_fit()
 {
     constexpr auto& tup = glz::meta<E>::value.value;
-    constexpr auto N = std::tuple_size_v<std::decay_t<decltype(tup)>>;
+    constexpr auto N = glz::tuple_size_v<std::decay_t<decltype(tup)>>;
     // Iterate value elements (odd indices: 1, 3, 5, …).
     return []<std::size_t... I>(std::index_sequence<I...>) {
-        return ((static_cast<std::size_t>(std::get<2 * I + 1>(tup)) < Capacity) && ...);
+        return ((static_cast<std::size_t>(glz::get<2 * I + 1>(tup)) < Capacity) && ...);
     }(std::make_index_sequence<N / 2>{});
 }
 
@@ -69,6 +69,8 @@ class enum_set_t
     }
 
 public:
+    using value_type = E;
+
     constexpr enum_set_t() = default;
 
     constexpr enum_set_t(std::initializer_list<E> init)
@@ -76,6 +78,12 @@ public:
         for (auto e : init)
             add(e);
     }
+
+    /// Clear all bits, making the set empty.
+    constexpr void clear() noexcept { bits_.reset(); }
+
+    /// Insert a value (set-like interface required by glaze for JSON array deserialization).
+    constexpr void emplace(E e) noexcept { add(e); }
 
     constexpr bool contains(E e) const noexcept
     {
