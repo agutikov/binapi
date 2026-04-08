@@ -8,7 +8,8 @@
 #pragma once
 
 #include <binapi2/fapi/config.hpp>
-#include <binapi2/fapi/types/streams.hpp>
+#include <binapi2/fapi/types/market_stream_events.hpp>
+#include <binapi2/fapi/types/user_stream_events.hpp>
 #include <binapi2/fapi/types/subscriptions.hpp>
 
 #include <algorithm>

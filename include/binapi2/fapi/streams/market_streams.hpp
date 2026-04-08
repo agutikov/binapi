@@ -13,6 +13,7 @@
 #include <binapi2/fapi/streams/stream_traits.hpp>
 #include <binapi2/fapi/transport/websocket_client.hpp>
 
+#include <boost/cobalt/generator.hpp>
 #include <boost/cobalt/task.hpp>
 #include <glaze/glaze.hpp>
 
@@ -22,11 +23,23 @@
 
 namespace binapi2::fapi::streams {
 
+/// @brief Typed async event generator returned by market_streams::subscribe().
+template<class Event>
+using event_generator = boost::cobalt::generator<result<Event>>;
+
 /// @brief Async client for Binance USD-M Futures market data WebSocket streams.
 ///
-/// Two usage styles:
+/// Three usage styles:
 ///
-/// Typed (trait-driven):
+/// Generator (recommended):
+///   auto stream = streams.subscribe(types::book_ticker_subscription{.symbol = "BTCUSDT"});
+///   while (stream) {
+///       auto event = co_await stream;
+///       if (!event) break;
+///       std::cout << event->best_bid_price << "\n";
+///   }
+///
+/// Typed connect + read:
 ///   co_await streams.async_connect(types::book_ticker_subscription{.symbol = "BTCUSDT"});
 ///   auto event = co_await streams.async_read_event<types::book_ticker_stream_event_t>();
 ///
@@ -38,7 +51,45 @@ class market_streams
 public:
     explicit market_streams(config cfg);
 
-    // -- Typed (trait-driven) --
+    // -- Generator --
+
+    /// @brief Subscribe and return a typed async generator.
+    ///
+    /// Connects to the stream derived from stream_traits, then yields parsed
+    /// events. The generator runs until an error occurs or the caller stops
+    /// consuming. Destroying the generator does NOT close the connection —
+    /// call async_close() explicitly if needed.
+    template<class Subscription>
+        requires has_stream_traits<Subscription>
+    event_generator<typename stream_traits<Subscription>::event_type>
+    subscribe(const Subscription& sub)
+    {
+        using Event = typename stream_traits<Subscription>::event_type;
+        auto conn = co_await async_connect(stream_traits<Subscription>::target(cfg_, sub));
+        if (!conn) {
+            co_yield result<Event>::failure(conn.err);
+        } else {
+            bool running = true;
+            while (running) {
+                auto msg = co_await transport_.async_read_text();
+                if (!msg) {
+                    co_yield result<Event>::failure(msg.err);
+                    running = false;
+                } else {
+                    Event event{};
+                    glz::context ctx{};
+                    if (auto ec = glz::read<fapi::detail::json_read_opts>(event, *msg, ctx)) {
+                        co_yield result<Event>::failure({error_code::json, 0, 0, glz::format_error(ec, *msg), *msg});
+                        running = false;
+                    } else {
+                        co_yield result<Event>::success(std::move(event));
+                    }
+                }
+            }
+        }
+    }
+
+    // -- Typed connect + read --
 
     /// @brief Connect using a subscription type with stream_traits.
     template<class Subscription>

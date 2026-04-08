@@ -66,13 +66,13 @@ public:
 
     using book_ticker_request_t = types::websocket_api_book_ticker_request_t;
     using price_ticker_request_t = types::websocket_api_price_ticker_request_t;
-    using order_place_request = types::websocket_api_order_place_request_t;
-    using order_query_request = types::websocket_api_order_query_request_t;
-    using order_cancel_request = types::websocket_api_order_cancel_request_t;
-    using order_modify_request = types::websocket_api_order_modify_request_t;
-    using position_request = types::websocket_api_position_request_t;
-    using algo_order_place_request = types::websocket_api_algo_order_place_request_t;
-    using algo_order_cancel_request = types::websocket_api_algo_order_cancel_request_t;
+    using order_place_request_t = types::websocket_api_order_place_request_t;
+    using order_query_request_t = types::websocket_api_order_query_request_t;
+    using order_cancel_request_t = types::websocket_api_order_cancel_request_t;
+    using order_modify_request_t = types::websocket_api_order_modify_request_t;
+    using position_request_t = types::websocket_api_position_request_t;
+    using algo_order_place_request_t = types::websocket_api_algo_order_place_request_t;
+    using algo_order_cancel_request_t = types::websocket_api_algo_order_cancel_request_t;
 
 private:
     config cfg_;

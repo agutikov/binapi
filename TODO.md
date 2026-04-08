@@ -15,6 +15,18 @@ review and update documents in docs/binapi2 according to current state, remove p
 
 --------------------------------------------------------------------------------
 
+
+
+user streams
+
+and other clarifications
+
+
+
+--------------------------------------------------------------------------------
+
+
+
 Throughput benchmarks w/o WS transport.
     - record some samples from testnet
     - write a benchmark that repeats those samples
@@ -26,6 +38,7 @@ Throughput benchmarks w/o WS transport.
 REST benchmark with postman mock
 
 --------------------------------------------------------------------------------
+
 
 
 
