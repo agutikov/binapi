@@ -65,9 +65,9 @@ struct websocket_api_signed_request
 struct websocket_api_order_place_request : websocket_api_signed_request
 {
     std::string symbol{};
-    order_side side{};
-    order_type type{};
-    std::optional<time_in_force> timeInForce{};
+    order_side_t side{};
+    order_type_t type{};
+    std::optional<time_in_force_t> timeInForce{};
     decimal_t quantity{};
     std::optional<decimal_t> price{};
     std::optional<std::string> newClientOrderId{};
@@ -108,10 +108,10 @@ struct websocket_api_order_modify_request : websocket_api_signed_request
     std::string symbol{};
     std::optional<std::uint64_t> orderId{};
     std::optional<std::string> origClientOrderId{};
-    order_side side{};
+    order_side_t side{};
     decimal_t quantity{};
     decimal_t price{};
-    std::optional<price_match> priceMatch{};
+    std::optional<price_match_t> priceMatch{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/websocket-api/Position-Information.md
@@ -124,14 +124,14 @@ struct websocket_api_position_request : websocket_api_signed_request
 struct websocket_api_algo_order_place_request : websocket_api_signed_request
 {
     std::string symbol{};
-    order_side side{};
-    std::optional<position_side> positionSide{};
-    order_type type{};
-    std::optional<time_in_force> timeInForce{};
+    order_side_t side{};
+    std::optional<position_side_t> positionSide{};
+    order_type_t type{};
+    std::optional<time_in_force_t> timeInForce{};
     decimal_t quantity{};
     std::optional<decimal_t> price{};
     std::optional<decimal_t> triggerPrice{};
-    algo_type algoType{};
+    algo_type_t algoType{};
     std::optional<std::string> workingType{};
     std::optional<std::string> priceMatch{};
     std::optional<std::string> closePosition{};

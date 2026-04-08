@@ -76,8 +76,8 @@ int cmd_ws_order_place(const args_t& args)
 
     binapi2::fapi::websocket_api::client::order_place_request req;
     req.symbol = args[0];
-    req.side = parse_enum<binapi2::fapi::types::order_side>(args[1]);
-    req.type = parse_enum<binapi2::fapi::types::order_type>(args[2]);
+    req.side = parse_enum<binapi2::fapi::types::order_side_t>(args[1]);
+    req.type = parse_enum<binapi2::fapi::types::order_type_t>(args[2]);
     if (auto v = find_flag(args, "--quantity"); !v.empty())
         req.quantity = binapi2::fapi::types::decimal_t(std::string(v));
     if (auto v = find_flag(args, "--price"); !v.empty())

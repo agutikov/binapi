@@ -80,8 +80,8 @@ TEST(JsonRoundTrip, RateLimitWithoutCount)
         R"({"rateLimitType":"REQUEST_WEIGHT","interval":"MINUTE","intervalNum":1,"limit":2400})";
     auto rl = parse_json<rate_limit>(input);
 
-    EXPECT_EQ(rl.rateLimitType, rate_limit_type::request_weight);
-    EXPECT_EQ(rl.interval, rate_limit_interval::minute);
+    EXPECT_EQ(rl.rateLimitType, rate_limit_type_t::request_weight);
+    EXPECT_EQ(rl.interval, rate_limit_interval_t::minute);
     EXPECT_EQ(rl.intervalNum, 1);
     EXPECT_EQ(rl.limit, 2400);
     EXPECT_FALSE(rl.count.has_value());
@@ -101,8 +101,8 @@ TEST(JsonRoundTrip, RateLimitWithCount)
         R"({"rateLimitType":"ORDERS_1M","interval":"MINUTE","intervalNum":1,"limit":1200,"count":42})";
     auto rl = parse_json<rate_limit>(input);
 
-    EXPECT_EQ(rl.rateLimitType, rate_limit_type::orders_1m);
-    EXPECT_EQ(rl.interval, rate_limit_interval::minute);
+    EXPECT_EQ(rl.rateLimitType, rate_limit_type_t::orders_1m);
+    EXPECT_EQ(rl.interval, rate_limit_interval_t::minute);
     EXPECT_EQ(rl.intervalNum, 1);
     EXPECT_EQ(rl.limit, 1200);
     ASSERT_TRUE(rl.count.has_value());
@@ -218,13 +218,13 @@ TEST(JsonRoundTrip, OrderResponse)
 
     EXPECT_EQ(resp.clientOrderId, "testOrder");
     EXPECT_EQ(resp.orderId, 22542179ULL);
-    EXPECT_EQ(resp.side, order_side::buy);
-    EXPECT_EQ(resp.positionSide, position_side::short_side);
-    EXPECT_EQ(resp.status, order_status::new_order);
+    EXPECT_EQ(resp.side, order_side_t::buy);
+    EXPECT_EQ(resp.positionSide, position_side_t::short_side);
+    EXPECT_EQ(resp.status, order_status_t::new_order);
     EXPECT_EQ(resp.symbol, "BTCUSDT");
-    EXPECT_EQ(resp.timeInForce, time_in_force::gtc);
-    EXPECT_EQ(resp.type, order_type::trailing_stop_market);
-    EXPECT_EQ(resp.origType, order_type::trailing_stop_market);
+    EXPECT_EQ(resp.timeInForce, time_in_force_t::gtc);
+    EXPECT_EQ(resp.type, order_type_t::trailing_stop_market);
+    EXPECT_EQ(resp.origType, order_type_t::trailing_stop_market);
     EXPECT_EQ(resp.origQty, decimal_t("10.0"));
     EXPECT_EQ(resp.stopPrice, decimal_t("9300.0"));
     EXPECT_FALSE(resp.reduceOnly);
@@ -237,13 +237,13 @@ TEST(JsonRoundTrip, OrderResponse)
     ASSERT_TRUE(resp.updateTime.has_value());
     EXPECT_EQ(*resp.updateTime, timestamp_ms_t{1566818724722ULL});
     ASSERT_TRUE(resp.workingType.has_value());
-    EXPECT_EQ(*resp.workingType, working_type::contract_price);
+    EXPECT_EQ(*resp.workingType, working_type_t::contract_price);
     ASSERT_TRUE(resp.priceProtect.has_value());
     EXPECT_FALSE(*resp.priceProtect);
     ASSERT_TRUE(resp.priceMatch.has_value());
-    EXPECT_EQ(*resp.priceMatch, price_match::none);
+    EXPECT_EQ(*resp.priceMatch, price_match_t::none);
     ASSERT_TRUE(resp.selfTradePreventionMode.has_value());
-    EXPECT_EQ(*resp.selfTradePreventionMode, stp_mode::expire_taker);
+    EXPECT_EQ(*resp.selfTradePreventionMode, stp_mode_t::expire_taker);
 
     // Round-trip.
     auto json2 = to_json(resp);
@@ -287,9 +287,9 @@ TEST(ToQueryMap, NewOrderRequestFull)
 {
     new_order_request req{};
     req.symbol = "ETHUSDT";
-    req.side = order_side::sell;
-    req.type = order_type::limit;
-    req.timeInForce = time_in_force::gtc;
+    req.side = order_side_t::sell;
+    req.type = order_type_t::limit;
+    req.timeInForce = time_in_force_t::gtc;
     req.quantity = decimal_t("0.5");
     req.price = decimal_t("3000.0");
 

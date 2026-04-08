@@ -39,12 +39,12 @@ public:
     /// Blocks the calling thread. Must not be called from within a coroutine context.
     ///
     /// @tparam Request  A request struct satisfying has_endpoint_traits. The response
-    ///                  type is deduced from endpoint_traits<Request>::response_type.
+    ///                  type is deduced from endpoint_traits<Request>::response_type_t.
     /// @param request   The populated request struct.
     /// @return Typed result with the deduced response type, or an error.
     template<class Request>
         requires has_endpoint_traits<Request>
-    [[nodiscard]] auto execute(const Request& request) -> result<typename endpoint_traits<Request>::response_type>;
+    [[nodiscard]] auto execute(const Request& request) -> result<typename endpoint_traits<Request>::response_type_t>;
 
     /// @brief Asynchronous generic execute (boost::cobalt coroutine).
     ///
@@ -56,7 +56,7 @@ public:
     template<class Request>
         requires has_endpoint_traits<Request>
     [[nodiscard]] auto async_execute(const Request& request)
-        -> boost::cobalt::task<result<typename endpoint_traits<Request>::response_type>>;
+        -> boost::cobalt::task<result<typename endpoint_traits<Request>::response_type_t>>;
 
 protected:
     client& owner_;

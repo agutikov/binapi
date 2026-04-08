@@ -7,7 +7,7 @@
 ///
 /// Each enum class maps to a Binance API constant set. The corresponding
 /// to_string() overload converts each enumerator to the exact API wire-format
-/// string (e.g. order_side::buy -> "BUY").
+/// string (e.g. order_side_t::buy -> "BUY").
 
 #pragma once
 
@@ -19,7 +19,7 @@ namespace binapi2::fapi::types {
 
 /// API endpoint security classification. Determines what credentials
 /// are required to call an endpoint.
-enum class security_type
+enum class security_type_t
 {
     none,
     market_data,
@@ -30,7 +30,7 @@ enum class security_type
 
 /// Order side: buy or sell.
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
-enum class order_side
+enum class order_side_t
 {
     buy,
     sell,
@@ -38,7 +38,7 @@ enum class order_side
 
 /// Order type: LIMIT, MARKET, and conditional order variants (STOP, TAKE_PROFIT, etc.).
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
-enum class order_type
+enum class order_type_t
 {
     limit,
     market,
@@ -51,7 +51,7 @@ enum class order_type
 
 /// Time-in-force policy for order lifetime.
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
-enum class time_in_force
+enum class time_in_force_t
 {
     gtc,  ///< Good Till Cancel.
     ioc,  ///< Immediate Or Cancel.
@@ -64,7 +64,7 @@ enum class time_in_force
 /// Kline/candlestick interval. Prefixed by unit: m=minutes, h=hours, d=days, w=weeks, mo=months.
 /// to_string() produces the API format (e.g. m1 -> "1m", mo1 -> "1M").
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
-enum class kline_interval
+enum class kline_interval_t
 {
     m1,
     m3,
@@ -86,7 +86,7 @@ enum class kline_interval
 /// Position side for hedge mode. "both" is used in one-way mode.
 /// long_side/short_side map to API strings "LONG"/"SHORT".
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
-enum class position_side
+enum class position_side_t
 {
     both,
     long_side,   ///< Maps to "LONG" on the wire (avoids C++ keyword).
@@ -95,7 +95,7 @@ enum class position_side
 
 /// Price type used for triggering conditional orders.
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
-enum class working_type
+enum class working_type_t
 {
     mark_price,
     contract_price,
@@ -103,7 +103,7 @@ enum class working_type
 
 /// Controls the detail level of order placement responses.
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
-enum class response_type
+enum class response_type_t
 {
     ack,
     result,
@@ -111,31 +111,31 @@ enum class response_type
 
 /// Position margin mode: isolated or cross (crossed).
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
-enum class margin_type
+enum class margin_type_t
 {
     isolated,
     crossed,
 };
 
 /// Futures margining type (USD-M vs COIN-M).
-enum class futures_type
+enum class futures_type_t
 {
     u_margined,
     coin_margined,
 };
 
 [[nodiscard]] inline std::string
-to_string(futures_type value)
+to_string(futures_type_t value)
 {
     switch (value) {
-        case futures_type::u_margined:   return "U_MARGINED";
-        case futures_type::coin_margined: return "COIN_MARGINED";
+        case futures_type_t::u_margined:   return "U_MARGINED";
+        case futures_type_t::coin_margined: return "COIN_MARGINED";
     }
     return "U_MARGINED";
 }
 
 /// Position control side for POSITION_RISK_CONTROL filters.
-enum class position_control_side
+enum class position_control_side_t
 {
     none,
     long_side,
@@ -144,19 +144,19 @@ enum class position_control_side
 };
 
 [[nodiscard]] inline std::string
-to_string(position_control_side value)
+to_string(position_control_side_t value)
 {
     switch (value) {
-        case position_control_side::none:       return "NONE";
-        case position_control_side::long_side:  return "LONG";
-        case position_control_side::short_side: return "SHORT";
-        case position_control_side::both:       return "BOTH";
+        case position_control_side_t::none:       return "NONE";
+        case position_control_side_t::long_side:  return "LONG";
+        case position_control_side_t::short_side: return "SHORT";
+        case position_control_side_t::both:       return "BOTH";
     }
     return "NONE";
 }
 
 /// Trading permission type for symbol permissionSets.
-enum class trading_permission
+enum class trading_permission_t
 {
     grid,
     copy,
@@ -166,21 +166,21 @@ enum class trading_permission
 };
 
 [[nodiscard]] inline std::string
-to_string(trading_permission value)
+to_string(trading_permission_t value)
 {
     switch (value) {
-        case trading_permission::grid: return "GRID";
-        case trading_permission::copy: return "COPY";
-        case trading_permission::dca:  return "DCA";
-        case trading_permission::rpi:  return "RPI";
-        case trading_permission::psb:  return "PSB";
+        case trading_permission_t::grid: return "GRID";
+        case trading_permission_t::copy: return "COPY";
+        case trading_permission_t::dca:  return "DCA";
+        case trading_permission_t::rpi:  return "RPI";
+        case trading_permission_t::psb:  return "PSB";
     }
     return "GRID";
 }
 
 /// Futures contract delivery type (perpetual, quarterly, etc.).
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
-enum class contract_type
+enum class contract_type_t
 {
     perpetual,
     current_month,
@@ -194,7 +194,7 @@ enum class contract_type
 
 /// Trading status of a futures contract through its lifecycle.
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
-enum class contract_status
+enum class contract_status_t
 {
     pending_trading,
     trading,
@@ -209,7 +209,7 @@ enum class contract_status
 /// Order execution status. Note: new_order maps to API string "NEW"
 /// (renamed to avoid collision with C++ keywords/macros).
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
-enum class order_status
+enum class order_status_t
 {
     new_order,
     partially_filled,
@@ -223,7 +223,7 @@ enum class order_status
 /// Self-Trade Prevention mode. Controls which side is expired when
 /// an order would match against another order from the same account.
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
-enum class stp_mode
+enum class stp_mode_t
 {
     none,
     expire_taker,
@@ -235,7 +235,7 @@ enum class stp_mode
 /// is derived relative to the current order book (opponent/queue side,
 /// with optional tick offset).
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
-enum class price_match
+enum class price_match_t
 {
     none,
     opponent,
@@ -251,7 +251,7 @@ enum class price_match
 /// Classification of account income/transaction entries returned by
 /// the income history endpoint.
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
-enum class income_type
+enum class income_type_t
 {
     transfer,
     welcome_bonus,
@@ -278,7 +278,7 @@ enum class income_type
 /// long/short ratio, taker volume, basis). to_string() produces API format
 /// (e.g. m5 -> "5m").
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
-enum class futures_data_period
+enum class futures_data_period_t
 {
     m5,
     m15,
@@ -292,351 +292,351 @@ enum class futures_data_period
 };
 
 [[nodiscard]] inline std::string
-to_string(security_type value)
+to_string(security_type_t value)
 {
     switch (value) {
-        case security_type::none:
+        case security_type_t::none:
             return "none";
-        case security_type::market_data:
+        case security_type_t::market_data:
             return "market_data";
-        case security_type::user_stream:
+        case security_type_t::user_stream:
             return "user_stream";
-        case security_type::user_data:
+        case security_type_t::user_data:
             return "user_data";
-        case security_type::trade:
+        case security_type_t::trade:
             return "trade";
     }
     return "none";
 }
 
 [[nodiscard]] inline std::string
-to_string(order_side value)
+to_string(order_side_t value)
 {
     switch (value) {
-        case order_side::buy:
+        case order_side_t::buy:
             return "BUY";
-        case order_side::sell:
+        case order_side_t::sell:
             return "SELL";
     }
     return "BUY";
 }
 
 [[nodiscard]] inline std::string
-to_string(order_type value)
+to_string(order_type_t value)
 {
     switch (value) {
-        case order_type::limit:
+        case order_type_t::limit:
             return "LIMIT";
-        case order_type::market:
+        case order_type_t::market:
             return "MARKET";
-        case order_type::stop:
+        case order_type_t::stop:
             return "STOP";
-        case order_type::stop_market:
+        case order_type_t::stop_market:
             return "STOP_MARKET";
-        case order_type::take_profit:
+        case order_type_t::take_profit:
             return "TAKE_PROFIT";
-        case order_type::take_profit_market:
+        case order_type_t::take_profit_market:
             return "TAKE_PROFIT_MARKET";
-        case order_type::trailing_stop_market:
+        case order_type_t::trailing_stop_market:
             return "TRAILING_STOP_MARKET";
     }
     return "LIMIT";
 }
 
 [[nodiscard]] inline std::string
-to_string(time_in_force value)
+to_string(time_in_force_t value)
 {
     switch (value) {
-        case time_in_force::gtc:
+        case time_in_force_t::gtc:
             return "GTC";
-        case time_in_force::ioc:
+        case time_in_force_t::ioc:
             return "IOC";
-        case time_in_force::fok:
+        case time_in_force_t::fok:
             return "FOK";
-        case time_in_force::gtx:
+        case time_in_force_t::gtx:
             return "GTX";
-        case time_in_force::gtd:
+        case time_in_force_t::gtd:
             return "GTD";
-        case time_in_force::rpi:
+        case time_in_force_t::rpi:
             return "RPI";
     }
     return "GTC";
 }
 
 [[nodiscard]] inline std::string
-to_string(kline_interval value)
+to_string(kline_interval_t value)
 {
     switch (value) {
-        case kline_interval::m1:
+        case kline_interval_t::m1:
             return "1m";
-        case kline_interval::m3:
+        case kline_interval_t::m3:
             return "3m";
-        case kline_interval::m5:
+        case kline_interval_t::m5:
             return "5m";
-        case kline_interval::m15:
+        case kline_interval_t::m15:
             return "15m";
-        case kline_interval::m30:
+        case kline_interval_t::m30:
             return "30m";
-        case kline_interval::h1:
+        case kline_interval_t::h1:
             return "1h";
-        case kline_interval::h2:
+        case kline_interval_t::h2:
             return "2h";
-        case kline_interval::h4:
+        case kline_interval_t::h4:
             return "4h";
-        case kline_interval::h6:
+        case kline_interval_t::h6:
             return "6h";
-        case kline_interval::h8:
+        case kline_interval_t::h8:
             return "8h";
-        case kline_interval::h12:
+        case kline_interval_t::h12:
             return "12h";
-        case kline_interval::d1:
+        case kline_interval_t::d1:
             return "1d";
-        case kline_interval::d3:
+        case kline_interval_t::d3:
             return "3d";
-        case kline_interval::w1:
+        case kline_interval_t::w1:
             return "1w";
-        case kline_interval::mo1:
+        case kline_interval_t::mo1:
             return "1M";
     }
     return "1m";
 }
 
 [[nodiscard]] inline std::string
-to_string(position_side value)
+to_string(position_side_t value)
 {
     switch (value) {
-        case position_side::both:
+        case position_side_t::both:
             return "BOTH";
-        case position_side::long_side:
+        case position_side_t::long_side:
             return "LONG";
-        case position_side::short_side:
+        case position_side_t::short_side:
             return "SHORT";
     }
     return "BOTH";
 }
 
 [[nodiscard]] inline std::string
-to_string(working_type value)
+to_string(working_type_t value)
 {
     switch (value) {
-        case working_type::mark_price:
+        case working_type_t::mark_price:
             return "MARK_PRICE";
-        case working_type::contract_price:
+        case working_type_t::contract_price:
             return "CONTRACT_PRICE";
     }
     return "MARK_PRICE";
 }
 
 [[nodiscard]] inline std::string
-to_string(response_type value)
+to_string(response_type_t value)
 {
     switch (value) {
-        case response_type::ack:
+        case response_type_t::ack:
             return "ACK";
-        case response_type::result:
+        case response_type_t::result:
             return "RESULT";
     }
     return "ACK";
 }
 
 [[nodiscard]] inline std::string
-to_string(margin_type value)
+to_string(margin_type_t value)
 {
     switch (value) {
-        case margin_type::isolated:
+        case margin_type_t::isolated:
             return "ISOLATED";
-        case margin_type::crossed:
+        case margin_type_t::crossed:
             return "CROSSED";
     }
     return "ISOLATED";
 }
 
 [[nodiscard]] inline std::string
-to_string(contract_type value)
+to_string(contract_type_t value)
 {
     switch (value) {
-        case contract_type::perpetual:
+        case contract_type_t::perpetual:
             return "PERPETUAL";
-        case contract_type::current_month:
+        case contract_type_t::current_month:
             return "CURRENT_MONTH";
-        case contract_type::next_month:
+        case contract_type_t::next_month:
             return "NEXT_MONTH";
-        case contract_type::current_quarter:
+        case contract_type_t::current_quarter:
             return "CURRENT_QUARTER";
-        case contract_type::next_quarter:
+        case contract_type_t::next_quarter:
             return "NEXT_QUARTER";
-        case contract_type::perpetual_delivering:
+        case contract_type_t::perpetual_delivering:
             return "PERPETUAL_DELIVERING";
-        case contract_type::current_quarter_delivering:
+        case contract_type_t::current_quarter_delivering:
             return "CURRENT_QUARTER DELIVERING";
-        case contract_type::tradifi_perpetual:
+        case contract_type_t::tradifi_perpetual:
             return "TRADIFI_PERPETUAL";
     }
     return "PERPETUAL";
 }
 
 [[nodiscard]] inline std::string
-to_string(contract_status value)
+to_string(contract_status_t value)
 {
     switch (value) {
-        case contract_status::pending_trading:
+        case contract_status_t::pending_trading:
             return "PENDING_TRADING";
-        case contract_status::trading:
+        case contract_status_t::trading:
             return "TRADING";
-        case contract_status::pre_delivering:
+        case contract_status_t::pre_delivering:
             return "PRE_DELIVERING";
-        case contract_status::delivering:
+        case contract_status_t::delivering:
             return "DELIVERING";
-        case contract_status::delivered:
+        case contract_status_t::delivered:
             return "DELIVERED";
-        case contract_status::pre_settle:
+        case contract_status_t::pre_settle:
             return "PRE_SETTLE";
-        case contract_status::settling:
+        case contract_status_t::settling:
             return "SETTLING";
-        case contract_status::close:
+        case contract_status_t::close:
             return "CLOSE";
     }
     return "TRADING";
 }
 
 [[nodiscard]] inline std::string
-to_string(order_status value)
+to_string(order_status_t value)
 {
     switch (value) {
-        case order_status::new_order:
+        case order_status_t::new_order:
             return "NEW";
-        case order_status::partially_filled:
+        case order_status_t::partially_filled:
             return "PARTIALLY_FILLED";
-        case order_status::filled:
+        case order_status_t::filled:
             return "FILLED";
-        case order_status::canceled:
+        case order_status_t::canceled:
             return "CANCELED";
-        case order_status::rejected:
+        case order_status_t::rejected:
             return "REJECTED";
-        case order_status::expired:
+        case order_status_t::expired:
             return "EXPIRED";
-        case order_status::expired_in_match:
+        case order_status_t::expired_in_match:
             return "EXPIRED_IN_MATCH";
     }
     return "NEW";
 }
 
 [[nodiscard]] inline std::string
-to_string(stp_mode value)
+to_string(stp_mode_t value)
 {
     switch (value) {
-        case stp_mode::none:
+        case stp_mode_t::none:
             return "NONE";
-        case stp_mode::expire_taker:
+        case stp_mode_t::expire_taker:
             return "EXPIRE_TAKER";
-        case stp_mode::expire_both:
+        case stp_mode_t::expire_both:
             return "EXPIRE_BOTH";
-        case stp_mode::expire_maker:
+        case stp_mode_t::expire_maker:
             return "EXPIRE_MAKER";
     }
     return "NONE";
 }
 
 [[nodiscard]] inline std::string
-to_string(price_match value)
+to_string(price_match_t value)
 {
     switch (value) {
-        case price_match::none:
+        case price_match_t::none:
             return "NONE";
-        case price_match::opponent:
+        case price_match_t::opponent:
             return "OPPONENT";
-        case price_match::opponent_5:
+        case price_match_t::opponent_5:
             return "OPPONENT_5";
-        case price_match::opponent_10:
+        case price_match_t::opponent_10:
             return "OPPONENT_10";
-        case price_match::opponent_20:
+        case price_match_t::opponent_20:
             return "OPPONENT_20";
-        case price_match::queue:
+        case price_match_t::queue:
             return "QUEUE";
-        case price_match::queue_5:
+        case price_match_t::queue_5:
             return "QUEUE_5";
-        case price_match::queue_10:
+        case price_match_t::queue_10:
             return "QUEUE_10";
-        case price_match::queue_20:
+        case price_match_t::queue_20:
             return "QUEUE_20";
     }
     return "NONE";
 }
 
 [[nodiscard]] inline std::string
-to_string(income_type value)
+to_string(income_type_t value)
 {
     switch (value) {
-        case income_type::transfer:
+        case income_type_t::transfer:
             return "TRANSFER";
-        case income_type::welcome_bonus:
+        case income_type_t::welcome_bonus:
             return "WELCOME_BONUS";
-        case income_type::realized_pnl:
+        case income_type_t::realized_pnl:
             return "REALIZED_PNL";
-        case income_type::funding_fee:
+        case income_type_t::funding_fee:
             return "FUNDING_FEE";
-        case income_type::commission:
+        case income_type_t::commission:
             return "COMMISSION";
-        case income_type::insurance_clear:
+        case income_type_t::insurance_clear:
             return "INSURANCE_CLEAR";
-        case income_type::referral_kickback:
+        case income_type_t::referral_kickback:
             return "REFERRAL_KICKBACK";
-        case income_type::commission_rebate:
+        case income_type_t::commission_rebate:
             return "COMMISSION_REBATE";
-        case income_type::api_rebate:
+        case income_type_t::api_rebate:
             return "API_REBATE";
-        case income_type::contest_reward:
+        case income_type_t::contest_reward:
             return "CONTEST_REWARD";
-        case income_type::cross_collateral_transfer:
+        case income_type_t::cross_collateral_transfer:
             return "CROSS_COLLATERAL_TRANSFER";
-        case income_type::options_premium_fee:
+        case income_type_t::options_premium_fee:
             return "OPTIONS_PREMIUM_FEE";
-        case income_type::options_settle_profit:
+        case income_type_t::options_settle_profit:
             return "OPTIONS_SETTLE_PROFIT";
-        case income_type::internal_transfer:
+        case income_type_t::internal_transfer:
             return "INTERNAL_TRANSFER";
-        case income_type::auto_exchange:
+        case income_type_t::auto_exchange:
             return "AUTO_EXCHANGE";
-        case income_type::delivered_settelment:
+        case income_type_t::delivered_settelment:
             return "DELIVERED_SETTELMENT";
-        case income_type::coin_swap_deposit:
+        case income_type_t::coin_swap_deposit:
             return "COIN_SWAP_DEPOSIT";
-        case income_type::coin_swap_withdraw:
+        case income_type_t::coin_swap_withdraw:
             return "COIN_SWAP_WITHDRAW";
-        case income_type::position_limit_increase_fee:
+        case income_type_t::position_limit_increase_fee:
             return "POSITION_LIMIT_INCREASE_FEE";
     }
     return "TRANSFER";
 }
 
 [[nodiscard]] inline std::string
-to_string(futures_data_period value)
+to_string(futures_data_period_t value)
 {
     switch (value) {
-        case futures_data_period::m5:
+        case futures_data_period_t::m5:
             return "5m";
-        case futures_data_period::m15:
+        case futures_data_period_t::m15:
             return "15m";
-        case futures_data_period::m30:
+        case futures_data_period_t::m30:
             return "30m";
-        case futures_data_period::h1:
+        case futures_data_period_t::h1:
             return "1h";
-        case futures_data_period::h2:
+        case futures_data_period_t::h2:
             return "2h";
-        case futures_data_period::h4:
+        case futures_data_period_t::h4:
             return "4h";
-        case futures_data_period::h6:
+        case futures_data_period_t::h6:
             return "6h";
-        case futures_data_period::h12:
+        case futures_data_period_t::h12:
             return "12h";
-        case futures_data_period::d1:
+        case futures_data_period_t::d1:
             return "1d";
     }
     return "5m";
 }
 
 /// Execution type in order update events.
-enum class execution_type
+enum class execution_type_t
 {
     new_order,
     partial_fill,
@@ -648,22 +648,22 @@ enum class execution_type
 };
 
 [[nodiscard]] inline std::string
-to_string(execution_type value)
+to_string(execution_type_t value)
 {
     switch (value) {
-        case execution_type::new_order: return "NEW";
-        case execution_type::partial_fill: return "PARTIAL_FILL";
-        case execution_type::fill: return "FILL";
-        case execution_type::canceled: return "CANCELED";
-        case execution_type::rejected: return "REJECTED";
-        case execution_type::expired: return "EXPIRED";
-        case execution_type::trade: return "TRADE";
+        case execution_type_t::new_order: return "NEW";
+        case execution_type_t::partial_fill: return "PARTIAL_FILL";
+        case execution_type_t::fill: return "FILL";
+        case execution_type_t::canceled: return "CANCELED";
+        case execution_type_t::rejected: return "REJECTED";
+        case execution_type_t::expired: return "EXPIRED";
+        case execution_type_t::trade: return "TRADE";
     }
     return "NEW";
 }
 
 /// Rate limit type from exchange info.
-enum class rate_limit_type
+enum class rate_limit_type_t
 {
     request_weight,
     orders,
@@ -674,21 +674,21 @@ enum class rate_limit_type
 };
 
 [[nodiscard]] inline std::string
-to_string(rate_limit_type value)
+to_string(rate_limit_type_t value)
 {
     switch (value) {
-        case rate_limit_type::request_weight: return "REQUEST_WEIGHT";
-        case rate_limit_type::orders: return "ORDERS";
-        case rate_limit_type::orders_1s: return "ORDERS_1S";
-        case rate_limit_type::orders_1m: return "ORDERS_1M";
-        case rate_limit_type::orders_1h: return "ORDERS_1H";
-        case rate_limit_type::orders_1d: return "ORDERS_1D";
+        case rate_limit_type_t::request_weight: return "REQUEST_WEIGHT";
+        case rate_limit_type_t::orders: return "ORDERS";
+        case rate_limit_type_t::orders_1s: return "ORDERS_1S";
+        case rate_limit_type_t::orders_1m: return "ORDERS_1M";
+        case rate_limit_type_t::orders_1h: return "ORDERS_1H";
+        case rate_limit_type_t::orders_1d: return "ORDERS_1D";
     }
     return "REQUEST_WEIGHT";
 }
 
 /// Rate limit interval unit.
-enum class rate_limit_interval
+enum class rate_limit_interval_t
 {
     second,
     minute,
@@ -697,70 +697,70 @@ enum class rate_limit_interval
 };
 
 [[nodiscard]] inline std::string
-to_string(rate_limit_interval value)
+to_string(rate_limit_interval_t value)
 {
     switch (value) {
-        case rate_limit_interval::second: return "SECOND";
-        case rate_limit_interval::minute: return "MINUTE";
-        case rate_limit_interval::hour: return "HOUR";
-        case rate_limit_interval::day: return "DAY";
+        case rate_limit_interval_t::second: return "SECOND";
+        case rate_limit_interval_t::minute: return "MINUTE";
+        case rate_limit_interval_t::hour: return "HOUR";
+        case rate_limit_interval_t::day: return "DAY";
     }
     return "SECOND";
 }
 
 /// Auto-close type for forced liquidation/ADL orders.
-enum class auto_close_type
+enum class auto_close_type_t
 {
     liquidation,
     adl,
 };
 
 [[nodiscard]] inline std::string
-to_string(auto_close_type value)
+to_string(auto_close_type_t value)
 {
     switch (value) {
-        case auto_close_type::liquidation: return "LIQUIDATION";
-        case auto_close_type::adl: return "ADL";
+        case auto_close_type_t::liquidation: return "LIQUIDATION";
+        case auto_close_type_t::adl: return "ADL";
     }
     return "LIQUIDATION";
 }
 
 /// Isolated margin delta direction.
-enum class delta_type
+enum class delta_type_t
 {
     add,
     reduce,
 };
 
 [[nodiscard]] inline std::string
-to_string(delta_type value)
+to_string(delta_type_t value)
 {
     switch (value) {
-        case delta_type::add: return "1";
-        case delta_type::reduce: return "2";
+        case delta_type_t::add: return "1";
+        case delta_type_t::reduce: return "2";
     }
     return "1";
 }
 
 /// Algo order type.
-enum class algo_type
+enum class algo_type_t
 {
     twap,
     vp,
 };
 
 [[nodiscard]] inline std::string
-to_string(algo_type value)
+to_string(algo_type_t value)
 {
     switch (value) {
-        case algo_type::twap: return "TWAP";
-        case algo_type::vp: return "VP";
+        case algo_type_t::twap: return "TWAP";
+        case algo_type_t::vp: return "VP";
     }
     return "TWAP";
 }
 
 /// Algo order status.
-enum class algo_status
+enum class algo_status_t
 {
     working,
     cancelled,
@@ -770,14 +770,14 @@ enum class algo_status
 };
 
 [[nodiscard]] inline std::string
-to_string(algo_status value)
+to_string(algo_status_t value)
 {
     switch (value) {
-        case algo_status::working: return "WORKING";
-        case algo_status::cancelled: return "CANCELLED";
-        case algo_status::rejected: return "REJECTED";
-        case algo_status::expired: return "EXPIRED";
-        case algo_status::triggered: return "TRIGGERED";
+        case algo_status_t::working: return "WORKING";
+        case algo_status_t::cancelled: return "CANCELLED";
+        case algo_status_t::rejected: return "REJECTED";
+        case algo_status_t::expired: return "EXPIRED";
+        case algo_status_t::triggered: return "TRIGGERED";
     }
     return "WORKING";
 }
@@ -790,16 +790,16 @@ to_string(algo_status value)
 // ---------------------------------------------------------------------------
 
 template<>
-struct glz::meta<binapi2::fapi::types::order_side>
+struct glz::meta<binapi2::fapi::types::order_side_t>
 {
-    using enum binapi2::fapi::types::order_side;
+    using enum binapi2::fapi::types::order_side_t;
     static constexpr auto value = enumerate("BUY", buy, "SELL", sell);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::order_type>
+struct glz::meta<binapi2::fapi::types::order_type_t>
 {
-    using enum binapi2::fapi::types::order_type;
+    using enum binapi2::fapi::types::order_type_t;
     static constexpr auto value = enumerate(
         "LIMIT", limit, "MARKET", market, "STOP", stop, "STOP_MARKET", stop_market,
         "TAKE_PROFIT", take_profit, "TAKE_PROFIT_MARKET", take_profit_market,
@@ -807,16 +807,16 @@ struct glz::meta<binapi2::fapi::types::order_type>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::time_in_force>
+struct glz::meta<binapi2::fapi::types::time_in_force_t>
 {
-    using enum binapi2::fapi::types::time_in_force;
+    using enum binapi2::fapi::types::time_in_force_t;
     static constexpr auto value = enumerate("GTC", gtc, "IOC", ioc, "FOK", fok, "GTX", gtx, "GTD", gtd, "RPI", rpi);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::kline_interval>
+struct glz::meta<binapi2::fapi::types::kline_interval_t>
 {
-    using enum binapi2::fapi::types::kline_interval;
+    using enum binapi2::fapi::types::kline_interval_t;
     static constexpr auto value = enumerate(
         "1m", m1, "3m", m3, "5m", m5, "15m", m15, "30m", m30,
         "1h", h1, "2h", h2, "4h", h4, "6h", h6, "8h", h8, "12h", h12,
@@ -824,58 +824,58 @@ struct glz::meta<binapi2::fapi::types::kline_interval>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::position_side>
+struct glz::meta<binapi2::fapi::types::position_side_t>
 {
-    using enum binapi2::fapi::types::position_side;
+    using enum binapi2::fapi::types::position_side_t;
     static constexpr auto value = enumerate("BOTH", both, "LONG", long_side, "SHORT", short_side);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::working_type>
+struct glz::meta<binapi2::fapi::types::working_type_t>
 {
-    using enum binapi2::fapi::types::working_type;
+    using enum binapi2::fapi::types::working_type_t;
     static constexpr auto value = enumerate("MARK_PRICE", mark_price, "CONTRACT_PRICE", contract_price);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::response_type>
+struct glz::meta<binapi2::fapi::types::response_type_t>
 {
-    using enum binapi2::fapi::types::response_type;
+    using enum binapi2::fapi::types::response_type_t;
     static constexpr auto value = enumerate("ACK", ack, "RESULT", result);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::margin_type>
+struct glz::meta<binapi2::fapi::types::margin_type_t>
 {
-    using enum binapi2::fapi::types::margin_type;
+    using enum binapi2::fapi::types::margin_type_t;
     static constexpr auto value = enumerate("ISOLATED", isolated, "CROSSED", crossed, "isolated", isolated, "cross", crossed);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::futures_type>
+struct glz::meta<binapi2::fapi::types::futures_type_t>
 {
-    using enum binapi2::fapi::types::futures_type;
+    using enum binapi2::fapi::types::futures_type_t;
     static constexpr auto value = enumerate("U_MARGINED", u_margined, "COIN_MARGINED", coin_margined);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::position_control_side>
+struct glz::meta<binapi2::fapi::types::position_control_side_t>
 {
-    using enum binapi2::fapi::types::position_control_side;
+    using enum binapi2::fapi::types::position_control_side_t;
     static constexpr auto value = enumerate("NONE", none, "LONG", long_side, "SHORT", short_side, "BOTH", both);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::trading_permission>
+struct glz::meta<binapi2::fapi::types::trading_permission_t>
 {
-    using enum binapi2::fapi::types::trading_permission;
+    using enum binapi2::fapi::types::trading_permission_t;
     static constexpr auto value = enumerate("GRID", grid, "COPY", copy, "DCA", dca, "RPI", rpi, "PSB", psb);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::contract_type>
+struct glz::meta<binapi2::fapi::types::contract_type_t>
 {
-    using enum binapi2::fapi::types::contract_type;
+    using enum binapi2::fapi::types::contract_type_t;
     static constexpr auto value = enumerate(
         "PERPETUAL", perpetual, "CURRENT_MONTH", current_month, "NEXT_MONTH", next_month,
         "CURRENT_QUARTER", current_quarter, "NEXT_QUARTER", next_quarter,
@@ -885,9 +885,9 @@ struct glz::meta<binapi2::fapi::types::contract_type>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::contract_status>
+struct glz::meta<binapi2::fapi::types::contract_status_t>
 {
-    using enum binapi2::fapi::types::contract_status;
+    using enum binapi2::fapi::types::contract_status_t;
     static constexpr auto value = enumerate(
         "PENDING_TRADING", pending_trading, "TRADING", trading, "PRE_DELIVERING", pre_delivering,
         "DELIVERING", delivering, "DELIVERED", delivered, "PRE_SETTLE", pre_settle,
@@ -895,9 +895,9 @@ struct glz::meta<binapi2::fapi::types::contract_status>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::order_status>
+struct glz::meta<binapi2::fapi::types::order_status_t>
 {
-    using enum binapi2::fapi::types::order_status;
+    using enum binapi2::fapi::types::order_status_t;
     static constexpr auto value = enumerate(
         "NEW", new_order, "PARTIALLY_FILLED", partially_filled, "FILLED", filled,
         "CANCELED", canceled, "REJECTED", rejected, "EXPIRED", expired,
@@ -905,16 +905,16 @@ struct glz::meta<binapi2::fapi::types::order_status>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::stp_mode>
+struct glz::meta<binapi2::fapi::types::stp_mode_t>
 {
-    using enum binapi2::fapi::types::stp_mode;
+    using enum binapi2::fapi::types::stp_mode_t;
     static constexpr auto value = enumerate("NONE", none, "EXPIRE_TAKER", expire_taker, "EXPIRE_BOTH", expire_both, "EXPIRE_MAKER", expire_maker);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::price_match>
+struct glz::meta<binapi2::fapi::types::price_match_t>
 {
-    using enum binapi2::fapi::types::price_match;
+    using enum binapi2::fapi::types::price_match_t;
     static constexpr auto value = enumerate(
         "NONE", none, "OPPONENT", opponent, "OPPONENT_5", opponent_5, "OPPONENT_10", opponent_10,
         "OPPONENT_20", opponent_20, "QUEUE", queue, "QUEUE_5", queue_5, "QUEUE_10", queue_10,
@@ -922,9 +922,9 @@ struct glz::meta<binapi2::fapi::types::price_match>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::income_type>
+struct glz::meta<binapi2::fapi::types::income_type_t>
 {
-    using enum binapi2::fapi::types::income_type;
+    using enum binapi2::fapi::types::income_type_t;
     static constexpr auto value = enumerate(
         "TRANSFER", transfer, "WELCOME_BONUS", welcome_bonus, "REALIZED_PNL", realized_pnl,
         "FUNDING_FEE", funding_fee, "COMMISSION", commission, "INSURANCE_CLEAR", insurance_clear,
@@ -938,26 +938,26 @@ struct glz::meta<binapi2::fapi::types::income_type>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::futures_data_period>
+struct glz::meta<binapi2::fapi::types::futures_data_period_t>
 {
-    using enum binapi2::fapi::types::futures_data_period;
+    using enum binapi2::fapi::types::futures_data_period_t;
     static constexpr auto value = enumerate(
         "5m", m5, "15m", m15, "30m", m30, "1h", h1, "2h", h2, "4h", h4, "6h", h6, "12h", h12, "1d", d1);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::execution_type>
+struct glz::meta<binapi2::fapi::types::execution_type_t>
 {
-    using enum binapi2::fapi::types::execution_type;
+    using enum binapi2::fapi::types::execution_type_t;
     static constexpr auto value = enumerate(
         "NEW", new_order, "PARTIAL_FILL", partial_fill, "FILL", fill,
         "CANCELED", canceled, "REJECTED", rejected, "EXPIRED", expired, "TRADE", trade);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::rate_limit_type>
+struct glz::meta<binapi2::fapi::types::rate_limit_type_t>
 {
-    using enum binapi2::fapi::types::rate_limit_type;
+    using enum binapi2::fapi::types::rate_limit_type_t;
     static constexpr auto value = enumerate(
         "REQUEST_WEIGHT", request_weight, "ORDERS", orders,
         "ORDERS_1S", orders_1s, "ORDERS_1M", orders_1m,
@@ -965,37 +965,37 @@ struct glz::meta<binapi2::fapi::types::rate_limit_type>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::rate_limit_interval>
+struct glz::meta<binapi2::fapi::types::rate_limit_interval_t>
 {
-    using enum binapi2::fapi::types::rate_limit_interval;
+    using enum binapi2::fapi::types::rate_limit_interval_t;
     static constexpr auto value = enumerate("SECOND", second, "MINUTE", minute, "HOUR", hour, "DAY", day);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::auto_close_type>
+struct glz::meta<binapi2::fapi::types::auto_close_type_t>
 {
-    using enum binapi2::fapi::types::auto_close_type;
+    using enum binapi2::fapi::types::auto_close_type_t;
     static constexpr auto value = enumerate("LIQUIDATION", liquidation, "ADL", adl);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::delta_type>
+struct glz::meta<binapi2::fapi::types::delta_type_t>
 {
-    using enum binapi2::fapi::types::delta_type;
+    using enum binapi2::fapi::types::delta_type_t;
     static constexpr auto value = enumerate("1", add, "2", reduce);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::algo_type>
+struct glz::meta<binapi2::fapi::types::algo_type_t>
 {
-    using enum binapi2::fapi::types::algo_type;
+    using enum binapi2::fapi::types::algo_type_t;
     static constexpr auto value = enumerate("TWAP", twap, "VP", vp);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::algo_status>
+struct glz::meta<binapi2::fapi::types::algo_status_t>
 {
-    using enum binapi2::fapi::types::algo_status;
+    using enum binapi2::fapi::types::algo_status_t;
     static constexpr auto value = enumerate(
         "WORKING", working, "CANCELLED", cancelled, "REJECTED", rejected,
         "EXPIRED", expired, "TRIGGERED", triggered);

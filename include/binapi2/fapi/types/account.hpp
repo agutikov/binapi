@@ -63,7 +63,7 @@ struct account_position
     std::optional<decimal_t> maxNotional{};
     std::optional<decimal_t> bidNotional{};
     std::optional<decimal_t> askNotional{};
-    position_side positionSide{};
+    position_side_t positionSide{};
     decimal_t positionAmt{};
     std::optional<decimal_t> isolatedMargin{};
     std::optional<decimal_t> notional{};
@@ -132,10 +132,10 @@ struct position_risk
     decimal_t liquidationPrice{};
     decimal_t leverage{};
     decimal_t maxNotionalValue{};
-    margin_type marginType{};
+    margin_type_t marginType{};
     decimal_t isolatedMargin{};
     bool isAutoAddMargin{};
-    position_side positionSide{};
+    position_side_t positionSide{};
     decimal_t notional{};
     decimal_t isolatedWallet{};
     timestamp_ms_t updateTime{};
@@ -168,7 +168,7 @@ struct symbol_config_request
 struct symbol_config_entry
 {
     std::string symbol{};
-    margin_type marginType{};
+    margin_type_t marginType{};
     bool isAutoAddMargin{};
     int leverage{};
     decimal_t maxNotionalValue{};
@@ -205,7 +205,7 @@ struct income_history_request
 struct income_history_entry
 {
     std::string symbol{};
-    income_type incomeType{};
+    income_type_t incomeType{};
     decimal_t income{};
     std::string asset{};
     std::string info{};

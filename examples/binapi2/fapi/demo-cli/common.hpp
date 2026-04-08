@@ -79,7 +79,7 @@ int handle_result(const binapi2::fapi::result<T>& r)
     return 0;
 }
 
-// Parse an enum from a string using glaze metadata (e.g. "BUY" -> order_side::buy).
+// Parse an enum from a string using glaze metadata (e.g. "BUY" -> order_side_t::buy).
 // Enums whose glz::meta uses uppercase keys (BUY, LIMIT, GTC) accept input case-insensitively.
 // Kline intervals (1m, 1h, 1M) are parsed as-is.
 template<typename E>

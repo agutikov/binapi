@@ -31,23 +31,23 @@ namespace binapi2::fapi::types {
 struct new_order_request
 {
     std::string symbol{};
-    order_side side{ order_side::buy };
-    order_type type{ order_type::limit };
-    std::optional<time_in_force> timeInForce{};
+    order_side_t side{ order_side_t::buy };
+    order_type_t type{ order_type_t::limit };
+    std::optional<time_in_force_t> timeInForce{};
     decimal_t quantity{};
     std::optional<decimal_t> price{};
     std::optional<std::string> newClientOrderId{};
     std::optional<decimal_t> stopPrice{};
-    std::optional<position_side> positionSide{};
+    std::optional<position_side_t> positionSide{};
     std::optional<std::string> reduceOnly{};
     std::optional<std::string> closePosition{};
     std::optional<decimal_t> activationPrice{};
     std::optional<decimal_t> callbackRate{};
-    std::optional<working_type> workingType{};
+    std::optional<working_type_t> workingType{};
     std::optional<std::string> priceProtect{};
-    std::optional<response_type> newOrderRespType{};
-    std::optional<price_match> priceMatch{};
-    std::optional<stp_mode> selfTradePreventionMode{};
+    std::optional<response_type_t> newOrderRespType{};
+    std::optional<price_match_t> priceMatch{};
+    std::optional<stp_mode_t> selfTradePreventionMode{};
     std::optional<timestamp_ms_t> goodTillDate{};
 };
 
@@ -65,19 +65,19 @@ struct order_response
     std::optional<std::string> pair{};
     decimal_t price{};
     bool reduceOnly{};
-    order_side side{};
-    position_side positionSide{};
-    order_status status{};
+    order_side_t side{};
+    position_side_t positionSide{};
+    order_status_t status{};
     decimal_t stopPrice{};
     bool closePosition{};
     std::string symbol{};
-    time_in_force timeInForce{};
-    order_type type{};
-    std::optional<working_type> workingType{};
+    time_in_force_t timeInForce{};
+    order_type_t type{};
+    std::optional<working_type_t> workingType{};
     std::optional<bool> priceProtect{};
-    order_type origType{};
-    std::optional<price_match> priceMatch{};
-    std::optional<stp_mode> selfTradePreventionMode{};
+    order_type_t origType{};
+    std::optional<price_match_t> priceMatch{};
+    std::optional<stp_mode_t> selfTradePreventionMode{};
     std::optional<timestamp_ms_t> goodTillDate{};
     std::optional<decimal_t> activatePrice{};
     std::optional<decimal_t> priceRate{};
@@ -89,12 +89,12 @@ struct order_response
 struct modify_order_request
 {
     std::string symbol{};
-    order_side side{ order_side::buy };
+    order_side_t side{ order_side_t::buy };
     decimal_t quantity{};
     decimal_t price{};
     std::optional<std::uint64_t> orderId{};
     std::optional<std::string> origClientOrderId{};
-    std::optional<price_match> priceMatch{};
+    std::optional<price_match_t> priceMatch{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Cancel-Order.md
@@ -202,7 +202,7 @@ struct all_orders_request
 struct position_risk_v3
 {
     std::string symbol{};
-    position_side positionSide{};
+    position_side_t positionSide{};
     decimal_t positionAmt{};
     decimal_t entryPrice{};
     decimal_t breakEvenPrice{};
@@ -255,7 +255,7 @@ struct adl_quantile_request
 struct force_orders_request
 {
     std::optional<std::string> symbol{};
-    std::optional<auto_close_type> autoCloseType{};
+    std::optional<auto_close_type_t> autoCloseType{};
     std::optional<timestamp_ms_t> startTime{};
     std::optional<timestamp_ms_t> endTime{};
     std::optional<int> limit{};
@@ -278,8 +278,8 @@ struct account_trade_entry
     std::uint64_t id{};
     std::uint64_t orderId{};
     std::string symbol{};
-    order_side side{};
-    position_side positionSide{};
+    order_side_t side{};
+    position_side_t positionSide{};
     decimal_t price{};
     decimal_t qty{};
     decimal_t quoteQty{};
@@ -333,9 +333,9 @@ struct change_margin_type_request
 struct modify_isolated_margin_request
 {
     std::string symbol{};
-    std::optional<position_side> positionSide{};
+    std::optional<position_side_t> positionSide{};
     decimal_t amount{};
-    delta_type type{};
+    delta_type_t type{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Modify-Isolated-Position-Margin.md
@@ -362,11 +362,11 @@ struct position_margin_history_entry
 {
     std::string symbol{};
     int type{};
-    delta_type deltaType{};
+    delta_type_t deltaType{};
     decimal_t amount{};
     std::string asset{};
     timestamp_ms_t time{};
-    position_side positionSide{};
+    position_side_t positionSide{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Get-Order-Modify-History.md
@@ -384,24 +384,24 @@ struct order_modify_history_request
 struct new_algo_order_request
 {
     std::string symbol{};
-    order_side side{};
-    std::optional<position_side> positionSide{};
-    order_type type{};
-    std::optional<time_in_force> timeInForce{};
+    order_side_t side{};
+    std::optional<position_side_t> positionSide{};
+    order_type_t type{};
+    std::optional<time_in_force_t> timeInForce{};
     decimal_t quantity{};
     std::optional<decimal_t> price{};
     std::optional<decimal_t> triggerPrice{};
-    std::optional<working_type> workingType{};
-    algo_type algoType{};
+    std::optional<working_type_t> workingType{};
+    algo_type_t algoType{};
     std::optional<std::string> clientAlgoId{};
-    std::optional<price_match> priceMatch{};
+    std::optional<price_match_t> priceMatch{};
     std::optional<std::string> closePosition{};
     std::optional<std::string> priceProtect{};
     std::optional<std::string> reduceOnly{};
     std::optional<decimal_t> activatePrice{};
     std::optional<decimal_t> callbackRate{};
-    std::optional<response_type> newOrderRespType{};
-    std::optional<stp_mode> selfTradePreventionMode{};
+    std::optional<response_type_t> newOrderRespType{};
+    std::optional<stp_mode_t> selfTradePreventionMode{};
     std::optional<timestamp_ms_t> goodTillDate{};
 };
 
@@ -410,20 +410,20 @@ struct algo_order_response
 {
     std::uint64_t algoId{};
     std::optional<std::string> clientAlgoId{};
-    algo_type algoType{};
+    algo_type_t algoType{};
     std::string symbol{};
-    order_side side{};
-    std::optional<position_side> positionSide{};
-    algo_status algoStatus{};
-    std::optional<order_type> orderType{};
-    std::optional<time_in_force> timeInForce{};
+    order_side_t side{};
+    std::optional<position_side_t> positionSide{};
+    algo_status_t algoStatus{};
+    std::optional<order_type_t> orderType{};
+    std::optional<time_in_force_t> timeInForce{};
     std::optional<decimal_t> quantity{};
     std::optional<decimal_t> triggerPrice{};
     std::optional<decimal_t> price{};
     std::optional<decimal_t> icebergQuantity{};
-    std::optional<stp_mode> selfTradePreventionMode{};
-    std::optional<working_type> workingType{};
-    std::optional<price_match> priceMatch{};
+    std::optional<stp_mode_t> selfTradePreventionMode{};
+    std::optional<working_type_t> workingType{};
+    std::optional<price_match_t> priceMatch{};
     std::optional<bool> closePosition{};
     std::optional<bool> priceProtect{};
     std::optional<bool> reduceOnly{};

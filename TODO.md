@@ -12,12 +12,13 @@ add _t to all types in include/binapi2/fapi/types
 
 for all enum types - specify value of enum items
 
+what happen if enum parser gets unknown string?
+if serialization gets unknown enum value?
+
+
 
 tests for enum_set
 
-
-
-what happen if enum parser gets unknown string?
 
 
 
@@ -31,7 +32,8 @@ maybe type would be useful in future
 
 
 
-
+update docs/data_types.md
+update docs/DESIGN.md
 
 
 

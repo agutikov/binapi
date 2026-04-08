@@ -33,8 +33,8 @@ struct empty_response
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 struct rate_limit
 {
-    rate_limit_type rateLimitType{};
-    rate_limit_interval interval{};
+    rate_limit_type_t rateLimitType{};
+    rate_limit_interval_t interval{};
     int intervalNum{};
     int limit{};
     std::optional<int> count{};
@@ -92,7 +92,7 @@ struct symbol_filter
     std::optional<decimal_t> multiplierUp{};
     std::optional<decimal_t> multiplierDown{};
     std::optional<decimal_t> multiplierDecimal{};
-    std::optional<position_control_side> positionControlSide{};
+    std::optional<position_control_side_t> positionControlSide{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Exchange-Information.md
@@ -100,10 +100,10 @@ struct symbol_info
 {
     std::string symbol{};
     std::string pair{};
-    contract_type contractType{};
+    contract_type_t contractType{};
     timestamp_ms_t deliveryDate{};
     timestamp_ms_t onboardDate{};
-    contract_status status{};
+    contract_status_t status{};
     decimal_t maintMarginPercent{};
     decimal_t requiredMarginPercent{};
     std::string baseAsset{};
@@ -118,12 +118,12 @@ struct symbol_info
     int settlePlan{};
     decimal_t triggerProtect{};
     std::vector<symbol_filter> filters{};
-    std::vector<order_type> orderTypes{};
-    std::vector<time_in_force> timeInForce{};
+    std::vector<order_type_t> orderTypes{};
+    std::vector<time_in_force_t> timeInForce{};
     decimal_t liquidationFee{};
     decimal_t marketTakeBound{};
     std::optional<int> maxMoveOrderLimit{};
-    std::vector<trading_permission> permissionSets{};
+    std::vector<trading_permission_t> permissionSets{};
 };
 
 /// Full exchange information response. Contains rate limits, supported assets,
@@ -133,7 +133,7 @@ struct exchange_info_response
 {
     std::string timezone{};
     timestamp_ms_t serverTime{};
-    futures_type futuresType{};
+    futures_type_t futuresType{};
     std::vector<glz::generic> exchangeFilters{};
     std::vector<rate_limit> rateLimits{};
     std::vector<exchange_info_asset> assets{};

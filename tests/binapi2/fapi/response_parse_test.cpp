@@ -61,7 +61,7 @@ TEST(ResponseParse, ExchangeInfo)
     auto ec = glz::read_json(r, json);
     EXPECT_FALSE(ec) << glz::format_error(ec, json);
     EXPECT_EQ(r.timezone, "UTC");
-    EXPECT_EQ(r.futuresType, futures_type::u_margined);
+    EXPECT_EQ(r.futuresType, futures_type_t::u_margined);
     EXPECT_FALSE(r.rateLimits.empty());
     EXPECT_FALSE(r.symbols.empty());
 }

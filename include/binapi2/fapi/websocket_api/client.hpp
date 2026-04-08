@@ -71,7 +71,7 @@ public:
     template<class Request>
         requires has_ws_endpoint_traits<Request>
     [[nodiscard]] auto execute(const Request& request)
-        -> result<types::websocket_api_response<typename endpoint_traits<Request>::response_type>>;
+        -> result<types::websocket_api_response<typename endpoint_traits<Request>::response_type_t>>;
 
     /// @brief Asynchronously execute a WebSocket API request.
     ///
@@ -83,7 +83,7 @@ public:
     template<class Request>
         requires has_ws_endpoint_traits<Request>
     [[nodiscard]] auto async_execute(const Request& request)
-        -> boost::cobalt::task<result<types::websocket_api_response<typename endpoint_traits<Request>::response_type>>>;
+        -> boost::cobalt::task<result<types::websocket_api_response<typename endpoint_traits<Request>::response_type_t>>>;
 
     // -- Session logon (unique auth flow) --
 

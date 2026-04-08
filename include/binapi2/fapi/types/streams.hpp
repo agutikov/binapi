@@ -124,13 +124,13 @@ using all_market_ticker_stream_event = std::vector<ticker_stream_event>;
 struct liquidation_order_stream_data
 {
     std::string symbol{};
-    order_side side{};
-    order_type type{};
-    time_in_force tif{};
+    order_side_t side{};
+    order_type_t type{};
+    time_in_force_t tif{};
     decimal_t original_quantity{};
     decimal_t price{};
     decimal_t average_price{};
-    order_status status{};
+    order_status_t status{};
     decimal_t last_filled_qty{};
     decimal_t filled_accum_qty{};
     std::uint64_t trade_time{};
@@ -150,7 +150,7 @@ struct kline_stream_data
     std::uint64_t open_time{};
     std::uint64_t close_time{};
     std::string symbol{};
-    kline_interval interval{};
+    kline_interval_t interval{};
     std::uint64_t first_trade_id{};
     std::uint64_t last_trade_id{};
     decimal_t open_price{};
@@ -180,7 +180,7 @@ struct continuous_contract_kline_stream_data
 {
     std::uint64_t open_time{};
     std::uint64_t close_time{};
-    kline_interval interval{};
+    kline_interval_t interval{};
     std::uint64_t first_update_id{};
     std::uint64_t last_update_id{};
     decimal_t open_price{};
@@ -202,7 +202,7 @@ struct continuous_contract_kline_stream_event
     std::string event_type{};
     std::uint64_t event_time{};
     std::string pair{};
-    contract_type contractType{};
+    contract_type_t contractType{};
     continuous_contract_kline_stream_data kline{};
 };
 
@@ -246,10 +246,10 @@ struct contract_info_stream_event
     std::uint64_t event_time{};
     std::string symbol{};
     std::string pair{};
-    contract_type contractType{};
+    contract_type_t contractType{};
     std::uint64_t delivery_time{};
     std::uint64_t onboard_time{};
-    contract_status contractStatus{};
+    contract_status_t contractStatus{};
     std::optional<std::vector<contract_info_bracket>> brackets{};
 };
 
@@ -300,9 +300,9 @@ struct account_update_position
     decimal_t entry_price{};
     decimal_t accum_realized{};
     decimal_t unrealized_pnl{};
-    margin_type margin{};
+    margin_type_t margin{};
     decimal_t isolated_wallet{};
-    position_side pos_side{};
+    position_side_t pos_side{};
     decimal_t breakeven_price{};
 };
 
@@ -328,15 +328,15 @@ struct order_trade_update_order
 {
     std::string symbol{};
     std::string client_order_id{};
-    order_side side{};
-    order_type type{};
-    time_in_force tif{};
+    order_side_t side{};
+    order_type_t type{};
+    time_in_force_t tif{};
     decimal_t original_quantity{};
     decimal_t original_price{};
     decimal_t average_price{};
     decimal_t stop_price{};
-    execution_type exec_type{};
-    order_status status{};
+    execution_type_t exec_type{};
+    order_status_t status{};
     std::uint64_t order_id{};
     decimal_t last_filled_qty{};
     decimal_t filled_accum_qty{};
@@ -349,9 +349,9 @@ struct order_trade_update_order
     decimal_t ask_notional{};
     bool is_maker{};
     bool is_reduce_only{};
-    working_type work_type{};
-    order_type orig_order_type{};
-    position_side pos_side{};
+    working_type_t work_type{};
+    order_type_t orig_order_type{};
+    position_side_t pos_side{};
     bool is_close_all{};
     std::optional<decimal_t> activation_price{};
     std::optional<decimal_t> callback_rate{};
@@ -359,8 +359,8 @@ struct order_trade_update_order
     int ignore_si{};
     int ignore_ss{};
     decimal_t realized_profit{};
-    stp_mode stp{};
-    price_match price_match_mode{};
+    stp_mode_t stp{};
+    price_match_t price_match_mode{};
     std::optional<std::uint64_t> gtd_auto_cancel{};
     std::optional<std::string> expiry_reason{};
 };
@@ -378,9 +378,9 @@ struct order_trade_update_event
 struct margin_call_position
 {
     std::string symbol{};
-    position_side pos_side{};
+    position_side_t pos_side{};
     decimal_t position_amount{};
-    margin_type margin{};
+    margin_type_t margin{};
     decimal_t isolated_wallet{};
     decimal_t mark_price{};
     decimal_t unrealized_pnl{};
@@ -439,7 +439,7 @@ struct trade_lite_event
     decimal_t original_price{};
     bool is_maker{};
     std::string client_order_id{};
-    order_side side{};
+    order_side_t side{};
     decimal_t last_filled_price{};
     decimal_t last_filled_qty{};
     std::uint64_t trade_id{};
@@ -451,23 +451,23 @@ struct algo_order_update_data
 {
     std::string client_algo_id{};
     std::uint64_t algo_id{};
-    algo_type alg_type{};
-    order_type type{};
+    algo_type_t alg_type{};
+    order_type_t type{};
     std::string symbol{};
-    order_side side{};
-    position_side pos_side{};
-    time_in_force tif{};
+    order_side_t side{};
+    position_side_t pos_side{};
+    time_in_force_t tif{};
     decimal_t quantity{};
-    algo_status alg_status{};
+    algo_status_t alg_status{};
     std::optional<std::string> matched_order_id{};
     std::optional<decimal_t> avg_fill_price{};
     std::optional<decimal_t> executed_quantity{};
     std::optional<std::string> actual_order_type{};
     std::optional<decimal_t> trigger_price{};
     std::optional<decimal_t> order_price{};
-    std::optional<stp_mode> stp{};
-    std::optional<working_type> work_type{};
-    std::optional<price_match> price_match_mode{};
+    std::optional<stp_mode_t> stp{};
+    std::optional<working_type_t> work_type{};
+    std::optional<price_match_t> price_match_mode{};
     std::optional<bool> is_close_all{};
     std::optional<bool> price_protection{};
     std::optional<bool> is_reduce_only{};

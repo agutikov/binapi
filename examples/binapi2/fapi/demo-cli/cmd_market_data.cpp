@@ -278,7 +278,7 @@ int cmd_klines(const args_t& args)
 
     binapi2::fapi::types::kline_request req;
     req.symbol = args[0];
-    req.interval = parse_enum<binapi2::fapi::types::kline_interval>(args[1]);
+    req.interval = parse_enum<binapi2::fapi::types::kline_interval_t>(args[1]);
     if (args.size() > 2) req.limit = std::stoi(args[2]);
 
     spdlog::debug("executing klines request symbol={} interval={}",

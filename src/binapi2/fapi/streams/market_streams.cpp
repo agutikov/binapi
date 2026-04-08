@@ -309,7 +309,7 @@ market_streams::connect_continuous_contract_kline(const continuous_contract_klin
     if (subscription.pair.empty()) {
         return invalid_subscription("continuous contract kline stream requires a pair");
     }
-    const auto target = cfg_.stream_base_target + "/" + subscription.pair + "_" + types::to_string(subscription.contract_type)
+    const auto target = cfg_.stream_base_target + "/" + subscription.pair + "_" + types::to_string(subscription.contract_type_t)
         + "@continuousKline_" + types::to_string(subscription.interval);
     return transport_.connect(cfg_.stream_host, cfg_.stream_port, target);
 }

@@ -163,7 +163,7 @@ public:
     [[nodiscard]] auto execute(const Request& request)
     {
         using traits = rest::endpoint_traits<Request>;
-        return execute<typename traits::response_type>(
+        return execute<typename traits::response_type_t>(
             traits::endpoint.method, std::string{ traits::endpoint.path }, to_query_map(request), traits::endpoint.signed_request);
     }
 
@@ -179,7 +179,7 @@ public:
     [[nodiscard]] auto async_execute(const Request& request)
     {
         using traits = rest::endpoint_traits<Request>;
-        return async_execute<typename traits::response_type>(
+        return async_execute<typename traits::response_type_t>(
             traits::endpoint.method,
             std::string{ traits::endpoint.path },
             to_query_map(request),
@@ -216,7 +216,7 @@ private:
 template<class Request>
     requires rest::has_endpoint_traits<Request>
 auto
-rest::service::execute(const Request& request) -> result<typename rest::endpoint_traits<Request>::response_type>
+rest::service::execute(const Request& request) -> result<typename rest::endpoint_traits<Request>::response_type_t>
 {
     return owner_.execute(request);
 }
@@ -228,7 +228,7 @@ template<class Request>
     requires rest::has_endpoint_traits<Request>
 auto
 rest::service::async_execute(const Request& request)
-    -> boost::cobalt::task<result<typename rest::endpoint_traits<Request>::response_type>>
+    -> boost::cobalt::task<result<typename rest::endpoint_traits<Request>::response_type_t>>
 {
     co_return co_await owner_.async_execute(request);
 }

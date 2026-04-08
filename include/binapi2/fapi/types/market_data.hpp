@@ -128,7 +128,7 @@ struct historical_trades_request
 struct kline_request
 {
     std::string symbol{};
-    kline_interval interval{ kline_interval::m1 };
+    kline_interval_t interval{ kline_interval_t::m1 };
     std::optional<timestamp_ms_t> startTime{};
     std::optional<timestamp_ms_t> endTime{};
     std::optional<int> limit{};
@@ -138,8 +138,8 @@ struct kline_request
 struct continuous_kline_request
 {
     std::string pair{};
-    contract_type contractType{ contract_type::perpetual };
-    kline_interval interval{ kline_interval::m1 };
+    contract_type_t contractType{ contract_type_t::perpetual };
+    kline_interval_t interval{ kline_interval_t::m1 };
     std::optional<timestamp_ms_t> startTime{};
     std::optional<timestamp_ms_t> endTime{};
     std::optional<int> limit{};
@@ -149,7 +149,7 @@ struct continuous_kline_request
 struct index_price_kline_request
 {
     std::string pair{};
-    kline_interval interval{ kline_interval::m1 };
+    kline_interval_t interval{ kline_interval_t::m1 };
     std::optional<timestamp_ms_t> startTime{};
     std::optional<timestamp_ms_t> endTime{};
     std::optional<int> limit{};
@@ -314,7 +314,7 @@ struct open_interest
 struct futures_data_request
 {
     std::string symbol{};
-    futures_data_period period{ futures_data_period::m5 };
+    futures_data_period_t period{ futures_data_period_t::m5 };
     std::optional<int> limit{};
     std::optional<timestamp_ms_t> startTime{};
     std::optional<timestamp_ms_t> endTime{};
@@ -353,8 +353,8 @@ struct taker_buy_sell_volume_entry
 struct basis_request
 {
     std::string pair{};
-    contract_type contractType{ contract_type::perpetual };
-    futures_data_period period{ futures_data_period::m5 };
+    contract_type_t contractType{ contract_type_t::perpetual };
+    futures_data_period_t period{ futures_data_period_t::m5 };
     std::optional<int> limit{};
     std::optional<timestamp_ms_t> startTime{};
     std::optional<timestamp_ms_t> endTime{};
@@ -364,7 +364,7 @@ struct basis_request
 struct basis_entry
 {
     std::string pair{};
-    contract_type contractType{};
+    contract_type_t contractType{};
     decimal_t basis{};
     decimal_t basisRate{};
     decimal_t futuresPrice{};

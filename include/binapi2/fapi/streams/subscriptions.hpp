@@ -93,15 +93,15 @@ struct partial_book_depth_subscription
 struct kline_subscription
 {
     std::string symbol{};                                        ///< Trading pair symbol.
-    types::kline_interval interval{ types::kline_interval::m1 }; ///< Candlestick interval (e.g. 1m, 5m, 1h).
+    types::kline_interval_t interval{ types::kline_interval_t::m1 }; ///< Candlestick interval (e.g. 1m, 5m, 1h).
 };
 
 /// @brief Parameters for subscribing to the continuous contract kline stream.
 struct continuous_contract_kline_subscription
 {
     std::string pair{};                                                    ///< Trading pair (e.g. "BTCUSDT").
-    types::contract_type contract_type{ types::contract_type::perpetual }; ///< Contract type (perpetual, current quarter, etc.).
-    types::kline_interval interval{ types::kline_interval::m1 };           ///< Candlestick interval.
+    types::contract_type_t contract_type_t{ types::contract_type_t::perpetual }; ///< Contract type (perpetual, current quarter, etc.).
+    types::kline_interval_t interval{ types::kline_interval_t::m1 };           ///< Candlestick interval.
 };
 
 /// @brief Parameters for subscribing to the all-market mark price stream.

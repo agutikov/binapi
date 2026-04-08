@@ -46,10 +46,10 @@ consteval bool enum_values_fit()
 ///
 /// Example:
 /// @code
-///   enum_set<trading_permission> perms;
-///   perms.add(trading_permission::grid);
-///   perms.add(trading_permission::copy);
-///   assert(perms.contains(trading_permission::grid));
+///   enum_set<trading_permission_t> perms;
+///   perms.add(trading_permission_t::grid);
+///   perms.add(trading_permission_t::copy);
+///   assert(perms.contains(trading_permission_t::grid));
 ///   assert(perms.size() == 2);
 ///   for (auto p : perms) { ... }
 /// @endcode

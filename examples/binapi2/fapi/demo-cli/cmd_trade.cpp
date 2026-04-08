@@ -21,15 +21,15 @@ make_order_request(const args_t& args)
 {
     binapi2::fapi::types::new_order_request req;
     req.symbol = args[0];
-    req.side = parse_enum<binapi2::fapi::types::order_side>(args[1]);
-    req.type = parse_enum<binapi2::fapi::types::order_type>(args[2]);
+    req.side = parse_enum<binapi2::fapi::types::order_side_t>(args[1]);
+    req.type = parse_enum<binapi2::fapi::types::order_type_t>(args[2]);
 
     if (auto v = find_flag(args, "--quantity"); !v.empty())
         req.quantity = binapi2::fapi::types::decimal_t(std::string(v));
     if (auto v = find_flag(args, "--price"); !v.empty())
         req.price = binapi2::fapi::types::decimal_t(std::string(v));
     if (auto v = find_flag(args, "--tif"); !v.empty())
-        req.timeInForce = parse_enum<binapi2::fapi::types::time_in_force>(v);
+        req.timeInForce = parse_enum<binapi2::fapi::types::time_in_force_t>(v);
 
     spdlog::debug("order request: symbol={} side={} type={}",
                   req.symbol, to_string(req.side), to_string(req.type));

@@ -141,7 +141,7 @@ main()
     // Klines
     {
         auto r = c.market_data.klines(
-            types::kline_request{.symbol = "BTCUSDT", .interval = types::kline_interval::h1});
+            types::kline_request{.symbol = "BTCUSDT", .interval = types::kline_interval_t::h1});
         if (check("klines", r)) {
             if (r->empty()) {
                 std::cerr << "FAIL klines: empty array\n";

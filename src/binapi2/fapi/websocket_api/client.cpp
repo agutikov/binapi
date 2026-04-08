@@ -186,17 +186,17 @@ template<class Request>
     requires has_ws_endpoint_traits<Request>
 auto
 client::execute(const Request& request)
-    -> result<types::websocket_api_response<typename endpoint_traits<Request>::response_type>>
+    -> result<types::websocket_api_response<typename endpoint_traits<Request>::response_type_t>>
 {
     using traits = endpoint_traits<Request>;
-    return send_rpc<typename traits::response_type>(traits::method, inject_auth(request));
+    return send_rpc<typename traits::response_type_t>(traits::method, inject_auth(request));
 }
 
 template<class Request>
     requires has_ws_endpoint_traits<Request>
 auto
 client::async_execute(const Request& request)
-    -> boost::cobalt::task<result<types::websocket_api_response<typename endpoint_traits<Request>::response_type>>>
+    -> boost::cobalt::task<result<types::websocket_api_response<typename endpoint_traits<Request>::response_type_t>>>
 {
     co_return execute(request);
 }

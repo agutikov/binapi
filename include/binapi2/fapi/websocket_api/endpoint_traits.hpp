@@ -24,7 +24,7 @@ namespace binapi2::fapi::websocket_api {
 ///        name and expected response type.
 ///
 /// Each specialization must provide:
-/// - @c response_type : the deserialized response payload type.
+/// - @c response_type_t : the deserialized response payload type.
 /// - @c method        : a @c constexpr reference to the RPC method name string.
 ///
 /// @tparam Request The request parameter struct to look up.
@@ -37,7 +37,7 @@ struct endpoint_traits;
 template<>
 struct endpoint_traits<types::websocket_api_book_ticker_request>
 {
-    using response_type = types::book_ticker;
+    using response_type_t = types::book_ticker;
     static constexpr auto& method = ticker_book_method;
 };
 
@@ -45,7 +45,7 @@ struct endpoint_traits<types::websocket_api_book_ticker_request>
 template<>
 struct endpoint_traits<types::websocket_api_price_ticker_request>
 {
-    using response_type = types::price_ticker;
+    using response_type_t = types::price_ticker;
     static constexpr auto& method = ticker_price_method;
 };
 
@@ -55,7 +55,7 @@ struct endpoint_traits<types::websocket_api_price_ticker_request>
 template<>
 struct endpoint_traits<types::websocket_api_order_place_request>
 {
-    using response_type = types::order_response;
+    using response_type_t = types::order_response;
     static constexpr auto& method = order_place_method;
 };
 
@@ -63,7 +63,7 @@ struct endpoint_traits<types::websocket_api_order_place_request>
 template<>
 struct endpoint_traits<types::websocket_api_order_query_request>
 {
-    using response_type = types::order_response;
+    using response_type_t = types::order_response;
     static constexpr auto& method = order_status_method;
 };
 
@@ -71,7 +71,7 @@ struct endpoint_traits<types::websocket_api_order_query_request>
 template<>
 struct endpoint_traits<types::websocket_api_order_cancel_request>
 {
-    using response_type = types::order_response;
+    using response_type_t = types::order_response;
     static constexpr auto& method = order_cancel_method;
 };
 
@@ -79,7 +79,7 @@ struct endpoint_traits<types::websocket_api_order_cancel_request>
 template<>
 struct endpoint_traits<types::websocket_api_order_modify_request>
 {
-    using response_type = types::order_response;
+    using response_type_t = types::order_response;
     static constexpr auto& method = order_modify_method;
 };
 
@@ -87,7 +87,7 @@ struct endpoint_traits<types::websocket_api_order_modify_request>
 template<>
 struct endpoint_traits<types::websocket_api_position_request>
 {
-    using response_type = std::vector<types::position_risk>;
+    using response_type_t = std::vector<types::position_risk>;
     static constexpr auto& method = account_position_method;
 };
 
@@ -95,7 +95,7 @@ struct endpoint_traits<types::websocket_api_position_request>
 template<>
 struct endpoint_traits<types::websocket_api_algo_order_place_request>
 {
-    using response_type = types::algo_order_response;
+    using response_type_t = types::algo_order_response;
     static constexpr auto& method = algo_order_place_method;
 };
 
@@ -103,17 +103,17 @@ struct endpoint_traits<types::websocket_api_algo_order_place_request>
 template<>
 struct endpoint_traits<types::websocket_api_algo_order_cancel_request>
 {
-    using response_type = types::code_msg_response;
+    using response_type_t = types::code_msg_response;
     static constexpr auto& method = algo_order_cancel_method;
 };
 
 /// @brief Concept constraining types that have a valid @ref endpoint_traits specialization.
 ///
 /// A type satisfies this concept when @c endpoint_traits<T> provides both a
-/// @c response_type alias and a @c method member convertible to @c std::string_view.
+/// @c response_type_t alias and a @c method member convertible to @c std::string_view.
 template<class T>
 concept has_ws_endpoint_traits = requires {
-    typename endpoint_traits<T>::response_type;
+    typename endpoint_traits<T>::response_type_t;
     { endpoint_traits<T>::method } -> std::convertible_to<std::string_view>;
 };
 

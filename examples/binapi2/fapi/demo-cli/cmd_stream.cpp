@@ -77,7 +77,7 @@ int cmd_stream_kline(const args_t& args)
     spdlog::info("connecting to kline stream for {} {}", args[0], args[1]);
     if (auto c = streams.connect_kline({
             .symbol = args[0],
-            .interval = parse_enum<binapi2::fapi::types::kline_interval>(args[1]) }); !c) {
+            .interval = parse_enum<binapi2::fapi::types::kline_interval_t>(args[1]) }); !c) {
         print_error(c.err); return 1;
     }
 
