@@ -4,3 +4,4 @@ _docs
 compile_commands.json
 compose/postman-mock/certs/
 compose/postman-mock/workdir/
+*.log

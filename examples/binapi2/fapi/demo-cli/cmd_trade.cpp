@@ -7,7 +7,7 @@
 #include "cmd_trade.hpp"
 
 #include <binapi2/fapi/client.hpp>
-#include <binapi2/fapi/types/decimal.hpp>
+#include <binapi2/fapi/types/detail/decimal.hpp>
 
 #include <boost/asio/io_context.hpp>
 #include <spdlog/spdlog.h>

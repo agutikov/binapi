@@ -7,7 +7,7 @@
 #include "cmd_ws_api.hpp"
 
 #include <binapi2/fapi/websocket_api/client.hpp>
-#include <binapi2/fapi/types/decimal.hpp>
+#include <binapi2/fapi/types/detail/decimal.hpp>
 
 #include <boost/asio/io_context.hpp>
 #include <spdlog/spdlog.h>

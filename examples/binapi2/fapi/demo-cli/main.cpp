@@ -8,12 +8,17 @@
 //   binapi2-fapi-demo-cli [flags] <command> [args...]
 //
 // Flags:
-//   -v          Print full JSON responses
-//   -vv         Print JSON + transport log (method, target, status, body)
-//   -vvv        Print JSON + full HTTP with headers
-//   --live      Use production endpoints (default: testnet)
-//   --testnet   Use testnet endpoints (default)
-//   --help      Print this help message
+//   -v                      Print full JSON responses
+//   -vv                     Print JSON + transport log (method, target, status, body)
+//   -vvv                    Print JSON + full HTTP with headers
+//   --live                  Use production endpoints (default: testnet)
+//   --testnet               Use testnet endpoints (default)
+//   --save-request <file>   Save request to file
+//   --save-response <file>  Save response body to file
+//   --log-file <file>       Log to file
+//   --file-loglevel <lvl>   File log level (trace/debug/info/warn/error/off)
+//   --stdout-loglevel <lvl> Stdout log level (trace/debug/info/warn/error/off)
+//   --help                  Print this help message
 
 #include "common.hpp"
 #include "cmd_market_data.hpp"
@@ -102,12 +107,17 @@ void print_usage(const char* prog)
 {
     std::cout << "Usage: " << prog << " [flags] <command> [args...]\n\n"
               << "Flags:\n"
-              << "  -v          Print full JSON responses\n"
-              << "  -vv         Print JSON + transport log (method, target, status, body)\n"
-              << "  -vvv        Print JSON + full HTTP with headers\n"
-              << "  --live      Use production endpoints (default: testnet)\n"
-              << "  --testnet   Use testnet endpoints (default)\n"
-              << "  --help      Print this help\n\n"
+              << "  -v                      Print full JSON responses\n"
+              << "  -vv                     Print JSON + transport log\n"
+              << "  -vvv                    Print JSON + full HTTP with headers\n"
+              << "  --live                  Use production endpoints (default: testnet)\n"
+              << "  --testnet               Use testnet endpoints (default)\n"
+              << "  --save-request <file>   Save request to file\n"
+              << "  --save-response <file>  Save response body to file\n"
+              << "  --log-file <file>       Log to file\n"
+              << "  --file-loglevel <lvl>   File log level (trace/debug/info/warn/error/off)\n"
+              << "  --stdout-loglevel <lvl> Stdout log level (trace/debug/info/warn/error/off)\n"
+              << "  --help                  Print this help\n\n"
               << "Commands:\n";
     for (const auto& cmd : commands)
         std::cout << "  " << cmd.name << std::string(25 - std::min(cmd.name.size(), std::size_t{24}), ' ')
@@ -131,6 +141,11 @@ int main(int argc, char* argv[])
         else if (arg == "-v")   { demo::verbosity = 1; }
         else if (arg == "--live" || arg == "--prod") { demo::use_testnet = false; }
         else if (arg == "--testnet") { demo::use_testnet = true; }
+        else if (arg == "--save-request"   && i + 1 < argc) { demo::save_request_file  = argv[++i]; }
+        else if (arg == "--save-response"  && i + 1 < argc) { demo::save_response_file = argv[++i]; }
+        else if (arg == "--log-file"       && i + 1 < argc) { demo::log_file           = argv[++i]; }
+        else if (arg == "--file-loglevel"  && i + 1 < argc) { demo::file_loglevel      = argv[++i]; }
+        else if (arg == "--stdout-loglevel" && i + 1 < argc) { demo::stdout_loglevel   = argv[++i]; }
         else if (arg == "--help" || arg == "-h") { print_usage(prog); return 0; }
         else { cmd_args.emplace_back(arg); }
     }

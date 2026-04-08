@@ -1,0 +1,244 @@
+{
+  "$schema": "http://json-schema.org/schema#",
+  "type": "object",
+  "properties": {
+    "timezone": {
+      "type": "string"
+    },
+    "serverTime": {
+      "type": "integer"
+    },
+    "futuresType": {
+      "type": "string"
+    },
+    "rateLimits": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "rateLimitType": {
+            "type": "string"
+          },
+          "interval": {
+            "type": "string"
+          },
+          "intervalNum": {
+            "type": "integer"
+          },
+          "limit": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "interval",
+          "intervalNum",
+          "limit",
+          "rateLimitType"
+        ]
+      }
+    },
+    "exchangeFilters": {
+      "type": "array"
+    },
+    "assets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "asset": {
+            "type": "string"
+          },
+          "marginAvailable": {
+            "type": "boolean"
+          },
+          "autoAssetExchange": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "asset",
+          "autoAssetExchange",
+          "marginAvailable"
+        ]
+      }
+    },
+    "symbols": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "symbol": {
+            "type": "string"
+          },
+          "pair": {
+            "type": "string"
+          },
+          "contractType": {
+            "type": "string"
+          },
+          "deliveryDate": {
+            "type": "integer"
+          },
+          "onboardDate": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "maintMarginPercent": {
+            "type": "string"
+          },
+          "requiredMarginPercent": {
+            "type": "string"
+          },
+          "baseAsset": {
+            "type": "string"
+          },
+          "quoteAsset": {
+            "type": "string"
+          },
+          "marginAsset": {
+            "type": "string"
+          },
+          "pricePrecision": {
+            "type": "integer"
+          },
+          "quantityPrecision": {
+            "type": "integer"
+          },
+          "baseAssetPrecision": {
+            "type": "integer"
+          },
+          "quotePrecision": {
+            "type": "integer"
+          },
+          "underlyingType": {
+            "type": "string"
+          },
+          "underlyingSubType": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "triggerProtect": {
+            "type": "string"
+          },
+          "liquidationFee": {
+            "type": "string"
+          },
+          "marketTakeBound": {
+            "type": "string"
+          },
+          "maxMoveOrderLimit": {
+            "type": "integer"
+          },
+          "filters": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "tickSize": {
+                  "type": "string"
+                },
+                "filterType": {
+                  "type": "string"
+                },
+                "minPrice": {
+                  "type": "string"
+                },
+                "maxPrice": {
+                  "type": "string"
+                },
+                "minQty": {
+                  "type": "string"
+                },
+                "maxQty": {
+                  "type": "string"
+                },
+                "stepSize": {
+                  "type": "string"
+                },
+                "limit": {
+                  "type": "integer"
+                },
+                "notional": {
+                  "type": "string"
+                },
+                "multiplierDown": {
+                  "type": "string"
+                },
+                "multiplierDecimal": {
+                  "type": "string"
+                },
+                "multiplierUp": {
+                  "type": "string"
+                },
+                "positionControlSide": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "filterType"
+              ]
+            }
+          },
+          "orderTypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "timeInForce": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "permissionSets": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "baseAsset",
+          "baseAssetPrecision",
+          "contractType",
+          "deliveryDate",
+          "filters",
+          "liquidationFee",
+          "maintMarginPercent",
+          "marginAsset",
+          "marketTakeBound",
+          "maxMoveOrderLimit",
+          "onboardDate",
+          "orderTypes",
+          "pair",
+          "permissionSets",
+          "pricePrecision",
+          "quantityPrecision",
+          "quoteAsset",
+          "quotePrecision",
+          "requiredMarginPercent",
+          "status",
+          "symbol",
+          "timeInForce",
+          "triggerProtect",
+          "underlyingSubType",
+          "underlyingType"
+        ]
+      }
+    }
+  },
+  "required": [
+    "assets",
+    "exchangeFilters",
+    "futuresType",
+    "rateLimits",
+    "serverTime",
+    "symbols",
+    "timezone"
+  ]
+}

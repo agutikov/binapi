@@ -27,6 +27,15 @@ using args_t = std::vector<std::string>;
 inline int verbosity = 0;
 inline bool use_testnet = true;
 
+// Save request/response bodies to files.
+inline std::string save_request_file;
+inline std::string save_response_file;
+
+// File logging.
+inline std::string log_file;
+inline std::string file_loglevel;
+inline std::string stdout_loglevel;
+
 // Initialize spdlog (call once from main).
 void init_logging();
 

@@ -117,6 +117,67 @@ enum class margin_type
     crossed,
 };
 
+/// Futures margining type (USD-M vs COIN-M).
+enum class futures_type
+{
+    u_margined,
+    coin_margined,
+};
+
+[[nodiscard]] inline std::string
+to_string(futures_type value)
+{
+    switch (value) {
+        case futures_type::u_margined:   return "U_MARGINED";
+        case futures_type::coin_margined: return "COIN_MARGINED";
+    }
+    return "U_MARGINED";
+}
+
+/// Position control side for POSITION_RISK_CONTROL filters.
+enum class position_control_side
+{
+    none,
+    long_side,
+    short_side,
+    both,
+};
+
+[[nodiscard]] inline std::string
+to_string(position_control_side value)
+{
+    switch (value) {
+        case position_control_side::none:       return "NONE";
+        case position_control_side::long_side:  return "LONG";
+        case position_control_side::short_side: return "SHORT";
+        case position_control_side::both:       return "BOTH";
+    }
+    return "NONE";
+}
+
+/// Trading permission type for symbol permissionSets.
+enum class trading_permission
+{
+    grid,
+    copy,
+    dca,
+    rpi,
+    psb,
+};
+
+[[nodiscard]] inline std::string
+to_string(trading_permission value)
+{
+    switch (value) {
+        case trading_permission::grid: return "GRID";
+        case trading_permission::copy: return "COPY";
+        case trading_permission::dca:  return "DCA";
+        case trading_permission::rpi:  return "RPI";
+        case trading_permission::psb:  return "PSB";
+    }
+    return "GRID";
+}
+
 /// Futures contract delivery type (perpetual, quarterly, etc.).
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 enum class contract_type
@@ -127,6 +188,7 @@ enum class contract_type
     current_quarter,
     next_quarter,
     perpetual_delivering,
+    current_quarter_delivering,
     tradifi_perpetual,
 };
 
@@ -405,6 +467,8 @@ to_string(contract_type value)
             return "NEXT_QUARTER";
         case contract_type::perpetual_delivering:
             return "PERPETUAL_DELIVERING";
+        case contract_type::current_quarter_delivering:
+            return "CURRENT_QUARTER DELIVERING";
         case contract_type::tradifi_perpetual:
             return "TRADIFI_PERPETUAL";
     }
@@ -602,6 +666,7 @@ to_string(execution_type value)
 enum class rate_limit_type
 {
     request_weight,
+    orders,
     orders_1s,
     orders_1m,
     orders_1h,
@@ -613,6 +678,7 @@ to_string(rate_limit_type value)
 {
     switch (value) {
         case rate_limit_type::request_weight: return "REQUEST_WEIGHT";
+        case rate_limit_type::orders: return "ORDERS";
         case rate_limit_type::orders_1s: return "ORDERS_1S";
         case rate_limit_type::orders_1m: return "ORDERS_1M";
         case rate_limit_type::orders_1h: return "ORDERS_1H";
@@ -786,13 +852,36 @@ struct glz::meta<binapi2::fapi::types::margin_type>
 };
 
 template<>
+struct glz::meta<binapi2::fapi::types::futures_type>
+{
+    using enum binapi2::fapi::types::futures_type;
+    static constexpr auto value = enumerate("U_MARGINED", u_margined, "COIN_MARGINED", coin_margined);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::position_control_side>
+{
+    using enum binapi2::fapi::types::position_control_side;
+    static constexpr auto value = enumerate("NONE", none, "LONG", long_side, "SHORT", short_side, "BOTH", both);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::trading_permission>
+{
+    using enum binapi2::fapi::types::trading_permission;
+    static constexpr auto value = enumerate("GRID", grid, "COPY", copy, "DCA", dca, "RPI", rpi, "PSB", psb);
+};
+
+template<>
 struct glz::meta<binapi2::fapi::types::contract_type>
 {
     using enum binapi2::fapi::types::contract_type;
     static constexpr auto value = enumerate(
         "PERPETUAL", perpetual, "CURRENT_MONTH", current_month, "NEXT_MONTH", next_month,
         "CURRENT_QUARTER", current_quarter, "NEXT_QUARTER", next_quarter,
-        "PERPETUAL_DELIVERING", perpetual_delivering, "TRADIFI_PERPETUAL", tradifi_perpetual);
+        "PERPETUAL_DELIVERING", perpetual_delivering,
+        "CURRENT_QUARTER DELIVERING", current_quarter_delivering,
+        "TRADIFI_PERPETUAL", tradifi_perpetual);
 };
 
 template<>
@@ -870,7 +959,8 @@ struct glz::meta<binapi2::fapi::types::rate_limit_type>
 {
     using enum binapi2::fapi::types::rate_limit_type;
     static constexpr auto value = enumerate(
-        "REQUEST_WEIGHT", request_weight, "ORDERS_1S", orders_1s, "ORDERS_1M", orders_1m,
+        "REQUEST_WEIGHT", request_weight, "ORDERS", orders,
+        "ORDERS_1S", orders_1s, "ORDERS_1M", orders_1m,
         "ORDERS_1H", orders_1h, "ORDERS_1D", orders_1d);
 };
 

@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include <binapi2/fapi/types/decimal.hpp>
+#include <binapi2/fapi/types/detail/decimal.hpp>
 #include <binapi2/fapi/types/enums.hpp>
 #include <binapi2/fapi/types/timestamp.hpp>
 
@@ -92,6 +92,7 @@ struct symbol_filter
     std::optional<decimal> multiplierUp{};
     std::optional<decimal> multiplierDown{};
     std::optional<decimal> multiplierDecimal{};
+    std::optional<position_control_side> positionControlSide{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Exchange-Information.md
@@ -121,6 +122,8 @@ struct symbol_info
     std::vector<std::string> timeInForce{};
     decimal liquidationFee{};
     decimal marketTakeBound{};
+    std::optional<int> maxMoveOrderLimit{};
+    std::vector<trading_permission> permissionSets{};
 };
 
 /// Full exchange information response. Contains rate limits, supported assets,
@@ -130,6 +133,7 @@ struct exchange_info_response
 {
     std::string timezone{};
     timestamp_ms serverTime{};
+    futures_type futuresType{};
     std::vector<glz::generic> exchangeFilters{};
     std::vector<rate_limit> rateLimits{};
     std::vector<exchange_info_asset> assets{};
@@ -224,7 +228,9 @@ struct glz::meta<binapi2::fapi::types::symbol_filter>
                                          "multiplierDown",
                                          &T::multiplierDown,
                                          "multiplierDecimal",
-                                         &T::multiplierDecimal);
+                                         &T::multiplierDecimal,
+                                         "positionControlSide",
+                                         &T::positionControlSide);
 };
 
 template<>
@@ -278,7 +284,11 @@ struct glz::meta<binapi2::fapi::types::symbol_info>
                                          "liquidationFee",
                                          &T::liquidationFee,
                                          "marketTakeBound",
-                                         &T::marketTakeBound);
+                                         &T::marketTakeBound,
+                                         "maxMoveOrderLimit",
+                                         &T::maxMoveOrderLimit,
+                                         "permissionSets",
+                                         &T::permissionSets);
 };
 
 template<>
@@ -289,6 +299,8 @@ struct glz::meta<binapi2::fapi::types::exchange_info_response>
                                          &T::timezone,
                                          "serverTime",
                                          &T::serverTime,
+                                         "futuresType",
+                                         &T::futuresType,
                                          "exchangeFilters",
                                          &T::exchangeFilters,
                                          "rateLimits",

@@ -8,7 +8,7 @@
 #pragma once
 
 #include <binapi2/fapi/result.hpp>
-#include <binapi2/fapi/types/decimal.hpp>
+#include <binapi2/fapi/types/detail/decimal.hpp>
 #include <binapi2/fapi/types/market_data.hpp>
 #include <binapi2/fapi/types/streams.hpp>
 

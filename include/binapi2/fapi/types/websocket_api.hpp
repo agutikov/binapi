@@ -6,7 +6,7 @@
 
 #include <binapi2/fapi/types/account.hpp>
 #include <binapi2/fapi/types/common.hpp>
-#include <binapi2/fapi/types/decimal.hpp>
+#include <binapi2/fapi/types/detail/decimal.hpp>
 #include <binapi2/fapi/types/market_data.hpp>
 #include <binapi2/fapi/types/trade.hpp>
 

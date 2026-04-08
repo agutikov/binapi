@@ -31,6 +31,14 @@ target_link_libraries(json_query_test PRIVATE binapi2_fapi GTest::gtest_main)
 target_compile_options(json_query_test PRIVATE)
 gtest_discover_tests(json_query_test DISCOVERY_MODE PRE_TEST)
 
+add_executable(response_parse_test response_parse_test.cpp)
+target_link_libraries(response_parse_test PRIVATE binapi2_fapi GTest::gtest_main)
+target_compile_options(response_parse_test PRIVATE)
+target_compile_definitions(response_parse_test PRIVATE
+    RESPONSES_PATH="${CMAKE_SOURCE_DIR}/compose/postman-mock/responses"
+)
+gtest_discover_tests(response_parse_test DISCOVERY_MODE PRE_TEST)
+
 add_executable(postman_validation_test postman_validation_test.cpp)
 target_link_libraries(postman_validation_test PRIVATE binapi2_fapi GTest::gtest_main)
 target_compile_options(postman_validation_test PRIVATE)

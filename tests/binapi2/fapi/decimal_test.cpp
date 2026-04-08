@@ -2,7 +2,7 @@
 //
 // Comprehensive tests for the decimal fixed-precision type.
 
-#include <binapi2/fapi/types/decimal.hpp>
+#include <binapi2/fapi/types/detail/decimal.hpp>
 
 #include <gtest/gtest.h>
 

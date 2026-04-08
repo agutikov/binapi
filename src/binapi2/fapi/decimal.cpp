@@ -5,7 +5,7 @@
 /// @file decimal.cpp
 /// @brief Implementation of the fixed-precision decimal type.
 
-#include <binapi2/fapi/types/decimal.hpp>
+#include <binapi2/fapi/types/detail/decimal.hpp>
 
 #include <algorithm>
 #include <ostream>
