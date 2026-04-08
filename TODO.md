@@ -81,6 +81,25 @@ What execution variants we have of each of API variants?
 
 make a table of all combinations with comments
 
+
+Do we need to support all of them?
+Or maybe don't need easy sync calls at all?
+Or maybe need only production-ready setup:
+    - REST:
+        - single thread
+        - single shared connection
+        - maybe one spare connection?
+        - or one priority connection?
+    - WSAPI:
+        - the same as for REST
+    - Streams:
+        - parse in the same thread or buffer and transfer to parser thread?
+    - dedicated threads per API?
+    - or thread per pipeline stage: serialization, network, parsing?
+
+
+
+
 --------------------------------------------------------------------------------
 
 
@@ -92,6 +111,8 @@ it's manual implementation over async transport
 where is true async stream API?
 
 maybe asio::concurrent_channel ?
+
+
 
 
 --------------------------------------------------------------------------------

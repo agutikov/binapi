@@ -87,8 +87,8 @@ public:
     /// @return A result indicating how the loop terminated.
     [[nodiscard]] result<void> read_loop(account_update_handler account_handler,
                                          order_trade_update_handler order_handler,
-                                         margin_call_handler margin_handler = {},
-                                         listen_key_expired_handler listen_key_expired = {});
+                                         margin_call_handler margin_handler ,
+                                         listen_key_expired_handler listen_key_expired);
     /// @brief Async overload with completion callback.
     void read_loop(account_update_handler account_handler,
                    order_trade_update_handler order_handler,

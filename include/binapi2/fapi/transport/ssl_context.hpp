@@ -23,6 +23,6 @@ namespace binapi2::fapi::transport {
 ///                      in addition to system defaults.
 /// @return A ready-to-use Boost.Asio SSL context.
 boost::asio::ssl::context
-make_ssl_context(const std::string& ca_cert_file = {});
+make_ssl_context(const std::string& ca_cert_file);
 
 } // namespace binapi2::fapi::transport

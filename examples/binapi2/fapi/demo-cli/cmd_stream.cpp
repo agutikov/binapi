@@ -151,7 +151,7 @@ int cmd_stream_all_book_tickers(const args_t& /*args*/)
     binapi2::fapi::streams::market_streams streams{ io, make_config() };
 
     spdlog::info("connecting to all_book_tickers stream");
-    if (auto c = streams.connect_all_book_tickers(); !c) {
+    if (auto c = streams.connect_all_book_tickers({}); !c) {
         print_error(c.err); return 1;
     }
 
@@ -172,7 +172,7 @@ int cmd_stream_all_tickers(const args_t& /*args*/)
     binapi2::fapi::streams::market_streams streams{ io, make_config() };
 
     spdlog::info("connecting to all_market_tickers stream");
-    if (auto c = streams.connect_all_market_tickers(); !c) {
+    if (auto c = streams.connect_all_market_tickers({}); !c) {
         print_error(c.err); return 1;
     }
 
@@ -193,7 +193,7 @@ int cmd_stream_all_mini_tickers(const args_t& /*args*/)
     binapi2::fapi::streams::market_streams streams{ io, make_config() };
 
     spdlog::info("connecting to all_market_mini_tickers stream");
-    if (auto c = streams.connect_all_market_mini_tickers(); !c) {
+    if (auto c = streams.connect_all_market_mini_tickers({}); !c) {
         print_error(c.err); return 1;
     }
 

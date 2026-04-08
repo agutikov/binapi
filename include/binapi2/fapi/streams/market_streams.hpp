@@ -111,7 +111,7 @@ public:
 
     /// @brief Connect to the all-market mini ticker stream.
     /// @param subscription Subscription parameters (default-constructed for all markets).
-    [[nodiscard]] result<void> connect_all_market_mini_tickers(const types::all_market_mini_ticker_subscription& subscription = {});
+    [[nodiscard]] result<void> connect_all_market_mini_tickers(const types::all_market_mini_ticker_subscription& subscription);
     /// @brief Async overload with completion callback.
     void connect_all_market_mini_tickers(const types::all_market_mini_ticker_subscription& subscription, void_callback callback);
 
@@ -126,14 +126,14 @@ public:
     // -- All market tickers --
 
     /// @brief Connect to the all-market 24hr ticker stream.
-    [[nodiscard]] result<void> connect_all_market_tickers(const types::all_market_ticker_subscription& subscription = {});
+    [[nodiscard]] result<void> connect_all_market_tickers(const types::all_market_ticker_subscription& subscription);
     /// @brief Async overload with completion callback.
     void connect_all_market_tickers(const types::all_market_ticker_subscription& subscription, void_callback callback);
 
     // -- All book tickers --
 
     /// @brief Connect to the all-market book ticker stream.
-    [[nodiscard]] result<void> connect_all_book_tickers(const types::all_book_ticker_subscription& subscription = {});
+    [[nodiscard]] result<void> connect_all_book_tickers(const types::all_book_ticker_subscription& subscription);
     /// @brief Async overload with completion callback.
     void connect_all_book_tickers(const types::all_book_ticker_subscription& subscription, void_callback callback);
 
@@ -148,7 +148,7 @@ public:
     // -- All market liquidation orders --
 
     /// @brief Connect to the all-market liquidation order stream.
-    [[nodiscard]] result<void> connect_all_market_liquidation_orders(const types::all_market_liquidation_order_subscription& subscription = {});
+    [[nodiscard]] result<void> connect_all_market_liquidation_orders(const types::all_market_liquidation_order_subscription& subscription);
     /// @brief Async overload with completion callback.
     void connect_all_market_liquidation_orders(const types::all_market_liquidation_order_subscription& subscription, void_callback callback);
 
@@ -266,7 +266,7 @@ public:
 
     /// @brief Connect to the all-market mark price stream.
     /// @param subscription Subscription parameters (update frequency).
-    [[nodiscard]] result<void> connect_all_market_mark_price(const types::all_market_mark_price_subscription& subscription = {});
+    [[nodiscard]] result<void> connect_all_market_mark_price(const types::all_market_mark_price_subscription& subscription);
     /// @brief Async overload with completion callback.
     void connect_all_market_mark_price(const types::all_market_mark_price_subscription& subscription, void_callback callback);
 
@@ -278,7 +278,7 @@ public:
 
     /// @brief Connect to the contract info stream.
     /// @param subscription Subscription parameters (default-constructed for all contracts).
-    [[nodiscard]] result<void> connect_contract_info(const types::contract_info_subscription& subscription = {});
+    [[nodiscard]] result<void> connect_contract_info(const types::contract_info_subscription& subscription);
     /// @brief Async overload with completion callback.
     void connect_contract_info(const types::contract_info_subscription& subscription, void_callback callback);
 
@@ -289,12 +289,12 @@ public:
     void connect_asset_index(const types::asset_index_subscription& subscription, void_callback callback);
 
     /// @brief Connect to the all asset index stream.
-    [[nodiscard]] result<void> connect_all_asset_index(const types::all_asset_index_subscription& subscription = {});
+    [[nodiscard]] result<void> connect_all_asset_index(const types::all_asset_index_subscription& subscription);
     /// @brief Async overload with completion callback.
     void connect_all_asset_index(const types::all_asset_index_subscription& subscription, void_callback callback);
 
     /// @brief Connect to the trading session stream.
-    [[nodiscard]] result<void> connect_trading_session(const types::trading_session_subscription& subscription = {});
+    [[nodiscard]] result<void> connect_trading_session(const types::trading_session_subscription& subscription);
     /// @brief Async overload with completion callback.
     void connect_trading_session(const types::trading_session_subscription& subscription, void_callback callback);
 

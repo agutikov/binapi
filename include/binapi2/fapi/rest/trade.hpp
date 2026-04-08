@@ -105,9 +105,9 @@ public:
 
     /// @brief TradFi perpetual contract endpoint.
     /// @param request  Optional request parameters (defaults to empty).
-    [[nodiscard]] result<types::code_msg_response_t> tradfi_perps(const types::tradfi_perps_request_t& request = {});
+    [[nodiscard]] result<types::code_msg_response_t> tradfi_perps(const types::tradfi_perps_request_t& request);
     /// @brief Async variant of tradfi_perps.
-    [[nodiscard]] boost::cobalt::task<result<types::code_msg_response_t>> async_tradfi_perps(const types::tradfi_perps_request_t& request = {});
+    [[nodiscard]] boost::cobalt::task<result<types::code_msg_response_t>> async_tradfi_perps(const types::tradfi_perps_request_t& request);
 };
 
 } // namespace binapi2::fapi::rest
