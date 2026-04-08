@@ -43,7 +43,7 @@ struct rate_limit
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Check-Server-Time.md
 struct server_time_response
 {
-    timestamp_ms serverTime{};
+    timestamp_ms_t serverTime{};
 };
 
 /// Standard Binance error response body (HTTP 4xx/5xx).
@@ -59,8 +59,8 @@ struct binance_error_document
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Order-Book.md
 struct price_level
 {
-    decimal price{};
-    decimal quantity{};
+    decimal_t price{};
+    decimal_t quantity{};
 };
 
 /// Asset descriptor from exchange info. Indicates whether the asset can be
@@ -81,17 +81,17 @@ struct exchange_info_asset
 struct symbol_filter
 {
     std::string filterType{};
-    std::optional<decimal> maxPrice{};
-    std::optional<decimal> minPrice{};
-    std::optional<decimal> tickSize{};
-    std::optional<decimal> maxQty{};
-    std::optional<decimal> minQty{};
-    std::optional<decimal> stepSize{};
+    std::optional<decimal_t> maxPrice{};
+    std::optional<decimal_t> minPrice{};
+    std::optional<decimal_t> tickSize{};
+    std::optional<decimal_t> maxQty{};
+    std::optional<decimal_t> minQty{};
+    std::optional<decimal_t> stepSize{};
     std::optional<int> limit{};
-    std::optional<decimal> notional{};
-    std::optional<decimal> multiplierUp{};
-    std::optional<decimal> multiplierDown{};
-    std::optional<decimal> multiplierDecimal{};
+    std::optional<decimal_t> notional{};
+    std::optional<decimal_t> multiplierUp{};
+    std::optional<decimal_t> multiplierDown{};
+    std::optional<decimal_t> multiplierDecimal{};
     std::optional<position_control_side> positionControlSide{};
 };
 
@@ -101,11 +101,11 @@ struct symbol_info
     std::string symbol{};
     std::string pair{};
     contract_type contractType{};
-    timestamp_ms deliveryDate{};
-    timestamp_ms onboardDate{};
+    timestamp_ms_t deliveryDate{};
+    timestamp_ms_t onboardDate{};
     contract_status status{};
-    decimal maintMarginPercent{};
-    decimal requiredMarginPercent{};
+    decimal_t maintMarginPercent{};
+    decimal_t requiredMarginPercent{};
     std::string baseAsset{};
     std::string quoteAsset{};
     std::string marginAsset{};
@@ -116,12 +116,12 @@ struct symbol_info
     std::string underlyingType{};
     std::vector<std::string> underlyingSubType{};
     int settlePlan{};
-    decimal triggerProtect{};
+    decimal_t triggerProtect{};
     std::vector<symbol_filter> filters{};
     std::vector<order_type> orderTypes{};
     std::vector<time_in_force> timeInForce{};
-    decimal liquidationFee{};
-    decimal marketTakeBound{};
+    decimal_t liquidationFee{};
+    decimal_t marketTakeBound{};
     std::optional<int> maxMoveOrderLimit{};
     std::vector<trading_permission> permissionSets{};
 };
@@ -132,7 +132,7 @@ struct symbol_info
 struct exchange_info_response
 {
     std::string timezone{};
-    timestamp_ms serverTime{};
+    timestamp_ms_t serverTime{};
     futures_type futuresType{};
     std::vector<glz::generic> exchangeFilters{};
     std::vector<rate_limit> rateLimits{};

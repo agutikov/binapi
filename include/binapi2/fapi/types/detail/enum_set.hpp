@@ -54,12 +54,12 @@ consteval bool enum_values_fit()
 ///   for (auto p : perms) { ... }
 /// @endcode
 template<typename E, std::size_t Capacity = enum_capacity<E>>
-class enum_set
+class enum_set_t
 {
-    static_assert(std::is_enum_v<E>, "enum_set requires an enum type");
-    static_assert(Capacity > 0, "enum_set capacity must be positive");
+    static_assert(std::is_enum_v<E>, "enum_set_t requires an enum type");
+    static_assert(Capacity > 0, "enum_set_t capacity must be positive");
     static_assert(enum_values_fit<E, Capacity>(),
-                  "enum values exceed enum_set capacity — increase Capacity or check enum definition");
+                  "enum values exceed enum_set_t capacity — increase Capacity or check enum definition");
 
     std::bitset<Capacity> bits_{};
 
@@ -69,9 +69,9 @@ class enum_set
     }
 
 public:
-    constexpr enum_set() = default;
+    constexpr enum_set_t() = default;
 
-    constexpr enum_set(std::initializer_list<E> init)
+    constexpr enum_set_t(std::initializer_list<E> init)
     {
         for (auto e : init)
             add(e);
@@ -100,7 +100,7 @@ public:
     constexpr std::size_t size() const noexcept { return bits_.count(); }
     constexpr bool empty() const noexcept { return bits_.none(); }
 
-    constexpr bool operator==(const enum_set&) const = default;
+    constexpr bool operator==(const enum_set_t&) const = default;
 
     /// Forward iterator over the set values.
     class iterator

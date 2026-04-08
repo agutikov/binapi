@@ -51,7 +51,7 @@ TEST(ResponseParse, ServerTime)
     server_time_response r;
     auto ec = glz::read_json(r, json);
     EXPECT_FALSE(ec) << glz::format_error(ec, json);
-    EXPECT_NE(r.serverTime, timestamp_ms{});
+    EXPECT_NE(r.serverTime, timestamp_ms_t{});
 }
 
 TEST(ResponseParse, ExchangeInfo)

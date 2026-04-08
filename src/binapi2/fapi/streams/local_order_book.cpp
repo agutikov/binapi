@@ -207,7 +207,7 @@ local_order_book::apply_event(const types::depth_stream_event& event)
 template<class Compare>
 void
 local_order_book::apply_levels(const std::vector<types::price_level>& levels,
-                               std::map<types::decimal, types::decimal, Compare>& side)
+                               std::map<types::decimal_t, types::decimal_t, Compare>& side)
 {
     for (const auto& level : levels) {
         // Step 7: if quantity=0, remove price level
@@ -221,8 +221,8 @@ local_order_book::apply_levels(const std::vector<types::price_level>& levels,
 
 // Explicit instantiations for bid (descending) and ask (ascending) sides.
 template void local_order_book::apply_levels(const std::vector<types::price_level>&,
-                                             std::map<types::decimal, types::decimal, std::greater<>>&);
+                                             std::map<types::decimal_t, types::decimal_t, std::greater<>>&);
 template void local_order_book::apply_levels(const std::vector<types::price_level>&,
-                                             std::map<types::decimal, types::decimal, std::less<>>&);
+                                             std::map<types::decimal_t, types::decimal_t, std::less<>>&);
 
 } // namespace binapi2::fapi::streams

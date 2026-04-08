@@ -21,10 +21,10 @@ namespace binapi2::fapi {
 /// endpoint.  The value comes from `std::chrono::system_clock`, so it is
 /// subject to NTP adjustments.
 /// @return Milliseconds since 1970-01-01T00:00:00Z.
-[[nodiscard]] inline types::timestamp_ms
+[[nodiscard]] inline types::timestamp_ms_t
 current_timestamp_ms()
 {
-    return types::timestamp_ms{static_cast<std::uint64_t>(
+    return types::timestamp_ms_t{static_cast<std::uint64_t>(
         std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count())};
 }
 

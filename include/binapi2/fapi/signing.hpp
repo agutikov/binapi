@@ -54,9 +54,9 @@ build_query_string(const query_map& query);
 /// `sign_query()`.
 /// @param query          The parameter map to mutate.
 /// @param recv_window    Server-side timestamp tolerance in milliseconds.
-/// @param timestamp_ms   Current UTC time in milliseconds since epoch.
+/// @param timestamp_ms_t   Current UTC time in milliseconds since epoch.
 void
-inject_auth_query(query_map& query, std::uint64_t recv_window, types::timestamp_ms timestamp);
+inject_auth_query(query_map& query, std::uint64_t recv_window, types::timestamp_ms_t timestamp);
 
 /// @brief Compute and insert the `signature` parameter into @p query.
 ///

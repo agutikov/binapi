@@ -43,7 +43,7 @@ int cmd_order_book_live(const args_t& args)
         std::cout << "=== " << symbol << " Order Book (update " << snap.last_update_id << ") ===\n\n";
 
         std::cout << "  ASKS (best " << display_levels << ")\n";
-        std::vector<std::pair<binapi2::fapi::types::decimal, binapi2::fapi::types::decimal>> top_asks;
+        std::vector<std::pair<binapi2::fapi::types::decimal_t, binapi2::fapi::types::decimal_t>> top_asks;
         {
             auto it = snap.asks.begin();
             for (int i = 0; i < display_levels && it != snap.asks.end(); ++i, ++it)

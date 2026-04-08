@@ -61,8 +61,8 @@ struct order_book_request
 struct order_book_response
 {
     std::uint64_t lastUpdateId{};
-    timestamp_ms message_output_time{};
-    timestamp_ms transaction_time{};
+    timestamp_ms_t message_output_time{};
+    timestamp_ms_t transaction_time{};
     std::vector<price_level> bids{};
     std::vector<price_level> asks{};
 };
@@ -82,10 +82,10 @@ struct recent_trades_request
 struct recent_trade
 {
     std::uint64_t id{};
-    decimal price{};
-    decimal qty{};
-    decimal quoteQty{};
-    timestamp_ms time{};
+    decimal_t price{};
+    decimal_t qty{};
+    decimal_t quoteQty{};
+    timestamp_ms_t time{};
     bool isBuyerMaker{};
     std::optional<bool> isRPITrade{};
 };
@@ -95,8 +95,8 @@ struct aggregate_trades_request
 {
     std::string symbol{};
     std::optional<std::uint64_t> fromId{};
-    std::optional<timestamp_ms> startTime{};
-    std::optional<timestamp_ms> endTime{};
+    std::optional<timestamp_ms_t> startTime{};
+    std::optional<timestamp_ms_t> endTime{};
     std::optional<int> limit{};
 };
 
@@ -104,11 +104,11 @@ struct aggregate_trades_request
 struct aggregate_trade
 {
     std::uint64_t agg_trade_id{};
-    decimal price{};
-    decimal quantity{};
+    decimal_t price{};
+    decimal_t quantity{};
     std::uint64_t first_trade_id{};
     std::uint64_t last_trade_id{};
-    timestamp_ms timestamp{};
+    timestamp_ms_t timestamp{};
     bool is_buyer_maker{};
 };
 
@@ -129,8 +129,8 @@ struct kline_request
 {
     std::string symbol{};
     kline_interval interval{ kline_interval::m1 };
-    std::optional<timestamp_ms> startTime{};
-    std::optional<timestamp_ms> endTime{};
+    std::optional<timestamp_ms_t> startTime{};
+    std::optional<timestamp_ms_t> endTime{};
     std::optional<int> limit{};
 };
 
@@ -140,8 +140,8 @@ struct continuous_kline_request
     std::string pair{};
     contract_type contractType{ contract_type::perpetual };
     kline_interval interval{ kline_interval::m1 };
-    std::optional<timestamp_ms> startTime{};
-    std::optional<timestamp_ms> endTime{};
+    std::optional<timestamp_ms_t> startTime{};
+    std::optional<timestamp_ms_t> endTime{};
     std::optional<int> limit{};
 };
 
@@ -150,8 +150,8 @@ struct index_price_kline_request
 {
     std::string pair{};
     kline_interval interval{ kline_interval::m1 };
-    std::optional<timestamp_ms> startTime{};
-    std::optional<timestamp_ms> endTime{};
+    std::optional<timestamp_ms_t> startTime{};
+    std::optional<timestamp_ms_t> endTime{};
     std::optional<int> limit{};
 };
 
@@ -162,18 +162,18 @@ struct index_price_kline_request
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Kline-Candlestick-Data.md
 struct kline
 {
-    timestamp_ms openTime{};
-    decimal open{};
-    decimal high{};
-    decimal low{};
-    decimal close{};
-    decimal volume{};
-    timestamp_ms closeTime{};
-    decimal quoteAssetVolume{};
+    timestamp_ms_t openTime{};
+    decimal_t open{};
+    decimal_t high{};
+    decimal_t low{};
+    decimal_t close{};
+    decimal_t volume{};
+    timestamp_ms_t closeTime{};
+    decimal_t quoteAssetVolume{};
     std::uint64_t numberOfTrades{};
-    decimal takerBuyBaseAssetVolume{};
-    decimal takerBuyQuoteAssetVolume{};
-    decimal ignore{};
+    decimal_t takerBuyBaseAssetVolume{};
+    decimal_t takerBuyQuoteAssetVolume{};
+    decimal_t ignore{};
 };
 
 // ---------------------------------------------------------------------------
@@ -190,11 +190,11 @@ struct book_ticker_request
 struct book_ticker
 {
     std::string symbol{};
-    decimal bidPrice{};
-    decimal bidQty{};
-    decimal askPrice{};
-    decimal askQty{};
-    timestamp_ms time{};
+    decimal_t bidPrice{};
+    decimal_t bidQty{};
+    decimal_t askPrice{};
+    decimal_t askQty{};
+    timestamp_ms_t time{};
     std::uint64_t lastUpdateId{};
 };
 
@@ -208,8 +208,8 @@ struct price_ticker_request
 struct price_ticker
 {
     std::string symbol{};
-    decimal price{};
-    timestamp_ms time{};
+    decimal_t price{};
+    timestamp_ms_t time{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/24hr-Ticker-Price-Change-Statistics.md
@@ -222,18 +222,18 @@ struct ticker_24hr_request
 struct ticker_24hr
 {
     std::string symbol{};
-    decimal priceChange{};
-    decimal priceChangePercent{};
-    decimal weightedAvgPrice{};
-    decimal lastPrice{};
-    decimal lastQty{};
-    decimal openPrice{};
-    decimal highPrice{};
-    decimal lowPrice{};
-    decimal volume{};
-    decimal quoteVolume{};
-    timestamp_ms openTime{};
-    timestamp_ms closeTime{};
+    decimal_t priceChange{};
+    decimal_t priceChangePercent{};
+    decimal_t weightedAvgPrice{};
+    decimal_t lastPrice{};
+    decimal_t lastQty{};
+    decimal_t openPrice{};
+    decimal_t highPrice{};
+    decimal_t lowPrice{};
+    decimal_t volume{};
+    decimal_t quoteVolume{};
+    timestamp_ms_t openTime{};
+    timestamp_ms_t closeTime{};
     std::uint64_t firstId{};
     std::uint64_t lastId{};
     std::uint64_t count{};
@@ -253,21 +253,21 @@ struct mark_price_request
 struct mark_price
 {
     std::string symbol{};
-    decimal markPrice{};
-    decimal indexPrice{};
-    decimal estimatedSettlePrice{};
-    decimal lastFundingRate{};
-    decimal interestRate{};
-    timestamp_ms nextFundingTime{};
-    timestamp_ms time{};
+    decimal_t markPrice{};
+    decimal_t indexPrice{};
+    decimal_t estimatedSettlePrice{};
+    decimal_t lastFundingRate{};
+    decimal_t interestRate{};
+    timestamp_ms_t nextFundingTime{};
+    timestamp_ms_t time{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Get-Funding-Rate-History.md
 struct funding_rate_history_request
 {
     std::optional<std::string> symbol{};
-    std::optional<timestamp_ms> startTime{};
-    std::optional<timestamp_ms> endTime{};
+    std::optional<timestamp_ms_t> startTime{};
+    std::optional<timestamp_ms_t> endTime{};
     std::optional<int> limit{};
 };
 
@@ -275,17 +275,17 @@ struct funding_rate_history_request
 struct funding_rate_history_entry
 {
     std::string symbol{};
-    decimal fundingRate{};
-    timestamp_ms fundingTime{};
-    decimal markPrice{};
+    decimal_t fundingRate{};
+    timestamp_ms_t fundingTime{};
+    decimal_t markPrice{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Get-Funding-Rate-Info.md
 struct funding_rate_info
 {
     std::string symbol{};
-    decimal adjustedFundingRateCap{};
-    decimal adjustedFundingRateFloor{};
+    decimal_t adjustedFundingRateCap{};
+    decimal_t adjustedFundingRateFloor{};
     int fundingIntervalHours{};
     bool disclaimer{};
 };
@@ -303,9 +303,9 @@ struct open_interest_request
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Open-Interest.md
 struct open_interest
 {
-    decimal openInterest{};
+    decimal_t openInterest{};
     std::string symbol{};
-    timestamp_ms time{};
+    timestamp_ms_t time{};
 };
 
 /// Generic request for futures analytics endpoints (open interest statistics,
@@ -316,37 +316,37 @@ struct futures_data_request
     std::string symbol{};
     futures_data_period period{ futures_data_period::m5 };
     std::optional<int> limit{};
-    std::optional<timestamp_ms> startTime{};
-    std::optional<timestamp_ms> endTime{};
+    std::optional<timestamp_ms_t> startTime{};
+    std::optional<timestamp_ms_t> endTime{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Open-Interest-Statistics.md
 struct open_interest_statistics_entry
 {
     std::string symbol{};
-    decimal sumOpenInterest{};
-    decimal sumOpenInterestValue{};
-    decimal CMCCirculatingSupply{};
-    timestamp_ms timestamp{};
+    decimal_t sumOpenInterest{};
+    decimal_t sumOpenInterestValue{};
+    decimal_t CMCCirculatingSupply{};
+    timestamp_ms_t timestamp{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Long-Short-Ratio.md
 struct long_short_ratio_entry
 {
     std::string symbol{};
-    decimal longShortRatio{};
-    decimal longAccount{};
-    decimal shortAccount{};
-    timestamp_ms timestamp{};
+    decimal_t longShortRatio{};
+    decimal_t longAccount{};
+    decimal_t shortAccount{};
+    timestamp_ms_t timestamp{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Taker-BuySell-Volume.md
 struct taker_buy_sell_volume_entry
 {
-    decimal buySellRatio{};
-    decimal buyVol{};
-    decimal sellVol{};
-    timestamp_ms timestamp{};
+    decimal_t buySellRatio{};
+    decimal_t buyVol{};
+    decimal_t sellVol{};
+    timestamp_ms_t timestamp{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Basis.md
@@ -356,8 +356,8 @@ struct basis_request
     contract_type contractType{ contract_type::perpetual };
     futures_data_period period{ futures_data_period::m5 };
     std::optional<int> limit{};
-    std::optional<timestamp_ms> startTime{};
-    std::optional<timestamp_ms> endTime{};
+    std::optional<timestamp_ms_t> startTime{};
+    std::optional<timestamp_ms_t> endTime{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Basis.md
@@ -365,12 +365,12 @@ struct basis_entry
 {
     std::string pair{};
     contract_type contractType{};
-    decimal basis{};
-    decimal basisRate{};
-    decimal futuresPrice{};
-    decimal indexPrice{};
-    decimal annualizedBasisRate{};
-    timestamp_ms timestamp{};
+    decimal_t basis{};
+    decimal_t basisRate{};
+    decimal_t futuresPrice{};
+    decimal_t indexPrice{};
+    decimal_t annualizedBasisRate{};
+    timestamp_ms_t timestamp{};
 };
 
 // ---------------------------------------------------------------------------
@@ -392,8 +392,8 @@ struct delivery_price_request
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Delivery-Price.md
 struct delivery_price_entry
 {
-    timestamp_ms deliveryTime{};
-    decimal deliveryPrice{};
+    timestamp_ms_t deliveryTime{};
+    decimal_t deliveryPrice{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Composite-Index-Symbol-Information.md
@@ -407,15 +407,15 @@ struct composite_index_base_asset
 {
     std::string baseAsset{};
     std::string quoteAsset{};
-    decimal weightInQuantity{};
-    decimal weightInPercentage{};
+    decimal_t weightInQuantity{};
+    decimal_t weightInPercentage{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Composite-Index-Symbol-Information.md
 struct composite_index_info
 {
     std::string symbol{};
-    timestamp_ms time{};
+    timestamp_ms_t time{};
     std::string component{};
     std::vector<composite_index_base_asset> baseAssetList{};
 };
@@ -431,15 +431,15 @@ struct index_constituent
 {
     std::string exchange{};
     std::string symbol{};
-    decimal price{};
-    decimal weight{};
+    decimal_t price{};
+    decimal_t weight{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Index-Constituents.md
 struct index_constituents_response
 {
     std::string symbol{};
-    timestamp_ms time{};
+    timestamp_ms_t time{};
     std::vector<index_constituent> constituents{};
 };
 
@@ -453,16 +453,16 @@ struct asset_index_request
 struct asset_index
 {
     std::string symbol{};
-    timestamp_ms time{};
-    decimal index{};
-    decimal bidBuffer{};
-    decimal askBuffer{};
-    decimal bidRate{};
-    decimal askRate{};
-    decimal autoExchangeBidBuffer{};
-    decimal autoExchangeAskBuffer{};
-    decimal autoExchangeBidRate{};
-    decimal autoExchangeAskRate{};
+    timestamp_ms_t time{};
+    decimal_t index{};
+    decimal_t bidBuffer{};
+    decimal_t askBuffer{};
+    decimal_t bidRate{};
+    decimal_t askRate{};
+    decimal_t autoExchangeBidBuffer{};
+    decimal_t autoExchangeAskBuffer{};
+    decimal_t autoExchangeBidRate{};
+    decimal_t autoExchangeAskRate{};
 };
 
 // ---------------------------------------------------------------------------
@@ -479,8 +479,8 @@ struct insurance_fund_request
 struct insurance_fund_asset
 {
     std::string asset{};
-    decimal marginBalance{};
-    timestamp_ms updateTime{};
+    decimal_t marginBalance{};
+    timestamp_ms_t updateTime{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Insurance-Fund-Balance.md
@@ -500,8 +500,8 @@ struct adl_risk_request
 struct adl_risk_entry
 {
     std::string symbol{};
-    decimal adlRisk{};
-    timestamp_ms updateTime{};
+    decimal_t adlRisk{};
+    timestamp_ms_t updateTime{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Order-Book-RPI.md
@@ -518,8 +518,8 @@ struct trading_schedule_request
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Trading-Schedule.md
 struct trading_session_entry
 {
-    timestamp_ms startTime{};
-    timestamp_ms endTime{};
+    timestamp_ms_t startTime{};
+    timestamp_ms_t endTime{};
     std::string type{};
 };
 
@@ -532,7 +532,7 @@ struct market_schedule
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Trading-Schedule.md
 struct trading_schedule_response
 {
-    timestamp_ms updateTime{};
+    timestamp_ms_t updateTime{};
     std::map<std::string, market_schedule> marketSchedules{};
 };
 

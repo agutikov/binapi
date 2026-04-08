@@ -32,43 +32,43 @@ namespace binapi2::fapi::types {
 struct account_asset
 {
     std::string asset{};
-    decimal walletBalance{};
-    decimal unrealizedProfit{};
-    decimal marginBalance{};
-    decimal maintMargin{};
-    decimal initialMargin{};
-    decimal positionInitialMargin{};
-    decimal openOrderInitialMargin{};
-    decimal crossWalletBalance{};
-    decimal crossUnPnl{};
-    decimal availableBalance{};
-    decimal maxWithdrawAmount{};
+    decimal_t walletBalance{};
+    decimal_t unrealizedProfit{};
+    decimal_t marginBalance{};
+    decimal_t maintMargin{};
+    decimal_t initialMargin{};
+    decimal_t positionInitialMargin{};
+    decimal_t openOrderInitialMargin{};
+    decimal_t crossWalletBalance{};
+    decimal_t crossUnPnl{};
+    decimal_t availableBalance{};
+    decimal_t maxWithdrawAmount{};
     std::optional<bool> marginAvailable{};
-    timestamp_ms updateTime{};
+    timestamp_ms_t updateTime{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Account-Information-V3.md
 struct account_position
 {
     std::string symbol{};
-    decimal initialMargin{};
-    decimal maintMargin{};
-    decimal unrealizedProfit{};
-    decimal positionInitialMargin{};
-    decimal openOrderInitialMargin{};
-    std::optional<decimal> leverage{};
+    decimal_t initialMargin{};
+    decimal_t maintMargin{};
+    decimal_t unrealizedProfit{};
+    decimal_t positionInitialMargin{};
+    decimal_t openOrderInitialMargin{};
+    std::optional<decimal_t> leverage{};
     std::optional<bool> isolated{};
-    std::optional<decimal> entryPrice{};
-    std::optional<decimal> breakEvenPrice{};
-    std::optional<decimal> maxNotional{};
-    std::optional<decimal> bidNotional{};
-    std::optional<decimal> askNotional{};
+    std::optional<decimal_t> entryPrice{};
+    std::optional<decimal_t> breakEvenPrice{};
+    std::optional<decimal_t> maxNotional{};
+    std::optional<decimal_t> bidNotional{};
+    std::optional<decimal_t> askNotional{};
     position_side positionSide{};
-    decimal positionAmt{};
-    std::optional<decimal> isolatedMargin{};
-    std::optional<decimal> notional{};
-    std::optional<decimal> isolatedWallet{};
-    timestamp_ms updateTime{};
+    decimal_t positionAmt{};
+    std::optional<decimal_t> isolatedMargin{};
+    std::optional<decimal_t> notional{};
+    std::optional<decimal_t> isolatedWallet{};
+    timestamp_ms_t updateTime{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Account-Information-V3.md
@@ -78,20 +78,20 @@ struct account_information
     bool canTrade{};
     bool canDeposit{};
     bool canWithdraw{};
-    timestamp_ms updateTime{};
+    timestamp_ms_t updateTime{};
     std::optional<bool> multiAssetsMargin{};
     std::optional<int> tradeGroupId{};
-    decimal totalInitialMargin{};
-    decimal totalMaintMargin{};
-    decimal totalWalletBalance{};
-    decimal totalUnrealizedProfit{};
-    decimal totalMarginBalance{};
-    decimal totalPositionInitialMargin{};
-    decimal totalOpenOrderInitialMargin{};
-    decimal totalCrossWalletBalance{};
-    decimal totalCrossUnPnl{};
-    decimal availableBalance{};
-    decimal maxWithdrawAmount{};
+    decimal_t totalInitialMargin{};
+    decimal_t totalMaintMargin{};
+    decimal_t totalWalletBalance{};
+    decimal_t totalUnrealizedProfit{};
+    decimal_t totalMarginBalance{};
+    decimal_t totalPositionInitialMargin{};
+    decimal_t totalOpenOrderInitialMargin{};
+    decimal_t totalCrossWalletBalance{};
+    decimal_t totalCrossUnPnl{};
+    decimal_t availableBalance{};
+    decimal_t maxWithdrawAmount{};
     std::vector<account_asset> assets{};
     std::vector<account_position> positions{};
 };
@@ -101,13 +101,13 @@ struct futures_account_balance
 {
     std::string accountAlias{};
     std::string asset{};
-    decimal balance{};
-    decimal crossWalletBalance{};
-    decimal crossUnPnl{};
-    decimal availableBalance{};
-    decimal maxWithdrawAmount{};
+    decimal_t balance{};
+    decimal_t crossWalletBalance{};
+    decimal_t crossUnPnl{};
+    decimal_t availableBalance{};
+    decimal_t maxWithdrawAmount{};
     bool marginAvailable{};
-    timestamp_ms updateTime{};
+    timestamp_ms_t updateTime{};
 };
 
 // ---------------------------------------------------------------------------
@@ -124,21 +124,21 @@ struct position_risk_request
 struct position_risk
 {
     std::string symbol{};
-    decimal positionAmt{};
-    decimal entryPrice{};
-    decimal breakEvenPrice{};
-    decimal markPrice{};
-    decimal unRealizedProfit{};
-    decimal liquidationPrice{};
-    decimal leverage{};
-    decimal maxNotionalValue{};
+    decimal_t positionAmt{};
+    decimal_t entryPrice{};
+    decimal_t breakEvenPrice{};
+    decimal_t markPrice{};
+    decimal_t unRealizedProfit{};
+    decimal_t liquidationPrice{};
+    decimal_t leverage{};
+    decimal_t maxNotionalValue{};
     margin_type marginType{};
-    decimal isolatedMargin{};
+    decimal_t isolatedMargin{};
     bool isAutoAddMargin{};
     position_side positionSide{};
-    decimal notional{};
-    decimal isolatedWallet{};
-    timestamp_ms updateTime{};
+    decimal_t notional{};
+    decimal_t isolatedWallet{};
+    timestamp_ms_t updateTime{};
 };
 
 // ---------------------------------------------------------------------------
@@ -155,7 +155,7 @@ struct account_config_response
     bool dualSidePosition{};
     bool multiAssetsMargin{};
     std::optional<int> tradeGroupId{};
-    timestamp_ms updateTime{};
+    timestamp_ms_t updateTime{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Symbol-Config.md
@@ -171,7 +171,7 @@ struct symbol_config_entry
     margin_type marginType{};
     bool isAutoAddMargin{};
     int leverage{};
-    decimal maxNotionalValue{};
+    decimal_t maxNotionalValue{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Get-Current-Multi-Assets-Mode.md
@@ -195,8 +195,8 @@ struct income_history_request
 {
     std::optional<std::string> symbol{};
     std::optional<std::string> incomeType{};
-    std::optional<timestamp_ms> startTime{};
-    std::optional<timestamp_ms> endTime{};
+    std::optional<timestamp_ms_t> startTime{};
+    std::optional<timestamp_ms_t> endTime{};
     std::optional<int> page{};
     std::optional<int> limit{};
 };
@@ -206,10 +206,10 @@ struct income_history_entry
 {
     std::string symbol{};
     income_type incomeType{};
-    decimal income{};
+    decimal_t income{};
     std::string asset{};
     std::string info{};
-    timestamp_ms time{};
+    timestamp_ms_t time{};
     std::uint64_t tranId{};
     std::string tradeId{};
 };
@@ -231,15 +231,15 @@ struct leverage_bracket_entry
     int initialLeverage{};
     std::uint64_t notionalCap{};
     std::uint64_t notionalFloor{};
-    decimal maintMarginRatio{};
-    decimal cum{};
+    decimal_t maintMarginRatio{};
+    decimal_t cum{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Notional-and-Leverage-Brackets.md
 struct symbol_leverage_brackets
 {
     std::string symbol{};
-    std::optional<decimal> notionalCoef{};
+    std::optional<decimal_t> notionalCoef{};
     std::vector<leverage_bracket_entry> brackets{};
 };
 
@@ -253,9 +253,9 @@ struct commission_rate_request
 struct commission_rate_response
 {
     std::string symbol{};
-    decimal makerCommissionRate{};
-    decimal takerCommissionRate{};
-    std::optional<decimal> rpiCommissionRate{};
+    decimal_t makerCommissionRate{};
+    decimal_t takerCommissionRate{};
+    std::optional<decimal_t> rpiCommissionRate{};
 };
 
 // ---------------------------------------------------------------------------
@@ -265,14 +265,14 @@ struct commission_rate_response
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Get-Download-Id-For-Futures-Transaction-History.md
 struct download_id_request
 {
-    timestamp_ms startTime{};
-    timestamp_ms endTime{};
+    timestamp_ms_t startTime{};
+    timestamp_ms_t endTime{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Get-Download-Id-For-Futures-Transaction-History.md
 struct download_id_response
 {
-    timestamp_ms avgCostTimestampOfLast30d{};
+    timestamp_ms_t avgCostTimestampOfLast30d{};
     std::string downloadId{};
 };
 
@@ -289,7 +289,7 @@ struct download_link_response
     std::string status{};
     std::string url{};
     bool notified{};
-    timestamp_ms expirationTimestamp{};
+    timestamp_ms_t expirationTimestamp{};
     bool isExpired{};
 };
 
@@ -313,7 +313,7 @@ struct toggle_bnb_burn_request
 struct trading_status_indicator
 {
     bool isLocked{};
-    timestamp_ms plannedRecoverTime{};
+    timestamp_ms_t plannedRecoverTime{};
     std::string indicator{};
     double value{};
     double triggerValue{};
@@ -329,7 +329,7 @@ struct quantitative_rules_request
 struct quantitative_rules_response
 {
     std::map<std::string, std::vector<trading_status_indicator>> indicators{};
-    timestamp_ms updateTime{};
+    timestamp_ms_t updateTime{};
 };
 
 // ---------------------------------------------------------------------------
@@ -345,9 +345,9 @@ struct pm_account_info_request
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/portfolio-margin-endpoints.md
 struct pm_account_info_response
 {
-    decimal maxWithdrawAmountUSD{};
+    decimal_t maxWithdrawAmountUSD{};
     std::string asset{};
-    decimal maxWithdrawAmount{};
+    decimal_t maxWithdrawAmount{};
 };
 
 } // namespace binapi2::fapi::types

@@ -33,7 +33,7 @@ namespace binapi2::fapi::types {
 /// @code
 ///   new_order_request req{ .price = "50000.10", .quantity = "0.001" };
 /// @endcode
-struct decimal
+struct decimal_t
 {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
@@ -47,23 +47,23 @@ struct decimal
 
     /// Maximum valid decimal number: 10^19 (raw 10^37).
     /// Guarantees: max + max fits in int128 (no hardware overflow on +/-).
-    static constexpr decimal max() { return decimal(max_raw_, raw_tag{}); }
-    static constexpr decimal min() { return decimal(min_raw_, raw_tag{}); }
+    static constexpr decimal_t max() { return decimal_t(max_raw_, raw_tag{}); }
+    static constexpr decimal_t min() { return decimal_t(min_raw_, raw_tag{}); }
 
     int128_t value{}; ///< Unscaled integer: actual_value = value * 10^(-scale).
 
     // -- Construction --
 
-    constexpr decimal() = default;
+    constexpr decimal_t() = default;
 
     /// Construct from a raw value already at scale 18.
-    /// Use decimal(raw, input_scale) to convert from a different scale.
+    /// Use decimal_t(raw, input_scale) to convert from a different scale.
     struct raw_tag {};
-    explicit constexpr decimal(int128_t raw, raw_tag) : value(raw) {}
+    explicit constexpr decimal_t(int128_t raw, raw_tag) : value(raw) {}
 
     /// Construct from an integer with arbitrary scale.
     /// Scales the value to 18 decimal places.
-    constexpr decimal(int128_t raw, int input_scale) : value(raw)
+    constexpr decimal_t(int128_t raw, int input_scale) : value(raw)
     {
         if (input_scale < scale) {
             for (int i = 0; i < scale - input_scale; ++i)
@@ -76,9 +76,9 @@ struct decimal
 
     /// Parse from a decimal string. Throws std::overflow_error if the integer
     /// part is too large, std::invalid_argument if more than 18 fractional digits.
-    decimal(const char* s);                // NOLINT
-    decimal(const std::string& s);         // NOLINT
-    decimal(std::string_view s);           // NOLINT
+    decimal_t(const char* s);                // NOLINT
+    decimal_t(const std::string& s);         // NOLINT
+    decimal_t(std::string_view s);           // NOLINT
 
     // -- String conversion --
 
@@ -106,21 +106,21 @@ struct decimal
 
     // -- Comparison (trivial — same scale, just compare the int128) --
 
-    [[nodiscard]] constexpr auto operator<=>(const decimal& rhs) const = default;
+    [[nodiscard]] constexpr auto operator<=>(const decimal_t& rhs) const = default;
 
     // -- Arithmetic --
 
-    [[nodiscard]] constexpr decimal operator+(const decimal& rhs) const { return decimal(value + rhs.value, raw_tag{}); }
-    [[nodiscard]] constexpr decimal operator-(const decimal& rhs) const { return decimal(value - rhs.value, raw_tag{}); }
-    [[nodiscard]] constexpr decimal operator-() const { return decimal(-value, raw_tag{}); }
+    [[nodiscard]] constexpr decimal_t operator+(const decimal_t& rhs) const { return decimal_t(value + rhs.value, raw_tag{}); }
+    [[nodiscard]] constexpr decimal_t operator-(const decimal_t& rhs) const { return decimal_t(value - rhs.value, raw_tag{}); }
+    [[nodiscard]] constexpr decimal_t operator-() const { return decimal_t(-value, raw_tag{}); }
 
     /// Multiplication via 256-bit intermediate. Truncates sub-10^-18 remainder.
     /// Throws std::overflow_error if the result exceeds int128 range.
-    [[nodiscard]] decimal operator*(const decimal& rhs) const;
-    decimal& operator*=(const decimal& rhs);
+    [[nodiscard]] decimal_t operator*(const decimal_t& rhs) const;
+    decimal_t& operator*=(const decimal_t& rhs);
 
-    constexpr decimal& operator+=(const decimal& rhs) { value += rhs.value; return *this; }
-    constexpr decimal& operator-=(const decimal& rhs) { value -= rhs.value; return *this; }
+    constexpr decimal_t& operator+=(const decimal_t& rhs) { value += rhs.value; return *this; }
+    constexpr decimal_t& operator-=(const decimal_t& rhs) { value -= rhs.value; return *this; }
 
 private:
     // Raw int128 limits: 10^37 (decimal 10^19). 2 * 10^37 < 2^127, so +/- of two
@@ -136,47 +136,47 @@ private:
 /// For mul(a,b): value = |a.value * b.value| % 10^18, at scale 10^-36.
 /// For div(a,b): value = |a.value * 10^18| % |b.value|; actual error = value / |b.value| * 10^-18.
 /// Sign follows the sign of the result.
-struct decimal_error
+struct decimal_error_t
 {
-    decimal::int128_t value{};
+    decimal_t::int128_t value{};
     [[nodiscard]] constexpr bool is_zero() const { return value == 0; }
-    [[nodiscard]] constexpr auto operator<=>(const decimal_error&) const = default;
+    [[nodiscard]] constexpr auto operator<=>(const decimal_error_t&) const = default;
     /// Scientific notation of the raw int128 value.
     [[nodiscard]] std::string to_string() const;
 };
 
 /// Overflow from decimal mul/div — nonzero means result exceeded int128 range.
 /// Separate type prevents accidental arithmetic with decimal values.
-struct decimal_overflow
+struct decimal_overflow_t
 {
-    decimal::int128_t value{};
+    decimal_t::int128_t value{};
     [[nodiscard]] constexpr bool is_zero() const { return value == 0; }
-    [[nodiscard]] constexpr auto operator<=>(const decimal_overflow&) const = default;
+    [[nodiscard]] constexpr auto operator<=>(const decimal_overflow_t&) const = default;
     /// Scientific notation of the raw int128 value.
     [[nodiscard]] std::string to_string() const;
 };
 
 /// Complete result of decimal mul or div.
-struct decimal_result
+struct decimal_result_t
 {
-    decimal value;              ///< Main result at scale 10^-18.
-    decimal_error error;        ///< Precision remainder (scale depends on operation).
-    decimal_overflow overflow;  ///< Nonzero if result exceeded int128 range.
+    decimal_t value;              ///< Main result at scale 10^-18.
+    decimal_error_t error;        ///< Precision remainder (scale depends on operation).
+    decimal_overflow_t overflow;  ///< Nonzero if result exceeded int128 range.
 
     [[nodiscard]] constexpr bool is_exact() const { return error.is_zero() && overflow.is_zero(); }
     [[nodiscard]] constexpr bool has_overflow() const { return !overflow.is_zero(); }
 };
 
 /// Safe multiplication via 256-bit intermediate with overflow detection.
-[[nodiscard]] decimal_result mul(decimal a, decimal b);
+[[nodiscard]] decimal_result_t mul(decimal_t a, decimal_t b);
 
 /// Safe division via 256-bit intermediate with overflow detection.
 /// Throws std::domain_error on division by zero.
-[[nodiscard]] decimal_result div(decimal a, decimal b);
+[[nodiscard]] decimal_result_t div(decimal_t a, decimal_t b);
 
-std::ostream& operator<<(std::ostream& os, const decimal& d);
-std::ostream& operator<<(std::ostream& os, const decimal_error& e);
-std::ostream& operator<<(std::ostream& os, const decimal_overflow& o);
+std::ostream& operator<<(std::ostream& os, const decimal_t& d);
+std::ostream& operator<<(std::ostream& os, const decimal_error_t& e);
+std::ostream& operator<<(std::ostream& os, const decimal_overflow_t& o);
 
 } // namespace binapi2::fapi::types
 
@@ -187,22 +187,22 @@ std::ostream& operator<<(std::ostream& os, const decimal_overflow& o);
 namespace glz {
 
 template<>
-struct from<JSON, binapi2::fapi::types::decimal>
+struct from<JSON, binapi2::fapi::types::decimal_t>
 {
     template<auto Opts>
-    static void op(binapi2::fapi::types::decimal& d, is_context auto&& ctx, auto&& it, auto&& end)
+    static void op(binapi2::fapi::types::decimal_t& d, is_context auto&& ctx, auto&& it, auto&& end)
     {
         std::string s;
         parse<JSON>::op<Opts>(s, ctx, it, end);
-        d = binapi2::fapi::types::decimal(s);
+        d = binapi2::fapi::types::decimal_t(s);
     }
 };
 
 template<>
-struct to<JSON, binapi2::fapi::types::decimal>
+struct to<JSON, binapi2::fapi::types::decimal_t>
 {
     template<auto Opts>
-    static void op(const binapi2::fapi::types::decimal& d, is_context auto&& ctx, auto&& b, auto&& ix) noexcept
+    static void op(const binapi2::fapi::types::decimal_t& d, is_context auto&& ctx, auto&& b, auto&& ix) noexcept
     {
         auto s = d.to_string();
         serialize<JSON>::op<Opts>(s, ctx, b, ix);

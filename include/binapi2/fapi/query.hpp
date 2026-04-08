@@ -48,7 +48,7 @@ to_query_value(const std::string& value, std::string& out)
 }
 
 inline void
-to_query_value(const types::decimal& value, std::string& out)
+to_query_value(const types::decimal_t& value, std::string& out)
 {
     out = value.to_string();
 }
@@ -66,7 +66,7 @@ to_query_value(std::uint64_t value, std::string& out)
 }
 
 inline void
-to_query_value(const types::timestamp_ms& value, std::string& out)
+to_query_value(const types::timestamp_ms_t& value, std::string& out)
 {
     out = value.to_string();
 }

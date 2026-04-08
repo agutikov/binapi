@@ -79,9 +79,9 @@ int cmd_ws_order_place(const args_t& args)
     req.side = parse_enum<binapi2::fapi::types::order_side>(args[1]);
     req.type = parse_enum<binapi2::fapi::types::order_type>(args[2]);
     if (auto v = find_flag(args, "--quantity"); !v.empty())
-        req.quantity = binapi2::fapi::types::decimal(std::string(v));
+        req.quantity = binapi2::fapi::types::decimal_t(std::string(v));
     if (auto v = find_flag(args, "--price"); !v.empty())
-        req.price = binapi2::fapi::types::decimal(std::string(v));
+        req.price = binapi2::fapi::types::decimal_t(std::string(v));
 
     spdlog::info("placing order via WS API: {} {} {}", req.symbol,
                  to_string(req.side), to_string(req.type));

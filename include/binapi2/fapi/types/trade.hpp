@@ -34,41 +34,41 @@ struct new_order_request
     order_side side{ order_side::buy };
     order_type type{ order_type::limit };
     std::optional<time_in_force> timeInForce{};
-    decimal quantity{};
-    std::optional<decimal> price{};
+    decimal_t quantity{};
+    std::optional<decimal_t> price{};
     std::optional<std::string> newClientOrderId{};
-    std::optional<decimal> stopPrice{};
+    std::optional<decimal_t> stopPrice{};
     std::optional<position_side> positionSide{};
     std::optional<std::string> reduceOnly{};
     std::optional<std::string> closePosition{};
-    std::optional<decimal> activationPrice{};
-    std::optional<decimal> callbackRate{};
+    std::optional<decimal_t> activationPrice{};
+    std::optional<decimal_t> callbackRate{};
     std::optional<working_type> workingType{};
     std::optional<std::string> priceProtect{};
     std::optional<response_type> newOrderRespType{};
     std::optional<price_match> priceMatch{};
     std::optional<stp_mode> selfTradePreventionMode{};
-    std::optional<timestamp_ms> goodTillDate{};
+    std::optional<timestamp_ms_t> goodTillDate{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/New-Order-Test.md
 struct order_response
 {
     std::string clientOrderId{};
-    decimal cumQty{};
-    decimal cumQuote{};
-    decimal executedQty{};
-    std::optional<decimal> cumBase{};
+    decimal_t cumQty{};
+    decimal_t cumQuote{};
+    decimal_t executedQty{};
+    std::optional<decimal_t> cumBase{};
     std::uint64_t orderId{};
-    decimal avgPrice{};
-    decimal origQty{};
+    decimal_t avgPrice{};
+    decimal_t origQty{};
     std::optional<std::string> pair{};
-    decimal price{};
+    decimal_t price{};
     bool reduceOnly{};
     order_side side{};
     position_side positionSide{};
     order_status status{};
-    decimal stopPrice{};
+    decimal_t stopPrice{};
     bool closePosition{};
     std::string symbol{};
     time_in_force timeInForce{};
@@ -78,11 +78,11 @@ struct order_response
     order_type origType{};
     std::optional<price_match> priceMatch{};
     std::optional<stp_mode> selfTradePreventionMode{};
-    std::optional<timestamp_ms> goodTillDate{};
-    std::optional<decimal> activatePrice{};
-    std::optional<decimal> priceRate{};
-    std::optional<timestamp_ms> time{};       ///< Order creation time (ms). Present in query/list responses.
-    std::optional<timestamp_ms> updateTime{};
+    std::optional<timestamp_ms_t> goodTillDate{};
+    std::optional<decimal_t> activatePrice{};
+    std::optional<decimal_t> priceRate{};
+    std::optional<timestamp_ms_t> time{};       ///< Order creation time (ms). Present in query/list responses.
+    std::optional<timestamp_ms_t> updateTime{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Modify-Order.md
@@ -90,8 +90,8 @@ struct modify_order_request
 {
     std::string symbol{};
     order_side side{ order_side::buy };
-    decimal quantity{};
-    decimal price{};
+    decimal_t quantity{};
+    decimal_t price{};
     std::optional<std::uint64_t> orderId{};
     std::optional<std::string> origClientOrderId{};
     std::optional<price_match> priceMatch{};
@@ -189,8 +189,8 @@ struct all_orders_request
 {
     std::string symbol{};
     std::optional<std::uint64_t> orderId{};
-    std::optional<timestamp_ms> startTime{};
-    std::optional<timestamp_ms> endTime{};
+    std::optional<timestamp_ms_t> startTime{};
+    std::optional<timestamp_ms_t> endTime{};
     std::optional<int> limit{};
 };
 
@@ -203,24 +203,24 @@ struct position_risk_v3
 {
     std::string symbol{};
     position_side positionSide{};
-    decimal positionAmt{};
-    decimal entryPrice{};
-    decimal breakEvenPrice{};
-    decimal markPrice{};
-    decimal unRealizedProfit{};
-    decimal liquidationPrice{};
-    decimal isolatedMargin{};
-    decimal notional{};
+    decimal_t positionAmt{};
+    decimal_t entryPrice{};
+    decimal_t breakEvenPrice{};
+    decimal_t markPrice{};
+    decimal_t unRealizedProfit{};
+    decimal_t liquidationPrice{};
+    decimal_t isolatedMargin{};
+    decimal_t notional{};
     std::string marginAsset{};
     std::string isolatedWallet{};
-    decimal initialMargin{};
-    decimal maintMargin{};
-    decimal positionInitialMargin{};
-    decimal openOrderInitialMargin{};
+    decimal_t initialMargin{};
+    decimal_t maintMargin{};
+    decimal_t positionInitialMargin{};
+    decimal_t openOrderInitialMargin{};
     int adl{};
-    decimal bidNotional{};
-    decimal askNotional{};
-    timestamp_ms updateTime{};
+    decimal_t bidNotional{};
+    decimal_t askNotional{};
+    timestamp_ms_t updateTime{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Position-Information-V3.md
@@ -256,8 +256,8 @@ struct force_orders_request
 {
     std::optional<std::string> symbol{};
     std::optional<auto_close_type> autoCloseType{};
-    std::optional<timestamp_ms> startTime{};
-    std::optional<timestamp_ms> endTime{};
+    std::optional<timestamp_ms_t> startTime{};
+    std::optional<timestamp_ms_t> endTime{};
     std::optional<int> limit{};
 };
 
@@ -266,8 +266,8 @@ struct account_trade_request
 {
     std::string symbol{};
     std::optional<std::uint64_t> orderId{};
-    std::optional<timestamp_ms> startTime{};
-    std::optional<timestamp_ms> endTime{};
+    std::optional<timestamp_ms_t> startTime{};
+    std::optional<timestamp_ms_t> endTime{};
     std::optional<std::uint64_t> fromId{};
     std::optional<int> limit{};
 };
@@ -280,15 +280,15 @@ struct account_trade_entry
     std::string symbol{};
     order_side side{};
     position_side positionSide{};
-    decimal price{};
-    decimal qty{};
-    decimal quoteQty{};
-    decimal commission{};
+    decimal_t price{};
+    decimal_t qty{};
+    decimal_t quoteQty{};
+    decimal_t commission{};
     std::string commissionAsset{};
-    timestamp_ms time{};
+    timestamp_ms_t time{};
     bool buyer{};
     bool maker{};
-    decimal realizedPnl{};
+    decimal_t realizedPnl{};
 };
 
 // ---------------------------------------------------------------------------
@@ -318,7 +318,7 @@ struct change_leverage_request
 struct change_leverage_response
 {
     int leverage{};
-    decimal maxNotionalValue{};
+    decimal_t maxNotionalValue{};
     std::string symbol{};
 };
 
@@ -334,7 +334,7 @@ struct modify_isolated_margin_request
 {
     std::string symbol{};
     std::optional<position_side> positionSide{};
-    decimal amount{};
+    decimal_t amount{};
     delta_type type{};
 };
 
@@ -343,7 +343,7 @@ struct modify_isolated_margin_response
 {
     int code{};
     std::string msg{};
-    decimal amount{};
+    decimal_t amount{};
     int type{};
 };
 
@@ -352,8 +352,8 @@ struct position_margin_history_request
 {
     std::string symbol{};
     std::optional<int> type{};
-    std::optional<timestamp_ms> startTime{};
-    std::optional<timestamp_ms> endTime{};
+    std::optional<timestamp_ms_t> startTime{};
+    std::optional<timestamp_ms_t> endTime{};
     std::optional<int> limit{};
 };
 
@@ -363,9 +363,9 @@ struct position_margin_history_entry
     std::string symbol{};
     int type{};
     delta_type deltaType{};
-    decimal amount{};
+    decimal_t amount{};
     std::string asset{};
-    timestamp_ms time{};
+    timestamp_ms_t time{};
     position_side positionSide{};
 };
 
@@ -375,8 +375,8 @@ struct order_modify_history_request
     std::string symbol{};
     std::optional<std::uint64_t> orderId{};
     std::optional<std::string> origClientOrderId{};
-    std::optional<timestamp_ms> startTime{};
-    std::optional<timestamp_ms> endTime{};
+    std::optional<timestamp_ms_t> startTime{};
+    std::optional<timestamp_ms_t> endTime{};
     std::optional<int> limit{};
 };
 
@@ -388,9 +388,9 @@ struct new_algo_order_request
     std::optional<position_side> positionSide{};
     order_type type{};
     std::optional<time_in_force> timeInForce{};
-    decimal quantity{};
-    std::optional<decimal> price{};
-    std::optional<decimal> triggerPrice{};
+    decimal_t quantity{};
+    std::optional<decimal_t> price{};
+    std::optional<decimal_t> triggerPrice{};
     std::optional<working_type> workingType{};
     algo_type algoType{};
     std::optional<std::string> clientAlgoId{};
@@ -398,11 +398,11 @@ struct new_algo_order_request
     std::optional<std::string> closePosition{};
     std::optional<std::string> priceProtect{};
     std::optional<std::string> reduceOnly{};
-    std::optional<decimal> activatePrice{};
-    std::optional<decimal> callbackRate{};
+    std::optional<decimal_t> activatePrice{};
+    std::optional<decimal_t> callbackRate{};
     std::optional<response_type> newOrderRespType{};
     std::optional<stp_mode> selfTradePreventionMode{};
-    std::optional<timestamp_ms> goodTillDate{};
+    std::optional<timestamp_ms_t> goodTillDate{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/New-Algo-Order.md
@@ -417,22 +417,22 @@ struct algo_order_response
     algo_status algoStatus{};
     std::optional<order_type> orderType{};
     std::optional<time_in_force> timeInForce{};
-    std::optional<decimal> quantity{};
-    std::optional<decimal> triggerPrice{};
-    std::optional<decimal> price{};
-    std::optional<decimal> icebergQuantity{};
+    std::optional<decimal_t> quantity{};
+    std::optional<decimal_t> triggerPrice{};
+    std::optional<decimal_t> price{};
+    std::optional<decimal_t> icebergQuantity{};
     std::optional<stp_mode> selfTradePreventionMode{};
     std::optional<working_type> workingType{};
     std::optional<price_match> priceMatch{};
     std::optional<bool> closePosition{};
     std::optional<bool> priceProtect{};
     std::optional<bool> reduceOnly{};
-    std::optional<decimal> activatePrice{};
-    std::optional<decimal> callbackRate{};
-    std::optional<timestamp_ms> createTime{};
-    std::optional<timestamp_ms> updateTime{};
-    std::optional<timestamp_ms> triggerTime{};
-    std::optional<timestamp_ms> goodTillDate{};
+    std::optional<decimal_t> activatePrice{};
+    std::optional<decimal_t> callbackRate{};
+    std::optional<timestamp_ms_t> createTime{};
+    std::optional<timestamp_ms_t> updateTime{};
+    std::optional<timestamp_ms_t> triggerTime{};
+    std::optional<timestamp_ms_t> goodTillDate{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Cancel-Algo-Order.md
@@ -454,8 +454,8 @@ struct all_algo_orders_request
 {
     std::string symbol{};
     std::optional<std::uint64_t> algoId{};
-    std::optional<timestamp_ms> startTime{};
-    std::optional<timestamp_ms> endTime{};
+    std::optional<timestamp_ms_t> startTime{};
+    std::optional<timestamp_ms_t> endTime{};
     std::optional<int> page{};
     std::optional<int> limit{};
 };

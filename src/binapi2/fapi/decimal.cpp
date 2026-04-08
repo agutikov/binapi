@@ -17,8 +17,8 @@ namespace binapi2::fapi::types {
 
 namespace {
 
-using int128_t  = decimal::int128_t;
-using uint128_t = decimal::uint128_t;
+using int128_t  = decimal_t::int128_t;
+using uint128_t = decimal_t::uint128_t;
 
 // -- 256-bit unsigned helpers (manual, no compiler extension) --
 
@@ -94,13 +94,13 @@ divmod_result divmod256(uint256_t n, uint128_t d) {
     return {q, rem};
 }
 
-/// Pack a 256-bit unsigned quotient + sign into decimal_result fields.
-decimal_result pack_result(uint256_t quot, uint128_t rem, bool negative) {
+/// Pack a 256-bit unsigned quotient + sign into decimal_result_t fields.
+decimal_result_t pack_result(uint256_t quot, uint128_t rem, bool negative) {
     // int128 hardware limit (2^127 - 1).
     constexpr uint128_t int128_max = ~uint128_t(0) >> 1;
 
     int128_t result_raw;
-    decimal_overflow overflow{};
+    decimal_overflow_t overflow{};
 
     if (quot.hi == 0 && quot.lo <= int128_max) {
         result_raw = static_cast<int128_t>(quot.lo);
@@ -121,8 +121,8 @@ decimal_result pack_result(uint256_t quot, uint128_t rem, bool negative) {
     }
 
     return {
-        decimal(result_raw, decimal::raw_tag{}),
-        decimal_error{rem_signed},
+        decimal_t(result_raw, decimal_t::raw_tag{}),
+        decimal_error_t{rem_signed},
         overflow
     };
 }
@@ -130,9 +130,9 @@ decimal_result pack_result(uint256_t quot, uint128_t rem, bool negative) {
 /// Parse a decimal string into a scaled int128 with fixed 18 decimal places.
 /// Throws std::overflow_error if the integer part exceeds int128 range.
 /// Throws std::invalid_argument if there are more than 18 fractional digits.
-decimal::int128_t parse_decimal(std::string_view s)
+decimal_t::int128_t parse_decimal_t(std::string_view s)
 {
-    using int128_t = decimal::int128_t;
+    using int128_t = decimal_t::int128_t;
 
     if (s.empty())
         return 0;
@@ -180,24 +180,24 @@ decimal::int128_t parse_decimal(std::string_view s)
         }
     }
 
-    if (frac_digits > decimal::scale)
+    if (frac_digits > decimal_t::scale)
         throw std::invalid_argument(
             "decimal: more than 18 fractional digits in '" + std::string(s) + "'");
 
     // Scale the integer part to 18 decimal places.
-    int128_t result = integer_part * decimal::scale_factor;
+    int128_t result = integer_part * decimal_t::scale_factor;
 
     // Scale the fractional part up to fill the remaining decimal places.
     // E.g. "1.5" has frac_part=5, frac_digits=1, needs 17 more zeros.
     int128_t frac_scale = 1;
-    for (std::uint8_t i = 0; i < decimal::scale - frac_digits; ++i)
+    for (std::uint8_t i = 0; i < decimal_t::scale - frac_digits; ++i)
         frac_scale *= 10;
 
     result += frac_part * frac_scale;
 
     // Check for overflow: integer_part * 10^18 must not have wrapped.
     // If the integer part was too large, the result would be smaller than expected.
-    if (integer_part != 0 && result / decimal::scale_factor != integer_part)
+    if (integer_part != 0 && result / decimal_t::scale_factor != integer_part)
         throw std::overflow_error("decimal: value too large in '" + std::string(s) + "'");
 
     return negative ? -result : result;
@@ -207,16 +207,16 @@ decimal::int128_t parse_decimal(std::string_view s)
 
 // -- Constructors --
 
-decimal::decimal(const char* s) : value(parse_decimal(std::string_view(s))) {}
-decimal::decimal(const std::string& s) : value(parse_decimal(std::string_view(s))) {}
-decimal::decimal(std::string_view s) : value(parse_decimal(s)) {}
+decimal_t::decimal_t(const char* s) : value(parse_decimal_t(std::string_view(s))) {}
+decimal_t::decimal_t(const std::string& s) : value(parse_decimal_t(std::string_view(s))) {}
+decimal_t::decimal_t(std::string_view s) : value(parse_decimal_t(s)) {}
 
 
 
 // -- to_string --
 
 std::string
-decimal::to_string() const
+decimal_t::to_string() const
 {
     if (value == 0)
         return "0.0";
@@ -273,7 +273,7 @@ decimal::to_string() const
 // -- to_double / to_long_double --
 
 std::pair<double, bool>
-decimal::to_double() const
+decimal_t::to_double() const
 {
     bool negative = value < 0;
     int128_t abs_val = negative ? -value : value;
@@ -292,7 +292,7 @@ decimal::to_double() const
 }
 
 std::pair<long double, bool>
-decimal::to_long_double() const
+decimal_t::to_long_double() const
 {
     bool negative = value < 0;
     int128_t abs_val = negative ? -value : value;
@@ -311,14 +311,14 @@ decimal::to_long_double() const
 
 // -- operator* / operator*= (safe, via 256-bit) --
 
-decimal decimal::operator*(const decimal& rhs) const {
+decimal_t decimal_t::operator*(const decimal_t& rhs) const {
     auto r = mul(*this, rhs);
     if (r.has_overflow())
         throw std::overflow_error("decimal: multiplication overflow");
     return r.value;
 }
 
-decimal& decimal::operator*=(const decimal& rhs) {
+decimal_t& decimal_t::operator*=(const decimal_t& rhs) {
     return *this = *this * rhs;
 }
 
@@ -362,49 +362,49 @@ std::string int128_to_scientific(int128_t v) {
 
 } // anonymous namespace
 
-// -- decimal_error --
+// -- decimal_error_t --
 
-std::string decimal_error::to_string() const { return int128_to_scientific(value); }
+std::string decimal_error_t::to_string() const { return int128_to_scientific(value); }
 
-// -- decimal_overflow --
+// -- decimal_overflow_t --
 
-std::string decimal_overflow::to_string() const { return int128_to_scientific(value); }
+std::string decimal_overflow_t::to_string() const { return int128_to_scientific(value); }
 
 // -- operator<< --
 
 std::ostream&
-operator<<(std::ostream& os, const decimal& d)
+operator<<(std::ostream& os, const decimal_t& d)
 {
     return os << d.to_string();
 }
 
 std::ostream&
-operator<<(std::ostream& os, const decimal_error& e)
+operator<<(std::ostream& os, const decimal_error_t& e)
 {
     return os << e.to_string();
 }
 
 std::ostream&
-operator<<(std::ostream& os, const decimal_overflow& o)
+operator<<(std::ostream& os, const decimal_overflow_t& o)
 {
     return os << o.to_string();
 }
 
 // -- Safe mul / div --
 
-decimal_result mul(decimal a, decimal b) {
+decimal_result_t mul(decimal_t a, decimal_t b) {
     bool negative = (a.value < 0) != (b.value < 0);
     uint128_t abs_a = to_unsigned(a.value);
     uint128_t abs_b = to_unsigned(b.value);
 
     // Full 256-bit product, then divide by scale_factor to restore scale 10^-18.
     uint256_t product = mul256(abs_a, abs_b);
-    auto [quot, rem]  = divmod256(product, static_cast<uint128_t>(decimal::scale_factor));
+    auto [quot, rem]  = divmod256(product, static_cast<uint128_t>(decimal_t::scale_factor));
 
     return pack_result(quot, rem, negative);
 }
 
-decimal_result div(decimal a, decimal b) {
+decimal_result_t div(decimal_t a, decimal_t b) {
     if (b.value == 0)
         throw std::domain_error("decimal: division by zero");
 
@@ -413,7 +413,7 @@ decimal_result div(decimal a, decimal b) {
     uint128_t abs_b = to_unsigned(b.value);
 
     // Multiply numerator by scale_factor first (256-bit), then divide by b.
-    uint256_t numerator = mul256(abs_a, static_cast<uint128_t>(decimal::scale_factor));
+    uint256_t numerator = mul256(abs_a, static_cast<uint128_t>(decimal_t::scale_factor));
     auto [quot, rem]    = divmod256(numerator, abs_b);
 
     return pack_result(quot, rem, negative);

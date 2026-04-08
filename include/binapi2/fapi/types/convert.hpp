@@ -18,19 +18,19 @@ namespace binapi2::fapi::types {
 struct convert_quote_request {
     std::string fromAsset{};
     std::string toAsset{};
-    std::optional<decimal> fromAmount{};
-    std::optional<decimal> toAmount{};
+    std::optional<decimal_t> fromAmount{};
+    std::optional<decimal_t> toAmount{};
     std::optional<std::string> validTime{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/convert/Send-quote-request.md
 struct convert_quote_response {
     std::string quoteId{};
-    decimal ratio{};
-    decimal inverseRatio{};
-    timestamp_ms validTimestamp{};
-    decimal toAmount{};
-    decimal fromAmount{};
+    decimal_t ratio{};
+    decimal_t inverseRatio{};
+    timestamp_ms_t validTimestamp{};
+    decimal_t toAmount{};
+    decimal_t fromAmount{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/convert/Accept-Quote.md
@@ -41,7 +41,7 @@ struct convert_accept_request {
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/convert/Accept-Quote.md
 struct convert_accept_response {
     std::string orderId{};
-    timestamp_ms createTime{};
+    timestamp_ms_t createTime{};
     std::string orderStatus{};
 };
 
@@ -56,12 +56,12 @@ struct convert_order_status_response {
     std::string orderId{};
     std::string orderStatus{};
     std::string fromAsset{};
-    decimal fromAmount{};
+    decimal_t fromAmount{};
     std::string toAsset{};
-    decimal toAmount{};
-    decimal ratio{};
-    decimal inverseRatio{};
-    timestamp_ms createTime{};
+    decimal_t toAmount{};
+    decimal_t ratio{};
+    decimal_t inverseRatio{};
+    timestamp_ms_t createTime{};
 };
 
 } // namespace binapi2::fapi::types

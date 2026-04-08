@@ -22,10 +22,10 @@ struct book_ticker_stream_event
     std::string event_type{};
     std::uint64_t update_id{};
     std::string symbol{};
-    decimal best_bid_price{};
-    decimal best_bid_qty{};
-    decimal best_ask_price{};
-    decimal best_ask_qty{};
+    decimal_t best_bid_price{};
+    decimal_t best_bid_qty{};
+    decimal_t best_ask_price{};
+    decimal_t best_ask_qty{};
     std::uint64_t transaction_time{};
     std::uint64_t event_time{};
 };
@@ -37,13 +37,13 @@ struct aggregate_trade_stream_event
     std::uint64_t event_time{};
     std::string symbol{};
     std::uint64_t agg_trade_id{};
-    decimal price{};
-    decimal quantity{};
+    decimal_t price{};
+    decimal_t quantity{};
     std::uint64_t first_trade_id{};
     std::uint64_t last_trade_id{};
     std::uint64_t trade_time{};
     bool is_buyer_maker{};
-    std::optional<decimal> normal_quantity{};
+    std::optional<decimal_t> normal_quantity{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Mark-Price-Stream.md
@@ -52,11 +52,11 @@ struct mark_price_stream_event
     std::string event_type{};
     std::uint64_t event_time{};
     std::string symbol{};
-    decimal mark_price{};
-    std::optional<decimal> mark_price_avg{};
-    decimal index_price{};
-    decimal settle_price{};
-    decimal funding_rate{};
+    decimal_t mark_price{};
+    std::optional<decimal_t> mark_price_avg{};
+    decimal_t index_price{};
+    decimal_t settle_price{};
+    decimal_t funding_rate{};
     std::uint64_t next_funding_time{};
 };
 
@@ -83,12 +83,12 @@ struct mini_ticker_stream_event
     std::string event_type{};
     std::uint64_t event_time{};
     std::string symbol{};
-    decimal close_price{};
-    decimal open_price{};
-    decimal high_price{};
-    decimal low_price{};
-    decimal base_volume{};
-    decimal quote_volume{};
+    decimal_t close_price{};
+    decimal_t open_price{};
+    decimal_t high_price{};
+    decimal_t low_price{};
+    decimal_t base_volume{};
+    decimal_t quote_volume{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/All-Market-Mini-Tickers-Stream.md
@@ -100,16 +100,16 @@ struct ticker_stream_event
     std::string event_type{};
     std::uint64_t event_time{};
     std::string symbol{};
-    decimal price_change{};
-    decimal price_change_pct{};
-    decimal weighted_avg_price{};
-    decimal last_price{};
-    decimal last_quantity{};
-    decimal open_price{};
-    decimal high_price{};
-    decimal low_price{};
-    decimal base_volume{};
-    decimal quote_volume{};
+    decimal_t price_change{};
+    decimal_t price_change_pct{};
+    decimal_t weighted_avg_price{};
+    decimal_t last_price{};
+    decimal_t last_quantity{};
+    decimal_t open_price{};
+    decimal_t high_price{};
+    decimal_t low_price{};
+    decimal_t base_volume{};
+    decimal_t quote_volume{};
     std::uint64_t stats_open_time{};
     std::uint64_t stats_close_time{};
     std::uint64_t first_trade_id{};
@@ -127,12 +127,12 @@ struct liquidation_order_stream_data
     order_side side{};
     order_type type{};
     time_in_force tif{};
-    decimal original_quantity{};
-    decimal price{};
-    decimal average_price{};
+    decimal_t original_quantity{};
+    decimal_t price{};
+    decimal_t average_price{};
     order_status status{};
-    decimal last_filled_qty{};
-    decimal filled_accum_qty{};
+    decimal_t last_filled_qty{};
+    decimal_t filled_accum_qty{};
     std::uint64_t trade_time{};
 };
 
@@ -153,17 +153,17 @@ struct kline_stream_data
     kline_interval interval{};
     std::uint64_t first_trade_id{};
     std::uint64_t last_trade_id{};
-    decimal open_price{};
-    decimal close_price{};
-    decimal high_price{};
-    decimal low_price{};
-    decimal base_volume{};
+    decimal_t open_price{};
+    decimal_t close_price{};
+    decimal_t high_price{};
+    decimal_t low_price{};
+    decimal_t base_volume{};
     std::uint64_t trade_count{};
     bool is_closed{};
-    decimal quote_volume{};
-    decimal taker_buy_base_vol{};
-    decimal taker_buy_quote_vol{};
-    decimal ignore{};
+    decimal_t quote_volume{};
+    decimal_t taker_buy_base_vol{};
+    decimal_t taker_buy_quote_vol{};
+    decimal_t ignore{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Kline-Candlestick-Streams.md
@@ -183,17 +183,17 @@ struct continuous_contract_kline_stream_data
     kline_interval interval{};
     std::uint64_t first_update_id{};
     std::uint64_t last_update_id{};
-    decimal open_price{};
-    decimal close_price{};
-    decimal high_price{};
-    decimal low_price{};
-    decimal volume{};
+    decimal_t open_price{};
+    decimal_t close_price{};
+    decimal_t high_price{};
+    decimal_t low_price{};
+    decimal_t volume{};
     std::uint64_t trade_count{};
     bool is_closed{};
-    decimal quote_volume{};
-    decimal taker_buy_volume{};
-    decimal taker_buy_quote_vol{};
-    decimal ignore{};
+    decimal_t quote_volume{};
+    decimal_t taker_buy_volume{};
+    decimal_t taker_buy_quote_vol{};
+    decimal_t ignore{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Continuous-Contract-Kline-Candlestick-Streams.md
@@ -211,9 +211,9 @@ struct composite_index_constituent
 {
     std::string base_asset{};
     std::string quote_asset{};
-    decimal weight_in_quantity{};
-    decimal weight_in_pct{};
-    decimal index_price{};
+    decimal_t weight_in_quantity{};
+    decimal_t weight_in_pct{};
+    decimal_t index_price{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Composite-Index-Symbol-Information-Streams.md
@@ -222,7 +222,7 @@ struct composite_index_stream_event
     std::string event_type{};
     std::uint64_t event_time{};
     std::string symbol{};
-    decimal price{};
+    decimal_t price{};
     std::optional<std::string> base_asset_type{};
     std::vector<composite_index_constituent> composition{};
 };
@@ -259,15 +259,15 @@ struct asset_index_stream_event
     std::string event_type{};
     std::uint64_t event_time{};
     std::string symbol{};
-    decimal index_price{};
-    decimal bid_buffer{};
-    decimal ask_buffer{};
-    decimal bid_rate{};
-    decimal ask_rate{};
-    decimal auto_exch_bid_buffer{};
-    decimal auto_exch_ask_buffer{};
-    decimal auto_exch_bid_rate{};
-    decimal auto_exch_ask_rate{};
+    decimal_t index_price{};
+    decimal_t bid_buffer{};
+    decimal_t ask_buffer{};
+    decimal_t bid_rate{};
+    decimal_t ask_rate{};
+    decimal_t auto_exch_bid_buffer{};
+    decimal_t auto_exch_ask_buffer{};
+    decimal_t auto_exch_bid_rate{};
+    decimal_t auto_exch_ask_rate{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Asset-Index-Stream.md
@@ -287,23 +287,23 @@ struct trading_session_stream_event
 struct account_update_balance
 {
     std::string asset{};
-    decimal wallet_balance{};
-    decimal cross_wallet_balance{};
-    decimal balance_change{};
+    decimal_t wallet_balance{};
+    decimal_t cross_wallet_balance{};
+    decimal_t balance_change{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Balance-and-Position-Update.md
 struct account_update_position
 {
     std::string symbol{};
-    decimal position_amount{};
-    decimal entry_price{};
-    decimal accum_realized{};
-    decimal unrealized_pnl{};
+    decimal_t position_amount{};
+    decimal_t entry_price{};
+    decimal_t accum_realized{};
+    decimal_t unrealized_pnl{};
     margin_type margin{};
-    decimal isolated_wallet{};
+    decimal_t isolated_wallet{};
     position_side pos_side{};
-    decimal breakeven_price{};
+    decimal_t breakeven_price{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Balance-and-Position-Update.md
@@ -331,34 +331,34 @@ struct order_trade_update_order
     order_side side{};
     order_type type{};
     time_in_force tif{};
-    decimal original_quantity{};
-    decimal original_price{};
-    decimal average_price{};
-    decimal stop_price{};
+    decimal_t original_quantity{};
+    decimal_t original_price{};
+    decimal_t average_price{};
+    decimal_t stop_price{};
     execution_type exec_type{};
     order_status status{};
     std::uint64_t order_id{};
-    decimal last_filled_qty{};
-    decimal filled_accum_qty{};
-    decimal last_filled_price{};
+    decimal_t last_filled_qty{};
+    decimal_t filled_accum_qty{};
+    decimal_t last_filled_price{};
     std::string commission_asset{};
-    decimal commission{};
+    decimal_t commission{};
     std::uint64_t trade_time{};
     std::uint64_t trade_id{};
-    decimal bids_notional{};
-    decimal ask_notional{};
+    decimal_t bids_notional{};
+    decimal_t ask_notional{};
     bool is_maker{};
     bool is_reduce_only{};
     working_type work_type{};
     order_type orig_order_type{};
     position_side pos_side{};
     bool is_close_all{};
-    std::optional<decimal> activation_price{};
-    std::optional<decimal> callback_rate{};
+    std::optional<decimal_t> activation_price{};
+    std::optional<decimal_t> callback_rate{};
     bool price_protection{};
     int ignore_si{};
     int ignore_ss{};
-    decimal realized_profit{};
+    decimal_t realized_profit{};
     stp_mode stp{};
     price_match price_match_mode{};
     std::optional<std::uint64_t> gtd_auto_cancel{};
@@ -379,12 +379,12 @@ struct margin_call_position
 {
     std::string symbol{};
     position_side pos_side{};
-    decimal position_amount{};
+    decimal_t position_amount{};
     margin_type margin{};
-    decimal isolated_wallet{};
-    decimal mark_price{};
-    decimal unrealized_pnl{};
-    decimal maint_margin{};
+    decimal_t isolated_wallet{};
+    decimal_t mark_price{};
+    decimal_t unrealized_pnl{};
+    decimal_t maint_margin{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Margin-Call.md
@@ -392,7 +392,7 @@ struct margin_call_event
 {
     std::string event_type{};
     std::uint64_t event_time{};
-    decimal cross_wallet_balance{};
+    decimal_t cross_wallet_balance{};
     std::vector<margin_call_position> positions{};
 };
 
@@ -435,13 +435,13 @@ struct trade_lite_event
     std::uint64_t event_time{};
     std::uint64_t transaction_time{};
     std::string symbol{};
-    decimal original_quantity{};
-    decimal original_price{};
+    decimal_t original_quantity{};
+    decimal_t original_price{};
     bool is_maker{};
     std::string client_order_id{};
     order_side side{};
-    decimal last_filled_price{};
-    decimal last_filled_qty{};
+    decimal_t last_filled_price{};
+    decimal_t last_filled_qty{};
     std::uint64_t trade_id{};
     std::uint64_t order_id{};
 };
@@ -457,14 +457,14 @@ struct algo_order_update_data
     order_side side{};
     position_side pos_side{};
     time_in_force tif{};
-    decimal quantity{};
+    decimal_t quantity{};
     algo_status alg_status{};
     std::optional<std::string> matched_order_id{};
-    std::optional<decimal> avg_fill_price{};
-    std::optional<decimal> executed_quantity{};
+    std::optional<decimal_t> avg_fill_price{};
+    std::optional<decimal_t> executed_quantity{};
     std::optional<std::string> actual_order_type{};
-    std::optional<decimal> trigger_price{};
-    std::optional<decimal> order_price{};
+    std::optional<decimal_t> trigger_price{};
+    std::optional<decimal_t> order_price{};
     std::optional<stp_mode> stp{};
     std::optional<working_type> work_type{};
     std::optional<price_match> price_match_mode{};
@@ -509,11 +509,11 @@ struct grid_update_data
     std::string strategy_type{};
     std::string strategy_status{};
     std::string symbol{};
-    decimal realized_pnl{};
-    decimal unmatched_avg_price{};
-    decimal unmatched_qty{};
-    decimal unmatched_fee{};
-    decimal matched_pnl{};
+    decimal_t realized_pnl{};
+    decimal_t unmatched_avg_price{};
+    decimal_t unmatched_qty{};
+    decimal_t unmatched_fee{};
+    decimal_t matched_pnl{};
     std::uint64_t update_time{};
 };
 

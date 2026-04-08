@@ -19,7 +19,7 @@ using binapi2::fapi::inject_auth_query;
 using binapi2::fapi::percent_encode;
 using binapi2::fapi::query_map;
 using binapi2::fapi::sign_query;
-using binapi2::fapi::types::timestamp_ms;
+using binapi2::fapi::types::timestamp_ms_t;
 
 // ============================================================================
 // hmac_sha256_hex
@@ -123,14 +123,14 @@ TEST(BuildQueryString, ValuesArePercentEncoded) {
 
 TEST(InjectAuthQuery, AddsRecvWindowAndTimestamp) {
     query_map q;
-    inject_auth_query(q, 5000, timestamp_ms{1234567890});
+    inject_auth_query(q, 5000, timestamp_ms_t{1234567890});
     EXPECT_EQ(q.at("recvWindow"), "5000");
     EXPECT_EQ(q.at("timestamp"), "1234567890");
 }
 
 TEST(InjectAuthQuery, PreservesExistingKeys) {
     query_map q{{"symbol", "BTCUSDT"}};
-    inject_auth_query(q, 5000, timestamp_ms{1234567890});
+    inject_auth_query(q, 5000, timestamp_ms_t{1234567890});
     EXPECT_EQ(q.at("symbol"), "BTCUSDT");
     EXPECT_EQ(q.at("recvWindow"), "5000");
     EXPECT_EQ(q.at("timestamp"), "1234567890");
@@ -174,7 +174,7 @@ TEST(SignQuery, FullPipeline) {
     // Simulate a realistic signing flow: start with trading params, inject auth,
     // then sign.
     query_map q{{"symbol", "BTCUSDT"}, {"side", "BUY"}, {"quantity", "0.1"}};
-    inject_auth_query(q, 5000, timestamp_ms{1699999999999});
+    inject_auth_query(q, 5000, timestamp_ms_t{1699999999999});
     sign_query(q, "my_api_secret");
 
     // All original keys preserved.

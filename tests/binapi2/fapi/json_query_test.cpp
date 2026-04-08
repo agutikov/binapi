@@ -65,7 +65,7 @@ TEST(JsonRoundTrip, ServerTimeResponse)
     constexpr std::string_view input = R"({"serverTime":1234567890123})";
     auto resp = parse_json<server_time_response>(input);
 
-    EXPECT_EQ(resp.serverTime, timestamp_ms{1234567890123ULL});
+    EXPECT_EQ(resp.serverTime, timestamp_ms_t{1234567890123ULL});
 
     auto json2 = to_json(resp);
     auto resp2 = parse_json<server_time_response>(json2);
@@ -121,8 +121,8 @@ TEST(JsonRoundTrip, PriceLevel)
     constexpr std::string_view input = R"(["50000.5","1.234"])";
     auto pl = parse_json<price_level>(input);
 
-    EXPECT_EQ(pl.price, decimal("50000.5"));
-    EXPECT_EQ(pl.quantity, decimal("1.234"));
+    EXPECT_EQ(pl.price, decimal_t("50000.5"));
+    EXPECT_EQ(pl.quantity, decimal_t("1.234"));
 
     auto json2 = to_json(pl);
     auto pl2 = parse_json<price_level>(json2);
@@ -225,17 +225,17 @@ TEST(JsonRoundTrip, OrderResponse)
     EXPECT_EQ(resp.timeInForce, time_in_force::gtc);
     EXPECT_EQ(resp.type, order_type::trailing_stop_market);
     EXPECT_EQ(resp.origType, order_type::trailing_stop_market);
-    EXPECT_EQ(resp.origQty, decimal("10.0"));
-    EXPECT_EQ(resp.stopPrice, decimal("9300.0"));
+    EXPECT_EQ(resp.origQty, decimal_t("10.0"));
+    EXPECT_EQ(resp.stopPrice, decimal_t("9300.0"));
     EXPECT_FALSE(resp.reduceOnly);
     EXPECT_FALSE(resp.closePosition);
 
     ASSERT_TRUE(resp.activatePrice.has_value());
-    EXPECT_EQ(*resp.activatePrice, decimal("9020.0"));
+    EXPECT_EQ(*resp.activatePrice, decimal_t("9020.0"));
     ASSERT_TRUE(resp.priceRate.has_value());
-    EXPECT_EQ(*resp.priceRate, decimal("0.3"));
+    EXPECT_EQ(*resp.priceRate, decimal_t("0.3"));
     ASSERT_TRUE(resp.updateTime.has_value());
-    EXPECT_EQ(*resp.updateTime, timestamp_ms{1566818724722ULL});
+    EXPECT_EQ(*resp.updateTime, timestamp_ms_t{1566818724722ULL});
     ASSERT_TRUE(resp.workingType.has_value());
     EXPECT_EQ(*resp.workingType, working_type::contract_price);
     ASSERT_TRUE(resp.priceProtect.has_value());
@@ -290,8 +290,8 @@ TEST(ToQueryMap, NewOrderRequestFull)
     req.side = order_side::sell;
     req.type = order_type::limit;
     req.timeInForce = time_in_force::gtc;
-    req.quantity = decimal("0.5");
-    req.price = decimal("3000.0");
+    req.quantity = decimal_t("0.5");
+    req.price = decimal_t("3000.0");
 
     auto m = binapi2::fapi::to_query_map(req);
 

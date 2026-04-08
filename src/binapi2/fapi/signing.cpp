@@ -97,7 +97,7 @@ build_query_string(const query_map& query)
 }
 
 void
-inject_auth_query(query_map& query, std::uint64_t recv_window, types::timestamp_ms timestamp)
+inject_auth_query(query_map& query, std::uint64_t recv_window, types::timestamp_ms_t timestamp)
 {
     query["recvWindow"] = std::to_string(recv_window);
     query["timestamp"] = timestamp.to_string();

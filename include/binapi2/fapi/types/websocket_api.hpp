@@ -68,10 +68,10 @@ struct websocket_api_order_place_request : websocket_api_signed_request
     order_side side{};
     order_type type{};
     std::optional<time_in_force> timeInForce{};
-    decimal quantity{};
-    std::optional<decimal> price{};
+    decimal_t quantity{};
+    std::optional<decimal_t> price{};
     std::optional<std::string> newClientOrderId{};
-    std::optional<decimal> stopPrice{};
+    std::optional<decimal_t> stopPrice{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/websocket-api/Query-Order.md
@@ -109,8 +109,8 @@ struct websocket_api_order_modify_request : websocket_api_signed_request
     std::optional<std::uint64_t> orderId{};
     std::optional<std::string> origClientOrderId{};
     order_side side{};
-    decimal quantity{};
-    decimal price{};
+    decimal_t quantity{};
+    decimal_t price{};
     std::optional<price_match> priceMatch{};
 };
 
@@ -128,17 +128,17 @@ struct websocket_api_algo_order_place_request : websocket_api_signed_request
     std::optional<position_side> positionSide{};
     order_type type{};
     std::optional<time_in_force> timeInForce{};
-    decimal quantity{};
-    std::optional<decimal> price{};
-    std::optional<decimal> triggerPrice{};
+    decimal_t quantity{};
+    std::optional<decimal_t> price{};
+    std::optional<decimal_t> triggerPrice{};
     algo_type algoType{};
     std::optional<std::string> workingType{};
     std::optional<std::string> priceMatch{};
     std::optional<std::string> closePosition{};
     std::optional<std::string> priceProtect{};
     std::optional<std::string> reduceOnly{};
-    std::optional<decimal> activationPrice{};
-    std::optional<decimal> callbackRate{};
+    std::optional<decimal_t> activationPrice{};
+    std::optional<decimal_t> callbackRate{};
     std::optional<std::string> clientAlgoId{};
     std::optional<std::string> newOrderRespType{};
     std::optional<std::string> selfTradePreventionMode{};

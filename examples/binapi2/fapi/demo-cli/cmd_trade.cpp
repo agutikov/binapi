@@ -25,9 +25,9 @@ make_order_request(const args_t& args)
     req.type = parse_enum<binapi2::fapi::types::order_type>(args[2]);
 
     if (auto v = find_flag(args, "--quantity"); !v.empty())
-        req.quantity = binapi2::fapi::types::decimal(std::string(v));
+        req.quantity = binapi2::fapi::types::decimal_t(std::string(v));
     if (auto v = find_flag(args, "--price"); !v.empty())
-        req.price = binapi2::fapi::types::decimal(std::string(v));
+        req.price = binapi2::fapi::types::decimal_t(std::string(v));
     if (auto v = find_flag(args, "--tif"); !v.empty())
         req.timeInForce = parse_enum<binapi2::fapi::types::time_in_force>(v);
 
