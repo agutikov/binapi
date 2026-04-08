@@ -42,11 +42,6 @@ serialize_message(const boost::beast::http::message<IsRequest, Body, Fields>& ms
     return oss.str();
 }
 
-http_client::http_client(detail::io_thread& io, config cfg) :
-    session_base(std::move(cfg)), io_(&io)
-{
-}
-
 http_client::http_client(config cfg) :
     session_base(std::move(cfg))
 {
@@ -164,19 +159,6 @@ http_client::async_request(boost::beast::http::verb method,
     catch (const boost::system::system_error& e) {
         co_return result<http_response>::failure({ error_code::transport, 0, 0, e.what(), {} });
     }
-}
-
-// Synchronous wrapper: posts the async coroutine to the io_thread and
-// blocks until it completes. In async-only mode (no io_thread), returns an error.
-result<http_response>
-http_client::request(boost::beast::http::verb method,
-                     const std::string& target,
-                     const std::string& body,
-                     const std::string& content_type,
-                     const std::string& api_key)
-{
-    if (!io_) return result<http_response>::failure({ error_code::internal, 0, 0, "sync methods require io_thread", {} });
-    return io_->run_sync(async_request(method, target, body, content_type, api_key));
 }
 
 } // namespace binapi2::fapi::transport

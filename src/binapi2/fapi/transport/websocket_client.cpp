@@ -37,11 +37,6 @@ namespace binapi2::fapi::transport {
 // can drive completions on its persistent io_context.
 struct websocket_client::impl
 {
-    impl(detail::io_thread& io, config cfg) :
-        ssl_ctx(make_ssl_context(cfg.ca_cert_file)), cfg(std::move(cfg)), io(&io)
-    {
-    }
-
     explicit impl(config cfg) :
         ssl_ctx(make_ssl_context(cfg.ca_cert_file)), cfg(std::move(cfg))
     {
@@ -54,14 +49,8 @@ struct websocket_client::impl
     std::optional<ws_stream> stream;
     boost::beast::flat_buffer buffer;
     config cfg;
-    detail::io_thread* io{};  // nullptr in async-only mode
     bool connected{ false };
 };
-
-websocket_client::websocket_client(detail::io_thread& io, config cfg) :
-    session_base(cfg), impl_(std::make_unique<impl>(io, std::move(cfg)))
-{
-}
 
 websocket_client::websocket_client(config cfg) :
     session_base(cfg), impl_(std::make_unique<impl>(std::move(cfg)))
@@ -206,69 +195,6 @@ websocket_client::async_close()
         impl_->connected = false;
         co_return result<void>::failure({ error_code::websocket, 0, 0, e.what(), {} });
     }
-}
-
-// --- Sync (wraps async) ---
-//
-// Sync methods post coroutines to the io_thread's persistent io_context via
-// run_sync(). This keeps the executor alive across calls, so WebSocket
-// connections survive multiple read/write cycles.
-// In async-only mode (io == nullptr), sync methods return an error.
-
-static result<void> no_io_thread_error()
-{
-    return result<void>::failure({ error_code::internal, 0, 0, "sync methods require io_thread", {} });
-}
-
-result<void>
-websocket_client::connect(const std::string& host, const std::string& port, const std::string& target)
-{
-    if (!impl_->io) return no_io_thread_error();
-    return impl_->io->run_sync(async_connect(host, port, target));
-}
-
-result<void>
-websocket_client::write_text(const std::string& message)
-{
-    if (!impl_->io) return no_io_thread_error();
-    return impl_->io->run_sync(async_write_text(message));
-}
-
-result<std::string>
-websocket_client::read_text()
-{
-    if (!impl_->io) return result<std::string>::failure({ error_code::internal, 0, 0, "sync methods require io_thread", {} });
-    return impl_->io->run_sync(async_read_text());
-}
-
-// Blocking read loop: reads messages until the handler returns false or
-// an error occurs. Used by stream consumers (market_streams, user_streams)
-// to pump incoming WebSocket messages.
-result<void>
-websocket_client::run_read_loop(message_handler handler)
-{
-    if (!impl_->io) return no_io_thread_error();
-    const auto& recorder = impl_->cfg.stream_recorder;
-    while (true) {
-        auto message = read_text();
-        if (!message) {
-            return result<void>::failure(message.err);
-        }
-        if (recorder) {
-            recorder(*message);
-        }
-        if (!handler(*message)) {
-            break;
-        }
-    }
-    return result<void>::success();
-}
-
-result<void>
-websocket_client::close()
-{
-    if (!impl_->io) return no_io_thread_error();
-    return impl_->io->run_sync(async_close());
 }
 
 } // namespace binapi2::fapi::transport

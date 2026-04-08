@@ -100,7 +100,19 @@ record something
 
 
 
-review what would need to be done to move on Folly or Seastar
+review what would need to be done to move on:
+    - Folly
+    - Seastar
+    - Boost.Fibers
+    - CppCoro
+    - liburing4cpp
+    - libco
+    - bthread
+    - uvw
+    - asynC++
+    - asyncio(C++)
+    - packio
+    - libufinex
 
-
+provide analysis table
 
