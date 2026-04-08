@@ -6,8 +6,7 @@
 
 #include "cmd_stream.hpp"
 
-#include <binapi2/fapi/detail/io_thread.hpp>
-#include <binapi2/fapi/streams/market_streams.hpp>
+#include <binapi2/fapi/client.hpp>
 #include <spdlog/spdlog.h>
 
 #include <iostream>
@@ -18,12 +17,12 @@ int cmd_stream_book_ticker(const args_t& args)
 {
     if (args.empty()) { std::cerr << "usage: stream-book-ticker <symbol>\n"; return 1; }
 
-    binapi2::fapi::detail::io_thread io;
-    binapi2::fapi::streams::market_streams streams{ io, make_config() };
+    binapi2::fapi::client c(make_config());
+    auto& streams = c.streams();
 
     spdlog::info("connecting to book_ticker_t stream for {}", args[0]);
-    if (auto c = streams.connect_book_ticker({ .symbol = args[0] }); !c) {
-        print_error(c.err); return 1;
+    if (auto r = streams.connect_book_ticker({ .symbol = args[0] }); !r) {
+        print_error(r.err); return 1;
     }
 
     spdlog::info("connected, reading events...");
@@ -44,12 +43,12 @@ int cmd_stream_mark_price(const args_t& args)
 {
     if (args.empty()) { std::cerr << "usage: stream-mark-price <symbol>\n"; return 1; }
 
-    binapi2::fapi::detail::io_thread io;
-    binapi2::fapi::streams::market_streams streams{ io, make_config() };
+    binapi2::fapi::client c(make_config());
+    auto& streams = c.streams();
 
     spdlog::info("connecting to mark_price_t stream for {}", args[0]);
-    if (auto c = streams.connect_mark_price({ .symbol = args[0] }); !c) {
-        print_error(c.err); return 1;
+    if (auto r = streams.connect_mark_price({ .symbol = args[0] }); !r) {
+        print_error(r.err); return 1;
     }
 
     auto loop = streams.read_mark_price_loop([](const auto& e) {
@@ -70,14 +69,14 @@ int cmd_stream_kline(const args_t& args)
 {
     if (args.size() < 2) { std::cerr << "usage: stream-kline_t <symbol> <interval>\n"; return 1; }
 
-    binapi2::fapi::detail::io_thread io;
-    binapi2::fapi::streams::market_streams streams{ io, make_config() };
+    binapi2::fapi::client c(make_config());
+    auto& streams = c.streams();
 
     spdlog::info("connecting to kline_t stream for {} {}", args[0], args[1]);
-    if (auto c = streams.connect_kline({
+    if (auto r = streams.connect_kline({
             .symbol = args[0],
-            .interval = parse_enum<binapi2::fapi::types::kline_interval_t>(args[1]) }); !c) {
-        print_error(c.err); return 1;
+            .interval = parse_enum<binapi2::fapi::types::kline_interval_t>(args[1]) }); !r) {
+        print_error(r.err); return 1;
     }
 
     auto loop = streams.read_kline_loop([](const auto& e) {
@@ -97,12 +96,12 @@ int cmd_stream_ticker(const args_t& args)
 {
     if (args.empty()) { std::cerr << "usage: stream-ticker <symbol>\n"; return 1; }
 
-    binapi2::fapi::detail::io_thread io;
-    binapi2::fapi::streams::market_streams streams{ io, make_config() };
+    binapi2::fapi::client c(make_config());
+    auto& streams = c.streams();
 
     spdlog::info("connecting to ticker stream for {}", args[0]);
-    if (auto c = streams.connect_ticker({ .symbol = args[0] }); !c) {
-        print_error(c.err); return 1;
+    if (auto r = streams.connect_ticker({ .symbol = args[0] }); !r) {
+        print_error(r.err); return 1;
     }
 
     auto loop = streams.read_ticker_loop([](const auto& e) {
@@ -121,16 +120,16 @@ int cmd_stream_depth(const args_t& args)
 {
     if (args.empty()) { std::cerr << "usage: stream-depth <symbol> [levels]\n"; return 1; }
 
-    binapi2::fapi::detail::io_thread io;
-    binapi2::fapi::streams::market_streams streams{ io, make_config() };
+    binapi2::fapi::client c(make_config());
+    auto& streams = c.streams();
 
     binapi2::fapi::types::partial_book_depth_subscription sub;
     sub.symbol = args[0];
     if (args.size() > 1) sub.levels = std::stoi(args[1]);
 
     spdlog::info("connecting to partial_book_depth stream for {} levels={}", sub.symbol, sub.levels);
-    if (auto c = streams.connect_partial_book_depth(sub); !c) {
-        print_error(c.err); return 1;
+    if (auto r = streams.connect_partial_book_depth(sub); !r) {
+        print_error(r.err); return 1;
     }
 
     auto loop = streams.read_partial_book_depth_loop([](const auto& e) {
@@ -147,12 +146,12 @@ int cmd_stream_depth(const args_t& args)
 
 int cmd_stream_all_book_tickers(const args_t& /*args*/)
 {
-    binapi2::fapi::detail::io_thread io;
-    binapi2::fapi::streams::market_streams streams{ io, make_config() };
+    binapi2::fapi::client c(make_config());
+    auto& streams = c.streams();
 
     spdlog::info("connecting to all_book_tickers stream");
-    if (auto c = streams.connect_all_book_tickers({}); !c) {
-        print_error(c.err); return 1;
+    if (auto r = streams.connect_all_book_tickers({}); !r) {
+        print_error(r.err); return 1;
     }
 
     auto loop = streams.read_all_book_tickers_loop([](const auto& e) {
@@ -168,12 +167,12 @@ int cmd_stream_all_book_tickers(const args_t& /*args*/)
 
 int cmd_stream_all_tickers(const args_t& /*args*/)
 {
-    binapi2::fapi::detail::io_thread io;
-    binapi2::fapi::streams::market_streams streams{ io, make_config() };
+    binapi2::fapi::client c(make_config());
+    auto& streams = c.streams();
 
     spdlog::info("connecting to all_market_tickers stream");
-    if (auto c = streams.connect_all_market_tickers({}); !c) {
-        print_error(c.err); return 1;
+    if (auto r = streams.connect_all_market_tickers({}); !r) {
+        print_error(r.err); return 1;
     }
 
     auto loop = streams.read_all_market_tickers_loop([](const auto& e) {
@@ -189,12 +188,12 @@ int cmd_stream_all_tickers(const args_t& /*args*/)
 
 int cmd_stream_all_mini_tickers(const args_t& /*args*/)
 {
-    binapi2::fapi::detail::io_thread io;
-    binapi2::fapi::streams::market_streams streams{ io, make_config() };
+    binapi2::fapi::client c(make_config());
+    auto& streams = c.streams();
 
     spdlog::info("connecting to all_market_mini_tickers stream");
-    if (auto c = streams.connect_all_market_mini_tickers({}); !c) {
-        print_error(c.err); return 1;
+    if (auto r = streams.connect_all_market_mini_tickers({}); !r) {
+        print_error(r.err); return 1;
     }
 
     auto loop = streams.read_all_market_mini_tickers_loop([](const auto& e) {
@@ -212,12 +211,12 @@ int cmd_stream_liquidation(const args_t& args)
 {
     if (args.empty()) { std::cerr << "usage: stream-liquidation <symbol>\n"; return 1; }
 
-    binapi2::fapi::detail::io_thread io;
-    binapi2::fapi::streams::market_streams streams{ io, make_config() };
+    binapi2::fapi::client c(make_config());
+    auto& streams = c.streams();
 
     spdlog::info("connecting to liquidation_order stream for {}", args[0]);
-    if (auto c = streams.connect_liquidation_order({ .symbol = args[0] }); !c) {
-        print_error(c.err); return 1;
+    if (auto r = streams.connect_liquidation_order({ .symbol = args[0] }); !r) {
+        print_error(r.err); return 1;
     }
 
     auto loop = streams.read_liquidation_order_loop([](const auto& e) {

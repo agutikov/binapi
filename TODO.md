@@ -4,26 +4,6 @@
 
 
 
-
-
-Write a documents about
-
-
-How we suppose to work with streams?
-Callbacks, local order book, what else?
-Income data buffers, queues?
-    - Queue size limits?
-    - overflow policy (old, new, fail)?
-    - access to queued data?
-How to start/stop (subscribe/unsubscribe)?
-Connection reuse after unsubscribe?
-Multiple parallel streams?
-    - different connections
-    - one connection
-
-
---------------------------------------------------------------------------------
-
 Can we decouple io_thread from client? Does it make sense?
 Would it then help to make more generic library code?
 
@@ -96,6 +76,43 @@ Or maybe need only production-ready setup:
         - parse in the same thread or buffer and transfer to parser thread?
     - dedicated threads per API?
     - or thread per pipeline stage: serialization, network, parsing?
+
+
+I want strongly async-first architecture.
+And I want flexibility.
+And I want clean straigtforward API.
+
+Can we clearly separate?
+    - internal logic, CPU-bundled, no IO:
+        - serialization, parsing
+        - signing
+        - ...
+    - core async IO
+- combination if previous two - true async implementation
+    - ready to use in async context like cobalt::main or io_thread
+- if
+    - we want to
+        - isolate binapi2 execution
+        - or have multiple clients/threads
+        - or customize ... anything
+        - or ... what?
+    - then
+        - create io_thread
+    - and then
+        - either spawn complete async task (command, thread)
+            - and hanle results inside in true async mode
+        - or provide a callback to be called in async context
+        - or return future
+            - that caller can wait on
+        - or wait for result and return ready result
+- local order book is another level
+    - how to use it in async env?
+
+
+
+Update docs/binapi2/threading_and_io.md and docs/binapi2/DESIGN.md
+
+
 
 
 
