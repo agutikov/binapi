@@ -22,57 +22,42 @@ namespace binapi2::fapi::websocket_api {
 
 /// @brief Async WebSocket API client for Binance USD-M Futures.
 ///
-/// Sends JSON-RPC style requests over a persistent WebSocket connection.
-/// All methods are coroutines — no sync wrappers.
+/// All trait-enabled request types are dispatched through async_execute.
+/// session_logon has custom auth and remains a named method.
 class client
 {
 public:
     explicit client(config cfg);
 
-    // -- Connection --
-
     [[nodiscard]] boost::cobalt::task<result<void>> async_connect();
     [[nodiscard]] boost::cobalt::task<result<void>> async_close();
 
-    // -- Generic execute --
-
+    /// @brief Generic execute for any request type with ws endpoint traits.
+    /// Auth mode is resolved at compile time from the traits.
     template<class Request>
         requires has_ws_endpoint_traits<Request>
     [[nodiscard]] auto async_execute(const Request& request)
         -> boost::cobalt::task<result<types::websocket_api_response_t<typename endpoint_traits<Request>::response_type_t>>>;
 
-    // -- Session logon --
-
+    /// @brief Session logon (custom auth flow — cannot use generic execute).
     [[nodiscard]] boost::cobalt::task<result<types::websocket_api_response_t<types::session_logon_result_t>>> async_session_logon();
 
-    // -- Parameterless signed endpoints --
-
-    [[nodiscard]] boost::cobalt::task<result<types::websocket_api_response_t<types::account_information_t>>> async_account_status();
-    [[nodiscard]] boost::cobalt::task<result<types::websocket_api_response_t<types::account_information_t>>> async_account_status_v2();
-    [[nodiscard]] boost::cobalt::task<result<types::websocket_api_response_t<std::vector<types::futures_account_balance_t>>>> async_account_balance();
-
-    // -- Position --
-
-    [[nodiscard]] boost::cobalt::task<result<types::websocket_api_response_t<std::vector<types::position_risk_t>>>>
-    async_account_position_v2(const types::websocket_api_position_request_t& request);
-
-    // -- User data stream --
-
-    [[nodiscard]] boost::cobalt::task<result<types::websocket_api_response_t<types::websocket_api_listen_key_result_t>>> async_user_data_stream_start();
-    [[nodiscard]] boost::cobalt::task<result<types::websocket_api_response_t<types::websocket_api_listen_key_result_t>>> async_user_data_stream_ping();
-    [[nodiscard]] boost::cobalt::task<result<types::websocket_api_response_t<types::empty_response_t>>> async_user_data_stream_stop();
-
-    // -- Request type aliases --
-
-    using book_ticker_request_t = types::websocket_api_book_ticker_request_t;
-    using price_ticker_request_t = types::websocket_api_price_ticker_request_t;
-    using order_place_request_t = types::websocket_api_order_place_request_t;
-    using order_query_request_t = types::websocket_api_order_query_request_t;
-    using order_cancel_request_t = types::websocket_api_order_cancel_request_t;
-    using order_modify_request_t = types::websocket_api_order_modify_request_t;
-    using position_request_t = types::websocket_api_position_request_t;
-    using algo_order_place_request_t = types::websocket_api_algo_order_place_request_t;
-    using algo_order_cancel_request_t = types::websocket_api_algo_order_cancel_request_t;
+    // Request type aliases for discoverability.
+    using book_ticker_request = types::websocket_api_book_ticker_request_t;
+    using price_ticker_request = types::websocket_api_price_ticker_request_t;
+    using order_place_request = types::websocket_api_order_place_request_t;
+    using order_query_request = types::websocket_api_order_query_request_t;
+    using order_cancel_request = types::websocket_api_order_cancel_request_t;
+    using order_modify_request = types::websocket_api_order_modify_request_t;
+    using position_request = types::websocket_api_position_request_t;
+    using algo_order_place_request = types::websocket_api_algo_order_place_request_t;
+    using algo_order_cancel_request = types::websocket_api_algo_order_cancel_request_t;
+    using account_status_request = types::ws_account_status_request_t;
+    using account_status_v2_request = types::ws_account_status_v2_request_t;
+    using account_balance_request = types::ws_account_balance_request_t;
+    using user_data_stream_start_request = types::ws_user_data_stream_start_request_t;
+    using user_data_stream_ping_request = types::ws_user_data_stream_ping_request_t;
+    using user_data_stream_stop_request = types::ws_user_data_stream_stop_request_t;
 
 private:
     config cfg_;

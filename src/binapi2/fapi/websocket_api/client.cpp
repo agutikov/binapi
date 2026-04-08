@@ -81,7 +81,7 @@ decode_rpc_response(const std::string& raw)
 {
     types::websocket_api_response_t<Response> response{};
     glz::context glz_ctx{};
-    if (auto ec = glz::read<detail::json_read_opts>(response, raw, glz_ctx)) {
+    if (auto ec = glz::read<fapi::detail::json_read_opts>(response, raw, glz_ctx)) {
         return result<types::websocket_api_response_t<Response>>::failure(
             { error_code::json, 0, 0, glz::format_error(ec, raw), raw });
     }
@@ -181,7 +181,7 @@ client::inject_auth(const Request& request)
 
 // --- Generic execute ---
 
-// Trait-driven dispatch: endpoint_traits<Request> maps each request type to
+// Trait-driven dispatch with auth mode resolution.
 template<class Request>
     requires has_ws_endpoint_traits<Request>
 auto
@@ -189,10 +189,20 @@ client::async_execute(const Request& request)
     -> boost::cobalt::task<result<types::websocket_api_response_t<typename endpoint_traits<Request>::response_type_t>>>
 {
     using traits = endpoint_traits<Request>;
-    co_return co_await async_send_rpc<typename traits::response_type_t>(traits::method, inject_auth(request));
+    using response = typename traits::response_type_t;
+    constexpr auto auth = detail::resolve_auth<Request>();
+
+    if constexpr (auth == ws_auth_mode::signed_base) {
+        co_return co_await async_send_rpc<response>(traits::method, make_signed_request_base());
+    } else if constexpr (auth == ws_auth_mode::api_key_only) {
+        types::websocket_api_user_data_stream_request_t params{ .apiKey = cfg_.api_key };
+        co_return co_await async_send_rpc<response>(traits::method, params);
+    } else {
+        co_return co_await async_send_rpc<response>(traits::method, inject_auth(request));
+    }
 }
 
-// Explicit instantiations for all trait-enabled request types.
+// Explicit instantiations — existing types.
 template auto client::async_execute(const types::websocket_api_book_ticker_request_t&)
     -> boost::cobalt::task<result<types::websocket_api_response_t<types::book_ticker_t>>>;
 template auto client::async_execute(const types::websocket_api_price_ticker_request_t&)
@@ -211,6 +221,20 @@ template auto client::async_execute(const types::websocket_api_algo_order_place_
     -> boost::cobalt::task<result<types::websocket_api_response_t<types::algo_order_response_t>>>;
 template auto client::async_execute(const types::websocket_api_algo_order_cancel_request_t&)
     -> boost::cobalt::task<result<types::websocket_api_response_t<types::code_msg_response_t>>>;
+
+// Explicit instantiations — new parameterless types.
+template auto client::async_execute(const types::ws_account_status_request_t&)
+    -> boost::cobalt::task<result<types::websocket_api_response_t<types::account_information_t>>>;
+template auto client::async_execute(const types::ws_account_status_v2_request_t&)
+    -> boost::cobalt::task<result<types::websocket_api_response_t<types::account_information_t>>>;
+template auto client::async_execute(const types::ws_account_balance_request_t&)
+    -> boost::cobalt::task<result<types::websocket_api_response_t<std::vector<types::futures_account_balance_t>>>>;
+template auto client::async_execute(const types::ws_user_data_stream_start_request_t&)
+    -> boost::cobalt::task<result<types::websocket_api_response_t<types::websocket_api_listen_key_result_t>>>;
+template auto client::async_execute(const types::ws_user_data_stream_ping_request_t&)
+    -> boost::cobalt::task<result<types::websocket_api_response_t<types::websocket_api_listen_key_result_t>>>;
+template auto client::async_execute(const types::ws_user_data_stream_stop_request_t&)
+    -> boost::cobalt::task<result<types::websocket_api_response_t<types::empty_response_t>>>;
 
 // --- Connection ---
 
@@ -251,57 +275,6 @@ client::async_session_logon()
     };
 
     co_return co_await async_send_rpc<types::session_logon_result_t>(session_logon_method, params);
-}
-
-// --- Parameterless signed endpoints ---
-
-boost::cobalt::task<result<types::websocket_api_response_t<types::account_information_t>>>
-client::async_account_status()
-{
-    co_return co_await async_send_rpc<types::account_information_t>(account_status_method, make_signed_request_base());
-}
-
-boost::cobalt::task<result<types::websocket_api_response_t<types::account_information_t>>>
-client::async_account_status_v2()
-{
-    co_return co_await async_send_rpc<types::account_information_t>(account_status_v2_method, make_signed_request_base());
-}
-
-boost::cobalt::task<result<types::websocket_api_response_t<std::vector<types::futures_account_balance_t>>>>
-client::async_account_balance()
-{
-    co_return co_await async_send_rpc<std::vector<types::futures_account_balance_t>>(account_balance_method, make_signed_request_base());
-}
-
-// --- Shared: position v2 ---
-
-boost::cobalt::task<result<types::websocket_api_response_t<std::vector<types::position_risk_t>>>>
-client::async_account_position_v2(const types::websocket_api_position_request_t& request)
-{
-    co_return co_await async_send_rpc<std::vector<types::position_risk_t>>(account_position_v2_method, inject_auth(request));
-}
-
-// --- Shared: user data stream ---
-
-boost::cobalt::task<result<types::websocket_api_response_t<types::websocket_api_listen_key_result_t>>>
-client::async_user_data_stream_start()
-{
-    types::websocket_api_user_data_stream_request_t params{ .apiKey = cfg_.api_key };
-    co_return co_await async_send_rpc<types::websocket_api_listen_key_result_t>(user_data_stream_start_method, params);
-}
-
-boost::cobalt::task<result<types::websocket_api_response_t<types::websocket_api_listen_key_result_t>>>
-client::async_user_data_stream_ping()
-{
-    types::websocket_api_user_data_stream_request_t params{ .apiKey = cfg_.api_key };
-    co_return co_await async_send_rpc<types::websocket_api_listen_key_result_t>(user_data_stream_ping_method, params);
-}
-
-boost::cobalt::task<result<types::websocket_api_response_t<types::empty_response_t>>>
-client::async_user_data_stream_stop()
-{
-    types::websocket_api_user_data_stream_request_t params{ .apiKey = cfg_.api_key };
-    co_return co_await async_send_rpc<types::empty_response_t>(user_data_stream_stop_method, params);
 }
 
 } // namespace binapi2::fapi::websocket_api
