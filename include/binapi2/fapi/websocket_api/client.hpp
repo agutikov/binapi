@@ -13,7 +13,6 @@
 #include <binapi2/fapi/types/websocket_api.hpp>
 #include <binapi2/fapi/websocket_api/endpoint_traits.hpp>
 
-#include <boost/asio/io_context.hpp>
 #include <boost/cobalt/task.hpp>
 
 #include <string>
@@ -35,11 +34,6 @@ class client
 {
 public:
     /// @brief Construct a WebSocket API client.
-    /// @param io_context Boost.Asio I/O context for async operations.
-    /// @param cfg        Configuration with endpoint URL and API credentials.
-    client(boost::asio::io_context& io_context, config cfg);
-
-    /// @brief Construct a WebSocket API client driven by an io_thread.
     /// @param io  The io_thread that owns the io_context.
     /// @param cfg Configuration with endpoint URL and API credentials.
     client(detail::io_thread& io, config cfg);

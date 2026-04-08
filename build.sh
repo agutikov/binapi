@@ -10,4 +10,4 @@ cmake \
     -DCMAKE_BUILD_TYPE=Debug
 
 
-cmake --build _build -j16
+cmake --build _build -j10

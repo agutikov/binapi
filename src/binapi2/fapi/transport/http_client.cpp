@@ -6,7 +6,7 @@
 /// fresh TLS connection (resolve -> TCP connect -> SSL handshake -> write ->
 /// read -> shutdown). The primary implementation is the coroutine-based
 /// async_request; the synchronous request() is a thin wrapper that drives the
-/// coroutine to completion via boost::cobalt::run.
+/// coroutine to completion via io_thread::run_sync.
 
 #include <binapi2/fapi/transport/http_client.hpp>
 
@@ -42,8 +42,8 @@ serialize_message(const boost::beast::http::message<IsRequest, Body, Fields>& ms
     return oss.str();
 }
 
-http_client::http_client(boost::asio::io_context& io_context, config cfg) :
-    session_base(std::move(cfg)), io_context_(io_context)
+http_client::http_client(detail::io_thread& io, config cfg) :
+    session_base(std::move(cfg)), io_(io)
 {
 }
 
@@ -66,9 +66,8 @@ http_client::async_request(boost::beast::http::verb method,
 
     try {
         // Use the coroutine's own executor for all I/O objects.  This is
-        // critical: cobalt::run() (used by the sync wrapper) creates its own
-        // internal io_context, so objects bound to the user's io_context_
-        // would never see their completions dispatched.
+        // Use the coroutine's own executor for all I/O objects so their
+        // completions are dispatched by the io_thread's io_context.
         auto executor = co_await boost::cobalt::this_coro::executor;
         asio::ssl::context ssl_ctx = make_ssl_context(cfg_.ca_cert_file);
         asio::ip::tcp::resolver resolver{ executor };
@@ -162,8 +161,8 @@ http_client::async_request(boost::beast::http::verb method,
     }
 }
 
-// Synchronous wrapper: runs the async coroutine on the io_context via
-// boost::cobalt::run, which blocks until the coroutine completes.
+// Synchronous wrapper: posts the async coroutine to the io_thread and
+// blocks until it completes.
 result<http_response>
 http_client::request(boost::beast::http::verb method,
                      const std::string& target,
@@ -171,7 +170,7 @@ http_client::request(boost::beast::http::verb method,
                      const std::string& content_type,
                      const std::string& api_key)
 {
-    return boost::cobalt::run(async_request(method, target, body, content_type, api_key));
+    return io_.run_sync(async_request(method, target, body, content_type, api_key));
 }
 
 } // namespace binapi2::fapi::transport

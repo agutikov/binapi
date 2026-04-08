@@ -16,8 +16,6 @@
 #include <binapi2/fapi/types/market_data.hpp>
 #include <binapi2/fapi/types/trade.hpp>
 
-#include <boost/asio/io_context.hpp>
-
 #include <cstdlib>
 #include <iostream>
 #include <string>
@@ -76,8 +74,7 @@ main()
     cfg.secret_key = "test-secret-key";
     cfg.ca_cert_file = env_or("SSL_CERT_FILE", "");
 
-    boost::asio::io_context io;
-    client c(io, cfg);
+    client c(cfg);
 
     // =======================================================================
     // 1. Public market data endpoints (no auth).

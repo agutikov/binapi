@@ -88,11 +88,6 @@ read_stream_loop(transport::websocket_client& transport, Handler handler)
 
 } // namespace
 
-market_streams::market_streams(boost::asio::io_context& io_context, config cfg) :
-    io_context_(io_context), transport_(io_context, cfg), cfg_(std::move(cfg))
-{
-}
-
 market_streams::market_streams(fapi::detail::io_thread& io, config cfg) :
     io_context_(io.context()), transport_(io, cfg), cfg_(std::move(cfg))
 {

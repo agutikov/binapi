@@ -7,17 +7,14 @@
 #include "cmd_user_stream.hpp"
 
 #include <binapi2/fapi/client.hpp>
-#include <binapi2/fapi/streams/user_streams.hpp>
 
-#include <boost/asio/io_context.hpp>
 #include <spdlog/spdlog.h>
 
 namespace demo {
 
 int cmd_listen_key_start(const args_t& /*args*/)
 {
-    boost::asio::io_context io;
-    binapi2::fapi::client client{ io, make_config() };
+    binapi2::fapi::client client{ make_config() };
 
     spdlog::debug("requesting new listen key");
     auto r = client.user_data_streams.start();
@@ -30,8 +27,7 @@ int cmd_listen_key_start(const args_t& /*args*/)
 
 int cmd_listen_key_keepalive(const args_t& /*args*/)
 {
-    boost::asio::io_context io;
-    binapi2::fapi::client client{ io, make_config() };
+    binapi2::fapi::client client{ make_config() };
 
     spdlog::debug("sending listen key keepalive");
     auto r = client.user_data_streams.keepalive();
@@ -43,8 +39,7 @@ int cmd_listen_key_keepalive(const args_t& /*args*/)
 
 int cmd_listen_key_close(const args_t& /*args*/)
 {
-    boost::asio::io_context io;
-    binapi2::fapi::client client{ io, make_config() };
+    binapi2::fapi::client client{ make_config() };
 
     spdlog::debug("closing listen key");
     auto r = client.user_data_streams.close();
@@ -56,16 +51,14 @@ int cmd_listen_key_close(const args_t& /*args*/)
 
 int cmd_user_stream(const args_t& /*args*/)
 {
-    boost::asio::io_context io;
-    auto cfg = make_config();
+    binapi2::fapi::client client{ make_config() };
 
-    binapi2::fapi::client rest{ io, cfg };
     spdlog::info("requesting listen key...");
-    auto key = rest.user_data_streams.start();
+    auto key = client.user_data_streams.start();
     if (!key) { print_error(key.err); return 1; }
     spdlog::info("listen key: {}", key->listenKey);
 
-    binapi2::fapi::streams::user_streams stream{ io, cfg };
+    auto& stream = client.user_streams();
     spdlog::info("connecting to user data stream...");
     if (auto c = stream.connect(key->listenKey); !c) {
         print_error(c.err); return 1;
@@ -106,7 +99,6 @@ int cmd_user_stream(const args_t& /*args*/)
     auto loop = stream.read_loop(h);
     (void)stream.close();
     if (!loop) { print_error(loop.err); return 1; }
-    spdlog::info("user stream ended");
     return 0;
 }
 

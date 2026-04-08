@@ -9,7 +9,6 @@
 #include <binapi2/fapi/client.hpp>
 #include <binapi2/fapi/types/detail/decimal.hpp>
 
-#include <boost/asio/io_context.hpp>
 #include <spdlog/spdlog.h>
 
 #include <iostream>
@@ -43,8 +42,7 @@ int cmd_new_order(const args_t& args)
         return 1;
     }
 
-    boost::asio::io_context io;
-    binapi2::fapi::client client{ io, make_config() };
+    binapi2::fapi::client client{ make_config() };
 
     auto req = make_order_request(args);
     spdlog::info("placing order...");
@@ -59,8 +57,7 @@ int cmd_test_order(const args_t& args)
         return 1;
     }
 
-    boost::asio::io_context io;
-    binapi2::fapi::client client{ io, make_config() };
+    binapi2::fapi::client client{ make_config() };
 
     auto req = make_order_request(args);
     spdlog::info("placing test order (validation only)...");
@@ -72,8 +69,7 @@ int cmd_cancel_order(const args_t& args)
 {
     if (args.size() < 2) { std::cerr << "usage: cancel-order <symbol> <orderId>\n"; return 1; }
 
-    boost::asio::io_context io;
-    binapi2::fapi::client client{ io, make_config() };
+    binapi2::fapi::client client{ make_config() };
 
     binapi2::fapi::types::cancel_order_request_t req;
     req.symbol = args[0];
@@ -88,8 +84,7 @@ int cmd_query_order(const args_t& args)
 {
     if (args.size() < 2) { std::cerr << "usage: query-order <symbol> <orderId>\n"; return 1; }
 
-    boost::asio::io_context io;
-    binapi2::fapi::client client{ io, make_config() };
+    binapi2::fapi::client client{ make_config() };
 
     binapi2::fapi::types::query_order_request_t req;
     req.symbol = args[0];
@@ -102,8 +97,7 @@ int cmd_query_order(const args_t& args)
 
 int cmd_open_orders(const args_t& args)
 {
-    boost::asio::io_context io;
-    binapi2::fapi::client client{ io, make_config() };
+    binapi2::fapi::client client{ make_config() };
 
     binapi2::fapi::types::all_open_orders_request_t req;
     if (!args.empty()) req.symbol = args[0];

@@ -3,32 +3,7 @@
 
 
 
-
-How we suppose to work with streams?
-Callbacks?
-Income data buffers, queues?
-    - Queue size limits?
-    - overflow policy (old, new, fail)?
-    - access to queued data?
-How to start/stop (subscribe/unsubscribe)?
-Multiple parallel streams?
-Throughput benchmarks.
-
-
---------------------------------------------------------------------------------
-
-
-write document about:
-
-connection pooling
-What is it in our implementation context?
-Do we need it and in what cases?
-
-
-thread pool
-Is it possible to use with cobalt?
-How?
-What benefits?
+write document about
 
 
 Mapping between:
@@ -47,6 +22,37 @@ Is it possible to have?
 - one io context in multiple threads
 - one thread with multiple io contexts
 - in binapi2
+
+
+connection pooling
+What is it in our implementation context?
+Do we need it and in what cases?
+
+
+thread pool
+Is it possible to use with cobalt?
+How?
+What benefits?
+
+
+
+
+--------------------------------------------------------------------------------
+
+
+
+Write a documents about
+
+
+How we suppose to work with streams?
+Callbacks?
+Income data buffers, queues?
+    - Queue size limits?
+    - overflow policy (old, new, fail)?
+    - access to queued data?
+How to start/stop (subscribe/unsubscribe)?
+Multiple parallel streams?
+Throughput benchmarks.
 
 
 --------------------------------------------------------------------------------

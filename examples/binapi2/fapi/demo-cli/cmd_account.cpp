@@ -7,7 +7,6 @@
 
 #include <binapi2/fapi/client.hpp>
 
-#include <boost/asio/io_context.hpp>
 #include <spdlog/spdlog.h>
 
 #include <iostream>
@@ -16,8 +15,7 @@ namespace demo {
 
 int cmd_account_info(const args_t& /*args*/)
 {
-    boost::asio::io_context io;
-    binapi2::fapi::client client{ io, make_config() };
+    binapi2::fapi::client client{ make_config() };
 
     spdlog::debug("executing account_information_t request");
     auto r = client.account.account_information_t();
@@ -31,8 +29,7 @@ int cmd_account_info(const args_t& /*args*/)
 
 int cmd_balances(const args_t& /*args*/)
 {
-    boost::asio::io_context io;
-    binapi2::fapi::client client{ io, make_config() };
+    binapi2::fapi::client client{ make_config() };
 
     spdlog::debug("executing balances request");
     auto r = client.account.balances();
@@ -53,8 +50,7 @@ int cmd_balances(const args_t& /*args*/)
 
 int cmd_position_risk(const args_t& args)
 {
-    boost::asio::io_context io;
-    binapi2::fapi::client client{ io, make_config() };
+    binapi2::fapi::client client{ make_config() };
 
     binapi2::fapi::types::position_risk_request_t req;
     if (!args.empty()) req.symbol = args[0];
@@ -67,8 +63,7 @@ int cmd_position_risk(const args_t& args)
 
 int cmd_income_history(const args_t& args)
 {
-    boost::asio::io_context io;
-    binapi2::fapi::client client{ io, make_config() };
+    binapi2::fapi::client client{ make_config() };
 
     binapi2::fapi::types::income_history_request_t req;
     if (!args.empty()) req.symbol = args[0];

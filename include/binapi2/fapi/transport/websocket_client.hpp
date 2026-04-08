@@ -12,7 +12,6 @@
 #include <binapi2/fapi/result.hpp>
 #include <binapi2/fapi/transport/session_base.hpp>
 
-#include <boost/asio/io_context.hpp>
 #include <boost/cobalt/generator.hpp>
 #include <boost/cobalt/task.hpp>
 
@@ -39,14 +38,7 @@ public:
     /// or @c false to break out of the loop and close gracefully.
     using message_handler = std::function<bool(const std::string&)>;
 
-    /// @brief Construct a WebSocket client (legacy, uses cobalt::run for sync).
-    /// @param io_context Boost.Asio I/O context (currently unused).
-    /// @param cfg        Configuration containing endpoint and credential settings.
-    websocket_client(boost::asio::io_context& io_context, config cfg);
-
     /// @brief Construct a WebSocket client driven by an io_thread.
-    /// Sync methods use io_thread::run_sync instead of cobalt::run,
-    /// so persistent connections survive across calls.
     /// @param io  The io_thread that owns the io_context.
     /// @param cfg Configuration containing endpoint and credential settings.
     websocket_client(detail::io_thread& io, config cfg);

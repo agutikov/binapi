@@ -60,11 +60,6 @@ public:
     };
 
     /// @brief Construct a user streams client.
-    /// @param io_context Boost.Asio I/O context for async operations.
-    /// @param cfg        Configuration containing endpoint and credential settings.
-    user_streams(boost::asio::io_context& io_context, config cfg);
-
-    /// @brief Construct a user streams client driven by an io_thread.
     /// @param io  The io_thread that owns the io_context.
     /// @param cfg Configuration containing endpoint and credential settings.
     user_streams(detail::io_thread& io, config cfg);

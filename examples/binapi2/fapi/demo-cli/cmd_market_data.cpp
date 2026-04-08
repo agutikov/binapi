@@ -8,7 +8,6 @@
 
 #include <binapi2/fapi/client.hpp>
 
-#include <boost/asio/io_context.hpp>
 #include <spdlog/spdlog.h>
 
 #include <iostream>
@@ -17,8 +16,7 @@ namespace demo {
 
 int cmd_ping(const args_t& /*args*/)
 {
-    boost::asio::io_context io;
-    binapi2::fapi::client client{ io, make_config() };
+    binapi2::fapi::client client{ make_config() };
 
     spdlog::debug("executing ping request");
     auto r = client.market_data.execute(binapi2::fapi::types::ping_request_t{});
@@ -31,8 +29,7 @@ int cmd_ping(const args_t& /*args*/)
 
 int cmd_time(const args_t& /*args*/)
 {
-    boost::asio::io_context io;
-    binapi2::fapi::client client{ io, make_config() };
+    binapi2::fapi::client client{ make_config() };
 
     spdlog::debug("executing server_time request");
     auto r = client.market_data.execute(binapi2::fapi::types::server_time_request_t{});
@@ -45,8 +42,7 @@ int cmd_time(const args_t& /*args*/)
 
 int cmd_exchange_info(const args_t& args)
 {
-    boost::asio::io_context io;
-    binapi2::fapi::client client{ io, make_config() };
+    binapi2::fapi::client client{ make_config() };
 
     binapi2::fapi::types::exchange_info_request_t req;
     if (!args.empty()) req.symbol = args[0];
@@ -65,8 +61,7 @@ int cmd_order_book(const args_t& args)
 {
     if (args.empty()) { std::cerr << "usage: order-book <symbol> [limit]\n"; return 1; }
 
-    boost::asio::io_context io;
-    binapi2::fapi::client client{ io, make_config() };
+    binapi2::fapi::client client{ make_config() };
 
     binapi2::fapi::types::order_book_request_t req;
     req.symbol = args[0];
@@ -99,8 +94,7 @@ int cmd_recent_trades(const args_t& args)
 {
     if (args.empty()) { std::cerr << "usage: recent-trades <symbol> [limit]\n"; return 1; }
 
-    boost::asio::io_context io;
-    binapi2::fapi::client client{ io, make_config() };
+    binapi2::fapi::client client{ make_config() };
 
     binapi2::fapi::types::recent_trades_request_t req;
     req.symbol = args[0];
@@ -125,8 +119,7 @@ int cmd_book_ticker(const args_t& args)
 {
     if (args.empty()) { std::cerr << "usage: book-ticker <symbol>\n"; return 1; }
 
-    boost::asio::io_context io;
-    binapi2::fapi::client client{ io, make_config() };
+    binapi2::fapi::client client{ make_config() };
 
     binapi2::fapi::types::book_ticker_request_t req;
     req.symbol = args[0];
@@ -146,8 +139,7 @@ int cmd_book_ticker(const args_t& args)
 
 int cmd_book_tickers(const args_t& /*args*/)
 {
-    boost::asio::io_context io;
-    binapi2::fapi::client client{ io, make_config() };
+    binapi2::fapi::client client{ make_config() };
 
     spdlog::debug("executing book_tickers (all symbols)");
     auto r = client.market_data.book_tickers();
@@ -170,8 +162,7 @@ int cmd_price_ticker(const args_t& args)
 {
     if (args.empty()) { std::cerr << "usage: price-ticker <symbol>\n"; return 1; }
 
-    boost::asio::io_context io;
-    binapi2::fapi::client client{ io, make_config() };
+    binapi2::fapi::client client{ make_config() };
 
     binapi2::fapi::types::price_ticker_request_t req;
     req.symbol = args[0];
@@ -190,8 +181,7 @@ int cmd_price_ticker(const args_t& args)
 
 int cmd_price_tickers(const args_t& /*args*/)
 {
-    boost::asio::io_context io;
-    binapi2::fapi::client client{ io, make_config() };
+    binapi2::fapi::client client{ make_config() };
 
     spdlog::debug("executing price_tickers (all symbols)");
     auto r = client.market_data.price_tickers();
@@ -213,8 +203,7 @@ int cmd_ticker_24hr(const args_t& args)
 {
     if (args.empty()) { std::cerr << "usage: ticker-24hr <symbol>\n"; return 1; }
 
-    boost::asio::io_context io;
-    binapi2::fapi::client client{ io, make_config() };
+    binapi2::fapi::client client{ make_config() };
 
     binapi2::fapi::types::ticker_24hr_request_t req;
     req.symbol = args[0];
@@ -228,8 +217,7 @@ int cmd_mark_price(const args_t& args)
 {
     if (args.empty()) { std::cerr << "usage: mark-price <symbol>\n"; return 1; }
 
-    boost::asio::io_context io;
-    binapi2::fapi::client client{ io, make_config() };
+    binapi2::fapi::client client{ make_config() };
 
     binapi2::fapi::types::mark_price_request_t req;
     req.symbol = args[0];
@@ -250,8 +238,7 @@ int cmd_mark_price(const args_t& args)
 
 int cmd_mark_prices(const args_t& /*args*/)
 {
-    boost::asio::io_context io;
-    binapi2::fapi::client client{ io, make_config() };
+    binapi2::fapi::client client{ make_config() };
 
     spdlog::debug("executing mark_prices (all symbols)");
     auto r = client.market_data.mark_prices();
@@ -273,8 +260,7 @@ int cmd_klines(const args_t& args)
 {
     if (args.size() < 2) { std::cerr << "usage: klines <symbol> <interval> [limit]\n"; return 1; }
 
-    boost::asio::io_context io;
-    binapi2::fapi::client client{ io, make_config() };
+    binapi2::fapi::client client{ make_config() };
 
     binapi2::fapi::types::kline_request_t req;
     req.symbol = args[0];
@@ -303,8 +289,7 @@ int cmd_funding_rate(const args_t& args)
 {
     if (args.empty()) { std::cerr << "usage: funding-rate <symbol> [limit]\n"; return 1; }
 
-    boost::asio::io_context io;
-    binapi2::fapi::client client{ io, make_config() };
+    binapi2::fapi::client client{ make_config() };
 
     binapi2::fapi::types::funding_rate_history_request_t req;
     req.symbol = args[0];
@@ -319,8 +304,7 @@ int cmd_open_interest(const args_t& args)
 {
     if (args.empty()) { std::cerr << "usage: open-interest <symbol>\n"; return 1; }
 
-    boost::asio::io_context io;
-    binapi2::fapi::client client{ io, make_config() };
+    binapi2::fapi::client client{ make_config() };
 
     binapi2::fapi::types::open_interest_request_t req;
     req.symbol = args[0];

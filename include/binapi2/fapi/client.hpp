@@ -28,7 +28,6 @@
 #include <binapi2/fapi/types/common.hpp>
 #include <binapi2/fapi/websocket_api/client.hpp>
 
-#include <boost/asio/io_context.hpp>
 #include <boost/beast/http/verb.hpp>
 #include <boost/cobalt/task.hpp>
 
@@ -101,14 +100,8 @@ decode_response(const transport::http_response& response)
 class client
 {
 public:
-    /// @brief Self-contained mode: client owns io_context + background thread.
-    /// Both sync and async methods are available.
+    /// @brief Construct a client. Owns an io_context and a background I/O thread.
     explicit client(config cfg);
-
-    /// @brief Component mode: client borrows caller's io_context.
-    /// Only async methods are available; sync methods will assert.
-    /// The caller must drive io_context::run() on their own thread.
-    client(boost::asio::io_context& io_context, config cfg);
 
     ~client();
 
@@ -219,10 +212,7 @@ public:
     rest::user_data_stream_service user_data_streams;
 
 private:
-    // Owned mode: io_thread exists and drives the io_context.
-    // Component mode: io_thread_ is null, io_ references the caller's context.
-    std::unique_ptr<detail::io_thread> io_thread_;
-    boost::asio::io_context& io_;
+    detail::io_thread io_thread_;
     config cfg_;
     transport::http_client http_;
 

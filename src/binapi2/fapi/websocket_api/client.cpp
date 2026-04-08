@@ -108,11 +108,6 @@ encode_rpc_request(const std::string& id, std::string_view method, const Params&
 
 } // namespace
 
-client::client(boost::asio::io_context& io_context, config cfg) :
-    io_context_(io_context), cfg_(std::move(cfg)), transport_(io_context_, cfg_)
-{
-}
-
 client::client(fapi::detail::io_thread& io, config cfg) :
     io_context_(io.context()), cfg_(std::move(cfg)), transport_(io, cfg_)
 {

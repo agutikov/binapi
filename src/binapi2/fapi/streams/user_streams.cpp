@@ -27,11 +27,6 @@
 
 namespace binapi2::fapi::streams {
 
-user_streams::user_streams(boost::asio::io_context& io_context, config cfg) :
-    io_context_(io_context), transport_(io_context, cfg), cfg_(std::move(cfg))
-{
-}
-
 user_streams::user_streams(fapi::detail::io_thread& io, config cfg) :
     io_context_(io.context()), transport_(io, cfg), cfg_(std::move(cfg))
 {

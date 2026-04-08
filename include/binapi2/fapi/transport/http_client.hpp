@@ -8,10 +8,10 @@
 #pragma once
 
 #include <binapi2/fapi/config.hpp>
+#include <binapi2/fapi/detail/io_thread.hpp>
 #include <binapi2/fapi/result.hpp>
 #include <binapi2/fapi/transport/session_base.hpp>
 
-#include <boost/asio/io_context.hpp>
 #include <boost/beast/http/verb.hpp>
 #include <boost/cobalt/task.hpp>
 
@@ -35,9 +35,9 @@ class http_client final : public session_base
 {
 public:
     /// @brief Construct an HTTP client.
-    /// @param io_context Boost.Asio I/O context used for async operations.
-    /// @param cfg        Configuration containing the REST endpoint URL and credentials.
-    http_client(boost::asio::io_context& io_context, config cfg);
+    /// @param io  The io_thread that owns the io_context.
+    /// @param cfg Configuration containing the REST endpoint URL and credentials.
+    http_client(detail::io_thread& io, config cfg);
 
     /// @brief Send an HTTP request asynchronously (primary implementation).
     ///
@@ -74,7 +74,7 @@ public:
                                                 const std::string& api_key);
 
 private:
-    boost::asio::io_context& io_context_;
+    detail::io_thread& io_;
 };
 
 } // namespace binapi2::fapi::transport

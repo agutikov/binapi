@@ -18,18 +18,8 @@ namespace binapi2::fapi {
 
 client::client(config cfg) :
     account(*this), convert(*this), market_data(*this), trade(*this), user_data_streams(*this),
-    io_thread_(std::make_unique<detail::io_thread>()),
-    io_(io_thread_->context()),
     cfg_(std::move(cfg)),
-    http_(io_, cfg_)
-{
-}
-
-client::client(boost::asio::io_context& io_context, config cfg) :
-    account(*this), convert(*this), market_data(*this), trade(*this), user_data_streams(*this),
-    io_(io_context),
-    cfg_(std::move(cfg)),
-    http_(io_, cfg_)
+    http_(io_thread_, cfg_)
 {
 }
 
@@ -50,7 +40,7 @@ client::configuration() const noexcept
 boost::asio::io_context&
 client::context() noexcept
 {
-    return io_;
+    return io_thread_.context();
 }
 
 transport::http_client&
@@ -62,36 +52,24 @@ client::transport() noexcept
 websocket_api::client&
 client::ws_api()
 {
-    if (!ws_api_) {
-        if (io_thread_)
-            ws_api_ = std::make_unique<websocket_api::client>(*io_thread_, cfg_);
-        else
-            ws_api_ = std::make_unique<websocket_api::client>(io_, cfg_);
-    }
+    if (!ws_api_)
+        ws_api_ = std::make_unique<websocket_api::client>(io_thread_, cfg_);
     return *ws_api_;
 }
 
 streams::market_streams&
 client::streams()
 {
-    if (!streams_) {
-        if (io_thread_)
-            streams_ = std::make_unique<streams::market_streams>(*io_thread_, cfg_);
-        else
-            streams_ = std::make_unique<streams::market_streams>(io_, cfg_);
-    }
+    if (!streams_)
+        streams_ = std::make_unique<streams::market_streams>(io_thread_, cfg_);
     return *streams_;
 }
 
 streams::user_streams&
 client::user_streams()
 {
-    if (!user_streams_) {
-        if (io_thread_)
-            user_streams_ = std::make_unique<streams::user_streams>(*io_thread_, cfg_);
-        else
-            user_streams_ = std::make_unique<streams::user_streams>(io_, cfg_);
-    }
+    if (!user_streams_)
+        user_streams_ = std::make_unique<streams::user_streams>(io_thread_, cfg_);
     return *user_streams_;
 }
 
