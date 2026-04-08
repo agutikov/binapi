@@ -195,7 +195,7 @@ public:
         return async_execute<typename traits::response_type_t>(
             traits::endpoint.method,
             std::string{ traits::endpoint.path },
-            to_query_map(request),
+            to_query_map(request),  
             traits::endpoint.signed_request);
     }
 

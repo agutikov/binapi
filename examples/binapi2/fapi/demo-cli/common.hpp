@@ -31,6 +31,9 @@ inline bool use_testnet = true;
 inline std::string save_request_file;
 inline std::string save_response_file;
 
+// Record raw WebSocket stream frames to a JSONL file.
+inline std::string record_file;
+
 // File logging.
 inline std::string log_file;
 inline std::string file_loglevel;

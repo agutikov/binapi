@@ -223,10 +223,14 @@ websocket_client::read_text()
 result<void>
 websocket_client::run_read_loop(message_handler handler)
 {
+    const auto& recorder = impl_->cfg.stream_recorder;
     while (true) {
         auto message = read_text();
         if (!message) {
             return result<void>::failure(message.err);
+        }
+        if (recorder) {
+            recorder(*message);
         }
         if (!handler(*message)) {
             break;

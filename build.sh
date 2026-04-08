@@ -7,7 +7,7 @@ set -euo pipefail
 cmake \
     -S . \
     -B _build \
-    -DCMAKE_BUILD_TYPE=Release
+    -DCMAKE_BUILD_TYPE=Debug
 
 
 cmake --build _build -j16

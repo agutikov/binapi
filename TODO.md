@@ -4,19 +4,17 @@
 
 
 
-
-binapi2 connect to testnet
-
-test all methods
-
-
+How we suppose to work with streams?
+Callbacks?
+Income data buffers, queues?
+How to start/stop (subscribe/unsubscribe)?
 
 
-
+--------------------------------------------------------------------------------
 
 
 
-
+connection pooling
 
 
 --------------------------------------------------------------------------------
@@ -41,6 +39,15 @@ SecretProvider
 implement this in a separate library
 
 add required interface for SecretProvider in binapi2 that works with both implementation
+
+
+
+
+--------------------------------------------------------------------------------
+
+
+finish testing secure endpoints, streams and ws api with testnet
+
 
 
 

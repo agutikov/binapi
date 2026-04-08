@@ -15,6 +15,7 @@
 //       --testnet               Use testnet endpoints (default)
 //   -S, --save-request <file>   Save request to file
 //   -R, --save-response <file>  Save response body to file
+//   -r, --record <file>         Record raw WebSocket stream frames to JSONL file
 //   -L, --log-file <file>       Log to file
 //   -F, --file-loglevel <lvl>   File log level (trace/debug/info/warn/error/off)
 //   -O, --stdout-loglevel <lvl> Stdout log level (trace/debug/info/warn/error/off)
@@ -114,6 +115,7 @@ void print_usage(const char* prog)
               << "      --testnet               Use testnet endpoints (default)\n"
               << "  -S, --save-request <file>   Save request to file\n"
               << "  -R, --save-response <file>  Save response body to file\n"
+              << "  -r, --record <file>         Record raw stream frames to JSONL file\n"
               << "  -L, --log-file <file>       Log to file\n"
               << "  -F, --file-loglevel <lvl>   File log level (trace/debug/info/warn/error/off)\n"
               << "  -O, --stdout-loglevel <lvl> Stdout log level (trace/debug/info/warn/error/off)\n"
@@ -143,6 +145,7 @@ int main(int argc, char* argv[])
         else if (arg == "--testnet") { demo::use_testnet = true; }
         else if ((arg == "--save-request"  || arg == "-S") && i + 1 < argc) { demo::save_request_file  = argv[++i]; }
         else if ((arg == "--save-response" || arg == "-R") && i + 1 < argc) { demo::save_response_file = argv[++i]; }
+        else if ((arg == "--record"        || arg == "-r") && i + 1 < argc) { demo::record_file        = argv[++i]; }
         else if ((arg == "--log-file"      || arg == "-L") && i + 1 < argc) { demo::log_file           = argv[++i]; }
         else if ((arg == "--file-loglevel" || arg == "-F") && i + 1 < argc) { demo::file_loglevel      = argv[++i]; }
         else if ((arg == "--stdout-loglevel" || arg == "-O") && i + 1 < argc) { demo::stdout_loglevel  = argv[++i]; }

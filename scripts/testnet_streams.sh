@@ -24,13 +24,13 @@ run_stream() {
     local dir="$OUT/$name"
     mkdir -p "$dir"
     echo -n "  $name (${TIMEOUT}s) ... "
-    timeout "$TIMEOUT" \
+    (timeout -s KILL "$TIMEOUT" \
         "$CLI" \
             -L "$dir/log.txt" \
             -F trace \
             -v \
             "$@" \
-        > "$dir/stdout.txt" 2>&1 || true
+        > "$dir/stdout.txt" 2>/dev/null || true) 2>/dev/null
     local lines
     lines=$(wc -l < "$dir/stdout.txt")
     echo "$lines lines"

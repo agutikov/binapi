@@ -55,6 +55,22 @@ struct config
     /// status, and body.  When null (default), no logging overhead is incurred.
     transport_logger logger{};
 
+    /// @brief Optional callback invoked for every raw WebSocket frame received
+    ///        during a stream read loop, before JSON parsing.
+    ///
+    /// Useful for recording raw stream data to a file for debugging or replay.
+    /// The callback receives the raw text payload exactly as received from the
+    /// server. When null (default), no overhead is incurred.
+    ///
+    /// Example — record to a file:
+    /// @code
+    ///   std::ofstream out("stream.jsonl");
+    ///   cfg.stream_recorder = [&out](const std::string& payload) {
+    ///       out << payload << '\n';
+    ///   };
+    /// @endcode
+    std::function<void(const std::string&)> stream_recorder{};
+
     /// @brief When true the config targets the Binance Futures testnet.
     bool testnet{ false };
 

@@ -8,6 +8,7 @@
 
 #include <cstdlib>
 #include <fstream>
+#include <memory>
 
 namespace demo {
 
@@ -62,6 +63,19 @@ binapi2::fapi::config make_config()
         cfg.api_key = key;
     if (const char* secret = std::getenv("BINANCE_SECRET_KEY"))
         cfg.secret_key = secret;
+
+    if (!record_file.empty()) {
+        auto record_out = std::make_shared<std::ofstream>(record_file);
+        if (!record_out->good()) {
+            spdlog::error("cannot open record file: {}", record_file);
+        } else {
+            spdlog::info("recording raw stream frames to {}", record_file);
+            cfg.stream_recorder = [record_out](const std::string& payload) {
+                *record_out << payload << '\n';
+                record_out->flush();
+            };
+        }
+    }
 
     cfg.logger = [](const binapi2::fapi::transport_log_entry& e) {
         using binapi2::fapi::transport_direction;
