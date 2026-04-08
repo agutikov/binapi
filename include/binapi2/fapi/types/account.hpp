@@ -29,7 +29,7 @@ namespace binapi2::fapi::types {
 // ---------------------------------------------------------------------------
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Account-Information-V3.md
-struct account_asset
+struct account_asset_t
 {
     std::string asset{};
     decimal_t walletBalance{};
@@ -48,7 +48,7 @@ struct account_asset
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Account-Information-V3.md
-struct account_position
+struct account_position_t
 {
     std::string symbol{};
     decimal_t initialMargin{};
@@ -72,7 +72,7 @@ struct account_position
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Account-Information-V3.md
-struct account_information
+struct account_information_t
 {
     int feeTier{};
     bool canTrade{};
@@ -92,12 +92,12 @@ struct account_information
     decimal_t totalCrossUnPnl{};
     decimal_t availableBalance{};
     decimal_t maxWithdrawAmount{};
-    std::vector<account_asset> assets{};
-    std::vector<account_position> positions{};
+    std::vector<account_asset_t> assets{};
+    std::vector<account_position_t> positions{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Futures-Account-Balance-V3.md
-struct futures_account_balance
+struct futures_account_balance_t
 {
     std::string accountAlias{};
     std::string asset{};
@@ -115,13 +115,13 @@ struct futures_account_balance
 // ---------------------------------------------------------------------------
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Position-Information-V2.md
-struct position_risk_request
+struct position_risk_request_t
 {
     std::optional<std::string> symbol{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Position-Information-V2.md
-struct position_risk
+struct position_risk_t
 {
     std::string symbol{};
     decimal_t positionAmt{};
@@ -146,7 +146,7 @@ struct position_risk
 // ---------------------------------------------------------------------------
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Account-Config.md
-struct account_config_response
+struct account_config_response_t
 {
     int feeTier{};
     bool canTrade{};
@@ -159,13 +159,13 @@ struct account_config_response
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Symbol-Config.md
-struct symbol_config_request
+struct symbol_config_request_t
 {
     std::optional<std::string> symbol{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Symbol-Config.md
-struct symbol_config_entry
+struct symbol_config_entry_t
 {
     std::string symbol{};
     margin_type_t marginType{};
@@ -175,13 +175,13 @@ struct symbol_config_entry
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Get-Current-Multi-Assets-Mode.md
-struct multi_assets_mode_response
+struct multi_assets_mode_response_t
 {
     bool multiAssetsMargin{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Get-Current-Position-Mode.md
-struct position_mode_response
+struct position_mode_response_t
 {
     bool dualSidePosition{};
 };
@@ -191,7 +191,7 @@ struct position_mode_response
 // ---------------------------------------------------------------------------
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Get-Income-History.md
-struct income_history_request
+struct income_history_request_t
 {
     std::optional<std::string> symbol{};
     std::optional<std::string> incomeType{};
@@ -202,7 +202,7 @@ struct income_history_request
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Get-Income-History.md
-struct income_history_entry
+struct income_history_entry_t
 {
     std::string symbol{};
     income_type_t incomeType{};
@@ -219,13 +219,13 @@ struct income_history_entry
 // ---------------------------------------------------------------------------
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Notional-and-Leverage-Brackets.md
-struct leverage_bracket_request
+struct leverage_bracket_request_t
 {
     std::optional<std::string> symbol{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Notional-and-Leverage-Brackets.md
-struct leverage_bracket_entry
+struct leverage_bracket_entry_t
 {
     int bracket{};
     int initialLeverage{};
@@ -236,21 +236,21 @@ struct leverage_bracket_entry
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Notional-and-Leverage-Brackets.md
-struct symbol_leverage_brackets
+struct symbol_leverage_brackets_t
 {
     std::string symbol{};
     std::optional<decimal_t> notionalCoef{};
-    std::vector<leverage_bracket_entry> brackets{};
+    std::vector<leverage_bracket_entry_t> brackets{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/User-Commission-Rate.md
-struct commission_rate_request
+struct commission_rate_request_t
 {
     std::string symbol{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/User-Commission-Rate.md
-struct commission_rate_response
+struct commission_rate_response_t
 {
     std::string symbol{};
     decimal_t makerCommissionRate{};
@@ -263,27 +263,27 @@ struct commission_rate_response
 // ---------------------------------------------------------------------------
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Get-Download-Id-For-Futures-Transaction-History.md
-struct download_id_request
+struct download_id_request_t
 {
     timestamp_ms_t startTime{};
     timestamp_ms_t endTime{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Get-Download-Id-For-Futures-Transaction-History.md
-struct download_id_response
+struct download_id_response_t
 {
     timestamp_ms_t avgCostTimestampOfLast30d{};
     std::string downloadId{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Get-Futures-Transaction-History-Download-Link-by-Id.md
-struct download_link_request
+struct download_link_request_t
 {
     std::string downloadId{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Get-Futures-Transaction-History-Download-Link-by-Id.md
-struct download_link_response
+struct download_link_response_t
 {
     std::string downloadId{};
     std::string status{};
@@ -298,19 +298,19 @@ struct download_link_response
 // ---------------------------------------------------------------------------
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Get-BNB-Burn-Status.md
-struct bnb_burn_status_response
+struct bnb_burn_status_response_t
 {
     bool feeBurn{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Toggle-BNB-Burn-On-Futures-Trade.md
-struct toggle_bnb_burn_request
+struct toggle_bnb_burn_request_t
 {
     std::string feeBurn{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Futures-Trading-Quantitative-Rules-Indicators.md
-struct trading_status_indicator
+struct trading_status_indicator_t
 {
     bool isLocked{};
     timestamp_ms_t plannedRecoverTime{};
@@ -320,15 +320,15 @@ struct trading_status_indicator
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Futures-Trading-Quantitative-Rules-Indicators.md
-struct quantitative_rules_request
+struct quantitative_rules_request_t
 {
     std::optional<std::string> symbol{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Futures-Trading-Quantitative-Rules-Indicators.md
-struct quantitative_rules_response
+struct quantitative_rules_response_t
 {
-    std::map<std::string, std::vector<trading_status_indicator>> indicators{};
+    std::map<std::string, std::vector<trading_status_indicator_t>> indicators{};
     timestamp_ms_t updateTime{};
 };
 
@@ -337,13 +337,13 @@ struct quantitative_rules_response
 // ---------------------------------------------------------------------------
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/portfolio-margin-endpoints.md
-struct pm_account_info_request
+struct pm_account_info_request_t
 {
     std::string asset{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/portfolio-margin-endpoints.md
-struct pm_account_info_response
+struct pm_account_info_response_t
 {
     decimal_t maxWithdrawAmountUSD{};
     std::string asset{};
@@ -353,17 +353,17 @@ struct pm_account_info_response
 } // namespace binapi2::fapi::types
 
 template<>
-struct glz::meta<binapi2::fapi::types::pm_account_info_response>
+struct glz::meta<binapi2::fapi::types::pm_account_info_response_t>
 {
-    using T = binapi2::fapi::types::pm_account_info_response;
+    using T = binapi2::fapi::types::pm_account_info_response_t;
     static constexpr auto value =
         object("maxWithdrawAmountUSD", &T::maxWithdrawAmountUSD, "asset", &T::asset, "maxWithdrawAmount", &T::maxWithdrawAmount);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::account_asset>
+struct glz::meta<binapi2::fapi::types::account_asset_t>
 {
-    using T = binapi2::fapi::types::account_asset;
+    using T = binapi2::fapi::types::account_asset_t;
     static constexpr auto value = object("asset",
                                          &T::asset,
                                          "walletBalance",
@@ -395,9 +395,9 @@ struct glz::meta<binapi2::fapi::types::account_asset>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::account_position>
+struct glz::meta<binapi2::fapi::types::account_position_t>
 {
-    using T = binapi2::fapi::types::account_position;
+    using T = binapi2::fapi::types::account_position_t;
     static constexpr auto value = object("symbol",
                                          &T::symbol,
                                          "initialMargin",
@@ -439,9 +439,9 @@ struct glz::meta<binapi2::fapi::types::account_position>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::account_information>
+struct glz::meta<binapi2::fapi::types::account_information_t>
 {
-    using T = binapi2::fapi::types::account_information;
+    using T = binapi2::fapi::types::account_information_t;
     static constexpr auto value = object("feeTier",
                                          &T::feeTier,
                                          "canTrade",
@@ -485,9 +485,9 @@ struct glz::meta<binapi2::fapi::types::account_information>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::futures_account_balance>
+struct glz::meta<binapi2::fapi::types::futures_account_balance_t>
 {
-    using T = binapi2::fapi::types::futures_account_balance;
+    using T = binapi2::fapi::types::futures_account_balance_t;
     static constexpr auto value = object("accountAlias",
                                          &T::accountAlias,
                                          "asset",
@@ -509,9 +509,9 @@ struct glz::meta<binapi2::fapi::types::futures_account_balance>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::position_risk>
+struct glz::meta<binapi2::fapi::types::position_risk_t>
 {
-    using T = binapi2::fapi::types::position_risk;
+    using T = binapi2::fapi::types::position_risk_t;
     // Binance sends isAutoAddMargin as string "true"/"false".
     static constexpr auto read_auto_add = [](T& s, const std::string& v) { s.isAutoAddMargin = (v == "true"); };
     static constexpr auto write_auto_add = [](const T& s) -> std::string { return s.isAutoAddMargin ? "true" : "false"; };
@@ -550,9 +550,9 @@ struct glz::meta<binapi2::fapi::types::position_risk>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::account_config_response>
+struct glz::meta<binapi2::fapi::types::account_config_response_t>
 {
-    using T = binapi2::fapi::types::account_config_response;
+    using T = binapi2::fapi::types::account_config_response_t;
     static constexpr auto value = object("feeTier",
                                          &T::feeTier,
                                          "canTrade",
@@ -572,9 +572,9 @@ struct glz::meta<binapi2::fapi::types::account_config_response>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::symbol_config_entry>
+struct glz::meta<binapi2::fapi::types::symbol_config_entry_t>
 {
-    using T = binapi2::fapi::types::symbol_config_entry;
+    using T = binapi2::fapi::types::symbol_config_entry_t;
     // Binance sends isAutoAddMargin as string "true"/"false".
     static constexpr auto read_auto_add = [](T& s, const std::string& v) { s.isAutoAddMargin = (v == "true"); };
     static constexpr auto write_auto_add = [](const T& s) -> std::string { return s.isAutoAddMargin ? "true" : "false"; };
@@ -591,23 +591,23 @@ struct glz::meta<binapi2::fapi::types::symbol_config_entry>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::multi_assets_mode_response>
+struct glz::meta<binapi2::fapi::types::multi_assets_mode_response_t>
 {
-    using T = binapi2::fapi::types::multi_assets_mode_response;
+    using T = binapi2::fapi::types::multi_assets_mode_response_t;
     static constexpr auto value = object("multiAssetsMargin", &T::multiAssetsMargin);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::position_mode_response>
+struct glz::meta<binapi2::fapi::types::position_mode_response_t>
 {
-    using T = binapi2::fapi::types::position_mode_response;
+    using T = binapi2::fapi::types::position_mode_response_t;
     static constexpr auto value = object("dualSidePosition", &T::dualSidePosition);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::income_history_entry>
+struct glz::meta<binapi2::fapi::types::income_history_entry_t>
 {
-    using T = binapi2::fapi::types::income_history_entry;
+    using T = binapi2::fapi::types::income_history_entry_t;
     static constexpr auto value = object("symbol",
                                          &T::symbol,
                                          "incomeType",
@@ -627,9 +627,9 @@ struct glz::meta<binapi2::fapi::types::income_history_entry>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::leverage_bracket_entry>
+struct glz::meta<binapi2::fapi::types::leverage_bracket_entry_t>
 {
-    using T = binapi2::fapi::types::leverage_bracket_entry;
+    using T = binapi2::fapi::types::leverage_bracket_entry_t;
     static constexpr auto value = object("bracket",
                                          &T::bracket,
                                          "initialLeverage",
@@ -645,17 +645,17 @@ struct glz::meta<binapi2::fapi::types::leverage_bracket_entry>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::symbol_leverage_brackets>
+struct glz::meta<binapi2::fapi::types::symbol_leverage_brackets_t>
 {
-    using T = binapi2::fapi::types::symbol_leverage_brackets;
+    using T = binapi2::fapi::types::symbol_leverage_brackets_t;
     static constexpr auto value =
         object("symbol", &T::symbol, "notionalCoef", &T::notionalCoef, "brackets", &T::brackets);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::commission_rate_response>
+struct glz::meta<binapi2::fapi::types::commission_rate_response_t>
 {
-    using T = binapi2::fapi::types::commission_rate_response;
+    using T = binapi2::fapi::types::commission_rate_response_t;
     static constexpr auto value = object("symbol",
                                          &T::symbol,
                                          "makerCommissionRate",
@@ -667,17 +667,17 @@ struct glz::meta<binapi2::fapi::types::commission_rate_response>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::download_id_response>
+struct glz::meta<binapi2::fapi::types::download_id_response_t>
 {
-    using T = binapi2::fapi::types::download_id_response;
+    using T = binapi2::fapi::types::download_id_response_t;
     static constexpr auto value =
         object("avgCostTimestampOfLast30d", &T::avgCostTimestampOfLast30d, "downloadId", &T::downloadId);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::download_link_response>
+struct glz::meta<binapi2::fapi::types::download_link_response_t>
 {
-    using T = binapi2::fapi::types::download_link_response;
+    using T = binapi2::fapi::types::download_link_response_t;
     static constexpr auto value = object("downloadId",
                                          &T::downloadId,
                                          "status",
@@ -693,16 +693,16 @@ struct glz::meta<binapi2::fapi::types::download_link_response>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::bnb_burn_status_response>
+struct glz::meta<binapi2::fapi::types::bnb_burn_status_response_t>
 {
-    using T = binapi2::fapi::types::bnb_burn_status_response;
+    using T = binapi2::fapi::types::bnb_burn_status_response_t;
     static constexpr auto value = object("feeBurn", &T::feeBurn);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::trading_status_indicator>
+struct glz::meta<binapi2::fapi::types::trading_status_indicator_t>
 {
-    using T = binapi2::fapi::types::trading_status_indicator;
+    using T = binapi2::fapi::types::trading_status_indicator_t;
     static constexpr auto value = object("isLocked",
                                          &T::isLocked,
                                          "plannedRecoverTime",
@@ -716,8 +716,8 @@ struct glz::meta<binapi2::fapi::types::trading_status_indicator>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::quantitative_rules_response>
+struct glz::meta<binapi2::fapi::types::quantitative_rules_response_t>
 {
-    using T = binapi2::fapi::types::quantitative_rules_response;
+    using T = binapi2::fapi::types::quantitative_rules_response_t;
     static constexpr auto value = object("indicators", &T::indicators, "updateTime", &T::updateTime);
 };

@@ -214,56 +214,56 @@ build_binapi_registry()
     };
 
     // --- Market data: 1:1 traits ---
-    add(rest::ping_endpoint, field_names<types::ping_request>());
-    add(rest::server_time_endpoint, field_names<types::server_time_request>());
-    add(rest::exchange_info_endpoint, field_names<types::exchange_info_request>());
-    add(rest::order_book_endpoint, field_names<types::order_book_request>());
-    add(rest::recent_trades_endpoint, field_names<types::recent_trades_request>());
-    add(rest::aggregate_trades_endpoint, field_names<types::aggregate_trades_request>());
-    add(rest::continuous_klines_endpoint, field_names<types::continuous_kline_request>());
-    add(rest::index_price_klines_endpoint, field_names<types::index_price_kline_request>());
-    add(rest::book_ticker_endpoint, field_names<types::book_ticker_request>());
-    add(rest::price_ticker_endpoint, field_names<types::price_ticker_request>());
-    add(rest::ticker_24hr_endpoint, field_names<types::ticker_24hr_request>());
-    add(rest::mark_price_endpoint, field_names<types::mark_price_request>());
-    add(rest::funding_rate_history_endpoint, field_names<types::funding_rate_history_request>());
-    add(rest::open_interest_endpoint, field_names<types::open_interest_request>());
-    add(rest::historical_trades_endpoint, field_names<types::historical_trades_request>());
-    add(rest::basis_endpoint, field_names<types::basis_request>());
-    add(rest::price_ticker_v2_endpoint, field_names<types::price_ticker_v2_request>());
-    add(rest::delivery_price_endpoint, field_names<types::delivery_price_request>());
-    add(rest::composite_index_info_endpoint, field_names<types::composite_index_info_request>());
-    add(rest::index_constituents_endpoint, field_names<types::index_constituents_request>());
-    add(rest::asset_index_endpoint, field_names<types::asset_index_request>());
-    add(rest::insurance_fund_endpoint, field_names<types::insurance_fund_request>());
-    add(rest::adl_risk_endpoint, field_names<types::adl_risk_request>());
-    add(rest::rpi_depth_endpoint, field_names<types::rpi_depth_request>());
-    add(rest::trading_schedule_endpoint, field_names<types::trading_schedule_request>());
+    add(rest::ping_endpoint, field_names<types::ping_request_t>());
+    add(rest::server_time_endpoint, field_names<types::server_time_request_t>());
+    add(rest::exchange_info_endpoint, field_names<types::exchange_info_request_t>());
+    add(rest::order_book_endpoint, field_names<types::order_book_request_t>());
+    add(rest::recent_trades_endpoint, field_names<types::recent_trades_request_t>());
+    add(rest::aggregate_trades_endpoint, field_names<types::aggregate_trades_request_t>());
+    add(rest::continuous_klines_endpoint, field_names<types::continuous_kline_request_t>());
+    add(rest::index_price_klines_endpoint, field_names<types::index_price_kline_request_t>());
+    add(rest::book_ticker_endpoint, field_names<types::book_ticker_request_t>());
+    add(rest::price_ticker_endpoint, field_names<types::price_ticker_request_t>());
+    add(rest::ticker_24hr_endpoint, field_names<types::ticker_24hr_request_t>());
+    add(rest::mark_price_endpoint, field_names<types::mark_price_request_t>());
+    add(rest::funding_rate_history_endpoint, field_names<types::funding_rate_history_request_t>());
+    add(rest::open_interest_endpoint, field_names<types::open_interest_request_t>());
+    add(rest::historical_trades_endpoint, field_names<types::historical_trades_request_t>());
+    add(rest::basis_endpoint, field_names<types::basis_request_t>());
+    add(rest::price_ticker_v2_endpoint, field_names<types::price_ticker_v2_request_t>());
+    add(rest::delivery_price_endpoint, field_names<types::delivery_price_request_t>());
+    add(rest::composite_index_info_endpoint, field_names<types::composite_index_info_request_t>());
+    add(rest::index_constituents_endpoint, field_names<types::index_constituents_request_t>());
+    add(rest::asset_index_endpoint, field_names<types::asset_index_request_t>());
+    add(rest::insurance_fund_endpoint, field_names<types::insurance_fund_request_t>());
+    add(rest::adl_risk_endpoint, field_names<types::adl_risk_request_t>());
+    add(rest::rpi_depth_endpoint, field_names<types::rpi_depth_request_t>());
+    add(rest::trading_schedule_endpoint, field_names<types::trading_schedule_request_t>());
 
     // --- Market data: shared request types (named service methods) ---
-    add(rest::klines_endpoint, field_names<types::kline_request>());
-    add(rest::mark_price_klines_endpoint, field_names<types::kline_request>());
-    add(rest::premium_index_klines_endpoint, field_names<types::kline_request>());
-    add(rest::open_interest_statistics_endpoint, field_names<types::futures_data_request>());
-    add(rest::top_long_short_account_ratio_endpoint, field_names<types::futures_data_request>());
-    add(rest::top_trader_long_short_ratio_endpoint, field_names<types::futures_data_request>());
-    add(rest::long_short_ratio_endpoint, field_names<types::futures_data_request>());
-    add(rest::taker_buy_sell_volume_endpoint, field_names<types::futures_data_request>());
+    add(rest::klines_endpoint, field_names<types::kline_request_t>());
+    add(rest::mark_price_klines_endpoint, field_names<types::kline_request_t>());
+    add(rest::premium_index_klines_endpoint, field_names<types::kline_request_t>());
+    add(rest::open_interest_statistics_endpoint, field_names<types::futures_data_request_t>());
+    add(rest::top_long_short_account_ratio_endpoint, field_names<types::futures_data_request_t>());
+    add(rest::top_trader_long_short_ratio_endpoint, field_names<types::futures_data_request_t>());
+    add(rest::long_short_ratio_endpoint, field_names<types::futures_data_request_t>());
+    add(rest::taker_buy_sell_volume_endpoint, field_names<types::futures_data_request_t>());
 
     // --- Market data: parameterless list variants (same endpoint, no symbol) ---
     // These use the same endpoint_metadata as single-symbol variants; the optional
-    // symbol is simply omitted.  funding_rate_info is parameterless.
+    // symbol is simply omitted.  funding_rate_info_t is parameterless.
     add(rest::funding_rate_info_endpoint, {});
 
     // --- Account: 1:1 traits ---
-    add(rest::position_risk_endpoint, field_names<types::position_risk_request>());
-    add(rest::symbol_config_endpoint, field_names<types::symbol_config_request>());
-    add(rest::income_history_endpoint, field_names<types::income_history_request>());
-    add(rest::leverage_brackets_endpoint, field_names<types::leverage_bracket_request>());
-    add(rest::commission_rate_endpoint, field_names<types::commission_rate_request>());
-    add(rest::toggle_bnb_burn_endpoint, field_names<types::toggle_bnb_burn_request>());
-    add(rest::quantitative_rules_endpoint, field_names<types::quantitative_rules_request>());
-    add(rest::pm_account_info_endpoint, field_names<types::pm_account_info_request>());
+    add(rest::position_risk_endpoint, field_names<types::position_risk_request_t>());
+    add(rest::symbol_config_endpoint, field_names<types::symbol_config_request_t>());
+    add(rest::income_history_endpoint, field_names<types::income_history_request_t>());
+    add(rest::leverage_brackets_endpoint, field_names<types::leverage_bracket_request_t>());
+    add(rest::commission_rate_endpoint, field_names<types::commission_rate_request_t>());
+    add(rest::toggle_bnb_burn_endpoint, field_names<types::toggle_bnb_burn_request_t>());
+    add(rest::quantitative_rules_endpoint, field_names<types::quantitative_rules_request_t>());
+    add(rest::pm_account_info_endpoint, field_names<types::pm_account_info_request_t>());
 
     // --- Account: parameterless endpoints ---
     add(rest::account_information_endpoint, {});
@@ -275,49 +275,49 @@ build_binapi_registry()
     add(rest::get_bnb_burn_endpoint, {});
 
     // --- Account: shared request types (download_id / download_link) ---
-    add(rest::download_id_transaction_endpoint, field_names<types::download_id_request>());
-    add(rest::download_link_transaction_endpoint, field_names<types::download_link_request>());
-    add(rest::download_id_order_endpoint, field_names<types::download_id_request>());
-    add(rest::download_link_order_endpoint, field_names<types::download_link_request>());
-    add(rest::download_id_trade_endpoint, field_names<types::download_id_request>());
-    add(rest::download_link_trade_endpoint, field_names<types::download_link_request>());
+    add(rest::download_id_transaction_endpoint, field_names<types::download_id_request_t>());
+    add(rest::download_link_transaction_endpoint, field_names<types::download_link_request_t>());
+    add(rest::download_id_order_endpoint, field_names<types::download_id_request_t>());
+    add(rest::download_link_order_endpoint, field_names<types::download_link_request_t>());
+    add(rest::download_id_trade_endpoint, field_names<types::download_id_request_t>());
+    add(rest::download_link_trade_endpoint, field_names<types::download_link_request_t>());
 
     // --- Trade: 1:1 traits ---
-    add(rest::new_order_endpoint, field_names<types::new_order_request>());
-    add(rest::modify_order_endpoint, field_names<types::modify_order_request>());
-    add(rest::cancel_order_endpoint, field_names<types::cancel_order_request>());
-    add(rest::query_order_endpoint, field_names<types::query_order_request>());
-    add(rest::cancel_all_open_orders_endpoint, field_names<types::cancel_all_open_orders_request>());
-    add(rest::auto_cancel_endpoint, field_names<types::auto_cancel_request>());
-    add(rest::query_open_order_endpoint, field_names<types::query_open_order_request>());
-    add(rest::all_open_orders_endpoint, field_names<types::all_open_orders_request>());
-    add(rest::all_orders_endpoint, field_names<types::all_orders_request>());
-    add(rest::position_risk_v3_endpoint, field_names<types::position_info_v3_request>());
-    add(rest::adl_quantile_endpoint, field_names<types::adl_quantile_request>());
-    add(rest::force_orders_endpoint, field_names<types::force_orders_request>());
-    add(rest::account_trades_endpoint, field_names<types::account_trade_request>());
-    add(rest::change_position_mode_endpoint, field_names<types::change_position_mode_request>());
-    add(rest::change_multi_assets_endpoint, field_names<types::change_multi_assets_mode_request>());
-    add(rest::change_leverage_endpoint, field_names<types::change_leverage_request>());
-    add(rest::change_margin_type_endpoint, field_names<types::change_margin_type_request>());
-    add(rest::modify_isolated_margin_endpoint, field_names<types::modify_isolated_margin_request>());
-    add(rest::position_margin_history_endpoint, field_names<types::position_margin_history_request>());
-    add(rest::order_modify_history_endpoint, field_names<types::order_modify_history_request>());
-    add(rest::new_algo_order_endpoint, field_names<types::new_algo_order_request>());
-    add(rest::cancel_algo_order_endpoint, field_names<types::cancel_algo_order_request>());
-    add(rest::query_algo_order_endpoint, field_names<types::query_algo_order_request>());
-    add(rest::all_algo_orders_endpoint, field_names<types::all_algo_orders_request>());
+    add(rest::new_order_endpoint, field_names<types::new_order_request_t>());
+    add(rest::modify_order_endpoint, field_names<types::modify_order_request_t>());
+    add(rest::cancel_order_endpoint, field_names<types::cancel_order_request_t>());
+    add(rest::query_order_endpoint, field_names<types::query_order_request_t>());
+    add(rest::cancel_all_open_orders_endpoint, field_names<types::cancel_all_open_orders_request_t>());
+    add(rest::auto_cancel_endpoint, field_names<types::auto_cancel_request_t>());
+    add(rest::query_open_order_endpoint, field_names<types::query_open_order_request_t>());
+    add(rest::all_open_orders_endpoint, field_names<types::all_open_orders_request_t>());
+    add(rest::all_orders_endpoint, field_names<types::all_orders_request_t>());
+    add(rest::position_risk_v3_endpoint, field_names<types::position_info_v3_request_t>());
+    add(rest::adl_quantile_endpoint, field_names<types::adl_quantile_request_t>());
+    add(rest::force_orders_endpoint, field_names<types::force_orders_request_t>());
+    add(rest::account_trades_endpoint, field_names<types::account_trade_request_t>());
+    add(rest::change_position_mode_endpoint, field_names<types::change_position_mode_request_t>());
+    add(rest::change_multi_assets_endpoint, field_names<types::change_multi_assets_mode_request_t>());
+    add(rest::change_leverage_endpoint, field_names<types::change_leverage_request_t>());
+    add(rest::change_margin_type_endpoint, field_names<types::change_margin_type_request_t>());
+    add(rest::modify_isolated_margin_endpoint, field_names<types::modify_isolated_margin_request_t>());
+    add(rest::position_margin_history_endpoint, field_names<types::position_margin_history_request_t>());
+    add(rest::order_modify_history_endpoint, field_names<types::order_modify_history_request_t>());
+    add(rest::new_algo_order_endpoint, field_names<types::new_algo_order_request_t>());
+    add(rest::cancel_algo_order_endpoint, field_names<types::cancel_algo_order_request_t>());
+    add(rest::query_algo_order_endpoint, field_names<types::query_algo_order_request_t>());
+    add(rest::all_algo_orders_endpoint, field_names<types::all_algo_orders_request_t>());
 
     // --- Trade: shared request types ---
-    add(rest::test_order_endpoint, field_names<types::new_order_request>());
-    add(rest::batch_orders_endpoint, field_names<types::batch_orders_request>());
-    add(rest::modify_batch_orders_endpoint, field_names<types::batch_orders_request>());
-    add(rest::cancel_batch_orders_endpoint, field_names<types::cancel_multiple_orders_request>());
+    add(rest::test_order_endpoint, field_names<types::new_order_request_t>());
+    add(rest::batch_orders_endpoint, field_names<types::batch_orders_request_t>());
+    add(rest::modify_batch_orders_endpoint, field_names<types::batch_orders_request_t>());
+    add(rest::cancel_batch_orders_endpoint, field_names<types::cancel_multiple_orders_request_t>());
 
     // --- Trade: parameterless ---
     add(rest::open_algo_orders_endpoint, {});
     add(rest::cancel_all_algo_orders_endpoint, {});
-    add(rest::tradfi_perps_endpoint, field_names<types::tradfi_perps_request>());
+    add(rest::tradfi_perps_endpoint, field_names<types::tradfi_perps_request_t>());
 
     // --- User data streams ---
     add(rest::start_listen_key_endpoint, {});
@@ -325,9 +325,9 @@ build_binapi_registry()
     add(rest::close_listen_key_endpoint, {});
 
     // --- Convert: 1:1 traits ---
-    add(rest::convert_get_quote_endpoint, field_names<types::convert_quote_request>());
-    add(rest::convert_accept_quote_endpoint, field_names<types::convert_accept_request>());
-    add(rest::convert_order_status_endpoint, field_names<types::convert_order_status_request>());
+    add(rest::convert_get_quote_endpoint, field_names<types::convert_quote_request_t>());
+    add(rest::convert_accept_quote_endpoint, field_names<types::convert_accept_request_t>());
+    add(rest::convert_order_status_endpoint, field_names<types::convert_order_status_request_t>());
 
     return reg;
 }

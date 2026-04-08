@@ -28,7 +28,7 @@ namespace binapi2::fapi::types {
 // ---------------------------------------------------------------------------
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/New-Order-Test.md
-struct new_order_request
+struct new_order_request_t
 {
     std::string symbol{};
     order_side_t side{ order_side_t::buy };
@@ -52,7 +52,7 @@ struct new_order_request
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/New-Order-Test.md
-struct order_response
+struct order_response_t
 {
     std::string clientOrderId{};
     decimal_t cumQty{};
@@ -86,7 +86,7 @@ struct order_response
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Modify-Order.md
-struct modify_order_request
+struct modify_order_request_t
 {
     std::string symbol{};
     order_side_t side{ order_side_t::buy };
@@ -98,7 +98,7 @@ struct modify_order_request
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Cancel-Order.md
-struct cancel_order_request
+struct cancel_order_request_t
 {
     std::string symbol{};
     std::optional<std::uint64_t> orderId{};
@@ -106,7 +106,7 @@ struct cancel_order_request
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Query-Order.md
-struct query_order_request
+struct query_order_request_t
 {
     std::string symbol{};
     std::optional<std::uint64_t> orderId{};
@@ -115,7 +115,7 @@ struct query_order_request
 
 /// Alias: test order uses the same request shape as a real order.
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/New-Order-Test.md
-using test_new_order_request = new_order_request;
+using test_new_order_request = new_order_request_t;
 
 // ---------------------------------------------------------------------------
 // Batch and cancel-all orders
@@ -124,13 +124,13 @@ using test_new_order_request = new_order_request;
 /// Batch order placement. The batchOrders field is a JSON-encoded array
 /// of order parameter objects (pre-serialized by the caller).
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Place-Multiple-Orders.md
-struct batch_orders_request
+struct batch_orders_request_t
 {
     std::string batchOrders{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Cancel-Multiple-Orders.md
-struct cancel_multiple_orders_request
+struct cancel_multiple_orders_request_t
 {
     std::string symbol{};
     std::optional<std::vector<std::uint64_t>> orderIdList{};
@@ -138,13 +138,13 @@ struct cancel_multiple_orders_request
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Cancel-All-Open-Orders.md
-struct cancel_all_open_orders_request
+struct cancel_all_open_orders_request_t
 {
     std::string symbol{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/error-code.md
-struct code_msg_response
+struct code_msg_response_t
 {
     int code{};
     std::string msg{};
@@ -153,14 +153,14 @@ struct code_msg_response
 /// Auto-cancel (dead man's switch): cancel all open orders if not refreshed
 /// within countdownTime milliseconds.
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Auto-Cancel-All-Open-Orders.md
-struct auto_cancel_request
+struct auto_cancel_request_t
 {
     std::string symbol{};
     std::uint64_t countdownTime{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Auto-Cancel-All-Open-Orders.md
-struct auto_cancel_response
+struct auto_cancel_response_t
 {
     std::string symbol{};
     std::uint64_t countdownTime{};
@@ -171,7 +171,7 @@ struct auto_cancel_response
 // ---------------------------------------------------------------------------
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Query-Current-Open-Order.md
-struct query_open_order_request
+struct query_open_order_request_t
 {
     std::string symbol{};
     std::optional<std::uint64_t> orderId{};
@@ -179,13 +179,13 @@ struct query_open_order_request
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Current-All-Open-Orders.md
-struct all_open_orders_request
+struct all_open_orders_request_t
 {
     std::optional<std::string> symbol{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/All-Orders.md
-struct all_orders_request
+struct all_orders_request_t
 {
     std::string symbol{};
     std::optional<std::uint64_t> orderId{};
@@ -199,7 +199,7 @@ struct all_orders_request
 // ---------------------------------------------------------------------------
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Position-Information-V3.md
-struct position_risk_v3
+struct position_risk_v3_t
 {
     std::string symbol{};
     position_side_t positionSide{};
@@ -224,13 +224,13 @@ struct position_risk_v3
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Position-Information-V3.md
-struct position_info_v3_request
+struct position_info_v3_request_t
 {
     std::optional<std::string> symbol{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Position-ADL-Quantile-Estimation.md
-struct adl_quantile_values
+struct adl_quantile_values_t
 {
     int LONG{};
     int SHORT{};
@@ -239,20 +239,20 @@ struct adl_quantile_values
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Position-ADL-Quantile-Estimation.md
-struct adl_quantile_entry
+struct adl_quantile_entry_t
 {
     std::string symbol{};
-    adl_quantile_values adlQuantile{};
+    adl_quantile_values_t adlQuantile{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Position-ADL-Quantile-Estimation.md
-struct adl_quantile_request
+struct adl_quantile_request_t
 {
     std::optional<std::string> symbol{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Users-Force-Orders.md
-struct force_orders_request
+struct force_orders_request_t
 {
     std::optional<std::string> symbol{};
     std::optional<auto_close_type_t> autoCloseType{};
@@ -262,7 +262,7 @@ struct force_orders_request
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Account-Trade-List.md
-struct account_trade_request
+struct account_trade_request_t
 {
     std::string symbol{};
     std::optional<std::uint64_t> orderId{};
@@ -273,7 +273,7 @@ struct account_trade_request
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Account-Trade-List.md
-struct account_trade_entry
+struct account_trade_entry_t
 {
     std::uint64_t id{};
     std::uint64_t orderId{};
@@ -296,26 +296,26 @@ struct account_trade_entry
 // ---------------------------------------------------------------------------
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Change-Position-Mode.md
-struct change_position_mode_request
+struct change_position_mode_request_t
 {
     std::string dualSidePosition{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Change-Multi-Assets-Mode.md
-struct change_multi_assets_mode_request
+struct change_multi_assets_mode_request_t
 {
     std::string multiAssetsMargin{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Change-Initial-Leverage.md
-struct change_leverage_request
+struct change_leverage_request_t
 {
     std::string symbol{};
     int leverage{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Change-Initial-Leverage.md
-struct change_leverage_response
+struct change_leverage_response_t
 {
     int leverage{};
     decimal_t maxNotionalValue{};
@@ -323,14 +323,14 @@ struct change_leverage_response
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Change-Margin-Type.md
-struct change_margin_type_request
+struct change_margin_type_request_t
 {
     std::string symbol{};
     std::string marginType{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Modify-Isolated-Position-Margin.md
-struct modify_isolated_margin_request
+struct modify_isolated_margin_request_t
 {
     std::string symbol{};
     std::optional<position_side_t> positionSide{};
@@ -339,7 +339,7 @@ struct modify_isolated_margin_request
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Modify-Isolated-Position-Margin.md
-struct modify_isolated_margin_response
+struct modify_isolated_margin_response_t
 {
     int code{};
     std::string msg{};
@@ -348,7 +348,7 @@ struct modify_isolated_margin_response
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Get-Position-Margin-Change-History.md
-struct position_margin_history_request
+struct position_margin_history_request_t
 {
     std::string symbol{};
     std::optional<int> type{};
@@ -358,7 +358,7 @@ struct position_margin_history_request
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Get-Position-Margin-Change-History.md
-struct position_margin_history_entry
+struct position_margin_history_entry_t
 {
     std::string symbol{};
     int type{};
@@ -370,7 +370,7 @@ struct position_margin_history_entry
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Get-Order-Modify-History.md
-struct order_modify_history_request
+struct order_modify_history_request_t
 {
     std::string symbol{};
     std::optional<std::uint64_t> orderId{};
@@ -381,7 +381,7 @@ struct order_modify_history_request
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/New-Algo-Order.md
-struct new_algo_order_request
+struct new_algo_order_request_t
 {
     std::string symbol{};
     order_side_t side{};
@@ -406,7 +406,7 @@ struct new_algo_order_request
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/New-Algo-Order.md
-struct algo_order_response
+struct algo_order_response_t
 {
     std::uint64_t algoId{};
     std::optional<std::string> clientAlgoId{};
@@ -436,21 +436,21 @@ struct algo_order_response
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Cancel-Algo-Order.md
-struct cancel_algo_order_request
+struct cancel_algo_order_request_t
 {
     std::optional<std::uint64_t> algoId{};
     std::optional<std::string> clientAlgoId{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Query-Algo-Order.md
-struct query_algo_order_request
+struct query_algo_order_request_t
 {
     std::optional<std::uint64_t> algoId{};
     std::optional<std::string> clientAlgoId{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Query-All-Algo-Orders.md
-struct all_algo_orders_request
+struct all_algo_orders_request_t
 {
     std::string symbol{};
     std::optional<std::uint64_t> algoId{};
@@ -461,15 +461,15 @@ struct all_algo_orders_request
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/TradFi-Perps.md
-struct tradfi_perps_request
+struct tradfi_perps_request_t
 {};
 
 } // namespace binapi2::fapi::types
 
 template<>
-struct glz::meta<binapi2::fapi::types::order_response>
+struct glz::meta<binapi2::fapi::types::order_response_t>
 {
-    using T = binapi2::fapi::types::order_response;
+    using T = binapi2::fapi::types::order_response_t;
     static constexpr auto value = object("clientOrderId",
                                          &T::clientOrderId,
                                          "cumQty",
@@ -531,23 +531,23 @@ struct glz::meta<binapi2::fapi::types::order_response>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::code_msg_response>
+struct glz::meta<binapi2::fapi::types::code_msg_response_t>
 {
-    using T = binapi2::fapi::types::code_msg_response;
+    using T = binapi2::fapi::types::code_msg_response_t;
     static constexpr auto value = object("code", &T::code, "msg", &T::msg);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::auto_cancel_response>
+struct glz::meta<binapi2::fapi::types::auto_cancel_response_t>
 {
-    using T = binapi2::fapi::types::auto_cancel_response;
+    using T = binapi2::fapi::types::auto_cancel_response_t;
     static constexpr auto value = object("symbol", &T::symbol, "countdownTime", &T::countdownTime);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::position_risk_v3>
+struct glz::meta<binapi2::fapi::types::position_risk_v3_t>
 {
-    using T = binapi2::fapi::types::position_risk_v3;
+    using T = binapi2::fapi::types::position_risk_v3_t;
     static constexpr auto value = object("symbol",
                                          &T::symbol,
                                          "positionSide",
@@ -591,23 +591,23 @@ struct glz::meta<binapi2::fapi::types::position_risk_v3>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::adl_quantile_values>
+struct glz::meta<binapi2::fapi::types::adl_quantile_values_t>
 {
-    using T = binapi2::fapi::types::adl_quantile_values;
+    using T = binapi2::fapi::types::adl_quantile_values_t;
     static constexpr auto value = object("LONG", &T::LONG, "SHORT", &T::SHORT, "BOTH", &T::BOTH, "HEDGE", &T::HEDGE);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::adl_quantile_entry>
+struct glz::meta<binapi2::fapi::types::adl_quantile_entry_t>
 {
-    using T = binapi2::fapi::types::adl_quantile_entry;
+    using T = binapi2::fapi::types::adl_quantile_entry_t;
     static constexpr auto value = object("symbol", &T::symbol, "adlQuantile", &T::adlQuantile);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::account_trade_entry>
+struct glz::meta<binapi2::fapi::types::account_trade_entry_t>
 {
-    using T = binapi2::fapi::types::account_trade_entry;
+    using T = binapi2::fapi::types::account_trade_entry_t;
     static constexpr auto value = object("id",
                                          &T::id,
                                          "orderId",
@@ -639,24 +639,24 @@ struct glz::meta<binapi2::fapi::types::account_trade_entry>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::change_leverage_response>
+struct glz::meta<binapi2::fapi::types::change_leverage_response_t>
 {
-    using T = binapi2::fapi::types::change_leverage_response;
+    using T = binapi2::fapi::types::change_leverage_response_t;
     static constexpr auto value =
         object("leverage", &T::leverage, "maxNotionalValue", &T::maxNotionalValue, "symbol", &T::symbol);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::modify_isolated_margin_response>
+struct glz::meta<binapi2::fapi::types::modify_isolated_margin_response_t>
 {
-    using T = binapi2::fapi::types::modify_isolated_margin_response;
+    using T = binapi2::fapi::types::modify_isolated_margin_response_t;
     static constexpr auto value = object("code", &T::code, "msg", &T::msg, "amount", &T::amount, "type", &T::type);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::position_margin_history_entry>
+struct glz::meta<binapi2::fapi::types::position_margin_history_entry_t>
 {
-    using T = binapi2::fapi::types::position_margin_history_entry;
+    using T = binapi2::fapi::types::position_margin_history_entry_t;
     static constexpr auto value = object("symbol",
                                          &T::symbol,
                                          "type",
@@ -674,9 +674,9 @@ struct glz::meta<binapi2::fapi::types::position_margin_history_entry>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::algo_order_response>
+struct glz::meta<binapi2::fapi::types::algo_order_response_t>
 {
-    using T = binapi2::fapi::types::algo_order_response;
+    using T = binapi2::fapi::types::algo_order_response_t;
     static constexpr auto value = object("algoId",
                                          &T::algoId,
                                          "clientAlgoId",

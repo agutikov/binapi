@@ -62,7 +62,7 @@ user_streams::read_loop(account_update_handler account_handler,
                                      listen_key_expired = std::move(listen_key_expired)](const std::string& payload) {
         if (payload.find("\"e\": \"ACCOUNT_UPDATE\"") != std::string::npos ||
             payload.find("\"e\":\"ACCOUNT_UPDATE\"") != std::string::npos) {
-            types::account_update_event event{};
+            types::account_update_event_t event{};
             if (glz::read_json(event, payload)) {
                 return false;
             }
@@ -70,7 +70,7 @@ user_streams::read_loop(account_update_handler account_handler,
         }
         if (payload.find("\"e\": \"ORDER_TRADE_UPDATE\"") != std::string::npos ||
             payload.find("\"e\":\"ORDER_TRADE_UPDATE\"") != std::string::npos) {
-            types::order_trade_update_event event{};
+            types::order_trade_update_event_t event{};
             if (glz::read_json(event, payload)) {
                 return false;
             }
@@ -78,7 +78,7 @@ user_streams::read_loop(account_update_handler account_handler,
         }
         if (margin_handler && (payload.find("\"e\": \"MARGIN_CALL\"") != std::string::npos ||
                                payload.find("\"e\":\"MARGIN_CALL\"") != std::string::npos)) {
-            types::margin_call_event event{};
+            types::margin_call_event_t event{};
             if (glz::read_json(event, payload)) {
                 return false;
             }
@@ -86,7 +86,7 @@ user_streams::read_loop(account_update_handler account_handler,
         }
         if (listen_key_expired && (payload.find("\"e\": \"listenKeyExpired\"") != std::string::npos ||
                                    payload.find("\"e\":\"listenKeyExpired\"") != std::string::npos)) {
-            types::listen_key_expired_event event{};
+            types::listen_key_expired_event_t event{};
             if (glz::read_json(event, payload)) {
                 return false;
             }
@@ -162,35 +162,35 @@ result<void>
 user_streams::read_loop(const handlers& h)
 {
     return transport_.run_read_loop([h](const std::string& payload) {
-        if (try_dispatch<types::account_update_event>(payload, "ACCOUNT_UPDATE", h.on_account_update)) {
+        if (try_dispatch<types::account_update_event_t>(payload, "ACCOUNT_UPDATE", h.on_account_update)) {
             return true;
         }
-        if (try_dispatch<types::order_trade_update_event>(payload, "ORDER_TRADE_UPDATE", h.on_order_trade_update)) {
+        if (try_dispatch<types::order_trade_update_event_t>(payload, "ORDER_TRADE_UPDATE", h.on_order_trade_update)) {
             return true;
         }
-        if (try_dispatch<types::margin_call_event>(payload, "MARGIN_CALL", h.on_margin_call)) {
+        if (try_dispatch<types::margin_call_event_t>(payload, "MARGIN_CALL", h.on_margin_call)) {
             return true;
         }
-        if (try_dispatch<types::listen_key_expired_event>(payload, "listenKeyExpired", h.on_listen_key_expired)) {
+        if (try_dispatch<types::listen_key_expired_event_t>(payload, "listenKeyExpired", h.on_listen_key_expired)) {
             return true;
         }
-        if (try_dispatch<types::account_config_update_event>(payload, "ACCOUNT_CONFIG_UPDATE", h.on_account_config_update)) {
+        if (try_dispatch<types::account_config_update_event_t>(payload, "ACCOUNT_CONFIG_UPDATE", h.on_account_config_update)) {
             return true;
         }
-        if (try_dispatch<types::trade_lite_event>(payload, "TRADE_LITE", h.on_trade_lite)) {
+        if (try_dispatch<types::trade_lite_event_t>(payload, "TRADE_LITE", h.on_trade_lite)) {
             return true;
         }
-        if (try_dispatch<types::algo_order_update_event>(payload, "ALGO_UPDATE", h.on_algo_order_update)) {
+        if (try_dispatch<types::algo_order_update_event_t>(payload, "ALGO_UPDATE", h.on_algo_order_update)) {
             return true;
         }
-        if (try_dispatch<types::conditional_order_trigger_reject_event>(
+        if (try_dispatch<types::conditional_order_trigger_reject_event_t>(
                 payload, "CONDITIONAL_ORDER_TRIGGER_REJECT", h.on_conditional_order_reject)) {
             return true;
         }
-        if (try_dispatch<types::grid_update_event>(payload, "GRID_UPDATE", h.on_grid_update)) {
+        if (try_dispatch<types::grid_update_event_t>(payload, "GRID_UPDATE", h.on_grid_update)) {
             return true;
         }
-        if (try_dispatch<types::strategy_update_event>(payload, "STRATEGY_UPDATE", h.on_strategy_update)) {
+        if (try_dispatch<types::strategy_update_event_t>(payload, "STRATEGY_UPDATE", h.on_strategy_update)) {
             return true;
         }
         return true;

@@ -22,7 +22,7 @@ int cmd_stream_book_ticker(const args_t& args)
     boost::asio::io_context io;
     binapi2::fapi::streams::market_streams streams{ io, make_config() };
 
-    spdlog::info("connecting to book_ticker stream for {}", args[0]);
+    spdlog::info("connecting to book_ticker_t stream for {}", args[0]);
     if (auto c = streams.connect_book_ticker({ .symbol = args[0] }); !c) {
         print_error(c.err); return 1;
     }
@@ -48,7 +48,7 @@ int cmd_stream_mark_price(const args_t& args)
     boost::asio::io_context io;
     binapi2::fapi::streams::market_streams streams{ io, make_config() };
 
-    spdlog::info("connecting to mark_price stream for {}", args[0]);
+    spdlog::info("connecting to mark_price_t stream for {}", args[0]);
     if (auto c = streams.connect_mark_price({ .symbol = args[0] }); !c) {
         print_error(c.err); return 1;
     }
@@ -57,7 +57,7 @@ int cmd_stream_mark_price(const args_t& args)
         if (verbosity >= 1) { print_json(e); }
         else {
             std::cout << e.symbol
-                      << "  mark: " << e.mark_price
+                      << "  mark: " << e.mark_price_t
                       << "  index: " << e.index_price
                       << "  funding: " << e.funding_rate << '\n';
         }
@@ -69,12 +69,12 @@ int cmd_stream_mark_price(const args_t& args)
 
 int cmd_stream_kline(const args_t& args)
 {
-    if (args.size() < 2) { std::cerr << "usage: stream-kline <symbol> <interval>\n"; return 1; }
+    if (args.size() < 2) { std::cerr << "usage: stream-kline_t <symbol> <interval>\n"; return 1; }
 
     boost::asio::io_context io;
     binapi2::fapi::streams::market_streams streams{ io, make_config() };
 
-    spdlog::info("connecting to kline stream for {} {}", args[0], args[1]);
+    spdlog::info("connecting to kline_t stream for {} {}", args[0], args[1]);
     if (auto c = streams.connect_kline({
             .symbol = args[0],
             .interval = parse_enum<binapi2::fapi::types::kline_interval_t>(args[1]) }); !c) {
@@ -84,9 +84,9 @@ int cmd_stream_kline(const args_t& args)
     auto loop = streams.read_kline_loop([](const auto& e) {
         if (verbosity >= 1) { print_json(e); }
         else {
-            std::cout << e.symbol << "  O:" << e.kline.open_price
-                      << " H:" << e.kline.high_price << " L:" << e.kline.low_price
-                      << " C:" << e.kline.close_price << '\n';
+            std::cout << e.symbol << "  O:" << e.kline_t.open_price
+                      << " H:" << e.kline_t.high_price << " L:" << e.kline_t.low_price
+                      << " C:" << e.kline_t.close_price << '\n';
         }
         return false;
     });

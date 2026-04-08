@@ -17,7 +17,7 @@
 namespace binapi2::fapi::types {
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Individual-Symbol-Book-Ticker-Streams.md
-struct book_ticker_stream_event
+struct book_ticker_stream_event_t
 {
     std::string event_type{};
     std::uint64_t update_id{};
@@ -31,7 +31,7 @@ struct book_ticker_stream_event
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Aggregate-Trade-Streams.md
-struct aggregate_trade_stream_event
+struct aggregate_trade_stream_event_t
 {
     std::string event_type{};
     std::uint64_t event_time{};
@@ -47,12 +47,12 @@ struct aggregate_trade_stream_event
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Mark-Price-Stream.md
-struct mark_price_stream_event
+struct mark_price_stream_event_t
 {
     std::string event_type{};
     std::uint64_t event_time{};
     std::string symbol{};
-    decimal_t mark_price{};
+    decimal_t mark_price_t{};
     std::optional<decimal_t> mark_price_avg{};
     decimal_t index_price{};
     decimal_t settle_price{};
@@ -61,10 +61,10 @@ struct mark_price_stream_event
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Mark-Price-Stream-for-All-market.md
-using all_market_mark_price_stream_event = std::vector<mark_price_stream_event>;
+using all_market_mark_price_stream_event = std::vector<mark_price_stream_event_t>;
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Diff-Book-Depth-Streams.md
-struct depth_stream_event
+struct depth_stream_event_t
 {
     std::string event_type{};
     std::uint64_t event_time{};
@@ -78,7 +78,7 @@ struct depth_stream_event
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/All-Market-Mini-Tickers-Stream.md
-struct mini_ticker_stream_event
+struct mini_ticker_stream_event_t
 {
     std::string event_type{};
     std::uint64_t event_time{};
@@ -92,10 +92,10 @@ struct mini_ticker_stream_event
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/All-Market-Mini-Tickers-Stream.md
-using all_market_mini_ticker_stream_event = std::vector<mini_ticker_stream_event>;
+using all_market_mini_ticker_stream_event = std::vector<mini_ticker_stream_event_t>;
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/All-Market-Tickers-Streams.md
-struct ticker_stream_event
+struct ticker_stream_event_t
 {
     std::string event_type{};
     std::uint64_t event_time{};
@@ -118,10 +118,10 @@ struct ticker_stream_event
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/All-Market-Tickers-Streams.md
-using all_market_ticker_stream_event = std::vector<ticker_stream_event>;
+using all_market_ticker_stream_event = std::vector<ticker_stream_event_t>;
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/All-Market-Liquidation-Order-Streams.md
-struct liquidation_order_stream_data
+struct liquidation_order_stream_data_t
 {
     std::string symbol{};
     order_side_t side{};
@@ -137,15 +137,15 @@ struct liquidation_order_stream_data
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/All-Market-Liquidation-Order-Streams.md
-struct liquidation_order_stream_event
+struct liquidation_order_stream_event_t
 {
     std::string event_type{};
     std::uint64_t event_time{};
-    liquidation_order_stream_data order{};
+    liquidation_order_stream_data_t order{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Kline-Candlestick-Streams.md
-struct kline_stream_data
+struct kline_stream_data_t
 {
     std::uint64_t open_time{};
     std::uint64_t close_time{};
@@ -167,16 +167,16 @@ struct kline_stream_data
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Kline-Candlestick-Streams.md
-struct kline_stream_event
+struct kline_stream_event_t
 {
     std::string event_type{};
     std::uint64_t event_time{};
     std::string symbol{};
-    kline_stream_data kline{};
+    kline_stream_data_t kline_t{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Continuous-Contract-Kline-Candlestick-Streams.md
-struct continuous_contract_kline_stream_data
+struct continuous_contract_kline_stream_data_t
 {
     std::uint64_t open_time{};
     std::uint64_t close_time{};
@@ -197,17 +197,17 @@ struct continuous_contract_kline_stream_data
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Continuous-Contract-Kline-Candlestick-Streams.md
-struct continuous_contract_kline_stream_event
+struct continuous_contract_kline_stream_event_t
 {
     std::string event_type{};
     std::uint64_t event_time{};
     std::string pair{};
     contract_type_t contractType{};
-    continuous_contract_kline_stream_data kline{};
+    continuous_contract_kline_stream_data_t kline_t{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Composite-Index-Symbol-Information-Streams.md
-struct composite_index_constituent
+struct composite_index_constituent_t
 {
     std::string base_asset{};
     std::string quote_asset{};
@@ -217,18 +217,18 @@ struct composite_index_constituent
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Composite-Index-Symbol-Information-Streams.md
-struct composite_index_stream_event
+struct composite_index_stream_event_t
 {
     std::string event_type{};
     std::uint64_t event_time{};
     std::string symbol{};
     decimal_t price{};
     std::optional<std::string> base_asset_type{};
-    std::vector<composite_index_constituent> composition{};
+    std::vector<composite_index_constituent_t> composition{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Contract-Info-Stream.md
-struct contract_info_bracket
+struct contract_info_bracket_t
 {
     int notional_bracket{};
     double bracket_floor{};
@@ -240,7 +240,7 @@ struct contract_info_bracket
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Contract-Info-Stream.md
-struct contract_info_stream_event
+struct contract_info_stream_event_t
 {
     std::string event_type{};
     std::uint64_t event_time{};
@@ -250,11 +250,11 @@ struct contract_info_stream_event
     std::uint64_t delivery_time{};
     std::uint64_t onboard_time{};
     contract_status_t contractStatus{};
-    std::optional<std::vector<contract_info_bracket>> brackets{};
+    std::optional<std::vector<contract_info_bracket_t>> brackets{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Asset-Index-Stream.md
-struct asset_index_stream_event
+struct asset_index_stream_event_t
 {
     std::string event_type{};
     std::uint64_t event_time{};
@@ -271,10 +271,10 @@ struct asset_index_stream_event
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Asset-Index-Stream.md
-using all_asset_index_stream_event = std::vector<asset_index_stream_event>;
+using all_asset_index_stream_event = std::vector<asset_index_stream_event_t>;
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Trading-Session-Stream.md
-struct trading_session_stream_event
+struct trading_session_stream_event_t
 {
     std::string event_type{};
     std::uint64_t event_time{};
@@ -284,7 +284,7 @@ struct trading_session_stream_event
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Balance-and-Position-Update.md
-struct account_update_balance
+struct account_update_balance_t
 {
     std::string asset{};
     decimal_t wallet_balance{};
@@ -293,7 +293,7 @@ struct account_update_balance
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Balance-and-Position-Update.md
-struct account_update_position
+struct account_update_position_t
 {
     std::string symbol{};
     decimal_t position_amount{};
@@ -307,24 +307,24 @@ struct account_update_position
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Balance-and-Position-Update.md
-struct account_update_data
+struct account_update_data_t
 {
     std::string reason_type{};
-    std::vector<account_update_balance> balances{};
-    std::vector<account_update_position> positions{};
+    std::vector<account_update_balance_t> balances{};
+    std::vector<account_update_position_t> positions{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Balance-and-Position-Update.md
-struct account_update_event
+struct account_update_event_t
 {
     std::string event_type{};
     std::uint64_t event_time{};
     std::uint64_t transaction_time{};
-    account_update_data update_data{};
+    account_update_data_t update_data{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Order-Update.md
-struct order_trade_update_order
+struct order_trade_update_order_t
 {
     std::string symbol{};
     std::string client_order_id{};
@@ -366,38 +366,38 @@ struct order_trade_update_order
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Order-Update.md
-struct order_trade_update_event
+struct order_trade_update_event_t
 {
     std::string event_type{};
     std::uint64_t event_time{};
     std::uint64_t transaction_time{};
-    order_trade_update_order order{};
+    order_trade_update_order_t order{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Margin-Call.md
-struct margin_call_position
+struct margin_call_position_t
 {
     std::string symbol{};
     position_side_t pos_side{};
     decimal_t position_amount{};
     margin_type_t margin{};
     decimal_t isolated_wallet{};
-    decimal_t mark_price{};
+    decimal_t mark_price_t{};
     decimal_t unrealized_pnl{};
     decimal_t maint_margin{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Margin-Call.md
-struct margin_call_event
+struct margin_call_event_t
 {
     std::string event_type{};
     std::uint64_t event_time{};
     decimal_t cross_wallet_balance{};
-    std::vector<margin_call_position> positions{};
+    std::vector<margin_call_position_t> positions{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-User-Data-Stream-Expired.md
-struct listen_key_expired_event
+struct listen_key_expired_event_t
 {
     std::string event_type{};
     std::uint64_t event_time{};
@@ -406,30 +406,30 @@ struct listen_key_expired_event
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Account-Configuration-Update-previous-Leverage-Update.md
-struct account_config_leverage
+struct account_config_leverage_t
 {
     std::string symbol{};
     int leverage{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Account-Configuration-Update-previous-Leverage-Update.md
-struct account_config_multi_assets
+struct account_config_multi_assets_t
 {
     bool multi_assets_mode{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Account-Configuration-Update-previous-Leverage-Update.md
-struct account_config_update_event
+struct account_config_update_event_t
 {
     std::string event_type{};
     std::uint64_t event_time{};
     std::uint64_t transaction_time{};
-    std::optional<account_config_leverage> leverage_config{};
-    std::optional<account_config_multi_assets> multi_assets_config{};
+    std::optional<account_config_leverage_t> leverage_config{};
+    std::optional<account_config_multi_assets_t> multi_assets_config{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Trade-Lite.md
-struct trade_lite_event
+struct trade_lite_event_t
 {
     std::string event_type{};
     std::uint64_t event_time{};
@@ -447,7 +447,7 @@ struct trade_lite_event
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Algo-Order-Update.md
-struct algo_order_update_data
+struct algo_order_update_data_t
 {
     std::string client_algo_id{};
     std::uint64_t algo_id{};
@@ -477,16 +477,16 @@ struct algo_order_update_data
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Algo-Order-Update.md
-struct algo_order_update_event
+struct algo_order_update_event_t
 {
     std::string event_type{};
     std::uint64_t transaction_time{};
     std::uint64_t event_time{};
-    algo_order_update_data order{};
+    algo_order_update_data_t order{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Conditional-Order-Trigger-Reject.md
-struct conditional_order_reject_data
+struct conditional_order_reject_data_t
 {
     std::string symbol{};
     std::uint64_t order_id{};
@@ -494,16 +494,16 @@ struct conditional_order_reject_data
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Conditional-Order-Trigger-Reject.md
-struct conditional_order_trigger_reject_event
+struct conditional_order_trigger_reject_event_t
 {
     std::string event_type{};
     std::uint64_t event_time{};
     std::uint64_t message_send_time{};
-    conditional_order_reject_data order_reject{};
+    conditional_order_reject_data_t order_reject{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-GRID-UPDATE.md
-struct grid_update_data
+struct grid_update_data_t
 {
     std::uint64_t strategy_id{};
     std::string strategy_type{};
@@ -518,16 +518,16 @@ struct grid_update_data
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-GRID-UPDATE.md
-struct grid_update_event
+struct grid_update_event_t
 {
     std::string event_type{};
     std::uint64_t transaction_time{};
     std::uint64_t event_time{};
-    grid_update_data grid_update{};
+    grid_update_data_t grid_update{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-STRATEGY-UPDATE.md
-struct strategy_update_data
+struct strategy_update_data_t
 {
     std::uint64_t strategy_id{};
     std::string strategy_type{};
@@ -538,28 +538,28 @@ struct strategy_update_data
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-STRATEGY-UPDATE.md
-struct strategy_update_event
+struct strategy_update_event_t
 {
     std::string event_type{};
     std::uint64_t transaction_time{};
     std::uint64_t event_time{};
-    strategy_update_data strategy_update{};
+    strategy_update_data_t strategy_update{};
 };
 
 } // namespace binapi2::fapi::types
 
 template<>
-struct glz::meta<binapi2::fapi::types::book_ticker_stream_event>
+struct glz::meta<binapi2::fapi::types::book_ticker_stream_event_t>
 {
-    using T = binapi2::fapi::types::book_ticker_stream_event;
+    using T = binapi2::fapi::types::book_ticker_stream_event_t;
     static constexpr auto value =
         object("e", &T::event_type, "u", &T::update_id, "s", &T::symbol, "b", &T::best_bid_price, "B", &T::best_bid_qty, "a", &T::best_ask_price, "A", &T::best_ask_qty, "T", &T::transaction_time, "E", &T::event_time);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::aggregate_trade_stream_event>
+struct glz::meta<binapi2::fapi::types::aggregate_trade_stream_event_t>
 {
-    using T = binapi2::fapi::types::aggregate_trade_stream_event;
+    using T = binapi2::fapi::types::aggregate_trade_stream_event_t;
     static constexpr auto value = object("e",
                                          &T::event_type,
                                          "E",
@@ -585,33 +585,33 @@ struct glz::meta<binapi2::fapi::types::aggregate_trade_stream_event>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::mark_price_stream_event>
+struct glz::meta<binapi2::fapi::types::mark_price_stream_event_t>
 {
-    using T = binapi2::fapi::types::mark_price_stream_event;
+    using T = binapi2::fapi::types::mark_price_stream_event_t;
     static constexpr auto value =
-        object("e", &T::event_type, "E", &T::event_time, "s", &T::symbol, "p", &T::mark_price, "ap", &T::mark_price_avg, "i", &T::index_price, "P", &T::settle_price, "r", &T::funding_rate, "T", &T::next_funding_time);
+        object("e", &T::event_type, "E", &T::event_time, "s", &T::symbol, "p", &T::mark_price_t, "ap", &T::mark_price_avg, "i", &T::index_price, "P", &T::settle_price, "r", &T::funding_rate, "T", &T::next_funding_time);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::depth_stream_event>
+struct glz::meta<binapi2::fapi::types::depth_stream_event_t>
 {
-    using T = binapi2::fapi::types::depth_stream_event;
+    using T = binapi2::fapi::types::depth_stream_event_t;
     static constexpr auto value =
         object("e", &T::event_type, "E", &T::event_time, "T", &T::transaction_time, "s", &T::symbol, "U", &T::first_update_id, "u", &T::final_update_id, "pu", &T::prev_final_update_id, "b", &T::bids, "a", &T::asks);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::mini_ticker_stream_event>
+struct glz::meta<binapi2::fapi::types::mini_ticker_stream_event_t>
 {
-    using T = binapi2::fapi::types::mini_ticker_stream_event;
+    using T = binapi2::fapi::types::mini_ticker_stream_event_t;
     static constexpr auto value =
         object("e", &T::event_type, "E", &T::event_time, "s", &T::symbol, "c", &T::close_price, "o", &T::open_price, "h", &T::high_price, "l", &T::low_price, "v", &T::base_volume, "q", &T::quote_volume);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::ticker_stream_event>
+struct glz::meta<binapi2::fapi::types::ticker_stream_event_t>
 {
-    using T = binapi2::fapi::types::ticker_stream_event;
+    using T = binapi2::fapi::types::ticker_stream_event_t;
     static constexpr auto value = object("e",
                                          &T::event_type,
                                          "E",
@@ -651,9 +651,9 @@ struct glz::meta<binapi2::fapi::types::ticker_stream_event>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::liquidation_order_stream_data>
+struct glz::meta<binapi2::fapi::types::liquidation_order_stream_data_t>
 {
-    using T = binapi2::fapi::types::liquidation_order_stream_data;
+    using T = binapi2::fapi::types::liquidation_order_stream_data_t;
     static constexpr auto value = object("s",
                                          &T::symbol,
                                          "S",
@@ -679,16 +679,16 @@ struct glz::meta<binapi2::fapi::types::liquidation_order_stream_data>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::liquidation_order_stream_event>
+struct glz::meta<binapi2::fapi::types::liquidation_order_stream_event_t>
 {
-    using T = binapi2::fapi::types::liquidation_order_stream_event;
+    using T = binapi2::fapi::types::liquidation_order_stream_event_t;
     static constexpr auto value = object("e", &T::event_type, "E", &T::event_time, "o", &T::order);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::kline_stream_data>
+struct glz::meta<binapi2::fapi::types::kline_stream_data_t>
 {
-    using T = binapi2::fapi::types::kline_stream_data;
+    using T = binapi2::fapi::types::kline_stream_data_t;
     static constexpr auto value = object("t",
                                          &T::open_time,
                                          "T",
@@ -726,16 +726,16 @@ struct glz::meta<binapi2::fapi::types::kline_stream_data>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::kline_stream_event>
+struct glz::meta<binapi2::fapi::types::kline_stream_event_t>
 {
-    using T = binapi2::fapi::types::kline_stream_event;
-    static constexpr auto value = object("e", &T::event_type, "E", &T::event_time, "s", &T::symbol, "k", &T::kline);
+    using T = binapi2::fapi::types::kline_stream_event_t;
+    static constexpr auto value = object("e", &T::event_type, "E", &T::event_time, "s", &T::symbol, "k", &T::kline_t);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::continuous_contract_kline_stream_data>
+struct glz::meta<binapi2::fapi::types::continuous_contract_kline_stream_data_t>
 {
-    using T = binapi2::fapi::types::continuous_contract_kline_stream_data;
+    using T = binapi2::fapi::types::continuous_contract_kline_stream_data_t;
     static constexpr auto value = object("t",
                                          &T::open_time,
                                          "T",
@@ -771,45 +771,45 @@ struct glz::meta<binapi2::fapi::types::continuous_contract_kline_stream_data>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::continuous_contract_kline_stream_event>
+struct glz::meta<binapi2::fapi::types::continuous_contract_kline_stream_event_t>
 {
-    using T = binapi2::fapi::types::continuous_contract_kline_stream_event;
-    static constexpr auto value = object("e", &T::event_type, "E", &T::event_time, "ps", &T::pair, "ct", &T::contractType, "k", &T::kline);
+    using T = binapi2::fapi::types::continuous_contract_kline_stream_event_t;
+    static constexpr auto value = object("e", &T::event_type, "E", &T::event_time, "ps", &T::pair, "ct", &T::contractType, "k", &T::kline_t);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::account_update_balance>
+struct glz::meta<binapi2::fapi::types::account_update_balance_t>
 {
-    using T = binapi2::fapi::types::account_update_balance;
+    using T = binapi2::fapi::types::account_update_balance_t;
     static constexpr auto value = object("a", &T::asset, "wb", &T::wallet_balance, "cw", &T::cross_wallet_balance, "bc", &T::balance_change);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::account_update_position>
+struct glz::meta<binapi2::fapi::types::account_update_position_t>
 {
-    using T = binapi2::fapi::types::account_update_position;
+    using T = binapi2::fapi::types::account_update_position_t;
     static constexpr auto value =
         object("s", &T::symbol, "pa", &T::position_amount, "ep", &T::entry_price, "cr", &T::accum_realized, "up", &T::unrealized_pnl, "mt", &T::margin, "iw", &T::isolated_wallet, "ps", &T::pos_side, "bep", &T::breakeven_price);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::account_update_data>
+struct glz::meta<binapi2::fapi::types::account_update_data_t>
 {
-    using T = binapi2::fapi::types::account_update_data;
+    using T = binapi2::fapi::types::account_update_data_t;
     static constexpr auto value = object("m", &T::reason_type, "B", &T::balances, "P", &T::positions);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::account_update_event>
+struct glz::meta<binapi2::fapi::types::account_update_event_t>
 {
-    using T = binapi2::fapi::types::account_update_event;
+    using T = binapi2::fapi::types::account_update_event_t;
     static constexpr auto value = object("e", &T::event_type, "E", &T::event_time, "T", &T::transaction_time, "a", &T::update_data);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::order_trade_update_order>
+struct glz::meta<binapi2::fapi::types::order_trade_update_order_t>
 {
-    using T = binapi2::fapi::types::order_trade_update_order;
+    using T = binapi2::fapi::types::order_trade_update_order_t;
     static constexpr auto value = object("s", &T::symbol, "c", &T::client_order_id, "S", &T::side, "o", &T::type, "f", &T::tif,
                                          "q", &T::original_quantity, "p", &T::original_price, "ap", &T::average_price, "sp", &T::stop_price, "x", &T::exec_type,
                                          "X", &T::status, "i", &T::order_id, "l", &T::last_filled_qty, "z", &T::filled_accum_qty, "L", &T::last_filled_price,
@@ -821,60 +821,60 @@ struct glz::meta<binapi2::fapi::types::order_trade_update_order>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::order_trade_update_event>
+struct glz::meta<binapi2::fapi::types::order_trade_update_event_t>
 {
-    using T = binapi2::fapi::types::order_trade_update_event;
+    using T = binapi2::fapi::types::order_trade_update_event_t;
     static constexpr auto value = object("e", &T::event_type, "E", &T::event_time, "T", &T::transaction_time, "o", &T::order);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::margin_call_position>
+struct glz::meta<binapi2::fapi::types::margin_call_position_t>
 {
-    using T = binapi2::fapi::types::margin_call_position;
+    using T = binapi2::fapi::types::margin_call_position_t;
     static constexpr auto value =
-        object("s", &T::symbol, "ps", &T::pos_side, "pa", &T::position_amount, "mt", &T::margin, "iw", &T::isolated_wallet, "mp", &T::mark_price, "up", &T::unrealized_pnl, "mm", &T::maint_margin);
+        object("s", &T::symbol, "ps", &T::pos_side, "pa", &T::position_amount, "mt", &T::margin, "iw", &T::isolated_wallet, "mp", &T::mark_price_t, "up", &T::unrealized_pnl, "mm", &T::maint_margin);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::margin_call_event>
+struct glz::meta<binapi2::fapi::types::margin_call_event_t>
 {
-    using T = binapi2::fapi::types::margin_call_event;
+    using T = binapi2::fapi::types::margin_call_event_t;
     static constexpr auto value = object("e", &T::event_type, "E", &T::event_time, "cw", &T::cross_wallet_balance, "p", &T::positions);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::listen_key_expired_event>
+struct glz::meta<binapi2::fapi::types::listen_key_expired_event_t>
 {
-    using T = binapi2::fapi::types::listen_key_expired_event;
+    using T = binapi2::fapi::types::listen_key_expired_event_t;
     static constexpr auto value = object("e", &T::event_type, "E", &T::event_time, "T", &T::transaction_time, "listenKey", &T::listen_key);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::composite_index_constituent>
+struct glz::meta<binapi2::fapi::types::composite_index_constituent_t>
 {
-    using T = binapi2::fapi::types::composite_index_constituent;
+    using T = binapi2::fapi::types::composite_index_constituent_t;
     static constexpr auto value = object("b", &T::base_asset, "q", &T::quote_asset, "w", &T::weight_in_quantity, "W", &T::weight_in_pct, "i", &T::index_price);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::composite_index_stream_event>
+struct glz::meta<binapi2::fapi::types::composite_index_stream_event_t>
 {
-    using T = binapi2::fapi::types::composite_index_stream_event;
+    using T = binapi2::fapi::types::composite_index_stream_event_t;
     static constexpr auto value = object("e", &T::event_type, "E", &T::event_time, "s", &T::symbol, "p", &T::price, "C", &T::base_asset_type, "c", &T::composition);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::contract_info_bracket>
+struct glz::meta<binapi2::fapi::types::contract_info_bracket_t>
 {
-    using T = binapi2::fapi::types::contract_info_bracket;
+    using T = binapi2::fapi::types::contract_info_bracket_t;
     static constexpr auto value =
         object("bs", &T::notional_bracket, "bnf", &T::bracket_floor, "bnc", &T::bracket_cap, "mmr", &T::maint_margin_ratio, "cf", &T::calc_factor, "mi", &T::min_leverage, "ma", &T::max_leverage);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::contract_info_stream_event>
+struct glz::meta<binapi2::fapi::types::contract_info_stream_event_t>
 {
-    using T = binapi2::fapi::types::contract_info_stream_event;
+    using T = binapi2::fapi::types::contract_info_stream_event_t;
     static constexpr auto value = object("e",
                                          &T::event_type,
                                          "E",
@@ -896,9 +896,9 @@ struct glz::meta<binapi2::fapi::types::contract_info_stream_event>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::asset_index_stream_event>
+struct glz::meta<binapi2::fapi::types::asset_index_stream_event_t>
 {
-    using T = binapi2::fapi::types::asset_index_stream_event;
+    using T = binapi2::fapi::types::asset_index_stream_event_t;
     static constexpr auto value = object("e",
                                          &T::event_type,
                                          "E",
@@ -926,37 +926,37 @@ struct glz::meta<binapi2::fapi::types::asset_index_stream_event>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::trading_session_stream_event>
+struct glz::meta<binapi2::fapi::types::trading_session_stream_event_t>
 {
-    using T = binapi2::fapi::types::trading_session_stream_event;
+    using T = binapi2::fapi::types::trading_session_stream_event_t;
     static constexpr auto value = object("e", &T::event_type, "E", &T::event_time, "t", &T::session_start_time, "T", &T::session_end_time, "S", &T::session_type);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::account_config_leverage>
+struct glz::meta<binapi2::fapi::types::account_config_leverage_t>
 {
-    using T = binapi2::fapi::types::account_config_leverage;
+    using T = binapi2::fapi::types::account_config_leverage_t;
     static constexpr auto value = object("s", &T::symbol, "l", &T::leverage);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::account_config_multi_assets>
+struct glz::meta<binapi2::fapi::types::account_config_multi_assets_t>
 {
-    using T = binapi2::fapi::types::account_config_multi_assets;
+    using T = binapi2::fapi::types::account_config_multi_assets_t;
     static constexpr auto value = object("j", &T::multi_assets_mode);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::account_config_update_event>
+struct glz::meta<binapi2::fapi::types::account_config_update_event_t>
 {
-    using T = binapi2::fapi::types::account_config_update_event;
+    using T = binapi2::fapi::types::account_config_update_event_t;
     static constexpr auto value = object("e", &T::event_type, "E", &T::event_time, "T", &T::transaction_time, "ac", &T::leverage_config, "ai", &T::multi_assets_config);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::trade_lite_event>
+struct glz::meta<binapi2::fapi::types::trade_lite_event_t>
 {
-    using T = binapi2::fapi::types::trade_lite_event;
+    using T = binapi2::fapi::types::trade_lite_event_t;
     static constexpr auto value = object("e",
                                          &T::event_type,
                                          "E",
@@ -986,9 +986,9 @@ struct glz::meta<binapi2::fapi::types::trade_lite_event>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::algo_order_update_data>
+struct glz::meta<binapi2::fapi::types::algo_order_update_data_t>
 {
-    using T = binapi2::fapi::types::algo_order_update_data;
+    using T = binapi2::fapi::types::algo_order_update_data_t;
     static constexpr auto value = object("caid",
                                          &T::client_algo_id,
                                          "aid",
@@ -1042,30 +1042,30 @@ struct glz::meta<binapi2::fapi::types::algo_order_update_data>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::algo_order_update_event>
+struct glz::meta<binapi2::fapi::types::algo_order_update_event_t>
 {
-    using T = binapi2::fapi::types::algo_order_update_event;
+    using T = binapi2::fapi::types::algo_order_update_event_t;
     static constexpr auto value = object("e", &T::event_type, "T", &T::transaction_time, "E", &T::event_time, "o", &T::order);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::conditional_order_reject_data>
+struct glz::meta<binapi2::fapi::types::conditional_order_reject_data_t>
 {
-    using T = binapi2::fapi::types::conditional_order_reject_data;
+    using T = binapi2::fapi::types::conditional_order_reject_data_t;
     static constexpr auto value = object("s", &T::symbol, "i", &T::order_id, "r", &T::reject_reason);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::conditional_order_trigger_reject_event>
+struct glz::meta<binapi2::fapi::types::conditional_order_trigger_reject_event_t>
 {
-    using T = binapi2::fapi::types::conditional_order_trigger_reject_event;
+    using T = binapi2::fapi::types::conditional_order_trigger_reject_event_t;
     static constexpr auto value = object("e", &T::event_type, "E", &T::event_time, "T", &T::message_send_time, "or", &T::order_reject);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::grid_update_data>
+struct glz::meta<binapi2::fapi::types::grid_update_data_t>
 {
-    using T = binapi2::fapi::types::grid_update_data;
+    using T = binapi2::fapi::types::grid_update_data_t;
     static constexpr auto value = object("si",
                                          &T::strategy_id,
                                          "st",
@@ -1089,22 +1089,22 @@ struct glz::meta<binapi2::fapi::types::grid_update_data>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::grid_update_event>
+struct glz::meta<binapi2::fapi::types::grid_update_event_t>
 {
-    using T = binapi2::fapi::types::grid_update_event;
+    using T = binapi2::fapi::types::grid_update_event_t;
     static constexpr auto value = object("e", &T::event_type, "T", &T::transaction_time, "E", &T::event_time, "gu", &T::grid_update);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::strategy_update_data>
+struct glz::meta<binapi2::fapi::types::strategy_update_data_t>
 {
-    using T = binapi2::fapi::types::strategy_update_data;
+    using T = binapi2::fapi::types::strategy_update_data_t;
     static constexpr auto value = object("si", &T::strategy_id, "st", &T::strategy_type, "ss", &T::strategy_status, "s", &T::symbol, "ut", &T::update_time, "c", &T::op_code);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::strategy_update_event>
+struct glz::meta<binapi2::fapi::types::strategy_update_event_t>
 {
-    using T = binapi2::fapi::types::strategy_update_event;
+    using T = binapi2::fapi::types::strategy_update_event_t;
     static constexpr auto value = object("e", &T::event_type, "T", &T::transaction_time, "E", &T::event_time, "su", &T::strategy_update);
 };

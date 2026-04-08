@@ -62,7 +62,7 @@ local_order_book::start(const std::string& symbol, int depth_limit)
     // Step 2: buffer incoming diff events. On the first event (or after a
     // sequence gap), fetch a REST snapshot and apply the buffered events to
     // bring the book up to date. From then on, events are applied directly.
-    auto loop_result = streams_.read_diff_book_depth_loop([this](const types::depth_stream_event& event) -> bool {
+    auto loop_result = streams_.read_diff_book_depth_loop([this](const types::depth_stream_event_t& event) -> bool {
         bool need_snapshot = false;
 
         {
@@ -133,7 +133,7 @@ void
 local_order_book::fetch_snapshot()
 {
     // Step 3: get REST depth snapshot (no lock held during network call)
-    types::order_book_request request;
+    types::order_book_request_t request;
     {
         std::lock_guard<std::mutex> lock(mutex_);
         request.symbol = symbol_;
@@ -155,7 +155,7 @@ local_order_book::fetch_snapshot()
     // Step 4: drop buffered events where u < lastUpdateId
     buffer_.erase(std::remove_if(buffer_.begin(),
                                  buffer_.end(),
-                                 [last_update_id](const types::depth_stream_event& ev) { return ev.final_update_id < last_update_id; }),
+                                 [last_update_id](const types::depth_stream_event_t& ev) { return ev.final_update_id < last_update_id; }),
                   buffer_.end());
 
     // Step 5: first event should have U <= lastUpdateId AND u >= lastUpdateId
@@ -197,7 +197,7 @@ local_order_book::fetch_snapshot()
 }
 
 void
-local_order_book::apply_event(const types::depth_stream_event& event)
+local_order_book::apply_event(const types::depth_stream_event_t& event)
 {
     apply_levels(event.bids, book_.bids);
     apply_levels(event.asks, book_.asks);

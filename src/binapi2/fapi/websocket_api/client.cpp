@@ -36,13 +36,13 @@ struct wire_request
 };
 
 // Separate wire type for session.logon because its params type
-// (session_logon_request) has a different structure than the generic
+// (session_logon_request_t) has a different structure than the generic
 // signed_request base used by other endpoints.
 struct session_logon_wire_request
 {
     std::string id{};
     std::string method{};
-    types::session_logon_request params{};
+    types::session_logon_request_t params{};
 };
 
 } // namespace
@@ -75,21 +75,21 @@ namespace {
 // errors (valid JSON but the response contains an error object with a code
 // and message).
 template<typename Response>
-result<types::websocket_api_response<Response>>
+result<types::websocket_api_response_t<Response>>
 decode_rpc_response(const std::string& raw)
 {
-    types::websocket_api_response<Response> response{};
+    types::websocket_api_response_t<Response> response{};
     if (auto ec = glz::read_json(response, raw)) {
-        return result<types::websocket_api_response<Response>>::failure(
+        return result<types::websocket_api_response_t<Response>>::failure(
             { error_code::json, 0, 0, glz::format_error(ec, raw), raw });
     }
 
     if (response.error) {
-        return result<types::websocket_api_response<Response>>::failure(
+        return result<types::websocket_api_response_t<Response>>::failure(
             { error_code::binance, response.status, response.error->code, response.error->msg, raw });
     }
 
-    return result<types::websocket_api_response<Response>>::success(std::move(response));
+    return result<types::websocket_api_response_t<Response>>::success(std::move(response));
 }
 
 template<typename Params>
@@ -117,7 +117,7 @@ client::next_id()
     return std::to_string(++id_counter_);
 }
 
-types::websocket_api_signed_request
+types::websocket_api_signed_request_t
 client::make_signed_request_base()
 {
     query_map auth_query;
@@ -134,22 +134,22 @@ client::make_signed_request_base()
 }
 
 template<typename Response, typename Params>
-result<types::websocket_api_response<Response>>
+result<types::websocket_api_response_t<Response>>
 client::send_rpc(std::string_view method, const Params& params)
 {
     auto payload = encode_rpc_request(next_id(), method, params);
     if (!payload) {
-        return result<types::websocket_api_response<Response>>::failure(payload.err);
+        return result<types::websocket_api_response_t<Response>>::failure(payload.err);
     }
 
     auto write_result = transport_.write_text(*payload);
     if (!write_result) {
-        return result<types::websocket_api_response<Response>>::failure(write_result.err);
+        return result<types::websocket_api_response_t<Response>>::failure(write_result.err);
     }
 
     auto raw = transport_.read_text();
     if (!raw) {
-        return result<types::websocket_api_response<Response>>::failure(raw.err);
+        return result<types::websocket_api_response_t<Response>>::failure(raw.err);
     }
 
     return decode_rpc_response<Response>(*raw);
@@ -157,13 +157,13 @@ client::send_rpc(std::string_view method, const Params& params)
 
 // Conditionally injects authentication fields into a request. Uses
 // if-constexpr to check at compile time whether the request type inherits
-// from websocket_api_signed_request; unsigned request types pass through
+// from websocket_api_signed_request_t; unsigned request types pass through
 // unmodified.
 template<class Request>
 Request
 client::inject_auth(const Request& request)
 {
-    if constexpr (std::is_base_of_v<types::websocket_api_signed_request, Request>) {
+    if constexpr (std::is_base_of_v<types::websocket_api_signed_request_t, Request>) {
         auto auth = make_signed_request_base();
         Request authed = request;
         authed.apiKey = auth.apiKey;
@@ -186,7 +186,7 @@ template<class Request>
     requires has_ws_endpoint_traits<Request>
 auto
 client::execute(const Request& request)
-    -> result<types::websocket_api_response<typename endpoint_traits<Request>::response_type_t>>
+    -> result<types::websocket_api_response_t<typename endpoint_traits<Request>::response_type_t>>
 {
     using traits = endpoint_traits<Request>;
     return send_rpc<typename traits::response_type_t>(traits::method, inject_auth(request));
@@ -196,49 +196,49 @@ template<class Request>
     requires has_ws_endpoint_traits<Request>
 auto
 client::async_execute(const Request& request)
-    -> boost::cobalt::task<result<types::websocket_api_response<typename endpoint_traits<Request>::response_type_t>>>
+    -> boost::cobalt::task<result<types::websocket_api_response_t<typename endpoint_traits<Request>::response_type_t>>>
 {
     co_return execute(request);
 }
 
 // Explicit instantiations for all trait-enabled request types.
-template auto client::execute(const types::websocket_api_book_ticker_request&)
-    -> result<types::websocket_api_response<types::book_ticker>>;
-template auto client::execute(const types::websocket_api_price_ticker_request&)
-    -> result<types::websocket_api_response<types::price_ticker>>;
-template auto client::execute(const types::websocket_api_order_place_request&)
-    -> result<types::websocket_api_response<types::order_response>>;
-template auto client::execute(const types::websocket_api_order_query_request&)
-    -> result<types::websocket_api_response<types::order_response>>;
-template auto client::execute(const types::websocket_api_order_cancel_request&)
-    -> result<types::websocket_api_response<types::order_response>>;
-template auto client::execute(const types::websocket_api_order_modify_request&)
-    -> result<types::websocket_api_response<types::order_response>>;
-template auto client::execute(const types::websocket_api_position_request&)
-    -> result<types::websocket_api_response<std::vector<types::position_risk>>>;
-template auto client::execute(const types::websocket_api_algo_order_place_request&)
-    -> result<types::websocket_api_response<types::algo_order_response>>;
-template auto client::execute(const types::websocket_api_algo_order_cancel_request&)
-    -> result<types::websocket_api_response<types::code_msg_response>>;
+template auto client::execute(const types::websocket_api_book_ticker_request_t&)
+    -> result<types::websocket_api_response_t<types::book_ticker_t>>;
+template auto client::execute(const types::websocket_api_price_ticker_request_t&)
+    -> result<types::websocket_api_response_t<types::price_ticker_t>>;
+template auto client::execute(const types::websocket_api_order_place_request_t&)
+    -> result<types::websocket_api_response_t<types::order_response_t>>;
+template auto client::execute(const types::websocket_api_order_query_request_t&)
+    -> result<types::websocket_api_response_t<types::order_response_t>>;
+template auto client::execute(const types::websocket_api_order_cancel_request_t&)
+    -> result<types::websocket_api_response_t<types::order_response_t>>;
+template auto client::execute(const types::websocket_api_order_modify_request_t&)
+    -> result<types::websocket_api_response_t<types::order_response_t>>;
+template auto client::execute(const types::websocket_api_position_request_t&)
+    -> result<types::websocket_api_response_t<std::vector<types::position_risk_t>>>;
+template auto client::execute(const types::websocket_api_algo_order_place_request_t&)
+    -> result<types::websocket_api_response_t<types::algo_order_response_t>>;
+template auto client::execute(const types::websocket_api_algo_order_cancel_request_t&)
+    -> result<types::websocket_api_response_t<types::code_msg_response_t>>;
 
-template auto client::async_execute(const types::websocket_api_book_ticker_request&)
-    -> boost::cobalt::task<result<types::websocket_api_response<types::book_ticker>>>;
-template auto client::async_execute(const types::websocket_api_price_ticker_request&)
-    -> boost::cobalt::task<result<types::websocket_api_response<types::price_ticker>>>;
-template auto client::async_execute(const types::websocket_api_order_place_request&)
-    -> boost::cobalt::task<result<types::websocket_api_response<types::order_response>>>;
-template auto client::async_execute(const types::websocket_api_order_query_request&)
-    -> boost::cobalt::task<result<types::websocket_api_response<types::order_response>>>;
-template auto client::async_execute(const types::websocket_api_order_cancel_request&)
-    -> boost::cobalt::task<result<types::websocket_api_response<types::order_response>>>;
-template auto client::async_execute(const types::websocket_api_order_modify_request&)
-    -> boost::cobalt::task<result<types::websocket_api_response<types::order_response>>>;
-template auto client::async_execute(const types::websocket_api_position_request&)
-    -> boost::cobalt::task<result<types::websocket_api_response<std::vector<types::position_risk>>>>;
-template auto client::async_execute(const types::websocket_api_algo_order_place_request&)
-    -> boost::cobalt::task<result<types::websocket_api_response<types::algo_order_response>>>;
-template auto client::async_execute(const types::websocket_api_algo_order_cancel_request&)
-    -> boost::cobalt::task<result<types::websocket_api_response<types::code_msg_response>>>;
+template auto client::async_execute(const types::websocket_api_book_ticker_request_t&)
+    -> boost::cobalt::task<result<types::websocket_api_response_t<types::book_ticker_t>>>;
+template auto client::async_execute(const types::websocket_api_price_ticker_request_t&)
+    -> boost::cobalt::task<result<types::websocket_api_response_t<types::price_ticker_t>>>;
+template auto client::async_execute(const types::websocket_api_order_place_request_t&)
+    -> boost::cobalt::task<result<types::websocket_api_response_t<types::order_response_t>>>;
+template auto client::async_execute(const types::websocket_api_order_query_request_t&)
+    -> boost::cobalt::task<result<types::websocket_api_response_t<types::order_response_t>>>;
+template auto client::async_execute(const types::websocket_api_order_cancel_request_t&)
+    -> boost::cobalt::task<result<types::websocket_api_response_t<types::order_response_t>>>;
+template auto client::async_execute(const types::websocket_api_order_modify_request_t&)
+    -> boost::cobalt::task<result<types::websocket_api_response_t<types::order_response_t>>>;
+template auto client::async_execute(const types::websocket_api_position_request_t&)
+    -> boost::cobalt::task<result<types::websocket_api_response_t<std::vector<types::position_risk_t>>>>;
+template auto client::async_execute(const types::websocket_api_algo_order_place_request_t&)
+    -> boost::cobalt::task<result<types::websocket_api_response_t<types::algo_order_response_t>>>;
+template auto client::async_execute(const types::websocket_api_algo_order_cancel_request_t&)
+    -> boost::cobalt::task<result<types::websocket_api_response_t<types::code_msg_response_t>>>;
 
 // --- Connection ---
 
@@ -273,7 +273,7 @@ client::async_close()
 // rather than embedding auth fields into a generic signed_request struct.
 // This is because the logon request predates the generic auth pattern and
 // the server expects the params in a specific shape.
-result<types::websocket_api_response<types::session_logon_result>>
+result<types::websocket_api_response_t<types::session_logon_result_t>>
 client::session_logon()
 {
     query_map auth_query;
@@ -283,17 +283,17 @@ client::session_logon()
     const auto canonical = build_query_string(auth_query);
     const auto signature = hmac_sha256_hex(cfg_.secret_key, canonical);
 
-    types::session_logon_request params{
+    types::session_logon_request_t params{
         .apiKey = cfg_.api_key,
         .timestamp = std::stoull(auth_query["timestamp"]),
         .recvWindow = std::stoull(auth_query["recvWindow"]),
         .signature = signature,
     };
 
-    return send_rpc<types::session_logon_result>(session_logon_method, params);
+    return send_rpc<types::session_logon_result_t>(session_logon_method, params);
 }
 
-boost::cobalt::task<result<types::websocket_api_response<types::session_logon_result>>>
+boost::cobalt::task<result<types::websocket_api_response_t<types::session_logon_result_t>>>
 client::async_session_logon()
 {
     co_return session_logon();
@@ -301,37 +301,37 @@ client::async_session_logon()
 
 // --- Parameterless signed endpoints ---
 
-result<types::websocket_api_response<types::account_information>>
+result<types::websocket_api_response_t<types::account_information_t>>
 client::account_status()
 {
-    return send_rpc<types::account_information>(account_status_method, make_signed_request_base());
+    return send_rpc<types::account_information_t>(account_status_method, make_signed_request_base());
 }
 
-boost::cobalt::task<result<types::websocket_api_response<types::account_information>>>
+boost::cobalt::task<result<types::websocket_api_response_t<types::account_information_t>>>
 client::async_account_status()
 {
     co_return account_status();
 }
 
-result<types::websocket_api_response<types::account_information>>
+result<types::websocket_api_response_t<types::account_information_t>>
 client::account_status_v2()
 {
-    return send_rpc<types::account_information>(account_status_v2_method, make_signed_request_base());
+    return send_rpc<types::account_information_t>(account_status_v2_method, make_signed_request_base());
 }
 
-boost::cobalt::task<result<types::websocket_api_response<types::account_information>>>
+boost::cobalt::task<result<types::websocket_api_response_t<types::account_information_t>>>
 client::async_account_status_v2()
 {
     co_return account_status_v2();
 }
 
-result<types::websocket_api_response<std::vector<types::futures_account_balance>>>
+result<types::websocket_api_response_t<std::vector<types::futures_account_balance_t>>>
 client::account_balance()
 {
-    return send_rpc<std::vector<types::futures_account_balance>>(account_balance_method, make_signed_request_base());
+    return send_rpc<std::vector<types::futures_account_balance_t>>(account_balance_method, make_signed_request_base());
 }
 
-boost::cobalt::task<result<types::websocket_api_response<std::vector<types::futures_account_balance>>>>
+boost::cobalt::task<result<types::websocket_api_response_t<std::vector<types::futures_account_balance_t>>>>
 client::async_account_balance()
 {
     co_return account_balance();
@@ -339,54 +339,54 @@ client::async_account_balance()
 
 // --- Shared: position v2 ---
 
-result<types::websocket_api_response<std::vector<types::position_risk>>>
-client::account_position_v2(const types::websocket_api_position_request& request)
+result<types::websocket_api_response_t<std::vector<types::position_risk_t>>>
+client::account_position_v2(const types::websocket_api_position_request_t& request)
 {
-    return send_rpc<std::vector<types::position_risk>>(account_position_v2_method, inject_auth(request));
+    return send_rpc<std::vector<types::position_risk_t>>(account_position_v2_method, inject_auth(request));
 }
 
-boost::cobalt::task<result<types::websocket_api_response<std::vector<types::position_risk>>>>
-client::async_account_position_v2(const types::websocket_api_position_request& request)
+boost::cobalt::task<result<types::websocket_api_response_t<std::vector<types::position_risk_t>>>>
+client::async_account_position_v2(const types::websocket_api_position_request_t& request)
 {
     co_return account_position_v2(request);
 }
 
 // --- Shared: user data stream ---
 
-result<types::websocket_api_response<types::websocket_api_listen_key_result>>
+result<types::websocket_api_response_t<types::websocket_api_listen_key_result_t>>
 client::user_data_stream_start()
 {
-    types::websocket_api_user_data_stream_request params{ .apiKey = cfg_.api_key };
-    return send_rpc<types::websocket_api_listen_key_result>(user_data_stream_start_method, params);
+    types::websocket_api_user_data_stream_request_t params{ .apiKey = cfg_.api_key };
+    return send_rpc<types::websocket_api_listen_key_result_t>(user_data_stream_start_method, params);
 }
 
-boost::cobalt::task<result<types::websocket_api_response<types::websocket_api_listen_key_result>>>
+boost::cobalt::task<result<types::websocket_api_response_t<types::websocket_api_listen_key_result_t>>>
 client::async_user_data_stream_start()
 {
     co_return user_data_stream_start();
 }
 
-result<types::websocket_api_response<types::websocket_api_listen_key_result>>
+result<types::websocket_api_response_t<types::websocket_api_listen_key_result_t>>
 client::user_data_stream_ping()
 {
-    types::websocket_api_user_data_stream_request params{ .apiKey = cfg_.api_key };
-    return send_rpc<types::websocket_api_listen_key_result>(user_data_stream_ping_method, params);
+    types::websocket_api_user_data_stream_request_t params{ .apiKey = cfg_.api_key };
+    return send_rpc<types::websocket_api_listen_key_result_t>(user_data_stream_ping_method, params);
 }
 
-boost::cobalt::task<result<types::websocket_api_response<types::websocket_api_listen_key_result>>>
+boost::cobalt::task<result<types::websocket_api_response_t<types::websocket_api_listen_key_result_t>>>
 client::async_user_data_stream_ping()
 {
     co_return user_data_stream_ping();
 }
 
-result<types::websocket_api_response<types::empty_response_t>>
+result<types::websocket_api_response_t<types::empty_response_t>>
 client::user_data_stream_stop()
 {
-    types::websocket_api_user_data_stream_request params{ .apiKey = cfg_.api_key };
+    types::websocket_api_user_data_stream_request_t params{ .apiKey = cfg_.api_key };
     return send_rpc<types::empty_response_t>(user_data_stream_stop_method, params);
 }
 
-boost::cobalt::task<result<types::websocket_api_response<types::empty_response_t>>>
+boost::cobalt::task<result<types::websocket_api_response_t<types::empty_response_t>>>
 client::async_user_data_stream_stop()
 {
     co_return user_data_stream_stop();

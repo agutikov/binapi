@@ -69,7 +69,7 @@ TEST(ResponseParse, ExchangeInfo)
 TEST(ResponseParse, OrderBook)
 {
     auto json = read_file(fixture("depth.json"));
-    order_book_response r;
+    order_book_response_t r;
     auto ec = glz::read_json(r, json);
     EXPECT_FALSE(ec) << glz::format_error(ec, json);
     EXPECT_GT(r.lastUpdateId, 0ULL);
@@ -89,7 +89,7 @@ TEST(ResponseParse, ListenKey)
 TEST(ResponseParse, Order)
 {
     auto json = read_file(fixture("order.json"));
-    order_response r;
+    order_response_t r;
     auto ec = glz::read_json(r, json);
     EXPECT_FALSE(ec) << glz::format_error(ec, json);
     EXPECT_GT(r.orderId, 0ULL);
@@ -99,7 +99,7 @@ TEST(ResponseParse, Order)
 TEST(ResponseParse, BookTicker)
 {
     auto json = read_file(fixture("ticker_book.json"));
-    book_ticker r;
+    book_ticker_t r;
     auto ec = glz::read_json(r, json);
     EXPECT_FALSE(ec) << glz::format_error(ec, json);
     EXPECT_EQ(r.symbol, "BTCUSDT");
@@ -108,7 +108,7 @@ TEST(ResponseParse, BookTicker)
 TEST(ResponseParse, PriceTicker)
 {
     auto json = read_file(fixture("ticker_price.json"));
-    price_ticker r;
+    price_ticker_t r;
     auto ec = glz::read_json(r, json);
     EXPECT_FALSE(ec) << glz::format_error(ec, json);
     EXPECT_EQ(r.symbol, "BTCUSDT");
@@ -117,7 +117,7 @@ TEST(ResponseParse, PriceTicker)
 TEST(ResponseParse, PremiumIndex)
 {
     auto json = read_file(fixture("premium_index.json"));
-    mark_price r;
+    mark_price_t r;
     auto ec = glz::read_json(r, json);
     EXPECT_FALSE(ec) << glz::format_error(ec, json);
     EXPECT_EQ(r.symbol, "BTCUSDT");
@@ -126,7 +126,7 @@ TEST(ResponseParse, PremiumIndex)
 TEST(ResponseParse, Account)
 {
     auto json = read_file(fixture("account.json"));
-    account_information r;
+    account_information_t r;
     auto ec = glz::read_json(r, json);
     EXPECT_FALSE(ec) << glz::format_error(ec, json);
 }
@@ -138,7 +138,7 @@ TEST(ResponseParse, Account)
 TEST(ResponseParse, Balances)
 {
     auto json = read_file(fixture("balance.json"));
-    std::vector<futures_account_balance> r;
+    std::vector<futures_account_balance_t> r;
     auto ec = glz::read_json(r, json);
     EXPECT_FALSE(ec) << glz::format_error(ec, json);
     EXPECT_FALSE(r.empty());
@@ -148,7 +148,7 @@ TEST(ResponseParse, Balances)
 TEST(ResponseParse, Trades)
 {
     auto json = read_file(fixture("trades.json"));
-    std::vector<recent_trade> r;
+    std::vector<recent_trade_t> r;
     auto ec = glz::read_json(r, json);
     EXPECT_FALSE(ec) << glz::format_error(ec, json);
     EXPECT_FALSE(r.empty());
@@ -157,7 +157,7 @@ TEST(ResponseParse, Trades)
 TEST(ResponseParse, FundingRate)
 {
     auto json = read_file(fixture("funding_rate.json"));
-    std::vector<funding_rate_history_entry> r;
+    std::vector<funding_rate_history_entry_t> r;
     auto ec = glz::read_json(r, json);
     EXPECT_FALSE(ec) << glz::format_error(ec, json);
     EXPECT_FALSE(r.empty());
@@ -167,7 +167,7 @@ TEST(ResponseParse, FundingRate)
 TEST(ResponseParse, Klines)
 {
     auto json = read_file(fixture("klines.json"));
-    std::vector<kline> r;
+    std::vector<kline_t> r;
     auto ec = glz::read_json(r, json);
     EXPECT_FALSE(ec) << glz::format_error(ec, json);
     EXPECT_FALSE(r.empty());
@@ -176,7 +176,7 @@ TEST(ResponseParse, Klines)
 TEST(ResponseParse, OpenOrders)
 {
     auto json = read_file(fixture("open_orders.json"));
-    std::vector<order_response> r;
+    std::vector<order_response_t> r;
     auto ec = glz::read_json(r, json);
     EXPECT_FALSE(ec) << glz::format_error(ec, json);
     EXPECT_FALSE(r.empty());
@@ -185,7 +185,7 @@ TEST(ResponseParse, OpenOrders)
 TEST(ResponseParse, PositionRisk)
 {
     auto json = read_file(fixture("position_risk.json"));
-    std::vector<position_risk> r;
+    std::vector<position_risk_t> r;
     auto ec = glz::read_json(r, json);
     EXPECT_FALSE(ec) << glz::format_error(ec, json);
     EXPECT_FALSE(r.empty());

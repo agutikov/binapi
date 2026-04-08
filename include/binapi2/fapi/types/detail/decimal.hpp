@@ -31,7 +31,7 @@ namespace binapi2::fapi::types {
 ///
 /// Implicitly constructible from string literals for ergonomic request building:
 /// @code
-///   new_order_request req{ .price = "50000.10", .quantity = "0.001" };
+///   new_order_request_t req{ .price = "50000.10", .quantity = "0.001" };
 /// @endcode
 struct decimal_t
 {

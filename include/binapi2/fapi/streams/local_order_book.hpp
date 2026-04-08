@@ -84,7 +84,7 @@ private:
 
     /// @brief Apply a single diff depth event to the local book.
     /// @param event The depth stream event containing bid/ask deltas.
-    void apply_event(const types::depth_stream_event& event);
+    void apply_event(const types::depth_stream_event_t& event);
 
     /// @brief Apply price level deltas to the bid side.
     /// @param levels Price level updates (quantity of "0" removes the level).
@@ -102,7 +102,7 @@ private:
     std::uint64_t last_u_{};          ///< Last processed event's first update ID.
     bool synced_{ false };            ///< Whether the book is synchronized with the snapshot.
     bool running_{ false };           ///< Whether the update loop is active.
-    std::vector<types::depth_stream_event> buffer_{}; ///< Buffer for events received before snapshot.
+    std::vector<types::depth_stream_event_t> buffer_{}; ///< Buffer for events received before snapshot.
     snapshot_callback on_snapshot_{}; ///< User callback invoked after each update.
 };
 

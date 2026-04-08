@@ -10,7 +10,7 @@ namespace binapi2::fapi::websocket_api {
 
 struct session_logon_call
 {
-    types::session_logon_request params{};
+    types::session_logon_request_t params{};
 };
 
 } // namespace binapi2::fapi::websocket_api

@@ -20,14 +20,14 @@
 namespace binapi2::fapi::types {
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-api-general-info.md
-struct websocket_api_error
+struct websocket_api_error_t
 {
     int code{};
     std::string msg{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-api-general-info.md
-struct session_logon_request
+struct session_logon_request_t
 {
     std::string apiKey{};
     std::uint64_t timestamp{};
@@ -36,14 +36,14 @@ struct session_logon_request
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-api-general-info.md
-struct websocket_api_status
+struct websocket_api_status_t
 {
     int status{};
     std::string id{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-api-general-info.md
-struct session_logon_result
+struct session_logon_result_t
 {
     std::optional<std::string> apiKey{};
     std::optional<std::uint64_t> authorizedSince{};
@@ -53,7 +53,7 @@ struct session_logon_result
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-api-general-info.md
-struct websocket_api_signed_request
+struct websocket_api_signed_request_t
 {
     std::string apiKey{};
     std::uint64_t timestamp{};
@@ -62,7 +62,7 @@ struct websocket_api_signed_request
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/websocket-api/New-Order.md
-struct websocket_api_order_place_request : websocket_api_signed_request
+struct websocket_api_order_place_request_t : websocket_api_signed_request_t
 {
     std::string symbol{};
     order_side_t side{};
@@ -75,7 +75,7 @@ struct websocket_api_order_place_request : websocket_api_signed_request
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/websocket-api/Query-Order.md
-struct websocket_api_order_query_request : websocket_api_signed_request
+struct websocket_api_order_query_request_t : websocket_api_signed_request_t
 {
     std::string symbol{};
     std::optional<std::uint64_t> orderId{};
@@ -83,7 +83,7 @@ struct websocket_api_order_query_request : websocket_api_signed_request
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/websocket-api/Cancel-Order.md
-struct websocket_api_order_cancel_request : websocket_api_signed_request
+struct websocket_api_order_cancel_request_t : websocket_api_signed_request_t
 {
     std::string symbol{};
     std::optional<std::uint64_t> orderId{};
@@ -91,19 +91,19 @@ struct websocket_api_order_cancel_request : websocket_api_signed_request
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/websocket-api/Symbol-Order-Book-Ticker.md
-struct websocket_api_book_ticker_request
+struct websocket_api_book_ticker_request_t
 {
     std::optional<std::string> symbol{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/websocket-api/Symbol-Price-Ticker.md
-struct websocket_api_price_ticker_request
+struct websocket_api_price_ticker_request_t
 {
     std::optional<std::string> symbol{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/websocket-api/Modify-Order.md
-struct websocket_api_order_modify_request : websocket_api_signed_request
+struct websocket_api_order_modify_request_t : websocket_api_signed_request_t
 {
     std::string symbol{};
     std::optional<std::uint64_t> orderId{};
@@ -115,13 +115,13 @@ struct websocket_api_order_modify_request : websocket_api_signed_request
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/websocket-api/Position-Information.md
-struct websocket_api_position_request : websocket_api_signed_request
+struct websocket_api_position_request_t : websocket_api_signed_request_t
 {
     std::optional<std::string> symbol{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/websocket-api/New-Algo-Order.md
-struct websocket_api_algo_order_place_request : websocket_api_signed_request
+struct websocket_api_algo_order_place_request_t : websocket_api_signed_request_t
 {
     std::string symbol{};
     order_side_t side{};
@@ -146,56 +146,56 @@ struct websocket_api_algo_order_place_request : websocket_api_signed_request
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/websocket-api/Cancel-Algo-Order.md
-struct websocket_api_algo_order_cancel_request : websocket_api_signed_request
+struct websocket_api_algo_order_cancel_request_t : websocket_api_signed_request_t
 {
     std::optional<std::uint64_t> algoId{};
     std::optional<std::string> clientAlgoId{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Start-User-Data-Stream-Wsp.md
-struct websocket_api_user_data_stream_request
+struct websocket_api_user_data_stream_request_t
 {
     std::string apiKey{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Start-User-Data-Stream-Wsp.md
-struct websocket_api_listen_key_result
+struct websocket_api_listen_key_result_t
 {
     std::string listenKey{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-api-general-info.md
 template<typename T>
-struct websocket_api_response
+struct websocket_api_response_t
 {
     std::string id{};
     int status{};
     std::optional<T> result{};
     std::optional<std::vector<rate_limit_t>> rateLimits{};
-    std::optional<websocket_api_error> error{};
+    std::optional<websocket_api_error_t> error{};
 };
 
 } // namespace binapi2::fapi::types
 
 template<>
-struct glz::meta<binapi2::fapi::types::websocket_api_error>
+struct glz::meta<binapi2::fapi::types::websocket_api_error_t>
 {
-    using T = binapi2::fapi::types::websocket_api_error;
+    using T = binapi2::fapi::types::websocket_api_error_t;
     static constexpr auto value = object("code", &T::code, "msg", &T::msg);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::session_logon_request>
+struct glz::meta<binapi2::fapi::types::session_logon_request_t>
 {
-    using T = binapi2::fapi::types::session_logon_request;
+    using T = binapi2::fapi::types::session_logon_request_t;
     static constexpr auto value =
         object("apiKey", &T::apiKey, "timestamp", &T::timestamp, "recvWindow", &T::recvWindow, "signature", &T::signature);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::session_logon_result>
+struct glz::meta<binapi2::fapi::types::session_logon_result_t>
 {
-    using T = binapi2::fapi::types::session_logon_result;
+    using T = binapi2::fapi::types::session_logon_result_t;
     static constexpr auto value = object("apiKey",
                                          &T::apiKey,
                                          "authorizedSince",
@@ -209,17 +209,17 @@ struct glz::meta<binapi2::fapi::types::session_logon_result>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::websocket_api_signed_request>
+struct glz::meta<binapi2::fapi::types::websocket_api_signed_request_t>
 {
-    using T = binapi2::fapi::types::websocket_api_signed_request;
+    using T = binapi2::fapi::types::websocket_api_signed_request_t;
     static constexpr auto value =
         object("apiKey", &T::apiKey, "timestamp", &T::timestamp, "recvWindow", &T::recvWindow, "signature", &T::signature);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::websocket_api_order_place_request>
+struct glz::meta<binapi2::fapi::types::websocket_api_order_place_request_t>
 {
-    using T = binapi2::fapi::types::websocket_api_order_place_request;
+    using T = binapi2::fapi::types::websocket_api_order_place_request_t;
     static constexpr auto value = object("apiKey",
                                          &T::apiKey,
                                          "timestamp",
@@ -247,9 +247,9 @@ struct glz::meta<binapi2::fapi::types::websocket_api_order_place_request>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::websocket_api_order_query_request>
+struct glz::meta<binapi2::fapi::types::websocket_api_order_query_request_t>
 {
-    using T = binapi2::fapi::types::websocket_api_order_query_request;
+    using T = binapi2::fapi::types::websocket_api_order_query_request_t;
     static constexpr auto value = object("apiKey",
                                          &T::apiKey,
                                          "timestamp",
@@ -267,9 +267,9 @@ struct glz::meta<binapi2::fapi::types::websocket_api_order_query_request>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::websocket_api_order_cancel_request>
+struct glz::meta<binapi2::fapi::types::websocket_api_order_cancel_request_t>
 {
-    using T = binapi2::fapi::types::websocket_api_order_cancel_request;
+    using T = binapi2::fapi::types::websocket_api_order_cancel_request_t;
     static constexpr auto value = object("apiKey",
                                          &T::apiKey,
                                          "timestamp",
@@ -287,23 +287,23 @@ struct glz::meta<binapi2::fapi::types::websocket_api_order_cancel_request>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::websocket_api_book_ticker_request>
+struct glz::meta<binapi2::fapi::types::websocket_api_book_ticker_request_t>
 {
-    using T = binapi2::fapi::types::websocket_api_book_ticker_request;
+    using T = binapi2::fapi::types::websocket_api_book_ticker_request_t;
     static constexpr auto value = object("symbol", &T::symbol);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::websocket_api_price_ticker_request>
+struct glz::meta<binapi2::fapi::types::websocket_api_price_ticker_request_t>
 {
-    using T = binapi2::fapi::types::websocket_api_price_ticker_request;
+    using T = binapi2::fapi::types::websocket_api_price_ticker_request_t;
     static constexpr auto value = object("symbol", &T::symbol);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::websocket_api_order_modify_request>
+struct glz::meta<binapi2::fapi::types::websocket_api_order_modify_request_t>
 {
-    using T = binapi2::fapi::types::websocket_api_order_modify_request;
+    using T = binapi2::fapi::types::websocket_api_order_modify_request_t;
     static constexpr auto value = object("apiKey",
                                          &T::apiKey,
                                          "timestamp",
@@ -329,9 +329,9 @@ struct glz::meta<binapi2::fapi::types::websocket_api_order_modify_request>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::websocket_api_position_request>
+struct glz::meta<binapi2::fapi::types::websocket_api_position_request_t>
 {
-    using T = binapi2::fapi::types::websocket_api_position_request;
+    using T = binapi2::fapi::types::websocket_api_position_request_t;
     static constexpr auto value = object("apiKey",
                                          &T::apiKey,
                                          "timestamp",
@@ -345,9 +345,9 @@ struct glz::meta<binapi2::fapi::types::websocket_api_position_request>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::websocket_api_algo_order_place_request>
+struct glz::meta<binapi2::fapi::types::websocket_api_algo_order_place_request_t>
 {
-    using T = binapi2::fapi::types::websocket_api_algo_order_place_request;
+    using T = binapi2::fapi::types::websocket_api_algo_order_place_request_t;
     static constexpr auto value = object("apiKey",
                                          &T::apiKey,
                                          "timestamp",
@@ -399,9 +399,9 @@ struct glz::meta<binapi2::fapi::types::websocket_api_algo_order_place_request>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::websocket_api_algo_order_cancel_request>
+struct glz::meta<binapi2::fapi::types::websocket_api_algo_order_cancel_request_t>
 {
-    using T = binapi2::fapi::types::websocket_api_algo_order_cancel_request;
+    using T = binapi2::fapi::types::websocket_api_algo_order_cancel_request_t;
     static constexpr auto value = object("apiKey",
                                          &T::apiKey,
                                          "timestamp",
@@ -417,23 +417,23 @@ struct glz::meta<binapi2::fapi::types::websocket_api_algo_order_cancel_request>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::websocket_api_user_data_stream_request>
+struct glz::meta<binapi2::fapi::types::websocket_api_user_data_stream_request_t>
 {
-    using T = binapi2::fapi::types::websocket_api_user_data_stream_request;
+    using T = binapi2::fapi::types::websocket_api_user_data_stream_request_t;
     static constexpr auto value = object("apiKey", &T::apiKey);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::websocket_api_listen_key_result>
+struct glz::meta<binapi2::fapi::types::websocket_api_listen_key_result_t>
 {
-    using T = binapi2::fapi::types::websocket_api_listen_key_result;
+    using T = binapi2::fapi::types::websocket_api_listen_key_result_t;
     static constexpr auto value = object("listenKey", &T::listenKey);
 };
 
 template<typename T>
-struct glz::meta<binapi2::fapi::types::websocket_api_response<T>>
+struct glz::meta<binapi2::fapi::types::websocket_api_response_t<T>>
 {
-    using U = binapi2::fapi::types::websocket_api_response<T>;
+    using U = binapi2::fapi::types::websocket_api_response_t<T>;
     static constexpr auto value =
         object("id", &U::id, "status", &U::status, "result", &U::result, "rateLimits", &U::rateLimits, "error", &U::error);
 };

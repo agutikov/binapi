@@ -35,17 +35,17 @@ struct endpoint_traits;
 
 /// @brief Traits for book ticker requests.
 template<>
-struct endpoint_traits<types::websocket_api_book_ticker_request>
+struct endpoint_traits<types::websocket_api_book_ticker_request_t>
 {
-    using response_type_t = types::book_ticker;
+    using response_type_t = types::book_ticker_t;
     static constexpr auto& method = ticker_book_method;
 };
 
 /// @brief Traits for price ticker requests.
 template<>
-struct endpoint_traits<types::websocket_api_price_ticker_request>
+struct endpoint_traits<types::websocket_api_price_ticker_request_t>
 {
-    using response_type_t = types::price_ticker;
+    using response_type_t = types::price_ticker_t;
     static constexpr auto& method = ticker_price_method;
 };
 
@@ -53,57 +53,57 @@ struct endpoint_traits<types::websocket_api_price_ticker_request>
 
 /// @brief Traits for order placement requests.
 template<>
-struct endpoint_traits<types::websocket_api_order_place_request>
+struct endpoint_traits<types::websocket_api_order_place_request_t>
 {
-    using response_type_t = types::order_response;
+    using response_type_t = types::order_response_t;
     static constexpr auto& method = order_place_method;
 };
 
 /// @brief Traits for order status query requests.
 template<>
-struct endpoint_traits<types::websocket_api_order_query_request>
+struct endpoint_traits<types::websocket_api_order_query_request_t>
 {
-    using response_type_t = types::order_response;
+    using response_type_t = types::order_response_t;
     static constexpr auto& method = order_status_method;
 };
 
 /// @brief Traits for order cancellation requests.
 template<>
-struct endpoint_traits<types::websocket_api_order_cancel_request>
+struct endpoint_traits<types::websocket_api_order_cancel_request_t>
 {
-    using response_type_t = types::order_response;
+    using response_type_t = types::order_response_t;
     static constexpr auto& method = order_cancel_method;
 };
 
 /// @brief Traits for order modification requests.
 template<>
-struct endpoint_traits<types::websocket_api_order_modify_request>
+struct endpoint_traits<types::websocket_api_order_modify_request_t>
 {
-    using response_type_t = types::order_response;
+    using response_type_t = types::order_response_t;
     static constexpr auto& method = order_modify_method;
 };
 
 /// @brief Traits for position risk query requests.
 template<>
-struct endpoint_traits<types::websocket_api_position_request>
+struct endpoint_traits<types::websocket_api_position_request_t>
 {
-    using response_type_t = std::vector<types::position_risk>;
+    using response_type_t = std::vector<types::position_risk_t>;
     static constexpr auto& method = account_position_method;
 };
 
 /// @brief Traits for algo order placement requests.
 template<>
-struct endpoint_traits<types::websocket_api_algo_order_place_request>
+struct endpoint_traits<types::websocket_api_algo_order_place_request_t>
 {
-    using response_type_t = types::algo_order_response;
+    using response_type_t = types::algo_order_response_t;
     static constexpr auto& method = algo_order_place_method;
 };
 
 /// @brief Traits for algo order cancellation requests.
 template<>
-struct endpoint_traits<types::websocket_api_algo_order_cancel_request>
+struct endpoint_traits<types::websocket_api_algo_order_cancel_request_t>
 {
-    using response_type_t = types::code_msg_response;
+    using response_type_t = types::code_msg_response_t;
     static constexpr auto& method = algo_order_cancel_method;
 };
 

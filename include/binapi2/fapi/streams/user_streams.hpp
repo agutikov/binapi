@@ -29,16 +29,16 @@ class user_streams
 {
 public:
     using void_callback = std::function<void(result<void>)>;                                          ///< Async completion callback type.
-    using account_update_handler = std::function<bool(const types::account_update_event&)>;            ///< Handler for account update events (balance/position changes).
-    using margin_call_handler = std::function<bool(const types::margin_call_event&)>;                  ///< Handler for margin call warning events.
-    using listen_key_expired_handler = std::function<bool(const types::listen_key_expired_event&)>;    ///< Handler for listen key expiration events.
-    using order_trade_update_handler = std::function<bool(const types::order_trade_update_event&)>;    ///< Handler for order/trade update events.
-    using account_config_update_handler = std::function<bool(const types::account_config_update_event&)>; ///< Handler for account configuration change events.
-    using trade_lite_handler = std::function<bool(const types::trade_lite_event&)>;                    ///< Handler for lightweight trade events.
-    using algo_order_update_handler = std::function<bool(const types::algo_order_update_event&)>;      ///< Handler for algorithmic order update events.
-    using conditional_order_reject_handler = std::function<bool(const types::conditional_order_trigger_reject_event&)>; ///< Handler for conditional order trigger rejection events.
-    using grid_update_handler = std::function<bool(const types::grid_update_event&)>;                  ///< Handler for grid strategy update events.
-    using strategy_update_handler = std::function<bool(const types::strategy_update_event&)>;          ///< Handler for strategy update events.
+    using account_update_handler = std::function<bool(const types::account_update_event_t&)>;            ///< Handler for account update events (balance/position changes).
+    using margin_call_handler = std::function<bool(const types::margin_call_event_t&)>;                  ///< Handler for margin call warning events.
+    using listen_key_expired_handler = std::function<bool(const types::listen_key_expired_event_t&)>;    ///< Handler for listen key expiration events.
+    using order_trade_update_handler = std::function<bool(const types::order_trade_update_event_t&)>;    ///< Handler for order/trade update events.
+    using account_config_update_handler = std::function<bool(const types::account_config_update_event_t&)>; ///< Handler for account configuration change events.
+    using trade_lite_handler = std::function<bool(const types::trade_lite_event_t&)>;                    ///< Handler for lightweight trade events.
+    using algo_order_update_handler = std::function<bool(const types::algo_order_update_event_t&)>;      ///< Handler for algorithmic order update events.
+    using conditional_order_reject_handler = std::function<bool(const types::conditional_order_trigger_reject_event_t&)>; ///< Handler for conditional order trigger rejection events.
+    using grid_update_handler = std::function<bool(const types::grid_update_event_t&)>;                  ///< Handler for grid strategy update events.
+    using strategy_update_handler = std::function<bool(const types::strategy_update_event_t&)>;          ///< Handler for strategy update events.
 
     /// @brief Aggregate struct holding all user data stream event handlers.
     ///

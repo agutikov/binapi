@@ -16,10 +16,10 @@
 
 namespace demo {
 
-static binapi2::fapi::types::new_order_request
+static binapi2::fapi::types::new_order_request_t
 make_order_request(const args_t& args)
 {
-    binapi2::fapi::types::new_order_request req;
+    binapi2::fapi::types::new_order_request_t req;
     req.symbol = args[0];
     req.side = parse_enum<binapi2::fapi::types::order_side_t>(args[1]);
     req.type = parse_enum<binapi2::fapi::types::order_type_t>(args[2]);
@@ -75,7 +75,7 @@ int cmd_cancel_order(const args_t& args)
     boost::asio::io_context io;
     binapi2::fapi::client client{ io, make_config() };
 
-    binapi2::fapi::types::cancel_order_request req;
+    binapi2::fapi::types::cancel_order_request_t req;
     req.symbol = args[0];
     req.orderId = std::stoull(args[1]);
 
@@ -91,7 +91,7 @@ int cmd_query_order(const args_t& args)
     boost::asio::io_context io;
     binapi2::fapi::client client{ io, make_config() };
 
-    binapi2::fapi::types::query_order_request req;
+    binapi2::fapi::types::query_order_request_t req;
     req.symbol = args[0];
     req.orderId = std::stoull(args[1]);
 
@@ -105,7 +105,7 @@ int cmd_open_orders(const args_t& args)
     boost::asio::io_context io;
     binapi2::fapi::client client{ io, make_config() };
 
-    binapi2::fapi::types::all_open_orders_request req;
+    binapi2::fapi::types::all_open_orders_request_t req;
     if (!args.empty()) req.symbol = args[0];
 
     spdlog::debug("querying open orders symbol={}", req.symbol.value_or("(all)"));

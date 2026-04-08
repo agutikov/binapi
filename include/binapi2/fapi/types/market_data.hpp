@@ -29,11 +29,11 @@ namespace binapi2::fapi::types {
 // ---------------------------------------------------------------------------
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Check-Server-Time.md
-struct ping_request
+struct ping_request_t
 {};
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Check-Server-Time.md
-struct server_time_request
+struct server_time_request_t
 {};
 
 // ---------------------------------------------------------------------------
@@ -41,7 +41,7 @@ struct server_time_request
 // ---------------------------------------------------------------------------
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Exchange-Information.md
-struct exchange_info_request
+struct exchange_info_request_t
 {
     std::optional<std::string> symbol{};
 };
@@ -51,14 +51,14 @@ struct exchange_info_request
 // ---------------------------------------------------------------------------
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Order-Book.md
-struct order_book_request
+struct order_book_request_t
 {
     std::string symbol{};
     std::optional<int> limit{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Order-Book.md
-struct order_book_response
+struct order_book_response_t
 {
     std::uint64_t lastUpdateId{};
     timestamp_ms_t message_output_time{};
@@ -72,14 +72,14 @@ struct order_book_response
 // ---------------------------------------------------------------------------
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Recent-Trades-List.md
-struct recent_trades_request
+struct recent_trades_request_t
 {
     std::string symbol{};
     std::optional<int> limit{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Recent-Trades-List.md
-struct recent_trade
+struct recent_trade_t
 {
     std::uint64_t id{};
     decimal_t price{};
@@ -91,7 +91,7 @@ struct recent_trade
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Compressed-Aggregate-Trades-List.md
-struct aggregate_trades_request
+struct aggregate_trades_request_t
 {
     std::string symbol{};
     std::optional<std::uint64_t> fromId{};
@@ -101,7 +101,7 @@ struct aggregate_trades_request
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Compressed-Aggregate-Trades-List.md
-struct aggregate_trade
+struct aggregate_trade_t
 {
     std::uint64_t agg_trade_id{};
     decimal_t price{};
@@ -113,7 +113,7 @@ struct aggregate_trade
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Old-Trades-Lookup.md
-struct historical_trades_request
+struct historical_trades_request_t
 {
     std::string symbol{};
     std::optional<int> limit{};
@@ -125,7 +125,7 @@ struct historical_trades_request
 // ---------------------------------------------------------------------------
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Kline-Candlestick-Data.md
-struct kline_request
+struct kline_request_t
 {
     std::string symbol{};
     kline_interval_t interval{ kline_interval_t::m1 };
@@ -135,7 +135,7 @@ struct kline_request
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Continuous-Contract-Kline-Candlestick-Data.md
-struct continuous_kline_request
+struct continuous_kline_request_t
 {
     std::string pair{};
     contract_type_t contractType{ contract_type_t::perpetual };
@@ -146,7 +146,7 @@ struct continuous_kline_request
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Index-Price-Kline-Candlestick-Data.md
-struct index_price_kline_request
+struct index_price_kline_request_t
 {
     std::string pair{};
     kline_interval_t interval{ kline_interval_t::m1 };
@@ -160,7 +160,7 @@ struct index_price_kline_request
 /// [openTime, open, high, low, close, volume, closeTime, quoteAssetVolume,
 ///  numberOfTrades, takerBuyBaseAssetVolume, takerBuyQuoteAssetVolume, ignore].
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Kline-Candlestick-Data.md
-struct kline
+struct kline_t
 {
     timestamp_ms_t openTime{};
     decimal_t open{};
@@ -181,13 +181,13 @@ struct kline
 // ---------------------------------------------------------------------------
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Symbol-Order-Book-Ticker.md
-struct book_ticker_request
+struct book_ticker_request_t
 {
     std::optional<std::string> symbol{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Symbol-Order-Book-Ticker.md
-struct book_ticker
+struct book_ticker_t
 {
     std::string symbol{};
     decimal_t bidPrice{};
@@ -199,13 +199,13 @@ struct book_ticker
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Symbol-Price-Ticker.md
-struct price_ticker_request
+struct price_ticker_request_t
 {
     std::optional<std::string> symbol{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Symbol-Price-Ticker.md
-struct price_ticker
+struct price_ticker_t
 {
     std::string symbol{};
     decimal_t price{};
@@ -213,13 +213,13 @@ struct price_ticker
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/24hr-Ticker-Price-Change-Statistics.md
-struct ticker_24hr_request
+struct ticker_24hr_request_t
 {
     std::optional<std::string> symbol{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/24hr-Ticker-Price-Change-Statistics.md
-struct ticker_24hr
+struct ticker_24hr_t
 {
     std::string symbol{};
     decimal_t priceChange{};
@@ -244,13 +244,13 @@ struct ticker_24hr
 // ---------------------------------------------------------------------------
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Mark-Price.md
-struct mark_price_request
+struct mark_price_request_t
 {
     std::optional<std::string> symbol{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Mark-Price.md
-struct mark_price
+struct mark_price_t
 {
     std::string symbol{};
     decimal_t markPrice{};
@@ -263,7 +263,7 @@ struct mark_price
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Get-Funding-Rate-History.md
-struct funding_rate_history_request
+struct funding_rate_history_request_t
 {
     std::optional<std::string> symbol{};
     std::optional<timestamp_ms_t> startTime{};
@@ -272,7 +272,7 @@ struct funding_rate_history_request
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Get-Funding-Rate-History.md
-struct funding_rate_history_entry
+struct funding_rate_history_entry_t
 {
     std::string symbol{};
     decimal_t fundingRate{};
@@ -281,7 +281,7 @@ struct funding_rate_history_entry
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Get-Funding-Rate-Info.md
-struct funding_rate_info
+struct funding_rate_info_t
 {
     std::string symbol{};
     decimal_t adjustedFundingRateCap{};
@@ -295,13 +295,13 @@ struct funding_rate_info
 // ---------------------------------------------------------------------------
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Open-Interest.md
-struct open_interest_request
+struct open_interest_request_t
 {
     std::string symbol{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Open-Interest.md
-struct open_interest
+struct open_interest_t
 {
     decimal_t openInterest{};
     std::string symbol{};
@@ -311,7 +311,7 @@ struct open_interest
 /// Generic request for futures analytics endpoints (open interest statistics,
 /// long/short ratio, taker volume). Shares the same parameter shape.
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Open-Interest-Statistics.md
-struct futures_data_request
+struct futures_data_request_t
 {
     std::string symbol{};
     futures_data_period_t period{ futures_data_period_t::m5 };
@@ -321,7 +321,7 @@ struct futures_data_request
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Open-Interest-Statistics.md
-struct open_interest_statistics_entry
+struct open_interest_statistics_entry_t
 {
     std::string symbol{};
     decimal_t sumOpenInterest{};
@@ -331,7 +331,7 @@ struct open_interest_statistics_entry
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Long-Short-Ratio.md
-struct long_short_ratio_entry
+struct long_short_ratio_entry_t
 {
     std::string symbol{};
     decimal_t longShortRatio{};
@@ -341,7 +341,7 @@ struct long_short_ratio_entry
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Taker-BuySell-Volume.md
-struct taker_buy_sell_volume_entry
+struct taker_buy_sell_volume_entry_t
 {
     decimal_t buySellRatio{};
     decimal_t buyVol{};
@@ -350,7 +350,7 @@ struct taker_buy_sell_volume_entry
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Basis.md
-struct basis_request
+struct basis_request_t
 {
     std::string pair{};
     contract_type_t contractType{ contract_type_t::perpetual };
@@ -361,7 +361,7 @@ struct basis_request
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Basis.md
-struct basis_entry
+struct basis_entry_t
 {
     std::string pair{};
     contract_type_t contractType{};
@@ -378,32 +378,32 @@ struct basis_entry
 // ---------------------------------------------------------------------------
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Symbol-Price-Ticker-v2.md
-struct price_ticker_v2_request
+struct price_ticker_v2_request_t
 {
     std::optional<std::string> symbol{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Delivery-Price.md
-struct delivery_price_request
+struct delivery_price_request_t
 {
     std::string pair{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Delivery-Price.md
-struct delivery_price_entry
+struct delivery_price_entry_t
 {
     timestamp_ms_t deliveryTime{};
     decimal_t deliveryPrice{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Composite-Index-Symbol-Information.md
-struct composite_index_info_request
+struct composite_index_info_request_t
 {
     std::optional<std::string> symbol{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Composite-Index-Symbol-Information.md
-struct composite_index_base_asset
+struct composite_index_base_asset_t
 {
     std::string baseAsset{};
     std::string quoteAsset{};
@@ -412,22 +412,22 @@ struct composite_index_base_asset
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Composite-Index-Symbol-Information.md
-struct composite_index_info
+struct composite_index_info_t
 {
     std::string symbol{};
     timestamp_ms_t time{};
     std::string component{};
-    std::vector<composite_index_base_asset> baseAssetList{};
+    std::vector<composite_index_base_asset_t> baseAssetList{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Index-Constituents.md
-struct index_constituents_request
+struct index_constituents_request_t
 {
     std::string symbol{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Index-Constituents.md
-struct index_constituent
+struct index_constituent_t
 {
     std::string exchange{};
     std::string symbol{};
@@ -436,21 +436,21 @@ struct index_constituent
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Index-Constituents.md
-struct index_constituents_response
+struct index_constituents_response_t
 {
     std::string symbol{};
     timestamp_ms_t time{};
-    std::vector<index_constituent> constituents{};
+    std::vector<index_constituent_t> constituents{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Multi-Assets-Mode-Asset-Index.md
-struct asset_index_request
+struct asset_index_request_t
 {
     std::optional<std::string> symbol{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Multi-Assets-Mode-Asset-Index.md
-struct asset_index
+struct asset_index_t
 {
     std::string symbol{};
     timestamp_ms_t time{};
@@ -470,13 +470,13 @@ struct asset_index
 // ---------------------------------------------------------------------------
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Insurance-Fund-Balance.md
-struct insurance_fund_request
+struct insurance_fund_request_t
 {
     std::optional<std::string> symbol{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Insurance-Fund-Balance.md
-struct insurance_fund_asset
+struct insurance_fund_asset_t
 {
     std::string asset{};
     decimal_t marginBalance{};
@@ -484,20 +484,20 @@ struct insurance_fund_asset
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Insurance-Fund-Balance.md
-struct insurance_fund_response
+struct insurance_fund_response_t
 {
     std::vector<std::string> symbols{};
-    std::vector<insurance_fund_asset> assets{};
+    std::vector<insurance_fund_asset_t> assets{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/ADL-Risk.md
-struct adl_risk_request
+struct adl_risk_request_t
 {
     std::optional<std::string> symbol{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/ADL-Risk.md
-struct adl_risk_entry
+struct adl_risk_entry_t
 {
     std::string symbol{};
     decimal_t adlRisk{};
@@ -505,18 +505,18 @@ struct adl_risk_entry
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Order-Book-RPI.md
-struct rpi_depth_request
+struct rpi_depth_request_t
 {
     std::string symbol{};
     std::optional<int> limit{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Trading-Schedule.md
-struct trading_schedule_request
+struct trading_schedule_request_t
 {};
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Trading-Schedule.md
-struct trading_session_entry
+struct trading_session_entry_t
 {
     timestamp_ms_t startTime{};
     timestamp_ms_t endTime{};
@@ -524,32 +524,32 @@ struct trading_session_entry
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Trading-Schedule.md
-struct market_schedule
+struct market_schedule_t
 {
-    std::vector<trading_session_entry> sessions{};
+    std::vector<trading_session_entry_t> sessions{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Trading-Schedule.md
-struct trading_schedule_response
+struct trading_schedule_response_t
 {
     timestamp_ms_t updateTime{};
-    std::map<std::string, market_schedule> marketSchedules{};
+    std::map<std::string, market_schedule_t> marketSchedules{};
 };
 
 } // namespace binapi2::fapi::types
 
 template<>
-struct glz::meta<binapi2::fapi::types::order_book_response>
+struct glz::meta<binapi2::fapi::types::order_book_response_t>
 {
-    using T = binapi2::fapi::types::order_book_response;
+    using T = binapi2::fapi::types::order_book_response_t;
     static constexpr auto value =
         object("lastUpdateId", &T::lastUpdateId, "E", &T::message_output_time, "T", &T::transaction_time, "bids", &T::bids, "asks", &T::asks);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::recent_trade>
+struct glz::meta<binapi2::fapi::types::recent_trade_t>
 {
-    using T = binapi2::fapi::types::recent_trade;
+    using T = binapi2::fapi::types::recent_trade_t;
     static constexpr auto value = object("id",
                                          &T::id,
                                          "price",
@@ -567,16 +567,16 @@ struct glz::meta<binapi2::fapi::types::recent_trade>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::aggregate_trade>
+struct glz::meta<binapi2::fapi::types::aggregate_trade_t>
 {
-    using T = binapi2::fapi::types::aggregate_trade;
+    using T = binapi2::fapi::types::aggregate_trade_t;
     static constexpr auto value = object("a", &T::agg_trade_id, "p", &T::price, "q", &T::quantity, "f", &T::first_trade_id, "l", &T::last_trade_id, "T", &T::timestamp, "m", &T::is_buyer_maker);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::kline>
+struct glz::meta<binapi2::fapi::types::kline_t>
 {
-    using T = binapi2::fapi::types::kline;
+    using T = binapi2::fapi::types::kline_t;
     static constexpr auto value = array(&T::openTime,
                                         &T::open,
                                         &T::high,
@@ -592,9 +592,9 @@ struct glz::meta<binapi2::fapi::types::kline>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::book_ticker>
+struct glz::meta<binapi2::fapi::types::book_ticker_t>
 {
-    using T = binapi2::fapi::types::book_ticker;
+    using T = binapi2::fapi::types::book_ticker_t;
     static constexpr auto value = object("symbol",
                                          &T::symbol,
                                          "bidPrice",
@@ -612,16 +612,16 @@ struct glz::meta<binapi2::fapi::types::book_ticker>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::price_ticker>
+struct glz::meta<binapi2::fapi::types::price_ticker_t>
 {
-    using T = binapi2::fapi::types::price_ticker;
+    using T = binapi2::fapi::types::price_ticker_t;
     static constexpr auto value = object("symbol", &T::symbol, "price", &T::price, "time", &T::time);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::ticker_24hr>
+struct glz::meta<binapi2::fapi::types::ticker_24hr_t>
 {
-    using T = binapi2::fapi::types::ticker_24hr;
+    using T = binapi2::fapi::types::ticker_24hr_t;
     static constexpr auto value = object("symbol",
                                          &T::symbol,
                                          "priceChange",
@@ -657,9 +657,9 @@ struct glz::meta<binapi2::fapi::types::ticker_24hr>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::mark_price>
+struct glz::meta<binapi2::fapi::types::mark_price_t>
 {
-    using T = binapi2::fapi::types::mark_price;
+    using T = binapi2::fapi::types::mark_price_t;
     static constexpr auto value = object("symbol",
                                          &T::symbol,
                                          "markPrice",
@@ -679,9 +679,9 @@ struct glz::meta<binapi2::fapi::types::mark_price>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::funding_rate_history_entry>
+struct glz::meta<binapi2::fapi::types::funding_rate_history_entry_t>
 {
-    using T = binapi2::fapi::types::funding_rate_history_entry;
+    using T = binapi2::fapi::types::funding_rate_history_entry_t;
     static constexpr auto value = object("symbol",
                                          &T::symbol,
                                          "fundingRate",
@@ -693,9 +693,9 @@ struct glz::meta<binapi2::fapi::types::funding_rate_history_entry>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::funding_rate_info>
+struct glz::meta<binapi2::fapi::types::funding_rate_info_t>
 {
-    using T = binapi2::fapi::types::funding_rate_info;
+    using T = binapi2::fapi::types::funding_rate_info_t;
     static constexpr auto value = object("symbol",
                                          &T::symbol,
                                          "adjustedFundingRateCap",
@@ -709,16 +709,16 @@ struct glz::meta<binapi2::fapi::types::funding_rate_info>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::open_interest>
+struct glz::meta<binapi2::fapi::types::open_interest_t>
 {
-    using T = binapi2::fapi::types::open_interest;
+    using T = binapi2::fapi::types::open_interest_t;
     static constexpr auto value = object("openInterest", &T::openInterest, "symbol", &T::symbol, "time", &T::time);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::open_interest_statistics_entry>
+struct glz::meta<binapi2::fapi::types::open_interest_statistics_entry_t>
 {
-    using T = binapi2::fapi::types::open_interest_statistics_entry;
+    using T = binapi2::fapi::types::open_interest_statistics_entry_t;
     static constexpr auto value = object("symbol",
                                          &T::symbol,
                                          "sumOpenInterest",
@@ -732,9 +732,9 @@ struct glz::meta<binapi2::fapi::types::open_interest_statistics_entry>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::long_short_ratio_entry>
+struct glz::meta<binapi2::fapi::types::long_short_ratio_entry_t>
 {
-    using T = binapi2::fapi::types::long_short_ratio_entry;
+    using T = binapi2::fapi::types::long_short_ratio_entry_t;
     static constexpr auto value = object("symbol",
                                          &T::symbol,
                                          "longShortRatio",
@@ -748,17 +748,17 @@ struct glz::meta<binapi2::fapi::types::long_short_ratio_entry>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::taker_buy_sell_volume_entry>
+struct glz::meta<binapi2::fapi::types::taker_buy_sell_volume_entry_t>
 {
-    using T = binapi2::fapi::types::taker_buy_sell_volume_entry;
+    using T = binapi2::fapi::types::taker_buy_sell_volume_entry_t;
     static constexpr auto value =
         object("buySellRatio", &T::buySellRatio, "buyVol", &T::buyVol, "sellVol", &T::sellVol, "timestamp", &T::timestamp);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::basis_entry>
+struct glz::meta<binapi2::fapi::types::basis_entry_t>
 {
-    using T = binapi2::fapi::types::basis_entry;
+    using T = binapi2::fapi::types::basis_entry_t;
     static constexpr auto value = object("pair",
                                          &T::pair,
                                          "contractType",
@@ -778,16 +778,16 @@ struct glz::meta<binapi2::fapi::types::basis_entry>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::delivery_price_entry>
+struct glz::meta<binapi2::fapi::types::delivery_price_entry_t>
 {
-    using T = binapi2::fapi::types::delivery_price_entry;
+    using T = binapi2::fapi::types::delivery_price_entry_t;
     static constexpr auto value = object("deliveryTime", &T::deliveryTime, "deliveryPrice", &T::deliveryPrice);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::composite_index_base_asset>
+struct glz::meta<binapi2::fapi::types::composite_index_base_asset_t>
 {
-    using T = binapi2::fapi::types::composite_index_base_asset;
+    using T = binapi2::fapi::types::composite_index_base_asset_t;
     static constexpr auto value = object("baseAsset",
                                          &T::baseAsset,
                                          "quoteAsset",
@@ -799,9 +799,9 @@ struct glz::meta<binapi2::fapi::types::composite_index_base_asset>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::composite_index_info>
+struct glz::meta<binapi2::fapi::types::composite_index_info_t>
 {
-    using T = binapi2::fapi::types::composite_index_info;
+    using T = binapi2::fapi::types::composite_index_info_t;
     static constexpr auto value = object("symbol",
                                          &T::symbol,
                                          "time",
@@ -813,24 +813,24 @@ struct glz::meta<binapi2::fapi::types::composite_index_info>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::index_constituent>
+struct glz::meta<binapi2::fapi::types::index_constituent_t>
 {
-    using T = binapi2::fapi::types::index_constituent;
+    using T = binapi2::fapi::types::index_constituent_t;
     static constexpr auto value =
         object("exchange", &T::exchange, "symbol", &T::symbol, "price", &T::price, "weight", &T::weight);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::index_constituents_response>
+struct glz::meta<binapi2::fapi::types::index_constituents_response_t>
 {
-    using T = binapi2::fapi::types::index_constituents_response;
+    using T = binapi2::fapi::types::index_constituents_response_t;
     static constexpr auto value = object("symbol", &T::symbol, "time", &T::time, "constituents", &T::constituents);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::asset_index>
+struct glz::meta<binapi2::fapi::types::asset_index_t>
 {
-    using T = binapi2::fapi::types::asset_index;
+    using T = binapi2::fapi::types::asset_index_t;
     static constexpr auto value = object("symbol",
                                          &T::symbol,
                                          "time",
@@ -856,43 +856,43 @@ struct glz::meta<binapi2::fapi::types::asset_index>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::insurance_fund_asset>
+struct glz::meta<binapi2::fapi::types::insurance_fund_asset_t>
 {
-    using T = binapi2::fapi::types::insurance_fund_asset;
+    using T = binapi2::fapi::types::insurance_fund_asset_t;
     static constexpr auto value = object("asset", &T::asset, "marginBalance", &T::marginBalance, "updateTime", &T::updateTime);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::insurance_fund_response>
+struct glz::meta<binapi2::fapi::types::insurance_fund_response_t>
 {
-    using T = binapi2::fapi::types::insurance_fund_response;
+    using T = binapi2::fapi::types::insurance_fund_response_t;
     static constexpr auto value = object("symbols", &T::symbols, "assets", &T::assets);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::adl_risk_entry>
+struct glz::meta<binapi2::fapi::types::adl_risk_entry_t>
 {
-    using T = binapi2::fapi::types::adl_risk_entry;
+    using T = binapi2::fapi::types::adl_risk_entry_t;
     static constexpr auto value = object("symbol", &T::symbol, "adlRisk", &T::adlRisk, "updateTime", &T::updateTime);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::trading_session_entry>
+struct glz::meta<binapi2::fapi::types::trading_session_entry_t>
 {
-    using T = binapi2::fapi::types::trading_session_entry;
+    using T = binapi2::fapi::types::trading_session_entry_t;
     static constexpr auto value = object("startTime", &T::startTime, "endTime", &T::endTime, "type", &T::type);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::market_schedule>
+struct glz::meta<binapi2::fapi::types::market_schedule_t>
 {
-    using T = binapi2::fapi::types::market_schedule;
+    using T = binapi2::fapi::types::market_schedule_t;
     static constexpr auto value = object("sessions", &T::sessions);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::trading_schedule_response>
+struct glz::meta<binapi2::fapi::types::trading_schedule_response_t>
 {
-    using T = binapi2::fapi::types::trading_schedule_response;
+    using T = binapi2::fapi::types::trading_schedule_response_t;
     static constexpr auto value = object("updateTime", &T::updateTime, "marketSchedules", &T::marketSchedules);
 };

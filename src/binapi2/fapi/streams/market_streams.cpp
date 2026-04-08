@@ -307,7 +307,7 @@ result<void>
 market_streams::connect_continuous_contract_kline(const continuous_contract_kline_subscription& subscription)
 {
     if (subscription.pair.empty()) {
-        return invalid_subscription("continuous contract kline stream requires a pair");
+        return invalid_subscription("continuous contract kline_t stream requires a pair");
     }
     const auto target = cfg_.stream_base_target + "/" + subscription.pair + "_" + types::to_string(subscription.contract_type_t)
         + "@continuousKline_" + types::to_string(subscription.interval);
@@ -326,7 +326,7 @@ market_streams::connect_continuous_contract_kline(const continuous_contract_klin
 result<void>
 market_streams::read_aggregate_trade_loop(aggregate_trade_handler handler)
 {
-    return read_stream_loop<types::aggregate_trade_stream_event>(transport_, std::move(handler));
+    return read_stream_loop<types::aggregate_trade_stream_event_t>(transport_, std::move(handler));
 }
 
 void
@@ -340,7 +340,7 @@ market_streams::read_aggregate_trade_loop(aggregate_trade_handler handler, void_
 result<void>
 market_streams::read_mark_price_loop(mark_price_handler handler)
 {
-    return read_stream_loop<types::mark_price_stream_event>(transport_, std::move(handler));
+    return read_stream_loop<types::mark_price_stream_event_t>(transport_, std::move(handler));
 }
 
 void
@@ -354,7 +354,7 @@ market_streams::read_mark_price_loop(mark_price_handler handler, void_callback c
 result<void>
 market_streams::read_book_ticker_loop(book_ticker_handler handler)
 {
-    return read_stream_loop<types::book_ticker_stream_event>(transport_, std::move(handler));
+    return read_stream_loop<types::book_ticker_stream_event_t>(transport_, std::move(handler));
 }
 
 void
@@ -368,7 +368,7 @@ market_streams::read_book_ticker_loop(book_ticker_handler handler, void_callback
 result<void>
 market_streams::read_diff_book_depth_loop(depth_handler handler)
 {
-    return read_stream_loop<types::depth_stream_event>(transport_, std::move(handler));
+    return read_stream_loop<types::depth_stream_event_t>(transport_, std::move(handler));
 }
 
 void
@@ -382,7 +382,7 @@ market_streams::read_diff_book_depth_loop(depth_handler handler, void_callback c
 result<void>
 market_streams::read_mini_ticker_loop(mini_ticker_handler handler)
 {
-    return read_stream_loop<types::mini_ticker_stream_event>(transport_, std::move(handler));
+    return read_stream_loop<types::mini_ticker_stream_event_t>(transport_, std::move(handler));
 }
 
 void
@@ -410,7 +410,7 @@ market_streams::read_all_market_mini_tickers_loop(all_market_mini_ticker_handler
 result<void>
 market_streams::read_ticker_loop(ticker_handler handler)
 {
-    return read_stream_loop<types::ticker_stream_event>(transport_, std::move(handler));
+    return read_stream_loop<types::ticker_stream_event_t>(transport_, std::move(handler));
 }
 
 void
@@ -438,7 +438,7 @@ market_streams::read_all_market_tickers_loop(all_market_ticker_handler handler, 
 result<void>
 market_streams::read_all_book_tickers_loop(book_ticker_handler handler)
 {
-    return read_stream_loop<types::book_ticker_stream_event>(transport_, std::move(handler));
+    return read_stream_loop<types::book_ticker_stream_event_t>(transport_, std::move(handler));
 }
 
 void
@@ -452,7 +452,7 @@ market_streams::read_all_book_tickers_loop(book_ticker_handler handler, void_cal
 result<void>
 market_streams::read_liquidation_order_loop(liquidation_order_handler handler)
 {
-    return read_stream_loop<types::liquidation_order_stream_event>(transport_, std::move(handler));
+    return read_stream_loop<types::liquidation_order_stream_event_t>(transport_, std::move(handler));
 }
 
 void
@@ -466,7 +466,7 @@ market_streams::read_liquidation_order_loop(liquidation_order_handler handler, v
 result<void>
 market_streams::read_all_market_liquidation_orders_loop(liquidation_order_handler handler)
 {
-    return read_stream_loop<types::liquidation_order_stream_event>(transport_, std::move(handler));
+    return read_stream_loop<types::liquidation_order_stream_event_t>(transport_, std::move(handler));
 }
 
 void
@@ -480,7 +480,7 @@ market_streams::read_all_market_liquidation_orders_loop(liquidation_order_handle
 result<void>
 market_streams::read_partial_book_depth_loop(depth_handler handler)
 {
-    return read_stream_loop<types::depth_stream_event>(transport_, std::move(handler));
+    return read_stream_loop<types::depth_stream_event_t>(transport_, std::move(handler));
 }
 
 void
@@ -494,7 +494,7 @@ market_streams::read_partial_book_depth_loop(depth_handler handler, void_callbac
 result<void>
 market_streams::read_kline_loop(kline_handler handler)
 {
-    return read_stream_loop<types::kline_stream_event>(transport_, std::move(handler));
+    return read_stream_loop<types::kline_stream_event_t>(transport_, std::move(handler));
 }
 
 void
@@ -508,7 +508,7 @@ market_streams::read_kline_loop(kline_handler handler, void_callback callback)
 result<void>
 market_streams::read_continuous_contract_kline_loop(continuous_contract_kline_handler handler)
 {
-    return read_stream_loop<types::continuous_contract_kline_stream_event>(transport_, std::move(handler));
+    return read_stream_loop<types::continuous_contract_kline_stream_event_t>(transport_, std::move(handler));
 }
 
 void
@@ -651,7 +651,7 @@ market_streams::read_all_market_mark_price_loop(all_market_mark_price_handler ha
 result<void>
 market_streams::read_composite_index_loop(composite_index_handler handler)
 {
-    return read_stream_loop<types::composite_index_stream_event>(transport_, std::move(handler));
+    return read_stream_loop<types::composite_index_stream_event_t>(transport_, std::move(handler));
 }
 
 void
@@ -665,7 +665,7 @@ market_streams::read_composite_index_loop(composite_index_handler handler, void_
 result<void>
 market_streams::read_contract_info_loop(contract_info_handler handler)
 {
-    return read_stream_loop<types::contract_info_stream_event>(transport_, std::move(handler));
+    return read_stream_loop<types::contract_info_stream_event_t>(transport_, std::move(handler));
 }
 
 void
@@ -679,7 +679,7 @@ market_streams::read_contract_info_loop(contract_info_handler handler, void_call
 result<void>
 market_streams::read_asset_index_loop(asset_index_handler handler)
 {
-    return read_stream_loop<types::asset_index_stream_event>(transport_, std::move(handler));
+    return read_stream_loop<types::asset_index_stream_event_t>(transport_, std::move(handler));
 }
 
 void
@@ -707,7 +707,7 @@ market_streams::read_all_asset_index_loop(all_asset_index_handler handler, void_
 result<void>
 market_streams::read_trading_session_loop(trading_session_handler handler)
 {
-    return read_stream_loop<types::trading_session_stream_event>(transport_, std::move(handler));
+    return read_stream_loop<types::trading_session_stream_event_t>(transport_, std::move(handler));
 }
 
 void
@@ -721,7 +721,7 @@ market_streams::read_trading_session_loop(trading_session_handler handler, void_
 result<void>
 market_streams::read_rpi_diff_book_depth_loop(depth_handler handler)
 {
-    return read_stream_loop<types::depth_stream_event>(transport_, std::move(handler));
+    return read_stream_loop<types::depth_stream_event_t>(transport_, std::move(handler));
 }
 
 void

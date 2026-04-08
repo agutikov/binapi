@@ -89,14 +89,14 @@ struct partial_book_depth_subscription
     std::string speed{ "250ms" };  ///< Update speed: "100ms" or "250ms".
 };
 
-/// @brief Parameters for subscribing to the kline/candlestick stream.
+/// @brief Parameters for subscribing to the kline_t/candlestick stream.
 struct kline_subscription
 {
     std::string symbol{};                                        ///< Trading pair symbol.
     types::kline_interval_t interval{ types::kline_interval_t::m1 }; ///< Candlestick interval (e.g. 1m, 5m, 1h).
 };
 
-/// @brief Parameters for subscribing to the continuous contract kline stream.
+/// @brief Parameters for subscribing to the continuous contract kline_t stream.
 struct continuous_contract_kline_subscription
 {
     std::string pair{};                                                    ///< Trading pair (e.g. "BTCUSDT").

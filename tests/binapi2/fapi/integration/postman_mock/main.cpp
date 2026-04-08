@@ -86,13 +86,13 @@ main()
 
     // Ping
     {
-        auto r = c.market_data.execute(types::ping_request{});
+        auto r = c.market_data.execute(types::ping_request_t{});
         check("ping", r);
     }
 
     // Server time
     {
-        auto r = c.market_data.execute(types::server_time_request{});
+        auto r = c.market_data.execute(types::server_time_request_t{});
         if (check("server_time", r)) {
             if (r->serverTime.value == 0) {
                 std::cerr << "FAIL server_time: serverTime is 0\n";
@@ -104,7 +104,7 @@ main()
 
     // Exchange info
     {
-        auto r = c.market_data.execute(types::exchange_info_request{});
+        auto r = c.market_data.execute(types::exchange_info_request_t{});
         if (check("exchange_info", r)) {
             if (r->symbols.empty()) {
                 std::cerr << "FAIL exchange_info: symbols array is empty\n";
@@ -116,7 +116,7 @@ main()
 
     // Order book
     {
-        auto r = c.market_data.execute(types::order_book_request{.symbol = "BTCUSDT", .limit = 5});
+        auto r = c.market_data.execute(types::order_book_request_t{.symbol = "BTCUSDT", .limit = 5});
         if (check("order_book", r)) {
             if (r->bids.empty() || r->asks.empty()) {
                 std::cerr << "FAIL order_book: bids or asks empty\n";
@@ -128,7 +128,7 @@ main()
 
     // Recent trades
     {
-        auto r = c.market_data.execute(types::recent_trades_request{.symbol = "BTCUSDT"});
+        auto r = c.market_data.execute(types::recent_trades_request_t{.symbol = "BTCUSDT"});
         if (check("recent_trades", r)) {
             if (r->empty()) {
                 std::cerr << "FAIL recent_trades: empty array\n";
@@ -141,7 +141,7 @@ main()
     // Klines
     {
         auto r = c.market_data.klines(
-            types::kline_request{.symbol = "BTCUSDT", .interval = types::kline_interval_t::h1});
+            types::kline_request_t{.symbol = "BTCUSDT", .interval = types::kline_interval_t::h1});
         if (check("klines", r)) {
             if (r->empty()) {
                 std::cerr << "FAIL klines: empty array\n";
@@ -153,10 +153,10 @@ main()
 
     // Price ticker
     {
-        auto r = c.market_data.execute(types::price_ticker_request{.symbol = "BTCUSDT"});
+        auto r = c.market_data.execute(types::price_ticker_request_t{.symbol = "BTCUSDT"});
         if (check("price_ticker", r)) {
             if (r->symbol.empty()) {
-                std::cerr << "FAIL price_ticker: symbol empty\n";
+                std::cerr << "FAIL price_ticker_t: symbol empty\n";
                 ++failures;
                 --passed;
             }
@@ -165,10 +165,10 @@ main()
 
     // Book ticker
     {
-        auto r = c.market_data.execute(types::book_ticker_request{.symbol = "BTCUSDT"});
+        auto r = c.market_data.execute(types::book_ticker_request_t{.symbol = "BTCUSDT"});
         if (check("book_ticker", r)) {
             if (r->symbol.empty()) {
-                std::cerr << "FAIL book_ticker: symbol empty\n";
+                std::cerr << "FAIL book_ticker_t: symbol empty\n";
                 ++failures;
                 --passed;
             }
@@ -177,10 +177,10 @@ main()
 
     // Mark price
     {
-        auto r = c.market_data.execute(types::mark_price_request{.symbol = "BTCUSDT"});
+        auto r = c.market_data.execute(types::mark_price_request_t{.symbol = "BTCUSDT"});
         if (check("mark_price", r)) {
             if (r->symbol.empty()) {
-                std::cerr << "FAIL mark_price: symbol empty\n";
+                std::cerr << "FAIL mark_price_t: symbol empty\n";
                 ++failures;
                 --passed;
             }
@@ -189,7 +189,7 @@ main()
 
     // Funding rate history
     {
-        auto r = c.market_data.execute(types::funding_rate_history_request{.symbol = "BTCUSDT"});
+        auto r = c.market_data.execute(types::funding_rate_history_request_t{.symbol = "BTCUSDT"});
         if (check("funding_rate_history", r)) {
             if (r->empty()) {
                 std::cerr << "FAIL funding_rate_history: empty array\n";
@@ -207,10 +207,10 @@ main()
 
     // Account information
     {
-        auto r = c.account.account_information();
+        auto r = c.account.account_information_t();
         if (check("account_information", r)) {
             if (r->assets.empty()) {
-                std::cerr << "FAIL account_information: assets empty\n";
+                std::cerr << "FAIL account_information_t: assets empty\n";
                 ++failures;
                 --passed;
             }
@@ -231,10 +231,10 @@ main()
 
     // Position risk
     {
-        auto r = c.account.execute(types::position_risk_request{});
+        auto r = c.account.execute(types::position_risk_request_t{});
         if (check("position_risk", r)) {
             if (r->empty()) {
-                std::cerr << "FAIL position_risk: empty array\n";
+                std::cerr << "FAIL position_risk_t: empty array\n";
                 ++failures;
                 --passed;
             }
@@ -249,7 +249,7 @@ main()
 
     // Query order
     {
-        auto r = c.trade.execute(types::query_order_request{.symbol = "BTCUSDT", .orderId = 22542179});
+        auto r = c.trade.execute(types::query_order_request_t{.symbol = "BTCUSDT", .orderId = 22542179});
         if (check("query_order", r)) {
             if (r->symbol != "BTCUSDT") {
                 std::cerr << "FAIL query_order: unexpected symbol: " << r->symbol << "\n";
@@ -261,7 +261,7 @@ main()
 
     // All open orders
     {
-        auto r = c.trade.execute(types::all_open_orders_request{});
+        auto r = c.trade.execute(types::all_open_orders_request_t{});
         if (check("all_open_orders", r)) {
             if (r->empty()) {
                 std::cerr << "FAIL all_open_orders: empty array\n";

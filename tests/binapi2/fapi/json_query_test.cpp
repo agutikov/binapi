@@ -214,7 +214,7 @@ TEST(JsonRoundTrip, OrderResponse)
         "selfTradePreventionMode": "EXPIRE_TAKER",
         "goodTillDate": 0
     })";
-    auto resp = parse_json<order_response>(input);
+    auto resp = parse_json<order_response_t>(input);
 
     EXPECT_EQ(resp.clientOrderId, "testOrder");
     EXPECT_EQ(resp.orderId, 22542179ULL);
@@ -247,7 +247,7 @@ TEST(JsonRoundTrip, OrderResponse)
 
     // Round-trip.
     auto json2 = to_json(resp);
-    auto resp2 = parse_json<order_response>(json2);
+    auto resp2 = parse_json<order_response_t>(json2);
     EXPECT_EQ(resp2.orderId, resp.orderId);
     EXPECT_EQ(resp2.side, resp.side);
     EXPECT_EQ(resp2.status, resp.status);
@@ -259,11 +259,11 @@ TEST(JsonRoundTrip, OrderResponse)
 // Part 3: to_query_map
 // ============================================================================
 
-// ---------- order_book_request ----------
+// ---------- order_book_request_t ----------
 
 TEST(ToQueryMap, OrderBookRequestWithLimit)
 {
-    order_book_request req{ .symbol = "BTCUSDT", .limit = 10 };
+    order_book_request_t req{ .symbol = "BTCUSDT", .limit = 10 };
     auto m = binapi2::fapi::to_query_map(req);
 
     EXPECT_EQ(m.at("symbol"), "BTCUSDT");
@@ -273,7 +273,7 @@ TEST(ToQueryMap, OrderBookRequestWithLimit)
 
 TEST(ToQueryMap, OrderBookRequestWithoutLimit)
 {
-    order_book_request req{ .symbol = "BTCUSDT" };
+    order_book_request_t req{ .symbol = "BTCUSDT" };
     auto m = binapi2::fapi::to_query_map(req);
 
     EXPECT_EQ(m.at("symbol"), "BTCUSDT");
@@ -281,11 +281,11 @@ TEST(ToQueryMap, OrderBookRequestWithoutLimit)
     EXPECT_EQ(m.size(), 1u);
 }
 
-// ---------- new_order_request with enum and decimal fields ----------
+// ---------- new_order_request_t with enum and decimal fields ----------
 
 TEST(ToQueryMap, NewOrderRequestFull)
 {
-    new_order_request req{};
+    new_order_request_t req{};
     req.symbol = "ETHUSDT";
     req.side = order_side_t::sell;
     req.type = order_type_t::limit;
@@ -318,11 +318,11 @@ TEST(ToQueryMap, NewOrderRequestFull)
     EXPECT_EQ(m.count("goodTillDate"), 0u);
 }
 
-// ---------- exchange_info_request ----------
+// ---------- exchange_info_request_t ----------
 
 TEST(ToQueryMap, ExchangeInfoRequestWithSymbol)
 {
-    exchange_info_request req{ .symbol = "BTCUSDT" };
+    exchange_info_request_t req{ .symbol = "BTCUSDT" };
     auto m = binapi2::fapi::to_query_map(req);
 
     EXPECT_EQ(m.at("symbol"), "BTCUSDT");
@@ -331,7 +331,7 @@ TEST(ToQueryMap, ExchangeInfoRequestWithSymbol)
 
 TEST(ToQueryMap, ExchangeInfoRequestEmpty)
 {
-    exchange_info_request req{};
+    exchange_info_request_t req{};
     auto m = binapi2::fapi::to_query_map(req);
 
     EXPECT_TRUE(m.empty());

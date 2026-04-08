@@ -6,9 +6,6 @@
 
 
 
-add _t to all types in include/binapi2/fapi/types
-
-
 
 for all enum types - specify value of enum items
 

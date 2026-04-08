@@ -26,12 +26,12 @@ class convert_service : public service
 public:
     using service::service;
 
-    using quote_request = types::convert_quote_request;
-    using quote_response = types::convert_quote_response;
-    using accept_request = types::convert_accept_request;
-    using accept_response = types::convert_accept_response;
-    using order_status_request = types::convert_order_status_request;
-    using order_status_response = types::convert_order_status_response;
+    using quote_request = types::convert_quote_request_t;
+    using quote_response = types::convert_quote_response_t;
+    using accept_request = types::convert_accept_request_t;
+    using accept_response = types::convert_accept_response_t;
+    using order_status_request = types::convert_order_status_request_t;
+    using order_status_response = types::convert_order_status_response_t;
 };
 
 } // namespace binapi2::fapi::rest

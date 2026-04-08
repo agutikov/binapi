@@ -19,8 +19,8 @@ int cmd_account_info(const args_t& /*args*/)
     boost::asio::io_context io;
     binapi2::fapi::client client{ io, make_config() };
 
-    spdlog::debug("executing account_information request");
-    auto r = client.account.account_information();
+    spdlog::debug("executing account_information_t request");
+    auto r = client.account.account_information_t();
     if (!r) { print_error(r.err); return 1; }
 
     spdlog::info("feeTier={} canTrade={} assets={} positions={}",
@@ -56,10 +56,10 @@ int cmd_position_risk(const args_t& args)
     boost::asio::io_context io;
     binapi2::fapi::client client{ io, make_config() };
 
-    binapi2::fapi::types::position_risk_request req;
+    binapi2::fapi::types::position_risk_request_t req;
     if (!args.empty()) req.symbol = args[0];
 
-    spdlog::debug("executing position_risk request symbol={}",
+    spdlog::debug("executing position_risk_t request symbol={}",
                   req.symbol.value_or("(all)"));
     auto r = client.account.execute(req);
     return handle_result(r);
@@ -70,7 +70,7 @@ int cmd_income_history(const args_t& args)
     boost::asio::io_context io;
     binapi2::fapi::client client{ io, make_config() };
 
-    binapi2::fapi::types::income_history_request req;
+    binapi2::fapi::types::income_history_request_t req;
     if (!args.empty()) req.symbol = args[0];
     if (args.size() >= 2) req.limit = std::stoi(args[1]);
 

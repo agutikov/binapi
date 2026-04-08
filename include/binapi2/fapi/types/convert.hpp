@@ -15,7 +15,7 @@
 namespace binapi2::fapi::types {
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/convert/Send-quote-request.md
-struct convert_quote_request {
+struct convert_quote_request_t {
     std::string fromAsset{};
     std::string toAsset{};
     std::optional<decimal_t> fromAmount{};
@@ -24,7 +24,7 @@ struct convert_quote_request {
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/convert/Send-quote-request.md
-struct convert_quote_response {
+struct convert_quote_response_t {
     std::string quoteId{};
     decimal_t ratio{};
     decimal_t inverseRatio{};
@@ -34,25 +34,25 @@ struct convert_quote_response {
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/convert/Accept-Quote.md
-struct convert_accept_request {
+struct convert_accept_request_t {
     std::string quoteId{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/convert/Accept-Quote.md
-struct convert_accept_response {
+struct convert_accept_response_t {
     std::string orderId{};
     timestamp_ms_t createTime{};
     std::string orderStatus{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/convert/Order-Status.md
-struct convert_order_status_request {
+struct convert_order_status_request_t {
     std::optional<std::string> orderId{};
     std::optional<std::string> quoteId{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/convert/Order-Status.md
-struct convert_order_status_response {
+struct convert_order_status_response_t {
     std::string orderId{};
     std::string orderStatus{};
     std::string fromAsset{};
@@ -67,9 +67,9 @@ struct convert_order_status_response {
 } // namespace binapi2::fapi::types
 
 template<>
-struct glz::meta<binapi2::fapi::types::convert_quote_response>
+struct glz::meta<binapi2::fapi::types::convert_quote_response_t>
 {
-    using T = binapi2::fapi::types::convert_quote_response;
+    using T = binapi2::fapi::types::convert_quote_response_t;
     static constexpr auto value = object("quoteId",
                                          &T::quoteId,
                                          "ratio",
@@ -85,9 +85,9 @@ struct glz::meta<binapi2::fapi::types::convert_quote_response>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::convert_accept_response>
+struct glz::meta<binapi2::fapi::types::convert_accept_response_t>
 {
-    using T = binapi2::fapi::types::convert_accept_response;
+    using T = binapi2::fapi::types::convert_accept_response_t;
     static constexpr auto value = object("orderId",
                                          &T::orderId,
                                          "createTime",
@@ -97,9 +97,9 @@ struct glz::meta<binapi2::fapi::types::convert_accept_response>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::convert_order_status_response>
+struct glz::meta<binapi2::fapi::types::convert_order_status_response_t>
 {
-    using T = binapi2::fapi::types::convert_order_status_response;
+    using T = binapi2::fapi::types::convert_order_status_response_t;
     static constexpr auto value = object("orderId",
                                          &T::orderId,
                                          "orderStatus",

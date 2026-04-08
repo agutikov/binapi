@@ -39,23 +39,23 @@ class market_streams
 {
 public:
     using void_callback = std::function<void(result<void>)>;                                      ///< Async completion callback type.
-    using aggregate_trade_handler = std::function<bool(const types::aggregate_trade_stream_event&)>; ///< Handler for aggregate trade events.
-    using mark_price_handler = std::function<bool(const types::mark_price_stream_event&)>;          ///< Handler for mark price events.
-    using book_ticker_handler = std::function<bool(const types::book_ticker_stream_event&)>;        ///< Handler for individual book ticker events.
-    using depth_handler = std::function<bool(const types::depth_stream_event&)>;                    ///< Handler for order book depth events.
-    using mini_ticker_handler = std::function<bool(const types::mini_ticker_stream_event&)>;        ///< Handler for mini ticker events.
+    using aggregate_trade_handler = std::function<bool(const types::aggregate_trade_stream_event_t&)>; ///< Handler for aggregate trade events.
+    using mark_price_handler = std::function<bool(const types::mark_price_stream_event_t&)>;          ///< Handler for mark price events.
+    using book_ticker_handler = std::function<bool(const types::book_ticker_stream_event_t&)>;        ///< Handler for individual book ticker events.
+    using depth_handler = std::function<bool(const types::depth_stream_event_t&)>;                    ///< Handler for order book depth events.
+    using mini_ticker_handler = std::function<bool(const types::mini_ticker_stream_event_t&)>;        ///< Handler for mini ticker events.
     using all_market_mini_ticker_handler = std::function<bool(const types::all_market_mini_ticker_stream_event&)>; ///< Handler for all-market mini ticker events.
-    using ticker_handler = std::function<bool(const types::ticker_stream_event&)>;                  ///< Handler for 24hr ticker events.
+    using ticker_handler = std::function<bool(const types::ticker_stream_event_t&)>;                  ///< Handler for 24hr ticker events.
     using all_market_ticker_handler = std::function<bool(const types::all_market_ticker_stream_event&)>;           ///< Handler for all-market 24hr ticker events.
-    using kline_handler = std::function<bool(const types::kline_stream_event&)>;                    ///< Handler for kline/candlestick events.
-    using liquidation_order_handler = std::function<bool(const types::liquidation_order_stream_event&)>;           ///< Handler for liquidation order events.
-    using continuous_contract_kline_handler = std::function<bool(const types::continuous_contract_kline_stream_event&)>; ///< Handler for continuous contract kline events.
+    using kline_handler = std::function<bool(const types::kline_stream_event_t&)>;                    ///< Handler for kline_t/candlestick events.
+    using liquidation_order_handler = std::function<bool(const types::liquidation_order_stream_event_t&)>;           ///< Handler for liquidation order events.
+    using continuous_contract_kline_handler = std::function<bool(const types::continuous_contract_kline_stream_event_t&)>; ///< Handler for continuous contract kline_t events.
     using all_market_mark_price_handler = std::function<bool(const types::all_market_mark_price_stream_event&)>;   ///< Handler for all-market mark price events.
-    using composite_index_handler = std::function<bool(const types::composite_index_stream_event&)>; ///< Handler for composite index events.
-    using contract_info_handler = std::function<bool(const types::contract_info_stream_event&)>;    ///< Handler for contract info events.
-    using asset_index_handler = std::function<bool(const types::asset_index_stream_event&)>;        ///< Handler for asset index events.
+    using composite_index_handler = std::function<bool(const types::composite_index_stream_event_t&)>; ///< Handler for composite index events.
+    using contract_info_handler = std::function<bool(const types::contract_info_stream_event_t&)>;    ///< Handler for contract info events.
+    using asset_index_handler = std::function<bool(const types::asset_index_stream_event_t&)>;        ///< Handler for asset index events.
     using all_asset_index_handler = std::function<bool(const types::all_asset_index_stream_event&)>; ///< Handler for all asset index events.
-    using trading_session_handler = std::function<bool(const types::trading_session_stream_event&)>; ///< Handler for trading session events.
+    using trading_session_handler = std::function<bool(const types::trading_session_stream_event_t&)>; ///< Handler for trading session events.
 
     /// @brief Construct a market streams client.
     /// @param io_context Boost.Asio I/O context for async operations.
@@ -158,15 +158,15 @@ public:
 
     // -- Kline stream --
 
-    /// @brief Connect to the kline/candlestick stream for a symbol.
+    /// @brief Connect to the kline_t/candlestick stream for a symbol.
     /// @param subscription Subscription parameters (symbol, interval).
     [[nodiscard]] result<void> connect_kline(const kline_subscription& subscription);
     /// @brief Async overload with completion callback.
     void connect_kline(const kline_subscription& subscription, void_callback callback);
 
-    // -- Continuous contract kline --
+    // -- Continuous contract kline_t --
 
-    /// @brief Connect to the continuous contract kline stream.
+    /// @brief Connect to the continuous contract kline_t stream.
     /// @param subscription Subscription parameters (pair, contract type, interval).
     [[nodiscard]] result<void> connect_continuous_contract_kline(const continuous_contract_kline_subscription& subscription);
     /// @brief Async overload with completion callback.
@@ -246,13 +246,13 @@ public:
     /// @brief Async overload with completion callback.
     void read_partial_book_depth_loop(depth_handler handler, void_callback callback);
 
-    /// @brief Read kline/candlestick events in a loop.
+    /// @brief Read kline_t/candlestick events in a loop.
     /// @param handler Callback for each event; return @c false to stop.
     [[nodiscard]] result<void> read_kline_loop(kline_handler handler);
     /// @brief Async overload with completion callback.
     void read_kline_loop(kline_handler handler, void_callback callback);
 
-    /// @brief Read continuous contract kline events in a loop.
+    /// @brief Read continuous contract kline_t events in a loop.
     /// @param handler Callback for each event; return @c false to stop.
     [[nodiscard]] result<void> read_continuous_contract_kline_loop(continuous_contract_kline_handler handler);
     /// @brief Async overload with completion callback.

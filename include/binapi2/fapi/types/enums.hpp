@@ -97,7 +97,7 @@ enum class position_side_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 enum class working_type_t
 {
-    mark_price,
+    mark_price_t,
     contract_price,
 };
 
@@ -419,7 +419,7 @@ to_string(position_side_t value)
 to_string(working_type_t value)
 {
     switch (value) {
-        case working_type_t::mark_price:
+        case working_type_t::mark_price_t:
             return "MARK_PRICE";
         case working_type_t::contract_price:
             return "CONTRACT_PRICE";
@@ -834,7 +834,7 @@ template<>
 struct glz::meta<binapi2::fapi::types::working_type_t>
 {
     using enum binapi2::fapi::types::working_type_t;
-    static constexpr auto value = enumerate("MARK_PRICE", mark_price, "CONTRACT_PRICE", contract_price);
+    static constexpr auto value = enumerate("MARK_PRICE", mark_price_t, "CONTRACT_PRICE", contract_price);
 };
 
 template<>

@@ -145,10 +145,10 @@ TEST(Enums, PositionSide) {
 // --------------------------------------------------------------------------
 
 TEST(Enums, WorkingType) {
-    EXPECT_EQ(to_string(working_type_t::mark_price), "MARK_PRICE");
+    EXPECT_EQ(to_string(working_type_t::mark_price_t), "MARK_PRICE");
     EXPECT_EQ(to_string(working_type_t::contract_price), "CONTRACT_PRICE");
 
-    check_json_roundtrip(working_type_t::mark_price, "MARK_PRICE");
+    check_json_roundtrip(working_type_t::mark_price_t, "MARK_PRICE");
     check_json_roundtrip(working_type_t::contract_price, "CONTRACT_PRICE");
 }
 
