@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(binapi2-fapi-demo-cli *)",
+      "Bash(postman_mock_integration *)"
+    ]
+  },
+  "sandbox": {
+    "network": {
+      "allowedDomains": [
+        "testnet.binancefuture.com",
+        "fapi.binance.com",
+        "stream.binancefuture.com",
+        "fstream.binance.com",
+        "localhost"
+      ]
+    }
+  }
+}
