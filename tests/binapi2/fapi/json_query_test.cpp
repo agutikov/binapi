@@ -41,44 +41,44 @@ std::string to_json(const T& obj)
 // Part 1: JSON round-trips for types in common.hpp
 // ============================================================================
 
-// ---------- binance_error_document ----------
+// ---------- binance_error_document_t ----------
 
 TEST(JsonRoundTrip, BinanceErrorDocument)
 {
     constexpr std::string_view input = R"({"code":-1021,"msg":"Timestamp outside"})";
-    auto doc = parse_json<binance_error_document>(input);
+    auto doc = parse_json<binance_error_document_t>(input);
 
     EXPECT_EQ(doc.code, -1021);
     EXPECT_EQ(doc.msg, "Timestamp outside");
 
     // Re-serialize and parse again.
     auto json2 = to_json(doc);
-    auto doc2 = parse_json<binance_error_document>(json2);
+    auto doc2 = parse_json<binance_error_document_t>(json2);
     EXPECT_EQ(doc2.code, doc.code);
     EXPECT_EQ(doc2.msg, doc.msg);
 }
 
-// ---------- server_time_response ----------
+// ---------- server_time_response_t ----------
 
 TEST(JsonRoundTrip, ServerTimeResponse)
 {
     constexpr std::string_view input = R"({"serverTime":1234567890123})";
-    auto resp = parse_json<server_time_response>(input);
+    auto resp = parse_json<server_time_response_t>(input);
 
     EXPECT_EQ(resp.serverTime, timestamp_ms_t{1234567890123ULL});
 
     auto json2 = to_json(resp);
-    auto resp2 = parse_json<server_time_response>(json2);
+    auto resp2 = parse_json<server_time_response_t>(json2);
     EXPECT_EQ(resp2.serverTime, resp.serverTime);
 }
 
-// ---------- rate_limit ----------
+// ---------- rate_limit_t ----------
 
 TEST(JsonRoundTrip, RateLimitWithoutCount)
 {
     constexpr std::string_view input =
         R"({"rateLimitType":"REQUEST_WEIGHT","interval":"MINUTE","intervalNum":1,"limit":2400})";
-    auto rl = parse_json<rate_limit>(input);
+    auto rl = parse_json<rate_limit_t>(input);
 
     EXPECT_EQ(rl.rateLimitType, rate_limit_type_t::request_weight);
     EXPECT_EQ(rl.interval, rate_limit_interval_t::minute);
@@ -87,7 +87,7 @@ TEST(JsonRoundTrip, RateLimitWithoutCount)
     EXPECT_FALSE(rl.count.has_value());
 
     auto json2 = to_json(rl);
-    auto rl2 = parse_json<rate_limit>(json2);
+    auto rl2 = parse_json<rate_limit_t>(json2);
     EXPECT_EQ(rl2.rateLimitType, rl.rateLimitType);
     EXPECT_EQ(rl2.interval, rl.interval);
     EXPECT_EQ(rl2.intervalNum, rl.intervalNum);
@@ -99,7 +99,7 @@ TEST(JsonRoundTrip, RateLimitWithCount)
 {
     constexpr std::string_view input =
         R"({"rateLimitType":"ORDERS_1M","interval":"MINUTE","intervalNum":1,"limit":1200,"count":42})";
-    auto rl = parse_json<rate_limit>(input);
+    auto rl = parse_json<rate_limit_t>(input);
 
     EXPECT_EQ(rl.rateLimitType, rate_limit_type_t::orders_1m);
     EXPECT_EQ(rl.interval, rate_limit_interval_t::minute);
@@ -109,48 +109,48 @@ TEST(JsonRoundTrip, RateLimitWithCount)
     EXPECT_EQ(*rl.count, 42);
 
     auto json2 = to_json(rl);
-    auto rl2 = parse_json<rate_limit>(json2);
+    auto rl2 = parse_json<rate_limit_t>(json2);
     ASSERT_TRUE(rl2.count.has_value());
     EXPECT_EQ(*rl2.count, 42);
 }
 
-// ---------- price_level (JSON array format) ----------
+// ---------- price_level_t (JSON array format) ----------
 
 TEST(JsonRoundTrip, PriceLevel)
 {
     constexpr std::string_view input = R"(["50000.5","1.234"])";
-    auto pl = parse_json<price_level>(input);
+    auto pl = parse_json<price_level_t>(input);
 
     EXPECT_EQ(pl.price, decimal_t("50000.5"));
     EXPECT_EQ(pl.quantity, decimal_t("1.234"));
 
     auto json2 = to_json(pl);
-    auto pl2 = parse_json<price_level>(json2);
+    auto pl2 = parse_json<price_level_t>(json2);
     EXPECT_EQ(pl2.price, pl.price);
     EXPECT_EQ(pl2.quantity, pl.quantity);
 }
 
-// ---------- listen_key_response ----------
+// ---------- listen_key_response_t ----------
 
 TEST(JsonRoundTrip, ListenKeyResponse)
 {
     constexpr std::string_view input = R"({"listenKey":"abc123"})";
-    auto resp = parse_json<listen_key_response>(input);
+    auto resp = parse_json<listen_key_response_t>(input);
 
     EXPECT_EQ(resp.listenKey, "abc123");
 
     auto json2 = to_json(resp);
-    auto resp2 = parse_json<listen_key_response>(json2);
+    auto resp2 = parse_json<listen_key_response_t>(json2);
     EXPECT_EQ(resp2.listenKey, resp.listenKey);
 }
 
-// ---------- exchange_info_asset ----------
+// ---------- exchange_info_asset_t ----------
 
 TEST(JsonRoundTrip, ExchangeInfoAssetWithOptional)
 {
     constexpr std::string_view input =
         R"({"asset":"USDT","marginAvailable":true,"autoAssetExchange":"-0.00100000"})";
-    auto a = parse_json<exchange_info_asset>(input);
+    auto a = parse_json<exchange_info_asset_t>(input);
 
     EXPECT_EQ(a.asset, "USDT");
     EXPECT_TRUE(a.marginAvailable);
@@ -158,7 +158,7 @@ TEST(JsonRoundTrip, ExchangeInfoAssetWithOptional)
     EXPECT_EQ(*a.autoAssetExchange, "-0.00100000");
 
     auto json2 = to_json(a);
-    auto a2 = parse_json<exchange_info_asset>(json2);
+    auto a2 = parse_json<exchange_info_asset_t>(json2);
     EXPECT_EQ(a2.asset, a.asset);
     EXPECT_EQ(a2.marginAvailable, a.marginAvailable);
     ASSERT_TRUE(a2.autoAssetExchange.has_value());
@@ -168,14 +168,14 @@ TEST(JsonRoundTrip, ExchangeInfoAssetWithOptional)
 TEST(JsonRoundTrip, ExchangeInfoAssetWithoutOptional)
 {
     constexpr std::string_view input = R"({"asset":"BTC","marginAvailable":false})";
-    auto a = parse_json<exchange_info_asset>(input);
+    auto a = parse_json<exchange_info_asset_t>(input);
 
     EXPECT_EQ(a.asset, "BTC");
     EXPECT_FALSE(a.marginAvailable);
     EXPECT_FALSE(a.autoAssetExchange.has_value());
 
     auto json2 = to_json(a);
-    auto a2 = parse_json<exchange_info_asset>(json2);
+    auto a2 = parse_json<exchange_info_asset_t>(json2);
     EXPECT_EQ(a2.asset, a.asset);
     EXPECT_FALSE(a2.autoAssetExchange.has_value());
 }

@@ -70,9 +70,9 @@ public:
     [[nodiscard]] boost::cobalt::task<result<types::position_mode_response>> async_get_position_mode();
 
     /// @brief Fetch current order rate limit usage.
-    [[nodiscard]] result<std::vector<types::rate_limit>> rate_limit_order();
+    [[nodiscard]] result<std::vector<types::rate_limit_t>> rate_limit_order();
     /// @brief Async variant of rate_limit_order.
-    [[nodiscard]] boost::cobalt::task<result<std::vector<types::rate_limit>>> async_rate_limit_order();
+    [[nodiscard]] boost::cobalt::task<result<std::vector<types::rate_limit_t>>> async_rate_limit_order();
 
     /// @brief Query whether BNB fee burn is enabled.
     [[nodiscard]] result<types::bnb_burn_status_response> get_bnb_burn();

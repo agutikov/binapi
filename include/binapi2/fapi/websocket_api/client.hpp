@@ -155,11 +155,11 @@ public:
 
     /// @brief Stop (close) an existing user data stream.
     /// @return A result indicating the stream was closed.
-    [[nodiscard]] result<types::websocket_api_response<types::empty_response>> user_data_stream_stop();
+    [[nodiscard]] result<types::websocket_api_response<types::empty_response_t>> user_data_stream_stop();
 
     /// @brief Asynchronously stop an existing user data stream.
     /// @return A cobalt task indicating the stream was closed.
-    [[nodiscard]] boost::cobalt::task<result<types::websocket_api_response<types::empty_response>>> async_user_data_stream_stop();
+    [[nodiscard]] boost::cobalt::task<result<types::websocket_api_response<types::empty_response_t>>> async_user_data_stream_stop();
 
     // -- Request type aliases for generic execute --
 

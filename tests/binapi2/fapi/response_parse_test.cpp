@@ -40,7 +40,7 @@ using namespace binapi2::fapi::types;
 TEST(ResponseParse, Ping)
 {
     auto json = read_file(fixture("ping.json"));
-    empty_response r;
+    empty_response_t r;
     auto ec = glz::read_json(r, json);
     EXPECT_FALSE(ec) << glz::format_error(ec, json);
 }
@@ -48,7 +48,7 @@ TEST(ResponseParse, Ping)
 TEST(ResponseParse, ServerTime)
 {
     auto json = read_file(fixture("server_time.json"));
-    server_time_response r;
+    server_time_response_t r;
     auto ec = glz::read_json(r, json);
     EXPECT_FALSE(ec) << glz::format_error(ec, json);
     EXPECT_NE(r.serverTime, timestamp_ms_t{});
@@ -57,7 +57,7 @@ TEST(ResponseParse, ServerTime)
 TEST(ResponseParse, ExchangeInfo)
 {
     auto json = read_file(fixture("exchange_info.json"));
-    exchange_info_response r;
+    exchange_info_response_t r;
     auto ec = glz::read_json(r, json);
     EXPECT_FALSE(ec) << glz::format_error(ec, json);
     EXPECT_EQ(r.timezone, "UTC");
@@ -80,7 +80,7 @@ TEST(ResponseParse, OrderBook)
 TEST(ResponseParse, ListenKey)
 {
     auto json = read_file(fixture("listen_key.json"));
-    listen_key_response r;
+    listen_key_response_t r;
     auto ec = glz::read_json(r, json);
     EXPECT_FALSE(ec) << glz::format_error(ec, json);
     EXPECT_FALSE(r.listenKey.empty());

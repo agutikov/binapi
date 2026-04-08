@@ -93,16 +93,16 @@ account_service::async_get_position_mode()
     co_return get_position_mode();
 }
 
-result<std::vector<types::rate_limit>>
+result<std::vector<types::rate_limit_t>>
 account_service::rate_limit_order()
 {
-    return owner_.execute<std::vector<types::rate_limit>>(rate_limit_order_endpoint.method,
+    return owner_.execute<std::vector<types::rate_limit_t>>(rate_limit_order_endpoint.method,
                                                           std::string{ rate_limit_order_endpoint.path },
                                                           {},
                                                           rate_limit_order_endpoint.signed_request);
 }
 
-boost::cobalt::task<result<std::vector<types::rate_limit>>>
+boost::cobalt::task<result<std::vector<types::rate_limit_t>>>
 account_service::async_rate_limit_order()
 {
     co_return rate_limit_order();

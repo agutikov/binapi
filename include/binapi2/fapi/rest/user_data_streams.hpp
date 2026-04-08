@@ -38,21 +38,21 @@ public:
 
     /// @brief Create a new listen key for opening a user data WebSocket stream.
     /// @return The listen key string on success, or an error.
-    [[nodiscard]] result<types::listen_key_response> start();
+    [[nodiscard]] result<types::listen_key_response_t> start();
     /// @brief Async variant of start.
-    [[nodiscard]] boost::cobalt::task<result<types::listen_key_response>> async_start();
+    [[nodiscard]] boost::cobalt::task<result<types::listen_key_response_t>> async_start();
 
     /// @brief Extend the validity of the current listen key by another 60 minutes.
     /// @return The listen key on success, or an error.
-    [[nodiscard]] result<types::listen_key_response> keepalive();
+    [[nodiscard]] result<types::listen_key_response_t> keepalive();
     /// @brief Async variant of keepalive.
-    [[nodiscard]] boost::cobalt::task<result<types::listen_key_response>> async_keepalive();
+    [[nodiscard]] boost::cobalt::task<result<types::listen_key_response_t>> async_keepalive();
 
     /// @brief Invalidate the current listen key and close the associated data stream.
     /// @return Empty response on success, or an error.
-    [[nodiscard]] result<types::empty_response> close();
+    [[nodiscard]] result<types::empty_response_t> close();
     /// @brief Async variant of close.
-    [[nodiscard]] boost::cobalt::task<result<types::empty_response>> async_close();
+    [[nodiscard]] boost::cobalt::task<result<types::empty_response_t>> async_close();
 
 private:
     client& owner_;

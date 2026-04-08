@@ -90,7 +90,7 @@ private:
     /// @param levels Price level updates (quantity of "0" removes the level).
     /// @param side   The bid-side map to update.
     template<class Compare>
-    void apply_levels(const std::vector<types::price_level>& levels, std::map<types::decimal_t, types::decimal_t, Compare>& side);
+    void apply_levels(const std::vector<types::price_level_t>& levels, std::map<types::decimal_t, types::decimal_t, Compare>& side);
 
     market_streams& streams_;         ///< Source of diff depth stream events.
     client& rest_client_;             ///< REST client for fetching the initial snapshot.

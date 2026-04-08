@@ -24,14 +24,14 @@
 namespace binapi2::fapi::types {
 
 /// Placeholder response type for endpoints that return no payload (e.g. DELETE listen key).
-struct empty_response
+struct empty_response_t
 {};
 
-/// API rate limit descriptor. Returned inside exchange_info_response and
+/// API rate limit descriptor. Returned inside exchange_info_response_t and
 /// WebSocket API responses. The optional `count` field is populated in
 /// WebSocket API responses to indicate current usage.
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
-struct rate_limit
+struct rate_limit_t
 {
     rate_limit_type_t rateLimitType{};
     rate_limit_interval_t interval{};
@@ -41,14 +41,14 @@ struct rate_limit
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Check-Server-Time.md
-struct server_time_response
+struct server_time_response_t
 {
     timestamp_ms_t serverTime{};
 };
 
 /// Standard Binance error response body (HTTP 4xx/5xx).
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/error-code.md
-struct binance_error_document
+struct binance_error_document_t
 {
     int code{};
     std::string msg{};
@@ -57,7 +57,7 @@ struct binance_error_document
 /// A single [price, quantity] level in an order book.
 /// Serialized as a JSON array (positional), not an object.
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Order-Book.md
-struct price_level
+struct price_level_t
 {
     decimal_t price{};
     decimal_t quantity{};
@@ -66,7 +66,7 @@ struct price_level
 /// Asset descriptor from exchange info. Indicates whether the asset can be
 /// used as margin and its auto-exchange threshold.
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Exchange-Information.md
-struct exchange_info_asset
+struct exchange_info_asset_t
 {
     std::string asset{};
     bool marginAvailable{};
@@ -78,7 +78,7 @@ struct exchange_info_asset
 /// PRICE_FILTER sets minPrice/maxPrice/tickSize, LOT_SIZE sets minQty/maxQty/stepSize,
 /// PERCENT_PRICE sets multiplierUp/multiplierDown, etc.
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Exchange-Information.md
-struct symbol_filter
+struct symbol_filter_t
 {
     std::string filterType{};
     std::optional<decimal_t> maxPrice{};
@@ -96,7 +96,7 @@ struct symbol_filter
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Exchange-Information.md
-struct symbol_info
+struct symbol_info_t
 {
     std::string symbol{};
     std::string pair{};
@@ -117,7 +117,7 @@ struct symbol_info
     std::vector<std::string> underlyingSubType{};
     int settlePlan{};
     decimal_t triggerProtect{};
-    std::vector<symbol_filter> filters{};
+    std::vector<symbol_filter_t> filters{};
     std::vector<order_type_t> orderTypes{};
     std::vector<time_in_force_t> timeInForce{};
     decimal_t liquidationFee{};
@@ -129,20 +129,20 @@ struct symbol_info
 /// Full exchange information response. Contains rate limits, supported assets,
 /// and per-symbol trading rules/filters.
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Exchange-Information.md
-struct exchange_info_response
+struct exchange_info_response_t
 {
     std::string timezone{};
     timestamp_ms_t serverTime{};
     futures_type_t futuresType{};
     std::vector<glz::generic> exchangeFilters{};
-    std::vector<rate_limit> rateLimits{};
-    std::vector<exchange_info_asset> assets{};
-    std::vector<symbol_info> symbols{};
+    std::vector<rate_limit_t> rateLimits{};
+    std::vector<exchange_info_asset_t> assets{};
+    std::vector<symbol_info_t> symbols{};
 };
 
 /// Response from creating/querying a user data stream listen key.
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Start-User-Data-Stream.md
-struct listen_key_response
+struct listen_key_response_t
 {
     std::string listenKey{};
 };
@@ -150,16 +150,16 @@ struct listen_key_response
 } // namespace binapi2::fapi::types
 
 template<>
-struct glz::meta<binapi2::fapi::types::empty_response>
+struct glz::meta<binapi2::fapi::types::empty_response_t>
 {
-    using T = binapi2::fapi::types::empty_response;
+    using T = binapi2::fapi::types::empty_response_t;
     static constexpr auto value = object();
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::rate_limit>
+struct glz::meta<binapi2::fapi::types::rate_limit_t>
 {
-    using T = binapi2::fapi::types::rate_limit;
+    using T = binapi2::fapi::types::rate_limit_t;
     static constexpr auto value = object("rateLimitType",
                                          &T::rateLimitType,
                                          "interval",
@@ -173,38 +173,38 @@ struct glz::meta<binapi2::fapi::types::rate_limit>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::server_time_response>
+struct glz::meta<binapi2::fapi::types::server_time_response_t>
 {
-    using T = binapi2::fapi::types::server_time_response;
+    using T = binapi2::fapi::types::server_time_response_t;
     static constexpr auto value = object("serverTime", &T::serverTime);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::binance_error_document>
+struct glz::meta<binapi2::fapi::types::binance_error_document_t>
 {
-    using T = binapi2::fapi::types::binance_error_document;
+    using T = binapi2::fapi::types::binance_error_document_t;
     static constexpr auto value = object("code", &T::code, "msg", &T::msg);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::price_level>
+struct glz::meta<binapi2::fapi::types::price_level_t>
 {
-    using T = binapi2::fapi::types::price_level;
+    using T = binapi2::fapi::types::price_level_t;
     static constexpr auto value = array(&T::price, &T::quantity);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::exchange_info_asset>
+struct glz::meta<binapi2::fapi::types::exchange_info_asset_t>
 {
-    using T = binapi2::fapi::types::exchange_info_asset;
+    using T = binapi2::fapi::types::exchange_info_asset_t;
     static constexpr auto value =
         object("asset", &T::asset, "marginAvailable", &T::marginAvailable, "autoAssetExchange", &T::autoAssetExchange);
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::symbol_filter>
+struct glz::meta<binapi2::fapi::types::symbol_filter_t>
 {
-    using T = binapi2::fapi::types::symbol_filter;
+    using T = binapi2::fapi::types::symbol_filter_t;
     static constexpr auto value = object("filterType",
                                          &T::filterType,
                                          "maxPrice",
@@ -234,9 +234,9 @@ struct glz::meta<binapi2::fapi::types::symbol_filter>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::symbol_info>
+struct glz::meta<binapi2::fapi::types::symbol_info_t>
 {
-    using T = binapi2::fapi::types::symbol_info;
+    using T = binapi2::fapi::types::symbol_info_t;
     static constexpr auto value = object("symbol",
                                          &T::symbol,
                                          "pair",
@@ -292,9 +292,9 @@ struct glz::meta<binapi2::fapi::types::symbol_info>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::exchange_info_response>
+struct glz::meta<binapi2::fapi::types::exchange_info_response_t>
 {
-    using T = binapi2::fapi::types::exchange_info_response;
+    using T = binapi2::fapi::types::exchange_info_response_t;
     static constexpr auto value = object("timezone",
                                          &T::timezone,
                                          "serverTime",
@@ -312,8 +312,8 @@ struct glz::meta<binapi2::fapi::types::exchange_info_response>
 };
 
 template<>
-struct glz::meta<binapi2::fapi::types::listen_key_response>
+struct glz::meta<binapi2::fapi::types::listen_key_response_t>
 {
-    using T = binapi2::fapi::types::listen_key_response;
+    using T = binapi2::fapi::types::listen_key_response_t;
     static constexpr auto value = object("listenKey", &T::listenKey);
 };

@@ -379,14 +379,14 @@ client::async_user_data_stream_ping()
     co_return user_data_stream_ping();
 }
 
-result<types::websocket_api_response<types::empty_response>>
+result<types::websocket_api_response<types::empty_response_t>>
 client::user_data_stream_stop()
 {
     types::websocket_api_user_data_stream_request params{ .apiKey = cfg_.api_key };
-    return send_rpc<types::empty_response>(user_data_stream_stop_method, params);
+    return send_rpc<types::empty_response_t>(user_data_stream_stop_method, params);
 }
 
-boost::cobalt::task<result<types::websocket_api_response<types::empty_response>>>
+boost::cobalt::task<result<types::websocket_api_response<types::empty_response_t>>>
 client::async_user_data_stream_stop()
 {
     co_return user_data_stream_stop();

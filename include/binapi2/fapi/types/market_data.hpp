@@ -63,8 +63,8 @@ struct order_book_response
     std::uint64_t lastUpdateId{};
     timestamp_ms_t message_output_time{};
     timestamp_ms_t transaction_time{};
-    std::vector<price_level> bids{};
-    std::vector<price_level> asks{};
+    std::vector<price_level_t> bids{};
+    std::vector<price_level_t> asks{};
 };
 
 // ---------------------------------------------------------------------------

@@ -45,21 +45,21 @@ struct endpoint_traits;
 template<>
 struct endpoint_traits<types::ping_request>
 {
-    using response_type_t = types::empty_response;
+    using response_type_t = types::empty_response_t;
     static constexpr auto& endpoint = ping_endpoint;
 };
 
 template<>
 struct endpoint_traits<types::server_time_request>
 {
-    using response_type_t = types::server_time_response;
+    using response_type_t = types::server_time_response_t;
     static constexpr auto& endpoint = server_time_endpoint;
 };
 
 template<>
 struct endpoint_traits<types::exchange_info_request>
 {
-    using response_type_t = types::exchange_info_response;
+    using response_type_t = types::exchange_info_response_t;
     static constexpr auto& endpoint = exchange_info_endpoint;
 };
 

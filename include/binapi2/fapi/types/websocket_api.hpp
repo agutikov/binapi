@@ -171,7 +171,7 @@ struct websocket_api_response
     std::string id{};
     int status{};
     std::optional<T> result{};
-    std::optional<std::vector<rate_limit>> rateLimits{};
+    std::optional<std::vector<rate_limit_t>> rateLimits{};
     std::optional<websocket_api_error> error{};
 };
 

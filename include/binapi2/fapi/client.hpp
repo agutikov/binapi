@@ -43,10 +43,10 @@ namespace detail {
 /// a Binance error document from the body. On success, deserializes the body
 /// as JSON into @p T using glaze.
 ///
-/// For @c types::empty_response, skips JSON parsing and returns an empty value.
+/// For @c types::empty_response_t, skips JSON parsing and returns an empty value.
 ///
 /// @tparam T  The response type to deserialize into. Must be default-constructible
-///            and supported by glz::read_json, or types::empty_response.
+///            and supported by glz::read_json, or types::empty_response_t.
 /// @param response  The raw HTTP response from the transport layer.
 /// @return A result containing either the deserialized value or an error with
 ///         error_code::binance, error_code::http_status, or error_code::json.
@@ -55,14 +55,14 @@ result<T>
 decode_response(const transport::http_response& response)
 {
     if (response.status < 200 || response.status >= 300) {
-        types::binance_error_document error_doc{};
+        types::binance_error_document_t error_doc{};
         if (!glz::read_json(error_doc, response.body)) {
             return result<T>::failure({ error_code::binance, response.status, error_doc.code, error_doc.msg, response.body });
         }
         return result<T>::failure({ error_code::http_status, response.status, 0, "HTTP request failed", response.body });
     }
 
-    if constexpr (std::is_same_v<T, types::empty_response>) {
+    if constexpr (std::is_same_v<T, types::empty_response_t>) {
         return result<T>::success({});
     } else {
         T value{};

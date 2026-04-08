@@ -73,8 +73,8 @@ struct depth_stream_event
     std::uint64_t first_update_id{};
     std::uint64_t final_update_id{};
     std::uint64_t prev_final_update_id{};
-    std::vector<price_level> bids{};
-    std::vector<price_level> asks{};
+    std::vector<price_level_t> bids{};
+    std::vector<price_level_t> asks{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/All-Market-Mini-Tickers-Stream.md
