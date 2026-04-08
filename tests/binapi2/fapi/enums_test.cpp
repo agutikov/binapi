@@ -469,4 +469,41 @@ TEST(Enums, AlgoStatus) {
     check_json_roundtrip(algo_status_t::triggered, "TRIGGERED");
 }
 
+// --------------------------------------------------------------------------
+// Corrupted enum value — to_string must throw on out-of-range values
+// --------------------------------------------------------------------------
+
+template<typename E>
+void check_corrupted_to_string(int bad_value) {
+    auto corrupted = static_cast<E>(bad_value);
+    EXPECT_THROW((void)to_string(corrupted), std::invalid_argument) << "bad value " << bad_value;
+}
+
+TEST(EnumsCorrupted, SecurityType)        { check_corrupted_to_string<security_type_t>(99); }
+TEST(EnumsCorrupted, OrderSide)           { check_corrupted_to_string<order_side_t>(99); }
+TEST(EnumsCorrupted, OrderType)           { check_corrupted_to_string<order_type_t>(99); }
+TEST(EnumsCorrupted, TimeInForce)         { check_corrupted_to_string<time_in_force_t>(99); }
+TEST(EnumsCorrupted, KlineInterval)       { check_corrupted_to_string<kline_interval_t>(99); }
+TEST(EnumsCorrupted, PositionSide)        { check_corrupted_to_string<position_side_t>(99); }
+TEST(EnumsCorrupted, WorkingType)         { check_corrupted_to_string<working_type_t>(99); }
+TEST(EnumsCorrupted, ResponseType)        { check_corrupted_to_string<response_type_t>(99); }
+TEST(EnumsCorrupted, MarginType)          { check_corrupted_to_string<margin_type_t>(99); }
+TEST(EnumsCorrupted, FuturesType)         { check_corrupted_to_string<futures_type_t>(99); }
+TEST(EnumsCorrupted, PositionControlSide) { check_corrupted_to_string<position_control_side_t>(99); }
+TEST(EnumsCorrupted, TradingPermission)   { check_corrupted_to_string<trading_permission_t>(99); }
+TEST(EnumsCorrupted, ContractType)        { check_corrupted_to_string<contract_type_t>(99); }
+TEST(EnumsCorrupted, ContractStatus)      { check_corrupted_to_string<contract_status_t>(99); }
+TEST(EnumsCorrupted, OrderStatus)         { check_corrupted_to_string<order_status_t>(99); }
+TEST(EnumsCorrupted, StpMode)             { check_corrupted_to_string<stp_mode_t>(99); }
+TEST(EnumsCorrupted, PriceMatch)          { check_corrupted_to_string<price_match_t>(99); }
+TEST(EnumsCorrupted, IncomeType)          { check_corrupted_to_string<income_type_t>(99); }
+TEST(EnumsCorrupted, FuturesDataPeriod)   { check_corrupted_to_string<futures_data_period_t>(99); }
+TEST(EnumsCorrupted, ExecutionType)       { check_corrupted_to_string<execution_type_t>(99); }
+TEST(EnumsCorrupted, RateLimitType)       { check_corrupted_to_string<rate_limit_type_t>(99); }
+TEST(EnumsCorrupted, RateLimitInterval)   { check_corrupted_to_string<rate_limit_interval_t>(99); }
+TEST(EnumsCorrupted, AutoCloseType)       { check_corrupted_to_string<auto_close_type_t>(99); }
+TEST(EnumsCorrupted, DeltaType)           { check_corrupted_to_string<delta_type_t>(99); }
+TEST(EnumsCorrupted, AlgoType)            { check_corrupted_to_string<algo_type_t>(99); }
+TEST(EnumsCorrupted, AlgoStatus)          { check_corrupted_to_string<algo_status_t>(99); }
+
 } // anonymous namespace

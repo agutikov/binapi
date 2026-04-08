@@ -37,6 +37,17 @@ namespace binapi2::fapi {
 
 namespace detail {
 
+/// JSON parse options:
+///  - error_on_unknown_keys = false: skip unknown keys so that new fields
+///    added by Binance don't break deserialization of existing response types.
+///  - error_on_missing_keys = true: require all non-optional fields to be
+///    present in the JSON, catching silent zero/empty defaults on renamed or
+///    removed fields.
+inline constexpr glz::opts json_read_opts{
+    .error_on_unknown_keys = false,
+    .error_on_missing_keys = true,
+};
+
 /// @brief Decode an HTTP response body into a typed result.
 ///
 /// Checks the HTTP status code first; on non-2xx responses, attempts to parse
@@ -56,7 +67,8 @@ decode_response(const transport::http_response& response)
 {
     if (response.status < 200 || response.status >= 300) {
         types::binance_error_document_t error_doc{};
-        if (!glz::read_json(error_doc, response.body)) {
+        glz::context ctx{};
+        if (!glz::read<json_read_opts>(error_doc, response.body, ctx)) {
             return result<T>::failure({ error_code::binance, response.status, error_doc.code, error_doc.msg, response.body });
         }
         return result<T>::failure({ error_code::http_status, response.status, 0, "HTTP request failed", response.body });
@@ -66,7 +78,8 @@ decode_response(const transport::http_response& response)
         return result<T>::success({});
     } else {
         T value{};
-        if (auto ec = glz::read_json(value, response.body)) {
+        glz::context ctx{};
+        if (auto ec = glz::read<json_read_opts>(value, response.body, ctx)) {
             return result<T>::failure(
                 { error_code::json, response.status, 0, glz::format_error(ec, response.body), response.body });
         }

@@ -13,6 +13,7 @@
 
 #include <glaze/glaze.hpp>
 
+#include <stdexcept>
 #include <string>
 
 namespace binapi2::fapi::types {
@@ -131,7 +132,7 @@ to_string(futures_type_t value)
         case futures_type_t::u_margined:   return "U_MARGINED";
         case futures_type_t::coin_margined: return "COIN_MARGINED";
     }
-    return "U_MARGINED";
+    throw std::invalid_argument("invalid futures_type_t: " + std::to_string(static_cast<int>(value)));
 }
 
 /// Position control side for POSITION_RISK_CONTROL filters.
@@ -152,7 +153,7 @@ to_string(position_control_side_t value)
         case position_control_side_t::short_side: return "SHORT";
         case position_control_side_t::both:       return "BOTH";
     }
-    return "NONE";
+    throw std::invalid_argument("invalid position_control_side_t: " + std::to_string(static_cast<int>(value)));
 }
 
 /// Trading permission type for symbol permissionSets.
@@ -175,7 +176,7 @@ to_string(trading_permission_t value)
         case trading_permission_t::rpi:  return "RPI";
         case trading_permission_t::psb:  return "PSB";
     }
-    return "GRID";
+    throw std::invalid_argument("invalid trading_permission_t: " + std::to_string(static_cast<int>(value)));
 }
 
 /// Futures contract delivery type (perpetual, quarterly, etc.).
@@ -306,7 +307,7 @@ to_string(security_type_t value)
         case security_type_t::trade:
             return "trade";
     }
-    return "none";
+    throw std::invalid_argument("invalid security_type_t: " + std::to_string(static_cast<int>(value)));
 }
 
 [[nodiscard]] inline std::string
@@ -318,7 +319,7 @@ to_string(order_side_t value)
         case order_side_t::sell:
             return "SELL";
     }
-    return "BUY";
+    throw std::invalid_argument("invalid order_side_t: " + std::to_string(static_cast<int>(value)));
 }
 
 [[nodiscard]] inline std::string
@@ -340,7 +341,7 @@ to_string(order_type_t value)
         case order_type_t::trailing_stop_market:
             return "TRAILING_STOP_MARKET";
     }
-    return "LIMIT";
+    throw std::invalid_argument("invalid order_type_t: " + std::to_string(static_cast<int>(value)));
 }
 
 [[nodiscard]] inline std::string
@@ -360,7 +361,7 @@ to_string(time_in_force_t value)
         case time_in_force_t::rpi:
             return "RPI";
     }
-    return "GTC";
+    throw std::invalid_argument("invalid time_in_force_t: " + std::to_string(static_cast<int>(value)));
 }
 
 [[nodiscard]] inline std::string
@@ -398,7 +399,7 @@ to_string(kline_interval_t value)
         case kline_interval_t::mo1:
             return "1M";
     }
-    return "1m";
+    throw std::invalid_argument("invalid kline_interval_t: " + std::to_string(static_cast<int>(value)));
 }
 
 [[nodiscard]] inline std::string
@@ -412,7 +413,7 @@ to_string(position_side_t value)
         case position_side_t::short_side:
             return "SHORT";
     }
-    return "BOTH";
+    throw std::invalid_argument("invalid position_side_t: " + std::to_string(static_cast<int>(value)));
 }
 
 [[nodiscard]] inline std::string
@@ -424,7 +425,7 @@ to_string(working_type_t value)
         case working_type_t::contract_price:
             return "CONTRACT_PRICE";
     }
-    return "MARK_PRICE";
+    throw std::invalid_argument("invalid working_type_t: " + std::to_string(static_cast<int>(value)));
 }
 
 [[nodiscard]] inline std::string
@@ -436,7 +437,7 @@ to_string(response_type_t value)
         case response_type_t::result:
             return "RESULT";
     }
-    return "ACK";
+    throw std::invalid_argument("invalid response_type_t: " + std::to_string(static_cast<int>(value)));
 }
 
 [[nodiscard]] inline std::string
@@ -448,7 +449,7 @@ to_string(margin_type_t value)
         case margin_type_t::crossed:
             return "CROSSED";
     }
-    return "ISOLATED";
+    throw std::invalid_argument("invalid margin_type_t: " + std::to_string(static_cast<int>(value)));
 }
 
 [[nodiscard]] inline std::string
@@ -472,7 +473,7 @@ to_string(contract_type_t value)
         case contract_type_t::tradifi_perpetual:
             return "TRADIFI_PERPETUAL";
     }
-    return "PERPETUAL";
+    throw std::invalid_argument("invalid contract_type_t: " + std::to_string(static_cast<int>(value)));
 }
 
 [[nodiscard]] inline std::string
@@ -496,7 +497,7 @@ to_string(contract_status_t value)
         case contract_status_t::close:
             return "CLOSE";
     }
-    return "TRADING";
+    throw std::invalid_argument("invalid contract_status_t: " + std::to_string(static_cast<int>(value)));
 }
 
 [[nodiscard]] inline std::string
@@ -518,7 +519,7 @@ to_string(order_status_t value)
         case order_status_t::expired_in_match:
             return "EXPIRED_IN_MATCH";
     }
-    return "NEW";
+    throw std::invalid_argument("invalid order_status_t: " + std::to_string(static_cast<int>(value)));
 }
 
 [[nodiscard]] inline std::string
@@ -534,7 +535,7 @@ to_string(stp_mode_t value)
         case stp_mode_t::expire_maker:
             return "EXPIRE_MAKER";
     }
-    return "NONE";
+    throw std::invalid_argument("invalid stp_mode_t: " + std::to_string(static_cast<int>(value)));
 }
 
 [[nodiscard]] inline std::string
@@ -560,7 +561,7 @@ to_string(price_match_t value)
         case price_match_t::queue_20:
             return "QUEUE_20";
     }
-    return "NONE";
+    throw std::invalid_argument("invalid price_match_t: " + std::to_string(static_cast<int>(value)));
 }
 
 [[nodiscard]] inline std::string
@@ -606,7 +607,7 @@ to_string(income_type_t value)
         case income_type_t::position_limit_increase_fee:
             return "POSITION_LIMIT_INCREASE_FEE";
     }
-    return "TRANSFER";
+    throw std::invalid_argument("invalid income_type_t: " + std::to_string(static_cast<int>(value)));
 }
 
 [[nodiscard]] inline std::string
@@ -632,7 +633,7 @@ to_string(futures_data_period_t value)
         case futures_data_period_t::d1:
             return "1d";
     }
-    return "5m";
+    throw std::invalid_argument("invalid futures_data_period_t: " + std::to_string(static_cast<int>(value)));
 }
 
 /// Execution type in order update events.
@@ -659,7 +660,7 @@ to_string(execution_type_t value)
         case execution_type_t::expired: return "EXPIRED";
         case execution_type_t::trade: return "TRADE";
     }
-    return "NEW";
+    throw std::invalid_argument("invalid execution_type_t: " + std::to_string(static_cast<int>(value)));
 }
 
 /// Rate limit type from exchange info.
@@ -684,7 +685,7 @@ to_string(rate_limit_type_t value)
         case rate_limit_type_t::orders_1h: return "ORDERS_1H";
         case rate_limit_type_t::orders_1d: return "ORDERS_1D";
     }
-    return "REQUEST_WEIGHT";
+    throw std::invalid_argument("invalid rate_limit_type_t: " + std::to_string(static_cast<int>(value)));
 }
 
 /// Rate limit interval unit.
@@ -705,7 +706,7 @@ to_string(rate_limit_interval_t value)
         case rate_limit_interval_t::hour: return "HOUR";
         case rate_limit_interval_t::day: return "DAY";
     }
-    return "SECOND";
+    throw std::invalid_argument("invalid rate_limit_interval_t: " + std::to_string(static_cast<int>(value)));
 }
 
 /// Auto-close type for forced liquidation/ADL orders.
@@ -722,7 +723,7 @@ to_string(auto_close_type_t value)
         case auto_close_type_t::liquidation: return "LIQUIDATION";
         case auto_close_type_t::adl: return "ADL";
     }
-    return "LIQUIDATION";
+    throw std::invalid_argument("invalid auto_close_type_t: " + std::to_string(static_cast<int>(value)));
 }
 
 /// Isolated margin delta direction.
@@ -739,7 +740,7 @@ to_string(delta_type_t value)
         case delta_type_t::add: return "1";
         case delta_type_t::reduce: return "2";
     }
-    return "1";
+    throw std::invalid_argument("invalid delta_type_t: " + std::to_string(static_cast<int>(value)));
 }
 
 /// Algo order type.
@@ -756,7 +757,7 @@ to_string(algo_type_t value)
         case algo_type_t::twap: return "TWAP";
         case algo_type_t::vp: return "VP";
     }
-    return "TWAP";
+    throw std::invalid_argument("invalid algo_type_t: " + std::to_string(static_cast<int>(value)));
 }
 
 /// Algo order status.
@@ -779,7 +780,7 @@ to_string(algo_status_t value)
         case algo_status_t::expired: return "EXPIRED";
         case algo_status_t::triggered: return "TRIGGERED";
     }
-    return "WORKING";
+    throw std::invalid_argument("invalid algo_status_t: " + std::to_string(static_cast<int>(value)));
 }
 
 } // namespace binapi2::fapi::types

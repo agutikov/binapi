@@ -126,7 +126,7 @@ cmake --build _build -j16
 
 ## Architecture
 
-See [docs/DESIGN.md](docs/DESIGN.md) for the full architecture documentation with
+See [docs/binapi2/DESIGN.md](docs/binapi2/DESIGN.md) for the full architecture documentation with
 PlantUML diagrams.  Key design points:
 
 - **Generic dispatch** -- request types carry all API metadata via `endpoint_traits<Request>`.
@@ -174,9 +174,9 @@ Generate Doxygen HTML documentation:
 
 | Document | Description |
 |----------|-------------|
-| [docs/implementation_status.md](docs/implementation_status.md) | Per-endpoint coverage matrix (implemented/partial/TBD) |
-| [docs/data_types.md](docs/data_types.md) | All C++ types with field-level status (complete/partial/extra) |
-| [docs/DESIGN.md](docs/DESIGN.md) | Architecture, async model, request flow, stream lifecycle |
+| [docs/binapi2/implementation_status.md](docs/binapi2/implementation_status.md) | Per-endpoint coverage matrix (implemented/partial/TBD) |
+| [docs/binapi2/data_types.md](docs/binapi2/data_types.md) | All C++ types with field-level status (complete/partial/extra) |
+| [docs/binapi2/DESIGN.md](docs/binapi2/DESIGN.md) | Architecture, async model, request flow, stream lifecycle |
 
 ### Binance API reference (local)
 

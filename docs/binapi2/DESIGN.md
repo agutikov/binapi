@@ -568,4 +568,4 @@ error --> error_code
 
 **Build:** CMake 3.10+, C++23 compiler, Boost 1.84+.
 
-[implementation_status.md]: /docs/implementation_status.md
+[implementation_status.md]: /docs/binapi2/implementation_status.md

@@ -6,20 +6,13 @@
 
 
 
-
-
-what happen if enum parser gets unknown string?
-if serialization gets unknown enum value?
-
-
-
-write tests for enum_set
+write tests for enum_set template
 
 
 
 
-convert vectors of enums into enum_set in include/binapi2/fapi/types
-where semantically field is a set (not sequence)
+replace vectors of enums with enum_set in include/binapi2/fapi/types
+where semantically field is a set and not sequence
 
 
 
