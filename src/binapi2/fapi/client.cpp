@@ -2,24 +2,14 @@
 //
 // binapi2 USD-M Futures client library.
 
-/// @file Implements the top-level client facade. Construction initializes the
-/// HTTP transport and REST pipeline. WebSocket components are lazy-initialized
-/// on first access.
+/// @file Implements the client facade. Construction initializes HTTP transport
+/// and REST pipeline. WebSocket components are lazy-initialized on first access.
 
 #include <binapi2/fapi/client.hpp>
 
 namespace binapi2::fapi {
 
 client::client(config cfg) :
-    account(pipeline_), convert(pipeline_), market_data(pipeline_), trade(pipeline_), user_data_streams(pipeline_),
-    io_thread_(std::make_unique<detail::io_thread>()),
-    cfg_(std::move(cfg)),
-    http_(cfg_),
-    pipeline_(cfg_, http_)
-{
-}
-
-client::client(config cfg, async_mode_t) :
     account(pipeline_), convert(pipeline_), market_data(pipeline_), trade(pipeline_), user_data_streams(pipeline_),
     cfg_(std::move(cfg)),
     http_(cfg_),
@@ -29,29 +19,9 @@ client::client(config cfg, async_mode_t) :
 
 client::~client() = default;
 
-config&
-client::configuration() noexcept
-{
-    return cfg_;
-}
-
-const config&
-client::configuration() const noexcept
-{
-    return cfg_;
-}
-
-rest::pipeline&
-client::rest() noexcept
-{
-    return pipeline_;
-}
-
-bool
-client::has_io_thread() const noexcept
-{
-    return io_thread_ != nullptr;
-}
+config& client::configuration() noexcept { return cfg_; }
+const config& client::configuration() const noexcept { return cfg_; }
+rest::pipeline& client::rest() noexcept { return pipeline_; }
 
 websocket_api::client&
 client::ws_api()

@@ -664,25 +664,19 @@ json_opts.hpp ──────────────────────
 ## Phase Order and Dependencies
 
 ```
-Phase 0 ─── Rewrite tests to async (safety net)
+Phase 0 ─── Rewrite tests to async              ✅ DONE
   │
-  Phase 1 ─── Extract REST pipeline
+  Phase 1 ─── Extract REST pipeline              ✅ DONE
     │
-    Phase 2 ─── Remove io_thread from transport
+    Phase 2+3+4 ─── Remove sync from all layers  ✅ DONE (combined)
       │
-      ├── Phase 3 ─── Remove sync from ws_api
-      │
-      ├── Phase 4 ─── Remove sync from streams
-      │
-      └── Phase 5 ─── Remove io_thread from client
-            │
-            ├── Phase 6 ─── Rewrite local_order_book
-            │
-            └── Phase 7 ─── Clean up transport constructors
-                  │
-                  Phase 8 ─── Add sync bridging tests
-                  │
-                  Phase 9 ─── Rename and restructure examples
+      Phase 5 ─── Remove io_thread from client    ✅ DONE
+        │
+        Phase 6 ─── Rewrite local_order_book      ✅ DONE
+          │
+          Phase 8 ─── Add sync bridging tests
+          │
+          Phase 9 ─── Rename and restructure examples
 ```
 
 Build and run tests after every phase. Examples may be temporarily disabled (comment out `add_subdirectory` in CMake) during Phases 1-7 since they use sync API that's being removed. Tests (converted in Phase 0) stay green throughout.

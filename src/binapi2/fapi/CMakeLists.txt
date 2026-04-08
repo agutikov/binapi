@@ -54,7 +54,7 @@ set(BINAPI2_FAPI_SOURCES
     transport/ssl_context.cpp
     transport/websocket_client.cpp
     websocket_api/client.cpp
-    # streams/local_order_book.cpp  # TODO: Phase 6 — rewrite as coroutine
+    streams/local_order_book.cpp
     streams/market_streams.cpp
     streams/user_streams.cpp
 )

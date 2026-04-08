@@ -78,7 +78,7 @@ co_main(int, char*[])
     cfg.secret_key = "test-secret-key";
     cfg.ca_cert_file = env_or("SSL_CERT_FILE", "");
 
-    client c(cfg, async_mode);
+    client c(cfg);
 
     // =======================================================================
     // 1. Public market data endpoints (no auth).

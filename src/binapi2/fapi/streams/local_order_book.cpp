@@ -2,198 +2,37 @@
 //
 // binapi2 USD-M Futures client library.
 
-/// @file Implements a locally-maintained order book that stays synchronised
-/// with the exchange via the diff depth WebSocket stream, following the
-/// Binance "How to manage a local order book correctly" algorithm:
-///
-///   1. Open a @depth@100ms WebSocket stream and begin buffering events.
-///   2. Fetch a REST depth snapshot (GET /fapi/v1/depth).
-///   3. Discard buffered events where u < snapshot.lastUpdateId.
-///   4. Verify the first remaining event brackets the snapshot
-///      (U <= lastUpdateId <= u).
-///   5. Apply remaining buffered events, then process live events.
-///   6. On each live event, verify pu == previous u (sequence continuity).
-///      If a gap is detected, re-sync from step 2.
-///   7. Remove price levels with quantity == 0.
-///
-/// All book state is protected by a mutex so snapshot() can be called from
-/// any thread while the read loop runs on the io_context thread.
+/// @file Implements the async local order book synchronization algorithm.
 
 #include <binapi2/fapi/streams/local_order_book.hpp>
 
-#include <binapi2/fapi/client.hpp>
-#include <binapi2/fapi/streams/market_streams.hpp>
-#include <binapi2/fapi/types/subscriptions.hpp>
+#include <binapi2/fapi/detail/json_opts.hpp>
+
+#include <glaze/glaze.hpp>
 
 #include <algorithm>
-#include <mutex>
-#include <utility>
 
 namespace binapi2::fapi::streams {
 
-local_order_book::local_order_book(market_streams& streams, client& rest_client) noexcept :
-    streams_(streams), rest_client_(rest_client)
+local_order_book::local_order_book(market_streams& streams, rest::pipeline& rest)
+    : streams_(streams), rest_(rest)
 {
 }
 
-result<void>
-local_order_book::start(const std::string& symbol, int depth_limit)
-{
-    {
-        std::lock_guard<std::mutex> lock(mutex_);
-        symbol_ = symbol;
-        depth_limit_ = depth_limit;
-        synced_ = false;
-        running_ = true;
-        buffer_.clear();
-        book_ = {};
-        last_u_ = 0;
-    }
-
-    // Step 1: open diff depth stream
-    types::diff_book_depth_subscription sub;
-    sub.symbol = symbol;
-    sub.speed = "100ms";
-    auto connect_result = streams_.connect_diff_book_depth(sub);
-    if (!connect_result) {
-        return connect_result;
-    }
-
-    // Step 2: buffer incoming diff events. On the first event (or after a
-    // sequence gap), fetch a REST snapshot and apply the buffered events to
-    // bring the book up to date. From then on, events are applied directly.
-    auto loop_result = streams_.read_diff_book_depth_loop([this](const types::depth_stream_event_t& event) -> bool {
-        bool need_snapshot = false;
-
-        {
-            std::lock_guard<std::mutex> lock(mutex_);
-            if (!running_) {
-                return false;
-            }
-
-            if (!synced_) {
-                buffer_.push_back(event);
-                // Trigger snapshot on the first buffered event
-                need_snapshot = true;
-            } else {
-                // Step 6: validate pu == previous u
-                if (event.prev_final_update_id != last_u_) {
-                    synced_ = false;
-                    buffer_.clear();
-                    buffer_.push_back(event);
-                    need_snapshot = true;
-                } else {
-                    apply_event(event);
-                    last_u_ = event.final_update_id;
-
-                    if (on_snapshot_) {
-                        on_snapshot_(book_);
-                    }
-                    return true;
-                }
-            }
-        }
-
-        if (need_snapshot) {
-            fetch_snapshot();
-        }
-
-        std::lock_guard<std::mutex> lock(mutex_);
-        return running_;
-    });
-
-    return loop_result;
-}
-
-void
-local_order_book::stop()
-{
-    std::lock_guard<std::mutex> lock(mutex_);
-    running_ = false;
-}
+void local_order_book::stop() { running_ = false; }
 
 order_book_snapshot
 local_order_book::snapshot() const
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard lock(mutex_);
     return book_;
 }
 
 void
-local_order_book::set_snapshot_callback(snapshot_callback callback)
+local_order_book::set_snapshot_callback(snapshot_callback cb)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
-    on_snapshot_ = std::move(callback);
-}
-
-// Fetches the REST depth snapshot and reconciles it with buffered diff events.
-// The mutex is intentionally released during the network call to avoid blocking
-// the WebSocket read loop; it is re-acquired before mutating book state.
-void
-local_order_book::fetch_snapshot()
-{
-    // Step 3: get REST depth snapshot (no lock held during network call)
-    types::order_book_request_t request;
-    {
-        std::lock_guard<std::mutex> lock(mutex_);
-        request.symbol = symbol_;
-        request.limit = depth_limit_;
-    }
-
-    auto snap = rest_client_.run_sync(rest_client_.market_data.async_execute(request));
-    if (!snap) {
-        return;
-    }
-
-    std::lock_guard<std::mutex> lock(mutex_);
-    if (!running_) {
-        return;
-    }
-
-    const auto last_update_id = snap->lastUpdateId;
-
-    // Step 4: drop buffered events where u < lastUpdateId
-    buffer_.erase(std::remove_if(buffer_.begin(),
-                                 buffer_.end(),
-                                 [last_update_id](const types::depth_stream_event_t& ev) { return ev.final_update_id < last_update_id; }),
-                  buffer_.end());
-
-    // Step 5: first event should have U <= lastUpdateId AND u >= lastUpdateId
-    if (buffer_.empty() || buffer_.front().first_update_id > last_update_id || buffer_.front().final_update_id < last_update_id) {
-        // Cannot sync yet - will retry on next event
-        return;
-    }
-
-    // Initialize book from snapshot
-    book_ = {};
-    book_.last_update_id = last_update_id;
-    for (const auto& level : snap->bids) {
-        if (!level.quantity.is_zero()) {
-            book_.bids[level.price] = level.quantity;
-        }
-    }
-    for (const auto& level : snap->asks) {
-        if (!level.quantity.is_zero()) {
-            book_.asks[level.price] = level.quantity;
-        }
-    }
-
-    // Apply buffered events in sequence
-    last_u_ = last_update_id;
-    for (const auto& event : buffer_) {
-        if (event.final_update_id <= last_update_id) {
-            last_u_ = event.final_update_id;
-            continue;
-        }
-        apply_event(event);
-        last_u_ = event.final_update_id;
-    }
-    buffer_.clear();
-    synced_ = true;
-
-    if (on_snapshot_) {
-        on_snapshot_(book_);
-    }
+    std::lock_guard lock(mutex_);
+    on_snapshot_ = std::move(cb);
 }
 
 void
@@ -210,7 +49,6 @@ local_order_book::apply_levels(const std::vector<types::price_level_t>& levels,
                                std::map<types::decimal_t, types::decimal_t, Compare>& side)
 {
     for (const auto& level : levels) {
-        // Step 7: if quantity=0, remove price level
         if (level.quantity.is_zero()) {
             side.erase(level.price);
         } else {
@@ -219,10 +57,117 @@ local_order_book::apply_levels(const std::vector<types::price_level_t>& levels,
     }
 }
 
-// Explicit instantiations for bid (descending) and ask (ascending) sides.
 template void local_order_book::apply_levels(const std::vector<types::price_level_t>&,
                                              std::map<types::decimal_t, types::decimal_t, std::greater<>>&);
 template void local_order_book::apply_levels(const std::vector<types::price_level_t>&,
                                              std::map<types::decimal_t, types::decimal_t, std::less<>>&);
+
+boost::cobalt::task<result<void>>
+local_order_book::async_run(types::symbol_t symbol, int depth_limit)
+{
+    running_ = true;
+
+    // Step 1: connect to diff depth stream
+    std::string symbol_lower = symbol.str();
+    std::ranges::transform(symbol_lower, symbol_lower.begin(), ::tolower);
+    const auto target = streams_.configuration().stream_base_target
+        + "/" + symbol_lower + "@depth@100ms";
+
+    auto conn = co_await streams_.async_connect(target);
+    if (!conn) co_return result<void>::failure(conn.err);
+
+    std::vector<types::depth_stream_event_t> buffer;
+    bool synced = false;
+    std::uint64_t last_u = 0;
+
+    while (running_) {
+        auto msg = co_await streams_.async_read_text();
+        if (!msg) co_return result<void>::failure(msg.err);
+
+        // Parse depth event
+        types::depth_stream_event_t event{};
+        glz::context ctx{};
+        if (glz::read<detail::json_read_opts>(event, *msg, ctx)) {
+            continue;  // skip unparseable frames
+        }
+
+        if (!synced) {
+            buffer.push_back(event);
+
+            // Fetch REST snapshot on first buffered event
+            if (buffer.size() == 1) {
+                types::order_book_request_t req;
+                req.symbol = symbol;
+                req.limit = depth_limit;
+                auto snap = co_await rest_.async_execute(req);
+                if (!snap) continue;  // retry on next event
+
+                const auto snapshot_id = snap->lastUpdateId;
+
+                // Discard events before snapshot
+                std::erase_if(buffer, [snapshot_id](const auto& ev) {
+                    return ev.final_update_id < snapshot_id;
+                });
+
+                // Verify first event brackets snapshot
+                if (buffer.empty()
+                    || buffer.front().first_update_id > snapshot_id
+                    || buffer.front().final_update_id < snapshot_id) {
+                    buffer.clear();
+                    continue;  // retry
+                }
+
+                // Initialize book from snapshot
+                {
+                    std::lock_guard lock(mutex_);
+                    book_ = {};
+                    book_.last_update_id = snapshot_id;
+                    for (const auto& level : snap->bids) {
+                        if (!level.quantity.is_zero())
+                            book_.bids[level.price] = level.quantity;
+                    }
+                    for (const auto& level : snap->asks) {
+                        if (!level.quantity.is_zero())
+                            book_.asks[level.price] = level.quantity;
+                    }
+
+                    // Apply buffered events
+                    last_u = snapshot_id;
+                    for (const auto& ev : buffer) {
+                        if (ev.final_update_id <= snapshot_id) {
+                            last_u = ev.final_update_id;
+                            continue;
+                        }
+                        apply_event(ev);
+                        last_u = ev.final_update_id;
+                    }
+
+                    if (on_snapshot_) on_snapshot_(book_);
+                }
+
+                buffer.clear();
+                synced = true;
+            }
+        } else {
+            // Step 6: validate sequence continuity
+            if (event.prev_final_update_id != last_u) {
+                synced = false;
+                buffer.clear();
+                buffer.push_back(event);
+                continue;
+            }
+
+            {
+                std::lock_guard lock(mutex_);
+                apply_event(event);
+                last_u = event.final_update_id;
+                if (on_snapshot_) on_snapshot_(book_);
+            }
+        }
+    }
+
+    co_await streams_.async_close();
+    co_return result<void>::success();
+}
 
 } // namespace binapi2::fapi::streams
