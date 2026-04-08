@@ -118,8 +118,8 @@ struct symbol_info
     int settlePlan{};
     decimal triggerProtect{};
     std::vector<symbol_filter> filters{};
-    std::vector<std::string> orderTypes{};
-    std::vector<std::string> timeInForce{};
+    std::vector<order_type> orderTypes{};
+    std::vector<time_in_force> timeInForce{};
     decimal liquidationFee{};
     decimal marketTakeBound{};
     std::optional<int> maxMoveOrderLimit{};

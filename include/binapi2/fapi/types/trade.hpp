@@ -43,11 +43,11 @@ struct new_order_request
     std::optional<std::string> closePosition{};
     std::optional<decimal> activationPrice{};
     std::optional<decimal> callbackRate{};
-    std::optional<std::string> workingType{};
+    std::optional<working_type> workingType{};
     std::optional<std::string> priceProtect{};
-    std::optional<std::string> newOrderRespType{};
-    std::optional<std::string> priceMatch{};
-    std::optional<std::string> selfTradePreventionMode{};
+    std::optional<response_type> newOrderRespType{};
+    std::optional<price_match> priceMatch{};
+    std::optional<stp_mode> selfTradePreventionMode{};
     std::optional<timestamp_ms> goodTillDate{};
 };
 
@@ -94,7 +94,7 @@ struct modify_order_request
     decimal price{};
     std::optional<std::uint64_t> orderId{};
     std::optional<std::string> origClientOrderId{};
-    std::optional<std::string> priceMatch{};
+    std::optional<price_match> priceMatch{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Cancel-Order.md
@@ -362,11 +362,11 @@ struct position_margin_history_entry
 {
     std::string symbol{};
     int type{};
-    std::string deltaType{};
+    delta_type deltaType{};
     decimal amount{};
     std::string asset{};
     timestamp_ms time{};
-    std::string positionSide{};
+    position_side positionSide{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/Get-Order-Modify-History.md
@@ -391,17 +391,17 @@ struct new_algo_order_request
     decimal quantity{};
     std::optional<decimal> price{};
     std::optional<decimal> triggerPrice{};
-    std::optional<std::string> workingType{};
+    std::optional<working_type> workingType{};
     algo_type algoType{};
     std::optional<std::string> clientAlgoId{};
-    std::optional<std::string> priceMatch{};
+    std::optional<price_match> priceMatch{};
     std::optional<std::string> closePosition{};
     std::optional<std::string> priceProtect{};
     std::optional<std::string> reduceOnly{};
     std::optional<decimal> activatePrice{};
     std::optional<decimal> callbackRate{};
-    std::optional<std::string> newOrderRespType{};
-    std::optional<std::string> selfTradePreventionMode{};
+    std::optional<response_type> newOrderRespType{};
+    std::optional<stp_mode> selfTradePreventionMode{};
     std::optional<timestamp_ms> goodTillDate{};
 };
 

@@ -150,7 +150,7 @@ struct kline_stream_data
     std::uint64_t open_time{};
     std::uint64_t close_time{};
     std::string symbol{};
-    std::string interval{};
+    kline_interval interval{};
     std::uint64_t first_trade_id{};
     std::uint64_t last_trade_id{};
     decimal open_price{};
@@ -180,7 +180,7 @@ struct continuous_contract_kline_stream_data
 {
     std::uint64_t open_time{};
     std::uint64_t close_time{};
-    std::string interval{};
+    kline_interval interval{};
     std::uint64_t first_update_id{};
     std::uint64_t last_update_id{};
     decimal open_price{};
@@ -202,7 +202,7 @@ struct continuous_contract_kline_stream_event
     std::string event_type{};
     std::uint64_t event_time{};
     std::string pair{};
-    std::string contract_type{};
+    contract_type contractType{};
     continuous_contract_kline_stream_data kline{};
 };
 
@@ -246,10 +246,10 @@ struct contract_info_stream_event
     std::uint64_t event_time{};
     std::string symbol{};
     std::string pair{};
-    std::string contract_type{};
+    contract_type contractType{};
     std::uint64_t delivery_time{};
     std::uint64_t onboard_time{};
-    std::string contract_status{};
+    contract_status contractStatus{};
     std::optional<std::vector<contract_info_bracket>> brackets{};
 };
 
@@ -774,7 +774,7 @@ template<>
 struct glz::meta<binapi2::fapi::types::continuous_contract_kline_stream_event>
 {
     using T = binapi2::fapi::types::continuous_contract_kline_stream_event;
-    static constexpr auto value = object("e", &T::event_type, "E", &T::event_time, "ps", &T::pair, "ct", &T::contract_type, "k", &T::kline);
+    static constexpr auto value = object("e", &T::event_type, "E", &T::event_time, "ps", &T::pair, "ct", &T::contractType, "k", &T::kline);
 };
 
 template<>
@@ -884,13 +884,13 @@ struct glz::meta<binapi2::fapi::types::contract_info_stream_event>
                                          "ps",
                                          &T::pair,
                                          "ct",
-                                         &T::contract_type,
+                                         &T::contractType,
                                          "dt",
                                          &T::delivery_time,
                                          "ot",
                                          &T::onboard_time,
                                          "cs",
-                                         &T::contract_status,
+                                         &T::contractStatus,
                                          "bks",
                                          &T::brackets);
 };

@@ -364,7 +364,7 @@ struct basis_request
 struct basis_entry
 {
     std::string pair{};
-    std::string contractType{};
+    contract_type contractType{};
     decimal basis{};
     decimal basisRate{};
     decimal futuresPrice{};
