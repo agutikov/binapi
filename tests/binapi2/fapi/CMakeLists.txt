@@ -53,3 +53,4 @@ target_compile_definitions(postman_validation_test PRIVATE
 gtest_discover_tests(postman_validation_test DISCOVERY_MODE PRE_TEST)
 
 add_subdirectory(integration/postman_mock)
+add_subdirectory(integration/sync_bridging)
