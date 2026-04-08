@@ -9,6 +9,7 @@
 #pragma once
 
 #include <binapi2/fapi/config.hpp>
+#include <binapi2/fapi/detail/json_opts.hpp>
 #include <binapi2/fapi/query.hpp>
 #include <binapi2/fapi/rest/account.hpp>
 #include <binapi2/fapi/rest/convert.hpp>
@@ -36,17 +37,6 @@
 namespace binapi2::fapi {
 
 namespace detail {
-
-/// JSON parse options:
-///  - error_on_unknown_keys = false: skip unknown keys so that new fields
-///    added by Binance don't break deserialization of existing response types.
-///  - error_on_missing_keys = true: require all non-optional fields to be
-///    present in the JSON, catching silent zero/empty defaults on renamed or
-///    removed fields.
-inline constexpr glz::opts json_read_opts{
-    .error_on_unknown_keys = false,
-    .error_on_missing_keys = true,
-};
 
 /// @brief Decode an HTTP response body into a typed result.
 ///

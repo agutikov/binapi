@@ -13,6 +13,7 @@
 
 #include <binapi2/fapi/websocket_api/client.hpp>
 
+#include <binapi2/fapi/detail/json_opts.hpp>
 #include <binapi2/fapi/signing.hpp>
 #include <binapi2/fapi/time.hpp>
 
@@ -79,7 +80,8 @@ result<types::websocket_api_response_t<Response>>
 decode_rpc_response(const std::string& raw)
 {
     types::websocket_api_response_t<Response> response{};
-    if (auto ec = glz::read_json(response, raw)) {
+    glz::context glz_ctx{};
+    if (auto ec = glz::read<detail::json_read_opts>(response, raw, glz_ctx)) {
         return result<types::websocket_api_response_t<Response>>::failure(
             { error_code::json, 0, 0, glz::format_error(ec, raw), raw });
     }

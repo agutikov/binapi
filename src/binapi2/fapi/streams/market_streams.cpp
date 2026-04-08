@@ -18,6 +18,7 @@
 /// stream protocol to manage multiple subscriptions over a single connection.
 
 #include <binapi2/fapi/streams/market_streams.hpp>
+#include <binapi2/fapi/detail/json_opts.hpp>
 
 #include <boost/asio/post.hpp>
 
@@ -77,7 +78,8 @@ read_stream_loop(transport::websocket_client& transport, Handler handler)
 {
     return transport.run_read_loop([handler = std::move(handler)](const std::string& payload) {
         Event event{};
-        if (glz::read_json(event, payload)) {
+        glz::context ctx{};
+        if (glz::read<fapi::detail::json_read_opts>(event, payload, ctx)) {
             return false;
         }
         return handler(event);
@@ -804,7 +806,8 @@ market_streams::list_subscriptions()
         return result<std::vector<std::string>>::failure(raw.err);
     }
     detail::stream_list_response response{};
-    if (auto ec = glz::read_json(response, *raw)) {
+    glz::context glz_ctx{};
+    if (auto ec = glz::read<fapi::detail::json_read_opts>(response, *raw, glz_ctx)) {
         return result<std::vector<std::string>>::failure(
             { error_code::json, 0, 0, glz::format_error(ec, *raw), *raw });
     }

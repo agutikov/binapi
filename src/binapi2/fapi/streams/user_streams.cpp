@@ -19,6 +19,7 @@
 /// register a handler for.
 
 #include <binapi2/fapi/streams/user_streams.hpp>
+#include <binapi2/fapi/detail/json_opts.hpp>
 
 #include <boost/asio/post.hpp>
 
@@ -63,7 +64,8 @@ user_streams::read_loop(account_update_handler account_handler,
         if (payload.find("\"e\": \"ACCOUNT_UPDATE\"") != std::string::npos ||
             payload.find("\"e\":\"ACCOUNT_UPDATE\"") != std::string::npos) {
             types::account_update_event_t event{};
-            if (glz::read_json(event, payload)) {
+            glz::context glz_ctx{};
+            if (glz::read<fapi::detail::json_read_opts>(event, payload, glz_ctx)) {
                 return false;
             }
             return account_handler(event);
@@ -71,7 +73,8 @@ user_streams::read_loop(account_update_handler account_handler,
         if (payload.find("\"e\": \"ORDER_TRADE_UPDATE\"") != std::string::npos ||
             payload.find("\"e\":\"ORDER_TRADE_UPDATE\"") != std::string::npos) {
             types::order_trade_update_event_t event{};
-            if (glz::read_json(event, payload)) {
+            glz::context glz_ctx{};
+            if (glz::read<fapi::detail::json_read_opts>(event, payload, glz_ctx)) {
                 return false;
             }
             return order_handler(event);
@@ -79,7 +82,8 @@ user_streams::read_loop(account_update_handler account_handler,
         if (margin_handler && (payload.find("\"e\": \"MARGIN_CALL\"") != std::string::npos ||
                                payload.find("\"e\":\"MARGIN_CALL\"") != std::string::npos)) {
             types::margin_call_event_t event{};
-            if (glz::read_json(event, payload)) {
+            glz::context glz_ctx{};
+            if (glz::read<fapi::detail::json_read_opts>(event, payload, glz_ctx)) {
                 return false;
             }
             return margin_handler(event);
@@ -87,7 +91,8 @@ user_streams::read_loop(account_update_handler account_handler,
         if (listen_key_expired && (payload.find("\"e\": \"listenKeyExpired\"") != std::string::npos ||
                                    payload.find("\"e\":\"listenKeyExpired\"") != std::string::npos)) {
             types::listen_key_expired_event_t event{};
-            if (glz::read_json(event, payload)) {
+            glz::context glz_ctx{};
+            if (glz::read<fapi::detail::json_read_opts>(event, payload, glz_ctx)) {
                 return false;
             }
             return listen_key_expired(event);
@@ -145,7 +150,8 @@ try_dispatch(const std::string& payload, const char* event_name, const Handler& 
         return false;
     }
     Event event{};
-    if (glz::read_json(event, payload)) {
+    glz::context glz_ctx{};
+    if (glz::read<fapi::detail::json_read_opts>(event, payload, glz_ctx)) {
         return false;
     }
     handler(event);

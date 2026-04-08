@@ -7,7 +7,12 @@
 How we suppose to work with streams?
 Callbacks?
 Income data buffers, queues?
+    - Queue size limits?
+    - overflow policy (old, new, fail)?
+    - access to queued data?
 How to start/stop (subscribe/unsubscribe)?
+Multiple parallel streams?
+Throughput benchmarks.
 
 
 --------------------------------------------------------------------------------
@@ -15,6 +20,8 @@ How to start/stop (subscribe/unsubscribe)?
 
 
 connection pooling
+What is it in our implementation context?
+Do we need it and in what cases?
 
 
 --------------------------------------------------------------------------------
