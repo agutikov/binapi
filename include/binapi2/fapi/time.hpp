@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <binapi2/fapi/types/timestamp.hpp>
+#include <binapi2/fapi/types/detail/timestamp.hpp>
 
 #include <chrono>
 #include <cstdint>

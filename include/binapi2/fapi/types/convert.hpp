@@ -5,7 +5,7 @@
 #pragma once
 
 #include <binapi2/fapi/types/detail/decimal.hpp>
-#include <binapi2/fapi/types/timestamp.hpp>
+#include <binapi2/fapi/types/detail/timestamp.hpp>
 
 #include <glaze/glaze.hpp>
 #include <cstdint>
