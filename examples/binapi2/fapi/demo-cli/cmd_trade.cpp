@@ -24,11 +24,11 @@ make_order_request(const args_t& args)
     req.side = parse_enum<binapi2::fapi::types::order_side_t>(args[1]);
     req.type = parse_enum<binapi2::fapi::types::order_type_t>(args[2]);
 
-    if (auto v = find_flag(args, "--quantity"); !v.empty())
+    if (auto v = find_flag(args, "--quantity", "-q"); !v.empty())
         req.quantity = binapi2::fapi::types::decimal_t(std::string(v));
-    if (auto v = find_flag(args, "--price"); !v.empty())
+    if (auto v = find_flag(args, "--price", "-p"); !v.empty())
         req.price = binapi2::fapi::types::decimal_t(std::string(v));
-    if (auto v = find_flag(args, "--tif"); !v.empty())
+    if (auto v = find_flag(args, "--tif", "-t"); !v.empty())
         req.timeInForce = parse_enum<binapi2::fapi::types::time_in_force_t>(v);
 
     spdlog::debug("order request: symbol={} side={} type={}",
@@ -39,7 +39,7 @@ make_order_request(const args_t& args)
 int cmd_new_order(const args_t& args)
 {
     if (args.size() < 3) {
-        std::cerr << "usage: new-order <symbol> <side> <type> [--quantity Q] [--price P] [--tif TIF]\n";
+        std::cerr << "usage: new-order <symbol> <side> <type> [-q|--quantity Q] [-p|--price P] [-t|--tif TIF]\n";
         return 1;
     }
 
@@ -55,7 +55,7 @@ int cmd_new_order(const args_t& args)
 int cmd_test_order(const args_t& args)
 {
     if (args.size() < 3) {
-        std::cerr << "usage: test-order <symbol> <side> <type> [--quantity Q] [--price P] [--tif TIF]\n";
+        std::cerr << "usage: test-order <symbol> <side> <type> [-q|--quantity Q] [-p|--price P] [-t|--tif TIF]\n";
         return 1;
     }
 

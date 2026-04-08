@@ -11,14 +11,14 @@
 //   -v                      Print full JSON responses
 //   -vv                     Print JSON + transport log (method, target, status, body)
 //   -vvv                    Print JSON + full HTTP with headers
-//   --live                  Use production endpoints (default: testnet)
-//   --testnet               Use testnet endpoints (default)
-//   --save-request <file>   Save request to file
-//   --save-response <file>  Save response body to file
-//   --log-file <file>       Log to file
-//   --file-loglevel <lvl>   File log level (trace/debug/info/warn/error/off)
-//   --stdout-loglevel <lvl> Stdout log level (trace/debug/info/warn/error/off)
-//   --help                  Print this help message
+//   -l, --live                  Use production endpoints (default: testnet)
+//       --testnet               Use testnet endpoints (default)
+//   -S, --save-request <file>   Save request to file
+//   -R, --save-response <file>  Save response body to file
+//   -L, --log-file <file>       Log to file
+//   -F, --file-loglevel <lvl>   File log level (trace/debug/info/warn/error/off)
+//   -O, --stdout-loglevel <lvl> Stdout log level (trace/debug/info/warn/error/off)
+//   -h, --help                  Print this help message
 
 #include "common.hpp"
 #include "cmd_market_data.hpp"
@@ -69,7 +69,7 @@ constexpr command_entry commands[] = {
     { "income-history",          demo::cmd_income_history,          "Income history [symbol] [limit] (auth)" },
 
     // Trade (auth, sync)
-    { "new-order",               demo::cmd_new_order,               "Place order <sym> <side> <type> [--quantity Q] [--price P] [--tif T]" },
+    { "new-order",               demo::cmd_new_order,               "Place order <sym> <side> <type> [-q Q] [-p P] [-t TIF]" },
     { "test-order",              demo::cmd_test_order,              "Test order (validates, does not place)" },
     { "cancel-order",            demo::cmd_cancel_order,            "Cancel order <symbol> <orderId>" },
     { "query-order",             demo::cmd_query_order,             "Query order <symbol> <orderId>" },
@@ -78,7 +78,7 @@ constexpr command_entry commands[] = {
     // WebSocket API (auth, sync)
     { "ws-logon",                demo::cmd_ws_logon,                "WebSocket API session logon (auth)" },
     { "ws-account-status",       demo::cmd_ws_account_status,       "Account status via WS API (auth)" },
-    { "ws-order-place",          demo::cmd_ws_order_place,          "Place order via WS API <sym> <side> <type> ..." },
+    { "ws-order-place",          demo::cmd_ws_order_place,          "Place order via WS API <sym> <side> <type> [-q Q] [-p P]" },
     { "ws-order-cancel",         demo::cmd_ws_order_cancel,         "Cancel order via WS API <symbol> <orderId>" },
 
     // Market data streams
@@ -107,17 +107,17 @@ void print_usage(const char* prog)
 {
     std::cout << "Usage: " << prog << " [flags] <command> [args...]\n\n"
               << "Flags:\n"
-              << "  -v                      Print full JSON responses\n"
-              << "  -vv                     Print JSON + transport log\n"
-              << "  -vvv                    Print JSON + full HTTP with headers\n"
-              << "  --live                  Use production endpoints (default: testnet)\n"
-              << "  --testnet               Use testnet endpoints (default)\n"
-              << "  --save-request <file>   Save request to file\n"
-              << "  --save-response <file>  Save response body to file\n"
-              << "  --log-file <file>       Log to file\n"
-              << "  --file-loglevel <lvl>   File log level (trace/debug/info/warn/error/off)\n"
-              << "  --stdout-loglevel <lvl> Stdout log level (trace/debug/info/warn/error/off)\n"
-              << "  --help                  Print this help\n\n"
+              << "  -v                          Print full JSON responses\n"
+              << "  -vv                         Print JSON + transport log\n"
+              << "  -vvv                        Print JSON + full HTTP with headers\n"
+              << "  -l, --live                  Use production endpoints (default: testnet)\n"
+              << "      --testnet               Use testnet endpoints (default)\n"
+              << "  -S, --save-request <file>   Save request to file\n"
+              << "  -R, --save-response <file>  Save response body to file\n"
+              << "  -L, --log-file <file>       Log to file\n"
+              << "  -F, --file-loglevel <lvl>   File log level (trace/debug/info/warn/error/off)\n"
+              << "  -O, --stdout-loglevel <lvl> Stdout log level (trace/debug/info/warn/error/off)\n"
+              << "  -h, --help                  Print this help\n\n"
               << "Commands:\n";
     for (const auto& cmd : commands)
         std::cout << "  " << cmd.name << std::string(25 - std::min(cmd.name.size(), std::size_t{24}), ' ')
@@ -139,13 +139,13 @@ int main(int argc, char* argv[])
         if (arg == "-vvv")      { demo::verbosity = 3; }
         else if (arg == "-vv")  { demo::verbosity = 2; }
         else if (arg == "-v")   { demo::verbosity = 1; }
-        else if (arg == "--live" || arg == "--prod") { demo::use_testnet = false; }
+        else if (arg == "--live" || arg == "--prod" || arg == "-l") { demo::use_testnet = false; }
         else if (arg == "--testnet") { demo::use_testnet = true; }
-        else if (arg == "--save-request"   && i + 1 < argc) { demo::save_request_file  = argv[++i]; }
-        else if (arg == "--save-response"  && i + 1 < argc) { demo::save_response_file = argv[++i]; }
-        else if (arg == "--log-file"       && i + 1 < argc) { demo::log_file           = argv[++i]; }
-        else if (arg == "--file-loglevel"  && i + 1 < argc) { demo::file_loglevel      = argv[++i]; }
-        else if (arg == "--stdout-loglevel" && i + 1 < argc) { demo::stdout_loglevel   = argv[++i]; }
+        else if ((arg == "--save-request"  || arg == "-S") && i + 1 < argc) { demo::save_request_file  = argv[++i]; }
+        else if ((arg == "--save-response" || arg == "-R") && i + 1 < argc) { demo::save_response_file = argv[++i]; }
+        else if ((arg == "--log-file"      || arg == "-L") && i + 1 < argc) { demo::log_file           = argv[++i]; }
+        else if ((arg == "--file-loglevel" || arg == "-F") && i + 1 < argc) { demo::file_loglevel      = argv[++i]; }
+        else if ((arg == "--stdout-loglevel" || arg == "-O") && i + 1 < argc) { demo::stdout_loglevel  = argv[++i]; }
         else if (arg == "--help" || arg == "-h") { print_usage(prog); return 0; }
         else { cmd_args.emplace_back(arg); }
     }

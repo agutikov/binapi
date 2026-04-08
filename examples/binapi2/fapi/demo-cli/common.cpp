@@ -119,10 +119,10 @@ void print_error(const binapi2::fapi::error& err)
         spdlog::debug("  payload: {}", err.payload);
 }
 
-std::string_view find_flag(const args_t& args, std::string_view key)
+std::string_view find_flag(const args_t& args, std::string_view key, std::string_view short_key)
 {
     for (std::size_t i = 0; i + 1 < args.size(); ++i) {
-        if (args[i] == key)
+        if (args[i] == key || (!short_key.empty() && args[i] == short_key))
             return args[i + 1];
     }
     return {};

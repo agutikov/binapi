@@ -103,7 +103,7 @@ E parse_enum(std::string_view s)
     throw std::invalid_argument("unknown " + std::string(typeid(E).name()) + ": " + std::string(s));
 }
 
-// Find a --key value pair in args, return value or empty.
-std::string_view find_flag(const args_t& args, std::string_view key);
+// Find a --key (or -k short) value pair in args, return value or empty.
+std::string_view find_flag(const args_t& args, std::string_view key, std::string_view short_key = {});
 
 } // namespace demo

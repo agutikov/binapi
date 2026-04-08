@@ -2,12 +2,9 @@
 
 
 
-examples/binapi2/fapi/demo-cli - add short cmdline options flags
 
 
-
-
-scripts that run all binapi2-fapi-demo-cli requests with testnet
+write scripts that run all binapi2-fapi-demo-cli requests with testnet
     - REST
     - WebSocket API
     - WebSocket streams
