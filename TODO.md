@@ -3,10 +3,18 @@
 
 
 
-review and update documents in docs/binapi2 according to current state, remove plans
 
 
---------------------------------------------------------------------------------
+streams:
+    - subscription is a generator?
+    - so async_subscribe should return a generator/stream instance
+    - generator can yeld messages, or
+        - template method can yeld parsed data types
+        - but type was provided while subscription and can't be "stored" in the instance
+        - so return data type will be stored in the generator/stream type, like type of std::vector
+
+
+---
 
 
 
@@ -20,6 +28,12 @@ streams.md: what's missing
         - balancing???
     - auto-reconnect
     - keepalive
+
+
+---
+
+
+review and update documents in docs/binapi2 according to current state, remove plans
 
 
 --------------------------------------------------------------------------------

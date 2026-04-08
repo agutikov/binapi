@@ -914,7 +914,7 @@ Phase 0 ─── Rewrite tests to async              ✅ DONE
         │
         Phase 6 ─── Rewrite local_order_book      ✅ DONE
           │
-          Phase 7 ─── Unified traits across all APIs
+          Phase 7 ─── Unified traits across all APIs    🔧 IN PROGRESS
           │
           Phase 8 ─── Add sync bridging tests
           │

@@ -30,11 +30,13 @@ namespace binapi2::fapi::types {
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Check-Server-Time.md
 struct ping_request_t
-{};
+{
+};
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Check-Server-Time.md
 struct server_time_request_t
-{};
+{
+};
 
 // ---------------------------------------------------------------------------
 // Exchange information
@@ -513,7 +515,8 @@ struct rpi_depth_request_t
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Trading-Schedule.md
 struct trading_schedule_request_t
-{};
+{
+};
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Trading-Schedule.md
 struct trading_session_entry_t
@@ -534,6 +537,83 @@ struct trading_schedule_response_t
 {
     timestamp_ms_t updateTime{};
     std::map<std::string, market_schedule_t> marketSchedules{};
+};
+
+// --- Parameterless market data request types ---
+
+struct book_tickers_request_t { };
+struct price_tickers_request_t { };
+struct price_tickers_v2_request_t { };
+struct ticker_24hrs_request_t { };
+struct mark_prices_request_t { };
+struct funding_rate_info_request_t { };
+
+// --- Distinct kline request types per endpoint ---
+
+struct klines_request_t {
+    symbol_t symbol{};
+    kline_interval_t interval{ kline_interval_t::m1 };
+    std::optional<timestamp_ms_t> startTime{};
+    std::optional<timestamp_ms_t> endTime{};
+    std::optional<int> limit{};
+};
+
+struct mark_price_klines_request_t {
+    symbol_t symbol{};
+    kline_interval_t interval{ kline_interval_t::m1 };
+    std::optional<timestamp_ms_t> startTime{};
+    std::optional<timestamp_ms_t> endTime{};
+    std::optional<int> limit{};
+};
+
+struct premium_index_klines_request_t {
+    symbol_t symbol{};
+    kline_interval_t interval{ kline_interval_t::m1 };
+    std::optional<timestamp_ms_t> startTime{};
+    std::optional<timestamp_ms_t> endTime{};
+    std::optional<int> limit{};
+};
+
+// --- Distinct futures data request types per endpoint ---
+
+struct open_interest_statistics_request_t {
+    symbol_t symbol{};
+    kline_interval_t period{ kline_interval_t::d1 };
+    std::optional<int> limit{};
+    std::optional<timestamp_ms_t> startTime{};
+    std::optional<timestamp_ms_t> endTime{};
+};
+
+struct top_long_short_account_ratio_request_t {
+    symbol_t symbol{};
+    kline_interval_t period{ kline_interval_t::d1 };
+    std::optional<int> limit{};
+    std::optional<timestamp_ms_t> startTime{};
+    std::optional<timestamp_ms_t> endTime{};
+};
+
+struct top_trader_long_short_ratio_request_t {
+    symbol_t symbol{};
+    kline_interval_t period{ kline_interval_t::d1 };
+    std::optional<int> limit{};
+    std::optional<timestamp_ms_t> startTime{};
+    std::optional<timestamp_ms_t> endTime{};
+};
+
+struct long_short_ratio_request_t {
+    symbol_t symbol{};
+    kline_interval_t period{ kline_interval_t::d1 };
+    std::optional<int> limit{};
+    std::optional<timestamp_ms_t> startTime{};
+    std::optional<timestamp_ms_t> endTime{};
+};
+
+struct taker_buy_sell_volume_request_t {
+    symbol_t symbol{};
+    kline_interval_t period{ kline_interval_t::d1 };
+    std::optional<int> limit{};
+    std::optional<timestamp_ms_t> startTime{};
+    std::optional<timestamp_ms_t> endTime{};
 };
 
 } // namespace binapi2::fapi::types

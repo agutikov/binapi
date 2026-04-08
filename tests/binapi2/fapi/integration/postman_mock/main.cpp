@@ -144,8 +144,8 @@ co_main(int, char*[])
 
     // Klines
     {
-        auto r = co_await c.market_data.async_klines(
-            types::kline_request_t{.symbol = "BTCUSDT", .interval = types::kline_interval_t::h1});
+        auto r = co_await c.market_data.async_execute(
+            types::klines_request_t{.symbol = "BTCUSDT", .interval = types::kline_interval_t::h1});
         if (check("klines", r)) {
             if (r->empty()) {
                 std::cerr << "FAIL klines: empty array\n";
@@ -215,7 +215,7 @@ co_main(int, char*[])
 
     // Account information
     {
-        auto r = co_await c.account.async_account_information();
+        auto r = co_await c.account.async_execute(types::account_information_request_t{});
         if (check("account_information", r)) {
             if (r->assets.empty()) {
                 std::cerr << "FAIL account_information_t: assets empty\n";
@@ -227,7 +227,7 @@ co_main(int, char*[])
 
     // Balances
     {
-        auto r = co_await c.account.async_balances();
+        auto r = co_await c.account.async_execute(types::balances_request_t{});
         if (check("balances", r)) {
             if (r->empty()) {
                 std::cerr << "FAIL balances: empty array\n";
@@ -288,7 +288,7 @@ co_main(int, char*[])
 
     // Start listen key
     {
-        auto r = co_await c.user_data_streams.async_start();
+        auto r = co_await c.user_data_streams.async_execute(types::start_listen_key_request_t{});
         if (check("start_listen_key", r)) {
             if (r->listenKey.empty()) {
                 std::cerr << "FAIL start_listen_key: listenKey empty\n";
@@ -300,13 +300,13 @@ co_main(int, char*[])
 
     // Keepalive listen key
     {
-        auto r = co_await c.user_data_streams.async_keepalive();
+        auto r = co_await c.user_data_streams.async_execute(types::keepalive_listen_key_request_t{});
         check("keepalive_listen_key", r);
     }
 
     // Close listen key
     {
-        auto r = co_await c.user_data_streams.async_close();
+        auto r = co_await c.user_data_streams.async_execute(types::close_listen_key_request_t{});
         check("close_listen_key", r);
     }
 

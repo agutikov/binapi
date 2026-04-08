@@ -462,7 +462,37 @@ struct all_algo_orders_request_t
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/TradFi-Perps.md
 struct tradfi_perps_request_t
-{};
+{
+};
+
+// --- Parameterless trade request types ---
+
+struct open_algo_orders_request_t { };
+struct cancel_all_algo_orders_request_t { };
+
+// --- Test order: distinct type sharing new_order fields ---
+
+struct test_order_request_t {
+    symbol_t symbol{};
+    order_side_t side{ order_side_t::buy };
+    order_type_t type{ order_type_t::limit };
+    std::optional<time_in_force_t> timeInForce{};
+    decimal_t quantity{};
+    std::optional<decimal_t> price{};
+    std::optional<std::string> newClientOrderId{};
+    std::optional<decimal_t> stopPrice{};
+    std::optional<decimal_t> activationPrice{};
+    std::optional<decimal_t> callbackRate{};
+    std::optional<working_type_t> workingType{};
+    std::optional<bool> reduceOnly{};
+    std::optional<position_side_t> positionSide{};
+    std::optional<bool> closePosition{};
+    std::optional<response_type_t> newOrderRespType{};
+    std::optional<bool> priceProtect{};
+    std::optional<price_match_t> priceMatch{};
+    std::optional<stp_mode_t> selfTradePreventionMode{};
+    std::optional<timestamp_ms_t> goodTillDate{};
+};
 
 } // namespace binapi2::fapi::types
 

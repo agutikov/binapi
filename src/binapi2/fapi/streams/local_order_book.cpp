@@ -87,7 +87,7 @@ local_order_book::async_run(types::symbol_t symbol, int depth_limit)
         // Parse depth event
         types::depth_stream_event_t event{};
         glz::context ctx{};
-        if (glz::read<detail::json_read_opts>(event, *msg, ctx)) {
+        if (glz::read<fapi::detail::json_read_opts>(event, *msg, ctx)) {
             continue;  // skip unparseable frames
         }
 

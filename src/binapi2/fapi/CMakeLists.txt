@@ -43,12 +43,8 @@ set(BINAPI2_FAPI_HEADERS
 set(BINAPI2_FAPI_SOURCES
     decimal.cpp
     client.cpp
-    rest/account.cpp
-    rest/convert.cpp
-    rest/market_data.cpp
     rest/pipeline.cpp
     rest/trade.cpp
-    rest/user_data_streams.cpp
     signing.cpp
     transport/http_client.cpp
     transport/ssl_context.cpp

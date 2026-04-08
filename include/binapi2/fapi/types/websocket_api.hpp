@@ -175,6 +175,15 @@ struct websocket_api_response_t
     std::optional<websocket_api_error_t> error{};
 };
 
+// --- Parameterless WS API request types ---
+
+struct ws_account_status_request_t { };
+struct ws_account_status_v2_request_t { };
+struct ws_account_balance_request_t { };
+struct ws_user_data_stream_start_request_t { };
+struct ws_user_data_stream_ping_request_t { };
+struct ws_user_data_stream_stop_request_t { };
+
 } // namespace binapi2::fapi::types
 
 template<>

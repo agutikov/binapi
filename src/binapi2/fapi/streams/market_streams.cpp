@@ -118,7 +118,7 @@ market_streams::async_list_subscriptions()
 
     stream_list_response response{};
     glz::context ctx{};
-    if (glz::read<detail::json_read_opts>(response, *rd, ctx)) {
+    if (glz::read<fapi::detail::json_read_opts>(response, *rd, ctx)) {
         co_return result<std::vector<std::string>>::failure({ error_code::json, 0, 0, "failed to parse list response", *rd });
     }
 

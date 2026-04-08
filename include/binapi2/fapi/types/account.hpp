@@ -351,6 +351,31 @@ struct pm_account_info_response_t
     decimal_t maxWithdrawAmount{};
 };
 
+// --- Request types for parameterless account endpoints ---
+
+struct account_information_request_t { };
+struct balances_request_t { };
+struct account_config_request_t { };
+struct get_multi_assets_mode_request_t { };
+struct get_position_mode_request_t { };
+struct rate_limit_order_request_t { };
+struct get_bnb_burn_request_t { };
+
+// --- Request types for download endpoints (distinct per endpoint) ---
+
+struct download_id_transaction_request_t { timestamp_ms_t startTime{}; timestamp_ms_t endTime{}; };
+struct download_link_transaction_request_t { std::string downloadId{}; };
+struct download_id_order_request_t { timestamp_ms_t startTime{}; timestamp_ms_t endTime{}; };
+struct download_link_order_request_t { std::string downloadId{}; };
+struct download_id_trade_request_t { timestamp_ms_t startTime{}; timestamp_ms_t endTime{}; };
+struct download_link_trade_request_t { std::string downloadId{}; };
+
+// --- Request types for user data stream endpoints ---
+
+struct start_listen_key_request_t { };
+struct keepalive_listen_key_request_t { };
+struct close_listen_key_request_t { };
+
 } // namespace binapi2::fapi::types
 
 template<>
