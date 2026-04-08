@@ -26,14 +26,17 @@ run_stream() {
     echo -n "  $name (${TIMEOUT}s) ... "
     (timeout -s KILL "$TIMEOUT" \
         "$CLI" \
+            -r "$dir/stream.jsonl" \
             -L "$dir/log.txt" \
             -F trace \
             -v \
             "$@" \
         > "$dir/stdout.txt" 2>/dev/null || true) 2>/dev/null
-    local lines
-    lines=$(wc -l < "$dir/stdout.txt")
-    echo "$lines lines"
+    local frames=0
+    if [ -f "$dir/stream.jsonl" ]; then
+        frames=$(wc -l < "$dir/stream.jsonl")
+    fi
+    echo "$frames frames"
 }
 
 echo "=== WebSocket streams (public) ==="

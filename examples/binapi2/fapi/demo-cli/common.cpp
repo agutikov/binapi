@@ -77,7 +77,13 @@ binapi2::fapi::config make_config()
         }
     }
 
+    static constexpr std::size_t max_log_body = 512;
+
     cfg.logger = [](const binapi2::fapi::transport_log_entry& e) {
+        auto truncate = [](const std::string& s) -> std::string {
+            if (s.size() <= max_log_body) return s;
+            return s.substr(0, max_log_body) + "... (" + std::to_string(s.size()) + " bytes)";
+        };
         using binapi2::fapi::transport_direction;
         if (e.protocol == "CONN") {
             // Connection lifecycle — trace only (-vvv).
@@ -89,8 +95,8 @@ binapi2::fapi::config make_config()
             }
         } else if (e.direction == transport_direction::sent) {
             spdlog::debug(">> {} {} {}", e.protocol, e.method, e.target);
-            if (!e.body.empty()) spdlog::debug(">> body: {}", e.body);
-            if (!e.raw.empty()) spdlog::trace(">> raw:\n{}", e.raw);
+            if (!e.body.empty()) spdlog::debug(">> body: {}", truncate(e.body));
+            if (!e.raw.empty()) spdlog::trace(">> raw:\n{}", truncate(e.raw));
 
             if (!save_request_file.empty()) {
                 std::ofstream f(save_request_file);
@@ -101,8 +107,8 @@ binapi2::fapi::config make_config()
             }
         } else {
             spdlog::debug("<< {} {} {} status={}", e.protocol, e.method, e.target, e.status);
-            if (!e.body.empty()) spdlog::debug("<< body: {}", e.body);
-            if (!e.raw.empty()) spdlog::trace("<< raw:\n{}", e.raw);
+            if (!e.body.empty()) spdlog::debug("<< body: {}", truncate(e.body));
+            if (!e.raw.empty()) spdlog::trace("<< raw:\n{}", truncate(e.raw));
 
             if (!save_response_file.empty()) {
                 std::ofstream f(save_response_file);

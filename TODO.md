@@ -3,43 +3,6 @@
 
 
 
-write document about
-
-
-Mapping between:
-- threads
-- io contexts
-- io objects (sockets, files)
-- cobalt contexts (Does it exist?)
-- binapi2 components
-    - client
-    - service
-    - stream
-    - handler
-    - ... what else?
-
-Is it possible to have?
-- one io context in multiple threads
-- one thread with multiple io contexts
-- in binapi2
-
-
-connection pooling
-What is it in our implementation context?
-Do we need it and in what cases?
-
-
-thread pool
-Is it possible to use with cobalt?
-How?
-What benefits?
-
-
-
-
---------------------------------------------------------------------------------
-
-
 
 Write a documents about
 
