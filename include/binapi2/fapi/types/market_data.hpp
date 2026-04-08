@@ -195,7 +195,7 @@ struct book_ticker_t
     decimal_t askPrice{};
     decimal_t askQty{};
     timestamp_ms_t time{};
-    std::uint64_t lastUpdateId{};
+    std::optional<std::uint64_t> lastUpdateId{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Symbol-Price-Ticker.md

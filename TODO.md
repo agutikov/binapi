@@ -2,17 +2,19 @@
 
 
 
+examples/binapi2/fapi/demo-cli - add short cmdline options flags
 
 
 
 
-
-scripts that runs all binapi2-fapi-demo-cli requests with testnet
+scripts that run all binapi2-fapi-demo-cli requests with testnet
     - REST
     - WebSocket API
     - WebSocket streams
 save requests, responses and logs into separate file for every command
 
+
+run and collect real responses for postman mock
 
 
 binapi2 connect to testnet

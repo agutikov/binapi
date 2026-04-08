@@ -35,101 +35,93 @@ std::string fixture(const char* name)
 using namespace binapi2::fapi::types;
 
 // ---------------------------------------------------------------------------
+// Helper: parse fixture through the production decode_response path.
+// ---------------------------------------------------------------------------
+
+template<typename T>
+binapi2::fapi::result<T> decode_fixture(const char* name) {
+    binapi2::fapi::transport::http_response resp;
+    resp.status = 200;
+    resp.body = read_file(fixture(name));
+    return binapi2::fapi::detail::decode_response<T>(resp);
+}
+
+// ---------------------------------------------------------------------------
 // Single-object responses
 // ---------------------------------------------------------------------------
 
 TEST(ResponseParse, Ping)
 {
-    auto json = read_file(fixture("ping.json"));
-    empty_response_t r;
-    auto ec = glz::read_json(r, json);
-    EXPECT_FALSE(ec) << glz::format_error(ec, json);
+    auto r = decode_fixture<empty_response_t>("ping.json");
+    EXPECT_TRUE(r) << r.err.message;
 }
 
 TEST(ResponseParse, ServerTime)
 {
-    auto json = read_file(fixture("server_time.json"));
-    server_time_response_t r;
-    auto ec = glz::read_json(r, json);
-    EXPECT_FALSE(ec) << glz::format_error(ec, json);
-    EXPECT_NE(r.serverTime, timestamp_ms_t{});
+    auto r = decode_fixture<server_time_response_t>("server_time.json");
+    ASSERT_TRUE(r) << r.err.message;
+    EXPECT_NE(r->serverTime, timestamp_ms_t{});
 }
 
 TEST(ResponseParse, ExchangeInfo)
 {
-    auto json = read_file(fixture("exchange_info.json"));
-    exchange_info_response_t r;
-    auto ec = glz::read_json(r, json);
-    EXPECT_FALSE(ec) << glz::format_error(ec, json);
-    EXPECT_EQ(r.timezone, "UTC");
-    EXPECT_EQ(r.futuresType, futures_type_t::u_margined);
-    EXPECT_FALSE(r.rateLimits.empty());
-    EXPECT_FALSE(r.symbols.empty());
+    auto r = decode_fixture<exchange_info_response_t>("exchange_info.json");
+    ASSERT_TRUE(r) << r.err.message;
+    EXPECT_EQ(r->timezone, "UTC");
+    EXPECT_EQ(r->futuresType, futures_type_t::u_margined);
+    EXPECT_FALSE(r->rateLimits.empty());
+    EXPECT_FALSE(r->symbols.empty());
 }
 
 TEST(ResponseParse, OrderBook)
 {
-    auto json = read_file(fixture("depth.json"));
-    order_book_response_t r;
-    auto ec = glz::read_json(r, json);
-    EXPECT_FALSE(ec) << glz::format_error(ec, json);
-    EXPECT_GT(r.lastUpdateId, 0ULL);
-    EXPECT_FALSE(r.bids.empty());
-    EXPECT_FALSE(r.asks.empty());
+    auto r = decode_fixture<order_book_response_t>("depth.json");
+    ASSERT_TRUE(r) << r.err.message;
+    EXPECT_GT(r->lastUpdateId, 0ULL);
+    EXPECT_FALSE(r->bids.empty());
+    EXPECT_FALSE(r->asks.empty());
 }
 
 TEST(ResponseParse, ListenKey)
 {
-    auto json = read_file(fixture("listen_key.json"));
-    listen_key_response_t r;
-    auto ec = glz::read_json(r, json);
-    EXPECT_FALSE(ec) << glz::format_error(ec, json);
-    EXPECT_FALSE(r.listenKey.empty());
+    auto r = decode_fixture<listen_key_response_t>("listen_key.json");
+    ASSERT_TRUE(r) << r.err.message;
+    EXPECT_FALSE(r->listenKey.empty());
 }
 
 TEST(ResponseParse, Order)
 {
-    auto json = read_file(fixture("order.json"));
-    order_response_t r;
-    auto ec = glz::read_json(r, json);
-    EXPECT_FALSE(ec) << glz::format_error(ec, json);
-    EXPECT_GT(r.orderId, 0ULL);
-    EXPECT_FALSE(r.symbol.empty());
+    auto r = decode_fixture<order_response_t>("order.json");
+    ASSERT_TRUE(r) << r.err.message;
+    EXPECT_GT(r->orderId, 0ULL);
+    EXPECT_FALSE(r->symbol.empty());
 }
 
 TEST(ResponseParse, BookTicker)
 {
-    auto json = read_file(fixture("ticker_book.json"));
-    book_ticker_t r;
-    auto ec = glz::read_json(r, json);
-    EXPECT_FALSE(ec) << glz::format_error(ec, json);
-    EXPECT_EQ(r.symbol, "BTCUSDT");
+    auto r = decode_fixture<book_ticker_t>("ticker_book.json");
+    ASSERT_TRUE(r) << r.err.message;
+    EXPECT_EQ(r->symbol, "BTCUSDT");
 }
 
 TEST(ResponseParse, PriceTicker)
 {
-    auto json = read_file(fixture("ticker_price.json"));
-    price_ticker_t r;
-    auto ec = glz::read_json(r, json);
-    EXPECT_FALSE(ec) << glz::format_error(ec, json);
-    EXPECT_EQ(r.symbol, "BTCUSDT");
+    auto r = decode_fixture<price_ticker_t>("ticker_price.json");
+    ASSERT_TRUE(r) << r.err.message;
+    EXPECT_EQ(r->symbol, "BTCUSDT");
 }
 
 TEST(ResponseParse, PremiumIndex)
 {
-    auto json = read_file(fixture("premium_index.json"));
-    mark_price_t r;
-    auto ec = glz::read_json(r, json);
-    EXPECT_FALSE(ec) << glz::format_error(ec, json);
-    EXPECT_EQ(r.symbol, "BTCUSDT");
+    auto r = decode_fixture<mark_price_t>("premium_index.json");
+    ASSERT_TRUE(r) << r.err.message;
+    EXPECT_EQ(r->symbol, "BTCUSDT");
 }
 
 TEST(ResponseParse, Account)
 {
-    auto json = read_file(fixture("account.json"));
-    account_information_t r;
-    auto ec = glz::read_json(r, json);
-    EXPECT_FALSE(ec) << glz::format_error(ec, json);
+    auto r = decode_fixture<account_information_t>("account.json");
+    EXPECT_TRUE(r) << r.err.message;
 }
 
 // ---------------------------------------------------------------------------
@@ -138,59 +130,47 @@ TEST(ResponseParse, Account)
 
 TEST(ResponseParse, Balances)
 {
-    auto json = read_file(fixture("balance.json"));
-    std::vector<futures_account_balance_t> r;
-    auto ec = glz::read_json(r, json);
-    EXPECT_FALSE(ec) << glz::format_error(ec, json);
-    EXPECT_FALSE(r.empty());
-    EXPECT_FALSE(r[0].asset.empty());
+    auto r = decode_fixture<std::vector<futures_account_balance_t>>("balance.json");
+    ASSERT_TRUE(r) << r.err.message;
+    EXPECT_FALSE(r->empty());
+    EXPECT_FALSE((*r)[0].asset.empty());
 }
 
 TEST(ResponseParse, Trades)
 {
-    auto json = read_file(fixture("trades.json"));
-    std::vector<recent_trade_t> r;
-    auto ec = glz::read_json(r, json);
-    EXPECT_FALSE(ec) << glz::format_error(ec, json);
-    EXPECT_FALSE(r.empty());
+    auto r = decode_fixture<std::vector<recent_trade_t>>("trades.json");
+    ASSERT_TRUE(r) << r.err.message;
+    EXPECT_FALSE(r->empty());
 }
 
 TEST(ResponseParse, FundingRate)
 {
-    auto json = read_file(fixture("funding_rate.json"));
-    std::vector<funding_rate_history_entry_t> r;
-    auto ec = glz::read_json(r, json);
-    EXPECT_FALSE(ec) << glz::format_error(ec, json);
-    EXPECT_FALSE(r.empty());
-    EXPECT_EQ(r[0].symbol, "BTCUSDT");
+    auto r = decode_fixture<std::vector<funding_rate_history_entry_t>>("funding_rate.json");
+    ASSERT_TRUE(r) << r.err.message;
+    EXPECT_FALSE(r->empty());
+    EXPECT_EQ((*r)[0].symbol, "BTCUSDT");
 }
 
 TEST(ResponseParse, Klines)
 {
-    auto json = read_file(fixture("klines.json"));
-    std::vector<kline_t> r;
-    auto ec = glz::read_json(r, json);
-    EXPECT_FALSE(ec) << glz::format_error(ec, json);
-    EXPECT_FALSE(r.empty());
+    auto r = decode_fixture<std::vector<kline_t>>("klines.json");
+    ASSERT_TRUE(r) << r.err.message;
+    EXPECT_FALSE(r->empty());
 }
 
 TEST(ResponseParse, OpenOrders)
 {
-    auto json = read_file(fixture("open_orders.json"));
-    std::vector<order_response_t> r;
-    auto ec = glz::read_json(r, json);
-    EXPECT_FALSE(ec) << glz::format_error(ec, json);
-    EXPECT_FALSE(r.empty());
+    auto r = decode_fixture<std::vector<order_response_t>>("open_orders.json");
+    ASSERT_TRUE(r) << r.err.message;
+    EXPECT_FALSE(r->empty());
 }
 
 TEST(ResponseParse, PositionRisk)
 {
-    auto json = read_file(fixture("position_risk.json"));
-    std::vector<position_risk_t> r;
-    auto ec = glz::read_json(r, json);
-    EXPECT_FALSE(ec) << glz::format_error(ec, json);
-    EXPECT_FALSE(r.empty());
-    EXPECT_EQ(r[0].symbol, "BTCUSDT");
+    auto r = decode_fixture<std::vector<position_risk_t>>("position_risk.json");
+    ASSERT_TRUE(r) << r.err.message;
+    EXPECT_FALSE(r->empty());
+    EXPECT_EQ((*r)[0].symbol, "BTCUSDT");
 }
 
 // ---------------------------------------------------------------------------

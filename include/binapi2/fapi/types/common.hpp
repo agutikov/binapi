@@ -117,7 +117,7 @@ struct symbol_info_t
     int quotePrecision{};
     std::string underlyingType{};
     std::vector<std::string> underlyingSubType{};
-    int settlePlan{};
+    std::optional<int> settlePlan{};
     decimal_t triggerProtect{};
     std::vector<symbol_filter_t> filters{};
     enum_set_t<order_type_t> orderTypes{};
