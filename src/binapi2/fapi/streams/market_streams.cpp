@@ -99,14 +99,14 @@ market_streams::market_streams(config cfg) :
 }
 
 result<void>
-market_streams::connect_aggregate_trade(const aggregate_trade_subscription& subscription)
+market_streams::connect_aggregate_trade(const types::aggregate_trade_subscription& subscription)
 {
     const auto target = cfg_.stream_base_target + "/" + subscription.symbol + "@aggTrade";
     return transport_.connect(cfg_.stream_host, cfg_.stream_port, target);
 }
 
 void
-market_streams::connect_aggregate_trade(const aggregate_trade_subscription& subscription, void_callback callback)
+market_streams::connect_aggregate_trade(const types::aggregate_trade_subscription& subscription, void_callback callback)
 {
     boost::asio::post(*io_context_, [this, subscription, callback = std::move(callback)]() mutable {
         callback(connect_aggregate_trade(subscription));
@@ -114,7 +114,7 @@ market_streams::connect_aggregate_trade(const aggregate_trade_subscription& subs
 }
 
 result<void>
-market_streams::connect_mark_price(const mark_price_subscription& subscription)
+market_streams::connect_mark_price(const types::mark_price_subscription& subscription)
 {
     const auto suffix = subscription.every_1s ? "@markPrice@1s" : "@markPrice";
     const auto target = cfg_.stream_base_target + "/" + subscription.symbol + suffix;
@@ -122,7 +122,7 @@ market_streams::connect_mark_price(const mark_price_subscription& subscription)
 }
 
 void
-market_streams::connect_mark_price(const mark_price_subscription& subscription, void_callback callback)
+market_streams::connect_mark_price(const types::mark_price_subscription& subscription, void_callback callback)
 {
     boost::asio::post(*io_context_, [this, subscription, callback = std::move(callback)]() mutable {
         callback(connect_mark_price(subscription));
@@ -130,14 +130,14 @@ market_streams::connect_mark_price(const mark_price_subscription& subscription, 
 }
 
 result<void>
-market_streams::connect_book_ticker(const book_ticker_subscription& subscription)
+market_streams::connect_book_ticker(const types::book_ticker_subscription& subscription)
 {
     const auto target = cfg_.stream_base_target + "/" + subscription.symbol + "@bookTicker";
     return transport_.connect(cfg_.stream_host, cfg_.stream_port, target);
 }
 
 void
-market_streams::connect_book_ticker(const book_ticker_subscription& subscription, void_callback callback)
+market_streams::connect_book_ticker(const types::book_ticker_subscription& subscription, void_callback callback)
 {
     boost::asio::post(*io_context_, [this, subscription, callback = std::move(callback)]() mutable {
         callback(connect_book_ticker(subscription));
@@ -145,14 +145,14 @@ market_streams::connect_book_ticker(const book_ticker_subscription& subscription
 }
 
 result<void>
-market_streams::connect_diff_book_depth(const diff_book_depth_subscription& subscription)
+market_streams::connect_diff_book_depth(const types::diff_book_depth_subscription& subscription)
 {
     const auto target = cfg_.stream_base_target + "/" + subscription.symbol + "@depth@" + subscription.speed;
     return transport_.connect(cfg_.stream_host, cfg_.stream_port, target);
 }
 
 void
-market_streams::connect_diff_book_depth(const diff_book_depth_subscription& subscription, void_callback callback)
+market_streams::connect_diff_book_depth(const types::diff_book_depth_subscription& subscription, void_callback callback)
 {
     boost::asio::post(*io_context_, [this, subscription, callback = std::move(callback)]() mutable {
         callback(connect_diff_book_depth(subscription));
@@ -160,14 +160,14 @@ market_streams::connect_diff_book_depth(const diff_book_depth_subscription& subs
 }
 
 result<void>
-market_streams::connect_mini_ticker(const mini_ticker_subscription& subscription)
+market_streams::connect_mini_ticker(const types::mini_ticker_subscription& subscription)
 {
     const auto target = cfg_.stream_base_target + "/" + subscription.symbol + "@miniTicker";
     return transport_.connect(cfg_.stream_host, cfg_.stream_port, target);
 }
 
 void
-market_streams::connect_mini_ticker(const mini_ticker_subscription& subscription, void_callback callback)
+market_streams::connect_mini_ticker(const types::mini_ticker_subscription& subscription, void_callback callback)
 {
     boost::asio::post(*io_context_, [this, subscription, callback = std::move(callback)]() mutable {
         callback(connect_mini_ticker(subscription));
@@ -175,14 +175,14 @@ market_streams::connect_mini_ticker(const mini_ticker_subscription& subscription
 }
 
 result<void>
-market_streams::connect_all_market_mini_tickers(const all_market_mini_ticker_subscription&)
+market_streams::connect_all_market_mini_tickers(const types::all_market_mini_ticker_subscription&)
 {
     const auto target = cfg_.stream_base_target + "/!miniTicker@arr";
     return transport_.connect(cfg_.stream_host, cfg_.stream_port, target);
 }
 
 void
-market_streams::connect_all_market_mini_tickers(const all_market_mini_ticker_subscription& subscription, void_callback callback)
+market_streams::connect_all_market_mini_tickers(const types::all_market_mini_ticker_subscription& subscription, void_callback callback)
 {
     boost::asio::post(*io_context_, [this, subscription, callback = std::move(callback)]() mutable {
         callback(connect_all_market_mini_tickers(subscription));
@@ -190,14 +190,14 @@ market_streams::connect_all_market_mini_tickers(const all_market_mini_ticker_sub
 }
 
 result<void>
-market_streams::connect_ticker(const ticker_subscription& subscription)
+market_streams::connect_ticker(const types::ticker_subscription& subscription)
 {
     const auto target = cfg_.stream_base_target + "/" + subscription.symbol + "@ticker";
     return transport_.connect(cfg_.stream_host, cfg_.stream_port, target);
 }
 
 void
-market_streams::connect_ticker(const ticker_subscription& subscription, void_callback callback)
+market_streams::connect_ticker(const types::ticker_subscription& subscription, void_callback callback)
 {
     boost::asio::post(*io_context_, [this, subscription, callback = std::move(callback)]() mutable {
         callback(connect_ticker(subscription));
@@ -205,14 +205,14 @@ market_streams::connect_ticker(const ticker_subscription& subscription, void_cal
 }
 
 result<void>
-market_streams::connect_all_market_tickers(const all_market_ticker_subscription&)
+market_streams::connect_all_market_tickers(const types::all_market_ticker_subscription&)
 {
     const auto target = cfg_.stream_base_target + "/!ticker@arr";
     return transport_.connect(cfg_.stream_host, cfg_.stream_port, target);
 }
 
 void
-market_streams::connect_all_market_tickers(const all_market_ticker_subscription& subscription, void_callback callback)
+market_streams::connect_all_market_tickers(const types::all_market_ticker_subscription& subscription, void_callback callback)
 {
     boost::asio::post(*io_context_, [this, subscription, callback = std::move(callback)]() mutable {
         callback(connect_all_market_tickers(subscription));
@@ -220,14 +220,14 @@ market_streams::connect_all_market_tickers(const all_market_ticker_subscription&
 }
 
 result<void>
-market_streams::connect_all_book_tickers(const all_book_ticker_subscription&)
+market_streams::connect_all_book_tickers(const types::all_book_ticker_subscription&)
 {
     const auto target = cfg_.stream_base_target + "/!bookTicker";
     return transport_.connect(cfg_.stream_host, cfg_.stream_port, target);
 }
 
 void
-market_streams::connect_all_book_tickers(const all_book_ticker_subscription& subscription, void_callback callback)
+market_streams::connect_all_book_tickers(const types::all_book_ticker_subscription& subscription, void_callback callback)
 {
     boost::asio::post(*io_context_, [this, subscription, callback = std::move(callback)]() mutable {
         callback(connect_all_book_tickers(subscription));
@@ -235,7 +235,7 @@ market_streams::connect_all_book_tickers(const all_book_ticker_subscription& sub
 }
 
 result<void>
-market_streams::connect_liquidation_order(const liquidation_order_subscription& subscription)
+market_streams::connect_liquidation_order(const types::liquidation_order_subscription& subscription)
 {
     if (subscription.symbol.empty()) {
         return invalid_subscription("liquidation order stream requires a symbol");
@@ -245,7 +245,7 @@ market_streams::connect_liquidation_order(const liquidation_order_subscription& 
 }
 
 void
-market_streams::connect_liquidation_order(const liquidation_order_subscription& subscription, void_callback callback)
+market_streams::connect_liquidation_order(const types::liquidation_order_subscription& subscription, void_callback callback)
 {
     boost::asio::post(*io_context_, [this, subscription, callback = std::move(callback)]() mutable {
         callback(connect_liquidation_order(subscription));
@@ -253,14 +253,14 @@ market_streams::connect_liquidation_order(const liquidation_order_subscription& 
 }
 
 result<void>
-market_streams::connect_all_market_liquidation_orders(const all_market_liquidation_order_subscription&)
+market_streams::connect_all_market_liquidation_orders(const types::all_market_liquidation_order_subscription&)
 {
     const auto target = cfg_.stream_base_target + "/!forceOrder@arr";
     return transport_.connect(cfg_.stream_host, cfg_.stream_port, target);
 }
 
 void
-market_streams::connect_all_market_liquidation_orders(const all_market_liquidation_order_subscription& subscription,
+market_streams::connect_all_market_liquidation_orders(const types::all_market_liquidation_order_subscription& subscription,
                                                       void_callback callback)
 {
     boost::asio::post(*io_context_, [this, subscription, callback = std::move(callback)]() mutable {
@@ -269,7 +269,7 @@ market_streams::connect_all_market_liquidation_orders(const all_market_liquidati
 }
 
 result<void>
-market_streams::connect_partial_book_depth(const partial_book_depth_subscription& subscription)
+market_streams::connect_partial_book_depth(const types::partial_book_depth_subscription& subscription)
 {
     if (subscription.symbol.empty()) {
         return invalid_subscription("partial book depth stream requires a symbol");
@@ -287,7 +287,7 @@ market_streams::connect_partial_book_depth(const partial_book_depth_subscription
 }
 
 void
-market_streams::connect_partial_book_depth(const partial_book_depth_subscription& subscription, void_callback callback)
+market_streams::connect_partial_book_depth(const types::partial_book_depth_subscription& subscription, void_callback callback)
 {
     boost::asio::post(*io_context_, [this, subscription, callback = std::move(callback)]() mutable {
         callback(connect_partial_book_depth(subscription));
@@ -295,7 +295,7 @@ market_streams::connect_partial_book_depth(const partial_book_depth_subscription
 }
 
 result<void>
-market_streams::connect_kline(const kline_subscription& subscription)
+market_streams::connect_kline(const types::kline_subscription& subscription)
 {
     const auto target =
         cfg_.stream_base_target + "/" + subscription.symbol + "@kline_" + types::to_string(subscription.interval);
@@ -303,7 +303,7 @@ market_streams::connect_kline(const kline_subscription& subscription)
 }
 
 void
-market_streams::connect_kline(const kline_subscription& subscription, void_callback callback)
+market_streams::connect_kline(const types::kline_subscription& subscription, void_callback callback)
 {
     boost::asio::post(*io_context_, [this, subscription, callback = std::move(callback)]() mutable {
         callback(connect_kline(subscription));
@@ -311,18 +311,18 @@ market_streams::connect_kline(const kline_subscription& subscription, void_callb
 }
 
 result<void>
-market_streams::connect_continuous_contract_kline(const continuous_contract_kline_subscription& subscription)
+market_streams::connect_continuous_contract_kline(const types::continuous_contract_kline_subscription& subscription)
 {
     if (subscription.pair.empty()) {
         return invalid_subscription("continuous contract kline_t stream requires a pair");
     }
-    const auto target = cfg_.stream_base_target + "/" + subscription.pair + "_" + types::to_string(subscription.contract_type_t)
+    const auto target = cfg_.stream_base_target + "/" + subscription.pair + "_" + types::to_string(subscription.contract_type)
         + "@continuousKline_" + types::to_string(subscription.interval);
     return transport_.connect(cfg_.stream_host, cfg_.stream_port, target);
 }
 
 void
-market_streams::connect_continuous_contract_kline(const continuous_contract_kline_subscription& subscription,
+market_streams::connect_continuous_contract_kline(const types::continuous_contract_kline_subscription& subscription,
                                                   void_callback callback)
 {
     boost::asio::post(*io_context_, [this, subscription, callback = std::move(callback)]() mutable {
@@ -527,7 +527,7 @@ market_streams::read_continuous_contract_kline_loop(continuous_contract_kline_ha
 }
 
 result<void>
-market_streams::connect_all_market_mark_price(const all_market_mark_price_subscription& subscription)
+market_streams::connect_all_market_mark_price(const types::all_market_mark_price_subscription& subscription)
 {
     const auto suffix = subscription.every_1s ? "/!markPrice@arr@1s" : "/!markPrice@arr";
     const auto target = cfg_.stream_base_target + suffix;
@@ -535,7 +535,7 @@ market_streams::connect_all_market_mark_price(const all_market_mark_price_subscr
 }
 
 void
-market_streams::connect_all_market_mark_price(const all_market_mark_price_subscription& subscription, void_callback callback)
+market_streams::connect_all_market_mark_price(const types::all_market_mark_price_subscription& subscription, void_callback callback)
 {
     boost::asio::post(*io_context_, [this, subscription, callback = std::move(callback)]() mutable {
         callback(connect_all_market_mark_price(subscription));
@@ -543,7 +543,7 @@ market_streams::connect_all_market_mark_price(const all_market_mark_price_subscr
 }
 
 result<void>
-market_streams::connect_composite_index(const composite_index_subscription& subscription)
+market_streams::connect_composite_index(const types::composite_index_subscription& subscription)
 {
     if (subscription.symbol.empty()) {
         return invalid_subscription("composite index stream requires a symbol");
@@ -553,7 +553,7 @@ market_streams::connect_composite_index(const composite_index_subscription& subs
 }
 
 void
-market_streams::connect_composite_index(const composite_index_subscription& subscription, void_callback callback)
+market_streams::connect_composite_index(const types::composite_index_subscription& subscription, void_callback callback)
 {
     boost::asio::post(*io_context_, [this, subscription, callback = std::move(callback)]() mutable {
         callback(connect_composite_index(subscription));
@@ -561,14 +561,14 @@ market_streams::connect_composite_index(const composite_index_subscription& subs
 }
 
 result<void>
-market_streams::connect_contract_info(const contract_info_subscription&)
+market_streams::connect_contract_info(const types::contract_info_subscription&)
 {
     const auto target = cfg_.stream_base_target + "/!contractInfo";
     return transport_.connect(cfg_.stream_host, cfg_.stream_port, target);
 }
 
 void
-market_streams::connect_contract_info(const contract_info_subscription& subscription, void_callback callback)
+market_streams::connect_contract_info(const types::contract_info_subscription& subscription, void_callback callback)
 {
     boost::asio::post(*io_context_, [this, subscription, callback = std::move(callback)]() mutable {
         callback(connect_contract_info(subscription));
@@ -576,7 +576,7 @@ market_streams::connect_contract_info(const contract_info_subscription& subscrip
 }
 
 result<void>
-market_streams::connect_asset_index(const asset_index_subscription& subscription)
+market_streams::connect_asset_index(const types::asset_index_subscription& subscription)
 {
     if (subscription.symbol.empty()) {
         return invalid_subscription("asset index stream requires a symbol");
@@ -586,7 +586,7 @@ market_streams::connect_asset_index(const asset_index_subscription& subscription
 }
 
 void
-market_streams::connect_asset_index(const asset_index_subscription& subscription, void_callback callback)
+market_streams::connect_asset_index(const types::asset_index_subscription& subscription, void_callback callback)
 {
     boost::asio::post(*io_context_, [this, subscription, callback = std::move(callback)]() mutable {
         callback(connect_asset_index(subscription));
@@ -594,14 +594,14 @@ market_streams::connect_asset_index(const asset_index_subscription& subscription
 }
 
 result<void>
-market_streams::connect_all_asset_index(const all_asset_index_subscription&)
+market_streams::connect_all_asset_index(const types::all_asset_index_subscription&)
 {
     const auto target = cfg_.stream_base_target + "/!assetIndex@arr";
     return transport_.connect(cfg_.stream_host, cfg_.stream_port, target);
 }
 
 void
-market_streams::connect_all_asset_index(const all_asset_index_subscription& subscription, void_callback callback)
+market_streams::connect_all_asset_index(const types::all_asset_index_subscription& subscription, void_callback callback)
 {
     boost::asio::post(*io_context_, [this, subscription, callback = std::move(callback)]() mutable {
         callback(connect_all_asset_index(subscription));
@@ -609,14 +609,14 @@ market_streams::connect_all_asset_index(const all_asset_index_subscription& subs
 }
 
 result<void>
-market_streams::connect_trading_session(const trading_session_subscription&)
+market_streams::connect_trading_session(const types::trading_session_subscription&)
 {
     const auto target = cfg_.stream_base_target + "/tradingSession";
     return transport_.connect(cfg_.stream_host, cfg_.stream_port, target);
 }
 
 void
-market_streams::connect_trading_session(const trading_session_subscription& subscription, void_callback callback)
+market_streams::connect_trading_session(const types::trading_session_subscription& subscription, void_callback callback)
 {
     boost::asio::post(*io_context_, [this, subscription, callback = std::move(callback)]() mutable {
         callback(connect_trading_session(subscription));
@@ -624,7 +624,7 @@ market_streams::connect_trading_session(const trading_session_subscription& subs
 }
 
 result<void>
-market_streams::connect_rpi_diff_book_depth(const rpi_diff_book_depth_subscription& subscription)
+market_streams::connect_rpi_diff_book_depth(const types::rpi_diff_book_depth_subscription& subscription)
 {
     if (subscription.symbol.empty()) {
         return invalid_subscription("RPI diff book depth stream requires a symbol");
@@ -634,7 +634,7 @@ market_streams::connect_rpi_diff_book_depth(const rpi_diff_book_depth_subscripti
 }
 
 void
-market_streams::connect_rpi_diff_book_depth(const rpi_diff_book_depth_subscription& subscription, void_callback callback)
+market_streams::connect_rpi_diff_book_depth(const types::rpi_diff_book_depth_subscription& subscription, void_callback callback)
 {
     boost::asio::post(*io_context_, [this, subscription, callback = std::move(callback)]() mutable {
         callback(connect_rpi_diff_book_depth(subscription));

@@ -12,6 +12,7 @@
 
 #include <binapi2/fapi/types/detail/decimal.hpp>
 #include <binapi2/fapi/types/detail/enum_set.hpp>
+#include <binapi2/fapi/types/detail/pair.hpp>
 #include <binapi2/fapi/types/detail/symbol.hpp>
 #include <binapi2/fapi/types/enums.hpp>
 #include <binapi2/fapi/types/detail/timestamp.hpp>
@@ -101,7 +102,7 @@ struct symbol_filter_t
 struct symbol_info_t
 {
     symbol_t symbol{};
-    std::string pair{};
+    pair_t pair{};
     contract_type_t contractType{};
     timestamp_ms_t deliveryDate{};
     timestamp_ms_t onboardDate{};

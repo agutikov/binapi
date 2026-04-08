@@ -124,7 +124,7 @@ int cmd_stream_depth(const args_t& args)
     binapi2::fapi::detail::io_thread io;
     binapi2::fapi::streams::market_streams streams{ io, make_config() };
 
-    binapi2::fapi::streams::partial_book_depth_subscription sub;
+    binapi2::fapi::types::partial_book_depth_subscription sub;
     sub.symbol = args[0];
     if (args.size() > 1) sub.levels = std::stoi(args[1]);
 

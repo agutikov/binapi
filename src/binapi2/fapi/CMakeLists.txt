@@ -16,7 +16,6 @@ set(BINAPI2_FAPI_HEADERS
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/rest/trade.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/rest/user_data_streams.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/streams/market_streams.hpp
-    ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/streams/subscriptions.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/streams/local_order_book.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/streams/user_streams.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/transport/http_client.hpp
@@ -25,6 +24,9 @@ set(BINAPI2_FAPI_HEADERS
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/transport/websocket_client.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/types/detail/decimal.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/types/detail/enum_set.hpp
+    ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/types/detail/pair.hpp
+    ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/types/detail/symbol.hpp
+    ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/types/subscriptions.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/types/common.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/types/account.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/types/convert.hpp

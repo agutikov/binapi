@@ -137,7 +137,7 @@ struct kline_request_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Continuous-Contract-Kline-Candlestick-Data.md
 struct continuous_kline_request_t
 {
-    std::string pair{};
+    pair_t pair{};
     contract_type_t contractType{ contract_type_t::perpetual };
     kline_interval_t interval{ kline_interval_t::m1 };
     std::optional<timestamp_ms_t> startTime{};
@@ -148,7 +148,7 @@ struct continuous_kline_request_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Index-Price-Kline-Candlestick-Data.md
 struct index_price_kline_request_t
 {
-    std::string pair{};
+    pair_t pair{};
     kline_interval_t interval{ kline_interval_t::m1 };
     std::optional<timestamp_ms_t> startTime{};
     std::optional<timestamp_ms_t> endTime{};
@@ -352,7 +352,7 @@ struct taker_buy_sell_volume_entry_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Basis.md
 struct basis_request_t
 {
-    std::string pair{};
+    pair_t pair{};
     contract_type_t contractType{ contract_type_t::perpetual };
     futures_data_period_t period{ futures_data_period_t::m5 };
     std::optional<int> limit{};
@@ -363,7 +363,7 @@ struct basis_request_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Basis.md
 struct basis_entry_t
 {
-    std::string pair{};
+    pair_t pair{};
     contract_type_t contractType{};
     decimal_t basis{};
     decimal_t basisRate{};
@@ -386,7 +386,7 @@ struct price_ticker_v2_request_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Delivery-Price.md
 struct delivery_price_request_t
 {
-    std::string pair{};
+    pair_t pair{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Delivery-Price.md

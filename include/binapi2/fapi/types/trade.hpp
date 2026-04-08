@@ -62,7 +62,7 @@ struct order_response_t
     std::uint64_t orderId{};
     decimal_t avgPrice{};
     decimal_t origQty{};
-    std::optional<std::string> pair{};
+    std::optional<pair_t> pair{};
     decimal_t price{};
     bool reduceOnly{};
     order_side_t side{};

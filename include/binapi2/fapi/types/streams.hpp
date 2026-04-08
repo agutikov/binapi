@@ -201,7 +201,7 @@ struct continuous_contract_kline_stream_event_t
 {
     std::string event_type{};
     std::uint64_t event_time{};
-    std::string pair{};
+    pair_t pair{};
     contract_type_t contractType{};
     continuous_contract_kline_stream_data_t kline_t{};
 };
@@ -245,7 +245,7 @@ struct contract_info_stream_event_t
     std::string event_type{};
     std::uint64_t event_time{};
     symbol_t symbol{};
-    std::string pair{};
+    pair_t pair{};
     contract_type_t contractType{};
     std::uint64_t delivery_time{};
     std::uint64_t onboard_time{};

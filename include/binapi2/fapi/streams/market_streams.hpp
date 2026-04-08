@@ -9,7 +9,7 @@
 
 #include <binapi2/fapi/config.hpp>
 #include <binapi2/fapi/result.hpp>
-#include <binapi2/fapi/streams/subscriptions.hpp>
+#include <binapi2/fapi/types/subscriptions.hpp>
 #include <binapi2/fapi/transport/websocket_client.hpp>
 #include <binapi2/fapi/types/streams.hpp>
 
@@ -71,110 +71,110 @@ public:
     /// @brief Connect to the aggregate trade stream for a symbol.
     /// @param subscription Subscription parameters (symbol).
     /// @return A result indicating success or connection error.
-    [[nodiscard]] result<void> connect_aggregate_trade(const aggregate_trade_subscription& subscription);
+    [[nodiscard]] result<void> connect_aggregate_trade(const types::aggregate_trade_subscription& subscription);
     /// @brief Async overload with completion callback.
-    void connect_aggregate_trade(const aggregate_trade_subscription& subscription, void_callback callback);
+    void connect_aggregate_trade(const types::aggregate_trade_subscription& subscription, void_callback callback);
 
     // -- Mark price stream --
 
     /// @brief Connect to the mark price stream for a symbol.
     /// @param subscription Subscription parameters (symbol, update frequency).
-    [[nodiscard]] result<void> connect_mark_price(const mark_price_subscription& subscription);
+    [[nodiscard]] result<void> connect_mark_price(const types::mark_price_subscription& subscription);
     /// @brief Async overload with completion callback.
-    void connect_mark_price(const mark_price_subscription& subscription, void_callback callback);
+    void connect_mark_price(const types::mark_price_subscription& subscription, void_callback callback);
 
     // -- Book ticker stream --
 
     /// @brief Connect to the individual symbol book ticker stream.
     /// @param subscription Subscription parameters (symbol).
-    [[nodiscard]] result<void> connect_book_ticker(const book_ticker_subscription& subscription);
+    [[nodiscard]] result<void> connect_book_ticker(const types::book_ticker_subscription& subscription);
     /// @brief Async overload with completion callback.
-    void connect_book_ticker(const book_ticker_subscription& subscription, void_callback callback);
+    void connect_book_ticker(const types::book_ticker_subscription& subscription, void_callback callback);
 
     // -- Diff book depth stream --
 
     /// @brief Connect to the diff book depth stream for a symbol.
     /// @param subscription Subscription parameters (symbol, update speed).
-    [[nodiscard]] result<void> connect_diff_book_depth(const diff_book_depth_subscription& subscription);
+    [[nodiscard]] result<void> connect_diff_book_depth(const types::diff_book_depth_subscription& subscription);
     /// @brief Async overload with completion callback.
-    void connect_diff_book_depth(const diff_book_depth_subscription& subscription, void_callback callback);
+    void connect_diff_book_depth(const types::diff_book_depth_subscription& subscription, void_callback callback);
 
     // -- Mini ticker stream --
 
     /// @brief Connect to the mini ticker stream for a symbol.
     /// @param subscription Subscription parameters (symbol).
-    [[nodiscard]] result<void> connect_mini_ticker(const mini_ticker_subscription& subscription);
+    [[nodiscard]] result<void> connect_mini_ticker(const types::mini_ticker_subscription& subscription);
     /// @brief Async overload with completion callback.
-    void connect_mini_ticker(const mini_ticker_subscription& subscription, void_callback callback);
+    void connect_mini_ticker(const types::mini_ticker_subscription& subscription, void_callback callback);
 
     // -- All market mini tickers --
 
     /// @brief Connect to the all-market mini ticker stream.
     /// @param subscription Subscription parameters (default-constructed for all markets).
-    [[nodiscard]] result<void> connect_all_market_mini_tickers(const all_market_mini_ticker_subscription& subscription = {});
+    [[nodiscard]] result<void> connect_all_market_mini_tickers(const types::all_market_mini_ticker_subscription& subscription = {});
     /// @brief Async overload with completion callback.
-    void connect_all_market_mini_tickers(const all_market_mini_ticker_subscription& subscription, void_callback callback);
+    void connect_all_market_mini_tickers(const types::all_market_mini_ticker_subscription& subscription, void_callback callback);
 
     // -- Ticker stream --
 
     /// @brief Connect to the 24hr ticker stream for a symbol.
     /// @param subscription Subscription parameters (symbol).
-    [[nodiscard]] result<void> connect_ticker(const ticker_subscription& subscription);
+    [[nodiscard]] result<void> connect_ticker(const types::ticker_subscription& subscription);
     /// @brief Async overload with completion callback.
-    void connect_ticker(const ticker_subscription& subscription, void_callback callback);
+    void connect_ticker(const types::ticker_subscription& subscription, void_callback callback);
 
     // -- All market tickers --
 
     /// @brief Connect to the all-market 24hr ticker stream.
-    [[nodiscard]] result<void> connect_all_market_tickers(const all_market_ticker_subscription& subscription = {});
+    [[nodiscard]] result<void> connect_all_market_tickers(const types::all_market_ticker_subscription& subscription = {});
     /// @brief Async overload with completion callback.
-    void connect_all_market_tickers(const all_market_ticker_subscription& subscription, void_callback callback);
+    void connect_all_market_tickers(const types::all_market_ticker_subscription& subscription, void_callback callback);
 
     // -- All book tickers --
 
     /// @brief Connect to the all-market book ticker stream.
-    [[nodiscard]] result<void> connect_all_book_tickers(const all_book_ticker_subscription& subscription = {});
+    [[nodiscard]] result<void> connect_all_book_tickers(const types::all_book_ticker_subscription& subscription = {});
     /// @brief Async overload with completion callback.
-    void connect_all_book_tickers(const all_book_ticker_subscription& subscription, void_callback callback);
+    void connect_all_book_tickers(const types::all_book_ticker_subscription& subscription, void_callback callback);
 
     // -- Liquidation orders --
 
     /// @brief Connect to the liquidation order stream for a symbol.
     /// @param subscription Subscription parameters (symbol).
-    [[nodiscard]] result<void> connect_liquidation_order(const liquidation_order_subscription& subscription);
+    [[nodiscard]] result<void> connect_liquidation_order(const types::liquidation_order_subscription& subscription);
     /// @brief Async overload with completion callback.
-    void connect_liquidation_order(const liquidation_order_subscription& subscription, void_callback callback);
+    void connect_liquidation_order(const types::liquidation_order_subscription& subscription, void_callback callback);
 
     // -- All market liquidation orders --
 
     /// @brief Connect to the all-market liquidation order stream.
-    [[nodiscard]] result<void> connect_all_market_liquidation_orders(const all_market_liquidation_order_subscription& subscription = {});
+    [[nodiscard]] result<void> connect_all_market_liquidation_orders(const types::all_market_liquidation_order_subscription& subscription = {});
     /// @brief Async overload with completion callback.
-    void connect_all_market_liquidation_orders(const all_market_liquidation_order_subscription& subscription, void_callback callback);
+    void connect_all_market_liquidation_orders(const types::all_market_liquidation_order_subscription& subscription, void_callback callback);
 
     // -- Partial book depth --
 
     /// @brief Connect to the partial book depth stream for a symbol.
     /// @param subscription Subscription parameters (symbol, depth levels, speed).
-    [[nodiscard]] result<void> connect_partial_book_depth(const partial_book_depth_subscription& subscription);
+    [[nodiscard]] result<void> connect_partial_book_depth(const types::partial_book_depth_subscription& subscription);
     /// @brief Async overload with completion callback.
-    void connect_partial_book_depth(const partial_book_depth_subscription& subscription, void_callback callback);
+    void connect_partial_book_depth(const types::partial_book_depth_subscription& subscription, void_callback callback);
 
     // -- Kline stream --
 
     /// @brief Connect to the kline_t/candlestick stream for a symbol.
     /// @param subscription Subscription parameters (symbol, interval).
-    [[nodiscard]] result<void> connect_kline(const kline_subscription& subscription);
+    [[nodiscard]] result<void> connect_kline(const types::kline_subscription& subscription);
     /// @brief Async overload with completion callback.
-    void connect_kline(const kline_subscription& subscription, void_callback callback);
+    void connect_kline(const types::kline_subscription& subscription, void_callback callback);
 
     // -- Continuous contract kline_t --
 
     /// @brief Connect to the continuous contract kline_t stream.
     /// @param subscription Subscription parameters (pair, contract type, interval).
-    [[nodiscard]] result<void> connect_continuous_contract_kline(const continuous_contract_kline_subscription& subscription);
+    [[nodiscard]] result<void> connect_continuous_contract_kline(const types::continuous_contract_kline_subscription& subscription);
     /// @brief Async overload with completion callback.
-    void connect_continuous_contract_kline(const continuous_contract_kline_subscription& subscription, void_callback callback);
+    void connect_continuous_contract_kline(const types::continuous_contract_kline_subscription& subscription, void_callback callback);
 
     // -- Read loops (connect first, then call the matching read loop) --
 
@@ -266,43 +266,43 @@ public:
 
     /// @brief Connect to the all-market mark price stream.
     /// @param subscription Subscription parameters (update frequency).
-    [[nodiscard]] result<void> connect_all_market_mark_price(const all_market_mark_price_subscription& subscription = {});
+    [[nodiscard]] result<void> connect_all_market_mark_price(const types::all_market_mark_price_subscription& subscription = {});
     /// @brief Async overload with completion callback.
-    void connect_all_market_mark_price(const all_market_mark_price_subscription& subscription, void_callback callback);
+    void connect_all_market_mark_price(const types::all_market_mark_price_subscription& subscription, void_callback callback);
 
     /// @brief Connect to the composite index stream for a symbol.
     /// @param subscription Subscription parameters (symbol).
-    [[nodiscard]] result<void> connect_composite_index(const composite_index_subscription& subscription);
+    [[nodiscard]] result<void> connect_composite_index(const types::composite_index_subscription& subscription);
     /// @brief Async overload with completion callback.
-    void connect_composite_index(const composite_index_subscription& subscription, void_callback callback);
+    void connect_composite_index(const types::composite_index_subscription& subscription, void_callback callback);
 
     /// @brief Connect to the contract info stream.
     /// @param subscription Subscription parameters (default-constructed for all contracts).
-    [[nodiscard]] result<void> connect_contract_info(const contract_info_subscription& subscription = {});
+    [[nodiscard]] result<void> connect_contract_info(const types::contract_info_subscription& subscription = {});
     /// @brief Async overload with completion callback.
-    void connect_contract_info(const contract_info_subscription& subscription, void_callback callback);
+    void connect_contract_info(const types::contract_info_subscription& subscription, void_callback callback);
 
     /// @brief Connect to the asset index stream for a symbol.
     /// @param subscription Subscription parameters (symbol).
-    [[nodiscard]] result<void> connect_asset_index(const asset_index_subscription& subscription);
+    [[nodiscard]] result<void> connect_asset_index(const types::asset_index_subscription& subscription);
     /// @brief Async overload with completion callback.
-    void connect_asset_index(const asset_index_subscription& subscription, void_callback callback);
+    void connect_asset_index(const types::asset_index_subscription& subscription, void_callback callback);
 
     /// @brief Connect to the all asset index stream.
-    [[nodiscard]] result<void> connect_all_asset_index(const all_asset_index_subscription& subscription = {});
+    [[nodiscard]] result<void> connect_all_asset_index(const types::all_asset_index_subscription& subscription = {});
     /// @brief Async overload with completion callback.
-    void connect_all_asset_index(const all_asset_index_subscription& subscription, void_callback callback);
+    void connect_all_asset_index(const types::all_asset_index_subscription& subscription, void_callback callback);
 
     /// @brief Connect to the trading session stream.
-    [[nodiscard]] result<void> connect_trading_session(const trading_session_subscription& subscription = {});
+    [[nodiscard]] result<void> connect_trading_session(const types::trading_session_subscription& subscription = {});
     /// @brief Async overload with completion callback.
-    void connect_trading_session(const trading_session_subscription& subscription, void_callback callback);
+    void connect_trading_session(const types::trading_session_subscription& subscription, void_callback callback);
 
     /// @brief Connect to the RPI diff book depth stream for a symbol.
     /// @param subscription Subscription parameters (symbol).
-    [[nodiscard]] result<void> connect_rpi_diff_book_depth(const rpi_diff_book_depth_subscription& subscription);
+    [[nodiscard]] result<void> connect_rpi_diff_book_depth(const types::rpi_diff_book_depth_subscription& subscription);
     /// @brief Async overload with completion callback.
-    void connect_rpi_diff_book_depth(const rpi_diff_book_depth_subscription& subscription, void_callback callback);
+    void connect_rpi_diff_book_depth(const types::rpi_diff_book_depth_subscription& subscription, void_callback callback);
 
     // -- Additional read loops --
 

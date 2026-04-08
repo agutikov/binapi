@@ -50,6 +50,11 @@ public:
     {
         return os << s.value_;
     }
+
+    friend std::string operator+(const std::string& lhs, const symbol_t& rhs) { return lhs + rhs.value_; }
+    friend std::string operator+(const symbol_t& lhs, const std::string& rhs) { return lhs.value_ + rhs; }
+    friend std::string operator+(const symbol_t& lhs, const char* rhs) { return lhs.value_ + rhs; }
+    friend std::string operator+(const char* lhs, const symbol_t& rhs) { return lhs + rhs.value_; }
 };
 
 } // namespace binapi2::fapi::types

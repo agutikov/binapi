@@ -23,7 +23,7 @@
 
 #include <binapi2/fapi/client.hpp>
 #include <binapi2/fapi/streams/market_streams.hpp>
-#include <binapi2/fapi/streams/subscriptions.hpp>
+#include <binapi2/fapi/types/subscriptions.hpp>
 
 #include <algorithm>
 #include <mutex>
@@ -51,7 +51,7 @@ local_order_book::start(const std::string& symbol, int depth_limit)
     }
 
     // Step 1: open diff depth stream
-    diff_book_depth_subscription sub;
+    types::diff_book_depth_subscription sub;
     sub.symbol = symbol;
     sub.speed = "100ms";
     auto connect_result = streams_.connect_diff_book_depth(sub);

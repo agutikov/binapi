@@ -3,14 +3,39 @@
 
 
 
-cobalt::main co_main
 
 
+
+Write a documents about
+
+
+How we suppose to work with streams?
+Callbacks, local order book, what else?
+Income data buffers, queues?
+    - Queue size limits?
+    - overflow policy (old, new, fail)?
+    - access to queued data?
+How to start/stop (subscribe/unsubscribe)?
+Connection reuse after unsubscribe?
+Multiple parallel streams?
+    - different connections
+    - one connection
+
+
+--------------------------------------------------------------------------------
 
 Can we decouple io_thread from client? Does it make sense?
 Would it then help to make more generic library code?
+
 What is fapi::client?
-I don't think client::run_sync does have sense while io_thread already have one.
+Seems fapi::client has too many different responsibilities:
+    - container for services, streams and wsapi client
+    - transport
+    - io context / io_thread owner
+    - executor
+
+
+I don't think client::run_sync does have sense while io_thread already has one.
 
 How to clearly separate execution model defined while constructing:
     - co_main
@@ -60,35 +85,13 @@ make a table of all combinations with comments
 
 
 
-Write a documents about
-
-
-How we suppose to work with streams?
-Callbacks?
-Income data buffers, queues?
-    - Queue size limits?
-    - overflow policy (old, new, fail)?
-    - access to queued data?
-How to start/stop (subscribe/unsubscribe)?
-Multiple parallel streams?
-
-
---------------------------------------------------------------------------------
-
-
-
-maybe move include/binapi2/fapi/streams/subscriptions.hpp into types?
-and replace string symbol with symbol_t?
-and what is the different between symbol and pair?
-
-
---------------------------------------------------------------------------------
-
 
 cmd_stream_book_ticker
 
 it's manual implementation over async transport
 where is true async stream API?
+
+maybe asio::concurrent_channel ?
 
 
 --------------------------------------------------------------------------------
