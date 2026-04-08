@@ -192,3 +192,17 @@ websocket_client& client::ws_api_transport() {
 Phase 0 → 1 → 2 → 3 → 4 → 5 → 6
 
 Phase 0 is independently shippable. Phases 1-4 are the core fix and should land together. Phase 5-6 are migration.
+
+## Status
+
+- **Phase 0**: Done — `json_read_opts` extracted, all raw `glz::read_json` calls fixed.
+- **Phase 1**: Done — `io_thread` created, `websocket_client` dual constructor, stream crash fixed.
+- **Phase 2**: Done — transport cleanup (kept legacy constructors for backward compat).
+- **Phase 3**: Done — unified `client` with self-contained (`client(config)`) and component (`client(io_context&, config)`) constructors. Lazy `ws_api()`, `streams()`, `user_streams()` accessors.
+- **Phase 4**: Done — sync wrappers route through `io_thread::run_sync` in owned mode.
+- **Phase 5**: Done — demo-cli migrated (`cmd_ws_api.cpp`, `cmd_order_book.cpp` use unified client; `cmd_stream.cpp` uses `io_thread` directly).
+- **Phase 6**: Done — all 308 unit tests pass, 18 postman mock integration tests pass.
+
+Additionally fixed:
+- TLS cert generation for mock server (added `CA:TRUE` basic constraint).
+- Added `ca_cert_file` config option for custom CA certificates.

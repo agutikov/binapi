@@ -9,6 +9,7 @@
 #pragma once
 
 #include <binapi2/fapi/config.hpp>
+#include <binapi2/fapi/detail/io_thread.hpp>
 #include <binapi2/fapi/detail/json_opts.hpp>
 #include <binapi2/fapi/query.hpp>
 #include <binapi2/fapi/rest/account.hpp>
@@ -19,10 +20,13 @@
 #include <binapi2/fapi/rest/trade.hpp>
 #include <binapi2/fapi/rest/user_data_streams.hpp>
 #include <binapi2/fapi/signing.hpp>
+#include <binapi2/fapi/streams/market_streams.hpp>
+#include <binapi2/fapi/streams/user_streams.hpp>
 #include <binapi2/fapi/time.hpp>
 #include <binapi2/fapi/transport/http_client.hpp>
 #include <binapi2/fapi/types/account.hpp>
 #include <binapi2/fapi/types/common.hpp>
+#include <binapi2/fapi/websocket_api/client.hpp>
 
 #include <boost/asio/io_context.hpp>
 #include <boost/beast/http/verb.hpp>
@@ -30,6 +34,7 @@
 
 #include <glaze/glaze.hpp>
 
+#include <memory>
 #include <string>
 #include <type_traits>
 #include <utility>
@@ -96,12 +101,30 @@ decode_response(const transport::http_response& response)
 class client
 {
 public:
+    /// @brief Self-contained mode: client owns io_context + background thread.
+    /// Both sync and async methods are available.
+    explicit client(config cfg);
+
+    /// @brief Component mode: client borrows caller's io_context.
+    /// Only async methods are available; sync methods will assert.
+    /// The caller must drive io_context::run() on their own thread.
     client(boost::asio::io_context& io_context, config cfg);
+
+    ~client();
 
     [[nodiscard]] config& configuration() noexcept;
     [[nodiscard]] const config& configuration() const noexcept;
     [[nodiscard]] boost::asio::io_context& context() noexcept;
     [[nodiscard]] transport::http_client& transport() noexcept;
+
+    /// @brief Access the WebSocket API client (lazy: connects on first use).
+    [[nodiscard]] websocket_api::client& ws_api();
+
+    /// @brief Access the market data streams client (lazy: created on first use).
+    [[nodiscard]] streams::market_streams& streams();
+
+    /// @brief Access the user data streams client (lazy: created on first use).
+    [[nodiscard]] streams::user_streams& user_streams();
 
     /// @brief Low-level synchronous request execution.
     ///
@@ -196,9 +219,17 @@ public:
     rest::user_data_stream_service user_data_streams;
 
 private:
-    boost::asio::io_context& io_context_;
+    // Owned mode: io_thread exists and drives the io_context.
+    // Component mode: io_thread_ is null, io_ references the caller's context.
+    std::unique_ptr<detail::io_thread> io_thread_;
+    boost::asio::io_context& io_;
     config cfg_;
     transport::http_client http_;
+
+    // Lazy WebSocket transports — created on first access.
+    std::unique_ptr<websocket_api::client> ws_api_;
+    std::unique_ptr<streams::market_streams> streams_;
+    std::unique_ptr<streams::user_streams> user_streams_;
 
     // Shared query preparation + transport call.
     result<transport::http_response> prepare_and_send(boost::beast::http::verb method,

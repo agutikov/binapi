@@ -8,9 +8,7 @@
 
 #include <binapi2/fapi/client.hpp>
 #include <binapi2/fapi/streams/local_order_book.hpp>
-#include <binapi2/fapi/streams/market_streams.hpp>
 
-#include <boost/asio/io_context.hpp>
 #include <spdlog/spdlog.h>
 
 #include <iomanip>
@@ -26,12 +24,8 @@ int cmd_order_book_live(const args_t& args)
     const int depth = (args.size() > 1) ? std::stoi(args[1]) : 1000;
     constexpr int display_levels = 10;
 
-    boost::asio::io_context io;
-    auto cfg = make_config();
-
-    binapi2::fapi::client rest{ io, cfg };
-    binapi2::fapi::streams::market_streams streams{ io, cfg };
-    binapi2::fapi::streams::local_order_book book{ streams, rest };
+    binapi2::fapi::client client{ make_config() };
+    binapi2::fapi::streams::local_order_book book{ client.streams(), client };
 
     spdlog::info("starting local order book for {} depth={}", symbol, depth);
 

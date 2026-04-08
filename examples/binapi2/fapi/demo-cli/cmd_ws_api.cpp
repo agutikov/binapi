@@ -6,10 +6,9 @@
 
 #include "cmd_ws_api.hpp"
 
-#include <binapi2/fapi/websocket_api/client.hpp>
+#include <binapi2/fapi/client.hpp>
 #include <binapi2/fapi/types/detail/decimal.hpp>
 
-#include <boost/asio/io_context.hpp>
 #include <spdlog/spdlog.h>
 
 #include <iostream>
@@ -18,8 +17,8 @@ namespace demo {
 
 int cmd_ws_logon(const args_t& /*args*/)
 {
-    boost::asio::io_context io;
-    binapi2::fapi::websocket_api::client ws{ io, make_config() };
+    binapi2::fapi::client client{ make_config() };
+    auto& ws = client.ws_api();
 
     spdlog::debug("connecting to WebSocket API");
     if (auto c = ws.connect(); !c) { print_error(c.err); return 1; }
@@ -37,8 +36,8 @@ int cmd_ws_logon(const args_t& /*args*/)
 
 int cmd_ws_account_status(const args_t& /*args*/)
 {
-    boost::asio::io_context io;
-    binapi2::fapi::websocket_api::client ws{ io, make_config() };
+    binapi2::fapi::client client{ make_config() };
+    auto& ws = client.ws_api();
 
     spdlog::debug("connecting to WebSocket API");
     if (auto c = ws.connect(); !c) { print_error(c.err); return 1; }
@@ -62,12 +61,12 @@ int cmd_ws_account_status(const args_t& /*args*/)
 int cmd_ws_order_place(const args_t& args)
 {
     if (args.size() < 3) {
-        std::cerr << "usage: ws-order-place <symbol> <side> <type> [--quantity Q] [--price P]\n";
+        std::cerr << "usage: ws-order-place <symbol> <side> <type> [-q|--quantity Q] [-p|--price P]\n";
         return 1;
     }
 
-    boost::asio::io_context io;
-    binapi2::fapi::websocket_api::client ws{ io, make_config() };
+    binapi2::fapi::client client{ make_config() };
+    auto& ws = client.ws_api();
 
     spdlog::debug("connecting to WebSocket API");
     if (auto c = ws.connect(); !c) { print_error(c.err); return 1; }
@@ -99,8 +98,8 @@ int cmd_ws_order_cancel(const args_t& args)
 {
     if (args.size() < 2) { std::cerr << "usage: ws-order-cancel <symbol> <orderId>\n"; return 1; }
 
-    boost::asio::io_context io;
-    binapi2::fapi::websocket_api::client ws{ io, make_config() };
+    binapi2::fapi::client client{ make_config() };
+    auto& ws = client.ws_api();
 
     spdlog::debug("connecting to WebSocket API");
     if (auto c = ws.connect(); !c) { print_error(c.err); return 1; }

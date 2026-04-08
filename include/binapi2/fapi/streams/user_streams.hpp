@@ -64,6 +64,11 @@ public:
     /// @param cfg        Configuration containing endpoint and credential settings.
     user_streams(boost::asio::io_context& io_context, config cfg);
 
+    /// @brief Construct a user streams client driven by an io_thread.
+    /// @param io  The io_thread that owns the io_context.
+    /// @param cfg Configuration containing endpoint and credential settings.
+    user_streams(detail::io_thread& io, config cfg);
+
     /// @brief Connect to the user data stream using a listen key.
     /// @param listen_key The listen key obtained from the REST or WebSocket API.
     /// @return A result indicating success or connection error.

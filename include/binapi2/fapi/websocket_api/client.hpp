@@ -39,6 +39,11 @@ public:
     /// @param cfg        Configuration with endpoint URL and API credentials.
     client(boost::asio::io_context& io_context, config cfg);
 
+    /// @brief Construct a WebSocket API client driven by an io_thread.
+    /// @param io  The io_thread that owns the io_context.
+    /// @param cfg Configuration with endpoint URL and API credentials.
+    client(detail::io_thread& io, config cfg);
+
     // -- Connection management --
 
     /// @brief Synchronously connect to the WebSocket API endpoint.

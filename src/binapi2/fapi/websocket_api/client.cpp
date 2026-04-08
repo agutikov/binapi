@@ -113,6 +113,11 @@ client::client(boost::asio::io_context& io_context, config cfg) :
 {
 }
 
+client::client(fapi::detail::io_thread& io, config cfg) :
+    io_context_(io.context()), cfg_(std::move(cfg)), transport_(io, cfg_)
+{
+}
+
 std::string
 client::next_id()
 {
