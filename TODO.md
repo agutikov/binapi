@@ -3,6 +3,13 @@
 
 
 
+cobalt::main co_main
+
+
+
+--------------------------------------------------------------------------------
+
+
 
 Write a documents about
 
@@ -50,6 +57,7 @@ add required interface for SecretProvider in binapi2 that works with both implem
 finish testing secure endpoints, streams and ws api with testnet
 
 
+all tests from demo-cli, including local order book
 
 
 
