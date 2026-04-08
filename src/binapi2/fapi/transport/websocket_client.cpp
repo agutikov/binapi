@@ -37,8 +37,8 @@ namespace binapi2::fapi::transport {
 // by the sync wrappers) can drive completions on its internal io_context.
 struct websocket_client::impl
 {
-    explicit impl(config cfg) :
-        ssl_ctx(make_ssl_context()), cfg(std::move(cfg))
+    explicit impl(config cfg, detail::io_thread* io = nullptr) :
+        ssl_ctx(make_ssl_context()), cfg(std::move(cfg)), io(io)
     {
     }
 
@@ -49,11 +49,17 @@ struct websocket_client::impl
     std::optional<ws_stream> stream;
     boost::beast::flat_buffer buffer;
     config cfg;
+    detail::io_thread* io{};
     bool connected{ false };
 };
 
 websocket_client::websocket_client(boost::asio::io_context& /*io_context*/, config cfg) :
     session_base(cfg), impl_(std::make_unique<impl>(std::move(cfg)))
+{
+}
+
+websocket_client::websocket_client(detail::io_thread& io, config cfg) :
+    session_base(cfg), impl_(std::make_unique<impl>(std::move(cfg), &io))
 {
 }
 
@@ -198,22 +204,36 @@ websocket_client::async_close()
 }
 
 // --- Sync (wraps async) ---
+//
+// When constructed with an io_thread, sync methods post coroutines to its
+// persistent io_context via run_sync(). This keeps the executor alive across
+// calls, fixing the dangling-executor crash.
+//
+// When constructed without an io_thread (legacy), falls back to cobalt::run()
+// which creates a throwaway io_context per call. This is fine for single-shot
+// operations but will crash for persistent WebSocket connections.
 
 result<void>
 websocket_client::connect(const std::string& host, const std::string& port, const std::string& target)
 {
+    if (impl_->io)
+        return impl_->io->run_sync(async_connect(host, port, target));
     return boost::cobalt::run(async_connect(host, port, target));
 }
 
 result<void>
 websocket_client::write_text(const std::string& message)
 {
+    if (impl_->io)
+        return impl_->io->run_sync(async_write_text(message));
     return boost::cobalt::run(async_write_text(message));
 }
 
 result<std::string>
 websocket_client::read_text()
 {
+    if (impl_->io)
+        return impl_->io->run_sync(async_read_text());
     return boost::cobalt::run(async_read_text());
 }
 
@@ -242,6 +262,8 @@ websocket_client::run_read_loop(message_handler handler)
 result<void>
 websocket_client::close()
 {
+    if (impl_->io)
+        return impl_->io->run_sync(async_close());
     return boost::cobalt::run(async_close());
 }
 
