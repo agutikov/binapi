@@ -1,85 +1,69 @@
 #!/usr/bin/env bash
-# Collect real Binance testnet responses to update postman mock fixtures.
+# Copy real testnet responses into postman mock fixtures.
 #
-# Fetches each response type from the testnet and saves it to
-# compose/postman-mock/responses/. Only overwrites if the request succeeds.
+# Reads from testnet_output/rest/ (produced by testnet_rest.sh)
+# and copies response.json files into compose/postman-mock/responses/.
 #
-# Usage: scripts/collect_mock_responses.sh
+# Usage:
+#   scripts/testnet_rest.sh          # run first to collect responses
+#   scripts/collect_mock_responses.sh # then copy into mock fixtures
 #
-# For auth endpoints: export BINANCE_API_KEY and BINANCE_SECRET_KEY first.
+# Only overwrites a fixture if the source response exists and is non-empty.
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
-CLI="$ROOT_DIR/_build/examples/binapi2/fapi/demo-cli/binapi2-fapi-demo-cli"
+INPUT="${1:-$ROOT_DIR/testnet_output/rest}"
 MOCK_DIR="$ROOT_DIR/compose/postman-mock/responses"
-TMP_DIR=$(mktemp -d)
 
-trap 'rm -rf "$TMP_DIR"' EXIT
-
-SYMBOL=BTCUSDT
 OK=0
 FAIL=0
-SKIP=0
 
-collect() {
+copy() {
     local fixture="$1"
-    local name="$2"
-    shift 2
-    echo -n "  $name -> $fixture ... "
-    if "$CLI" -R "$TMP_DIR/$fixture" -L "$TMP_DIR/${name}.log" -F trace "$@" >/dev/null 2>&1; then
-        if [ -s "$TMP_DIR/$fixture" ]; then
-            cp "$TMP_DIR/$fixture" "$MOCK_DIR/$fixture"
-            echo "OK"
-            OK=$((OK + 1))
-        else
-            echo "EMPTY (skipped)"
-            SKIP=$((SKIP + 1))
-        fi
+    local command="$2"
+    local src="$INPUT/$command/response.json"
+    echo -n "  $command -> $fixture ... "
+    if [ -f "$src" ] && [ -s "$src" ]; then
+        cp "$src" "$MOCK_DIR/$fixture"
+        echo "OK"
+        OK=$((OK + 1))
     else
-        echo "FAIL (kept old)"
+        echo "MISSING (kept old)"
         FAIL=$((FAIL + 1))
     fi
 }
 
-echo "Collecting responses from Binance testnet..."
-echo "Mock dir: $MOCK_DIR"
+echo "Copying testnet responses into mock fixtures..."
+echo "  from: $INPUT"
+echo "  to:   $MOCK_DIR"
 echo ""
 
 echo "=== Public endpoints ==="
-collect ping.json             ping              ping
-collect server_time.json      time              time
-collect exchange_info.json    exchange-info     exchange-info
-collect depth.json            order-book        order-book "$SYMBOL" 5
-collect trades.json           recent-trades     recent-trades "$SYMBOL"
-collect ticker_book.json      book-ticker       book-ticker "$SYMBOL"
-collect ticker_price.json     price-ticker      price-ticker "$SYMBOL"
-collect premium_index.json    mark-price        mark-price "$SYMBOL"
-collect funding_rate.json     funding-rate      funding-rate "$SYMBOL" 5
-collect klines.json           klines            klines "$SYMBOL" 1h 5
+copy ping.json           ping
+copy server_time.json    time
+copy exchange_info.json  exchange-info
+copy depth.json          order-book
+copy trades.json         recent-trades
+copy ticker_book.json    book-ticker
+copy ticker_price.json   price-ticker
+copy premium_index.json  mark-price
+copy funding_rate.json   funding-rate
+copy klines.json         klines
 
 echo ""
 echo "=== Authenticated endpoints ==="
-if [ -z "${BINANCE_API_KEY:-}" ]; then
-    echo "  BINANCE_API_KEY not set — skipping auth endpoints."
-    echo "  Export BINANCE_API_KEY and BINANCE_SECRET_KEY to collect these."
-    SKIP=$((SKIP + 7))
-else
-    collect account.json       account-info      account-info
-    collect balance.json       balances          balances
-    collect position_risk.json position-risk     position-risk
-    collect open_orders.json   open-orders       open-orders
-    collect listen_key.json    listen-key-start  listen-key-start
-
-    # test-order returns the order fixture shape
-    collect order.json         test-order        test-order "$SYMBOL" BUY LIMIT -q 0.001 -p 10000 -t GTC
-fi
+copy account.json        account-info
+copy balance.json        balances
+copy position_risk.json  position-risk
+copy open_orders.json    open-orders
+copy order.json          test-order
+copy listen_key.json     listen-key-start
 
 echo ""
 echo "=== Summary ==="
-echo "  OK:      $OK"
-echo "  Failed:  $FAIL (old fixture kept)"
-echo "  Skipped: $SKIP"
+echo "  Copied:  $OK"
+echo "  Missing: $FAIL (old fixture kept)"
 echo ""
 echo "Review changes: git diff compose/postman-mock/responses/"

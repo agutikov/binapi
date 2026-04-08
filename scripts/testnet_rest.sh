@@ -19,15 +19,19 @@ SYMBOL=BTCUSDT
 run() {
     local name="$1"
     shift
-    echo "--- $name ---"
-    "$CLI" \
-        -S "$OUT/${name}.request" \
-        -R "$OUT/${name}.response" \
-        -L "$OUT/${name}.log" \
+    local dir="$OUT/$name"
+    mkdir -p "$dir"
+    echo -n "  $name ... "
+    if "$CLI" \
+        -S "$dir/request" \
+        -R "$dir/response.json" \
+        -L "$dir/log.txt" \
         -F trace \
-        -v \
-        "$@" 2>&1 | tail -1
-    echo ""
+        "$@" >/dev/null 2>&1; then
+        echo "OK"
+    else
+        echo "FAIL"
+    fi
 }
 
 echo "=== Public REST endpoints ==="

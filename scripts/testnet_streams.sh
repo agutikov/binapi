@@ -21,18 +21,19 @@ TIMEOUT=5  # seconds per stream
 run_stream() {
     local name="$1"
     shift
-    echo "--- $name (${TIMEOUT}s) ---"
+    local dir="$OUT/$name"
+    mkdir -p "$dir"
+    echo -n "  $name (${TIMEOUT}s) ... "
     timeout "$TIMEOUT" \
         "$CLI" \
-            -L "$OUT/${name}.log" \
+            -L "$dir/log.txt" \
             -F trace \
             -v \
             "$@" \
-        > "$OUT/${name}.stdout" 2>&1 || true
+        > "$dir/stdout.txt" 2>&1 || true
     local lines
-    lines=$(wc -l < "$OUT/${name}.stdout")
-    echo "  captured $lines lines"
-    echo ""
+    lines=$(wc -l < "$dir/stdout.txt")
+    echo "$lines lines"
 }
 
 echo "=== WebSocket streams (public) ==="
