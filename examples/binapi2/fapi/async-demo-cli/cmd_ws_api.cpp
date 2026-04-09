@@ -11,8 +11,6 @@
 
 #include <spdlog/spdlog.h>
 
-#include <iostream>
-
 namespace demo {
 
 namespace types = binapi2::fapi::types;
@@ -61,8 +59,7 @@ boost::cobalt::task<int> cmd_ws_account_status(binapi2::fapi::client& c, const a
 boost::cobalt::task<int> cmd_ws_order_place(binapi2::fapi::client& c, const args_t& args)
 {
     if (args.size() < 3) {
-        std::cerr << "usage: ws-order-place <symbol> <side> <type> [--quantity Q] [--price P]\n";
-        co_return 1;
+        spdlog::error("usage: ws-order-place <symbol> <side> <type> [--quantity Q] [--price P]"); co_return 1;
     }
 
     auto& ws = c.ws_api();
@@ -95,7 +92,7 @@ boost::cobalt::task<int> cmd_ws_order_place(binapi2::fapi::client& c, const args
 
 boost::cobalt::task<int> cmd_ws_order_cancel(binapi2::fapi::client& c, const args_t& args)
 {
-    if (args.size() < 2) { std::cerr << "usage: ws-order-cancel <symbol> <orderId>\n"; co_return 1; }
+    if (args.size() < 2) { spdlog::error("usage: ws-order-cancel <symbol> <orderId>"); co_return 1; }
 
     auto& ws = c.ws_api();
 

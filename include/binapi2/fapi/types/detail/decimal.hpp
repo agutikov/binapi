@@ -210,3 +210,15 @@ struct to<JSON, binapi2::fapi::types::decimal_t>
 };
 
 } // namespace glz
+
+// fmt formatter
+#include <fmt/format.h>
+
+template<>
+struct fmt::formatter<binapi2::fapi::types::decimal_t> : fmt::formatter<std::string_view>
+{
+    auto format(const binapi2::fapi::types::decimal_t& d, fmt::format_context& ctx) const
+    {
+        return fmt::formatter<std::string_view>::format(d.to_string(), ctx);
+    }
+};

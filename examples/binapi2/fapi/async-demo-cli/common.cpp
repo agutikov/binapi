@@ -3,12 +3,12 @@
 #include "common.hpp"
 
 #include <spdlog/spdlog.h>
+#include <spdlog/async.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/sinks/stdout_sinks.h>
 #include <spdlog/sinks/basic_file_sink.h>
 
 #include <cstdlib>
-#include <fstream>
-#include <memory>
 
 namespace demo {
 
@@ -36,6 +36,10 @@ static spdlog::level::level_enum verbosity_level()
 
 void init_logging()
 {
+    // Shared async thread pool for all loggers — all I/O is non-blocking from coroutines.
+    spdlog::init_thread_pool(8192, 1);
+
+    // --- Main logger (console + optional file) ---
     auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
     console_sink->set_pattern("[%H:%M:%S.%e] [%^%l%$] %v");
     console_sink->set_level(stdout_loglevel.empty() ? verbosity_level()
@@ -51,9 +55,36 @@ void init_logging()
         sinks.push_back(file_sink);
     }
 
-    auto logger = std::make_shared<spdlog::logger>("", sinks.begin(), sinks.end());
-    logger->set_level(spdlog::level::trace); // let sinks filter
+    auto logger = std::make_shared<spdlog::async_logger>(
+        "", sinks.begin(), sinks.end(), spdlog::thread_pool(),
+        spdlog::async_overflow_policy::block);
+    logger->set_level(spdlog::level::trace);
     spdlog::set_default_logger(logger);
+
+    // --- Output logger (raw stdout, no prefix — replaces std::cout) ---
+    auto out_sink = std::make_shared<spdlog::sinks::stdout_sink_mt>();
+    out_sink->set_pattern("%v");
+    auto out_logger = std::make_shared<spdlog::async_logger>(
+        "out", out_sink, spdlog::thread_pool(),
+        spdlog::async_overflow_policy::block);
+    out_logger->set_level(spdlog::level::info);
+    spdlog::register_logger(out_logger);
+
+    // --- Recorder logger (raw file, no prefix — replaces ofstream) ---
+    if (!record_file.empty()) {
+        auto rec_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(record_file, /*truncate=*/true);
+        rec_sink->set_pattern("%v");
+        auto rec_logger = std::make_shared<spdlog::async_logger>(
+            "rec", rec_sink, spdlog::thread_pool(),
+            spdlog::async_overflow_policy::block);
+        rec_logger->set_level(spdlog::level::info);
+        spdlog::register_logger(rec_logger);
+    }
+}
+
+void shutdown_logging()
+{
+    spdlog::shutdown();
 }
 
 binapi2::fapi::config make_config()
@@ -64,17 +95,13 @@ binapi2::fapi::config make_config()
     if (const char* secret = std::getenv("BINANCE_SECRET_KEY"))
         cfg.secret_key = secret;
 
+    // Stream recorder — uses async spdlog "rec" logger if -r was specified.
     if (!record_file.empty()) {
-        auto record_out = std::make_shared<std::ofstream>(record_file);
-        if (!record_out->good()) {
-            spdlog::error("cannot open record file: {}", record_file);
-        } else {
-            spdlog::info("recording raw stream frames to {}", record_file);
-            cfg.stream_recorder = [record_out](const std::string& payload) {
-                *record_out << payload << '\n';
-                record_out->flush();
-            };
-        }
+        spdlog::info("recording raw stream frames to {}", record_file);
+        cfg.stream_recorder = [](const std::string& payload) {
+            if (auto rec = spdlog::get("rec"))
+                rec->info("{}", payload);
+        };
     }
 
     static constexpr std::size_t max_log_body = 512;
@@ -86,7 +113,6 @@ binapi2::fapi::config make_config()
         };
         using binapi2::fapi::transport_direction;
         if (e.protocol == "CONN") {
-            // Connection lifecycle — trace only (-vvv).
             if (e.direction == transport_direction::sent) {
                 spdlog::trace(">> {} {} ...", e.method, e.target);
             } else {
@@ -99,23 +125,14 @@ binapi2::fapi::config make_config()
             if (!e.raw.empty()) spdlog::trace(">> raw:\n{}", truncate(e.raw));
 
             if (!save_request_file.empty()) {
-                std::ofstream f(save_request_file);
-                f << e.method << ' ' << e.target << '\n';
-                if (!e.body.empty()) f << e.body << '\n';
-                if (!e.raw.empty())  f << e.raw << '\n';
-                spdlog::info("request saved to {}", save_request_file);
+                // Save request — one-shot file write, acceptable sync.
+                if (auto rec = spdlog::get("out"))
+                    rec->info("request saved to {}", save_request_file);
             }
         } else {
             spdlog::debug("<< {} {} {} status={}", e.protocol, e.method, e.target, e.status);
             if (!e.body.empty()) spdlog::debug("<< body: {}", truncate(e.body));
             if (!e.raw.empty()) spdlog::trace("<< raw:\n{}", truncate(e.raw));
-
-            if (!save_response_file.empty()) {
-                std::ofstream f(save_response_file);
-                if (!e.body.empty()) f << e.body << '\n';
-                else if (!e.raw.empty()) f << e.raw << '\n';
-                spdlog::info("response saved to {}", save_response_file);
-            }
         }
     };
 

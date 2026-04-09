@@ -10,8 +10,6 @@
 
 #include <spdlog/spdlog.h>
 
-#include <iostream>
-
 namespace demo {
 
 namespace types = binapi2::fapi::types;
@@ -55,7 +53,7 @@ boost::cobalt::task<int> cmd_exchange_info(binapi2::fapi::client& c, const args_
 
 boost::cobalt::task<int> cmd_order_book(binapi2::fapi::client& c, const args_t& args)
 {
-    if (args.empty()) { std::cerr << "usage: order-book <symbol> [limit]\n"; co_return 1; }
+    if (args.empty()) { spdlog::error("usage: order-book <symbol> [limit]"); co_return 1; }
 
     types::order_book_request_t req;
     req.symbol = args[0];
@@ -74,19 +72,19 @@ boost::cobalt::task<int> cmd_order_book(binapi2::fapi::client& c, const args_t& 
     } else {
         int n = std::min(5, static_cast<int>(r->bids.size()));
         for (int i = 0; i < n; ++i)
-            std::cout << "  bid " << r->bids[static_cast<std::size_t>(i)].price
-                      << " x " << r->bids[static_cast<std::size_t>(i)].quantity << '\n';
+            out("  bid {} x {}", r->bids[static_cast<std::size_t>(i)].price,
+                r->bids[static_cast<std::size_t>(i)].quantity);
         n = std::min(5, static_cast<int>(r->asks.size()));
         for (int i = 0; i < n; ++i)
-            std::cout << "  ask " << r->asks[static_cast<std::size_t>(i)].price
-                      << " x " << r->asks[static_cast<std::size_t>(i)].quantity << '\n';
+            out("  ask {} x {}", r->asks[static_cast<std::size_t>(i)].price,
+                r->asks[static_cast<std::size_t>(i)].quantity);
     }
     co_return 0;
 }
 
 boost::cobalt::task<int> cmd_recent_trades(binapi2::fapi::client& c, const args_t& args)
 {
-    if (args.empty()) { std::cerr << "usage: recent-trades <symbol> [limit]\n"; co_return 1; }
+    if (args.empty()) { spdlog::error("usage: recent-trades <symbol> [limit]"); co_return 1; }
 
     types::recent_trades_request_t req;
     req.symbol = args[0];
@@ -101,15 +99,15 @@ boost::cobalt::task<int> cmd_recent_trades(binapi2::fapi::client& c, const args_
         print_json(*r);
     } else {
         for (auto& t : *r)
-            std::cout << "  " << t.price << " x " << t.qty
-                      << (t.isBuyerMaker ? " sell" : " buy") << '\n';
+            out("  {} x {}{}", t.price, t.qty,
+                t.isBuyerMaker ? " sell" : " buy");
     }
     co_return 0;
 }
 
 boost::cobalt::task<int> cmd_book_ticker(binapi2::fapi::client& c, const args_t& args)
 {
-    if (args.empty()) { std::cerr << "usage: book-ticker <symbol>\n"; co_return 1; }
+    if (args.empty()) { spdlog::error("usage: book-ticker <symbol>"); co_return 1; }
 
     types::book_ticker_request_t req;
     req.symbol = args[0];
@@ -121,8 +119,8 @@ boost::cobalt::task<int> cmd_book_ticker(binapi2::fapi::client& c, const args_t&
     if (verbosity >= 1) {
         print_json(*r);
     } else {
-        std::cout << r->symbol << "  bid: " << r->bidPrice << " x " << r->bidQty
-                  << "  ask: " << r->askPrice << " x " << r->askQty << '\n';
+        out("{}  bid: {} x {}  ask: {} x {}", r->symbol,
+            r->bidPrice, r->bidQty, r->askPrice, r->askQty);
     }
     co_return 0;
 }
@@ -139,16 +137,16 @@ boost::cobalt::task<int> cmd_book_tickers(binapi2::fapi::client& c, const args_t
     } else {
         int n = std::min(10, static_cast<int>(r->size()));
         for (int i = 0; i < n; ++i)
-            std::cout << "  " << (*r)[static_cast<std::size_t>(i)].symbol
-                      << "  " << (*r)[static_cast<std::size_t>(i)].bidPrice
-                      << " / " << (*r)[static_cast<std::size_t>(i)].askPrice << '\n';
+            out("  {}  {} / {}", (*r)[static_cast<std::size_t>(i)].symbol,
+                (*r)[static_cast<std::size_t>(i)].bidPrice,
+                (*r)[static_cast<std::size_t>(i)].askPrice);
     }
     co_return 0;
 }
 
 boost::cobalt::task<int> cmd_price_ticker(binapi2::fapi::client& c, const args_t& args)
 {
-    if (args.empty()) { std::cerr << "usage: price-ticker <symbol>\n"; co_return 1; }
+    if (args.empty()) { spdlog::error("usage: price-ticker <symbol>"); co_return 1; }
 
     types::price_ticker_request_t req;
     req.symbol = args[0];
@@ -160,7 +158,7 @@ boost::cobalt::task<int> cmd_price_ticker(binapi2::fapi::client& c, const args_t
     if (verbosity >= 1) {
         print_json(*r);
     } else {
-        std::cout << r->symbol << "  price: " << r->price << '\n';
+        out("{}  price: {}", r->symbol, r->price);
     }
     co_return 0;
 }
@@ -177,15 +175,15 @@ boost::cobalt::task<int> cmd_price_tickers(binapi2::fapi::client& c, const args_
     } else {
         int n = std::min(10, static_cast<int>(r->size()));
         for (int i = 0; i < n; ++i)
-            std::cout << "  " << (*r)[static_cast<std::size_t>(i)].symbol
-                      << "  " << (*r)[static_cast<std::size_t>(i)].price << '\n';
+            out("  {}  {}", (*r)[static_cast<std::size_t>(i)].symbol,
+                (*r)[static_cast<std::size_t>(i)].price);
     }
     co_return 0;
 }
 
 boost::cobalt::task<int> cmd_ticker_24hr(binapi2::fapi::client& c, const args_t& args)
 {
-    if (args.empty()) { std::cerr << "usage: ticker-24hr <symbol>\n"; co_return 1; }
+    if (args.empty()) { spdlog::error("usage: ticker-24hr <symbol>"); co_return 1; }
 
     types::ticker_24hr_request_t req;
     req.symbol = args[0];
@@ -197,7 +195,7 @@ boost::cobalt::task<int> cmd_ticker_24hr(binapi2::fapi::client& c, const args_t&
 
 boost::cobalt::task<int> cmd_mark_price(binapi2::fapi::client& c, const args_t& args)
 {
-    if (args.empty()) { std::cerr << "usage: mark-price <symbol>\n"; co_return 1; }
+    if (args.empty()) { spdlog::error("usage: mark-price <symbol>"); co_return 1; }
 
     types::mark_price_request_t req;
     req.symbol = args[0];
@@ -209,9 +207,8 @@ boost::cobalt::task<int> cmd_mark_price(binapi2::fapi::client& c, const args_t& 
     if (verbosity >= 1) {
         print_json(*r);
     } else {
-        std::cout << r->symbol << "  mark: " << r->markPrice
-                  << "  index: " << r->indexPrice
-                  << "  funding: " << r->lastFundingRate << '\n';
+        out("{}  mark: {}  index: {}  funding: {}", r->symbol,
+            r->markPrice, r->indexPrice, r->lastFundingRate);
     }
     co_return 0;
 }
@@ -228,15 +225,15 @@ boost::cobalt::task<int> cmd_mark_prices(binapi2::fapi::client& c, const args_t&
     } else {
         int n = std::min(10, static_cast<int>(r->size()));
         for (int i = 0; i < n; ++i)
-            std::cout << "  " << (*r)[static_cast<std::size_t>(i)].symbol
-                      << "  " << (*r)[static_cast<std::size_t>(i)].markPrice << '\n';
+            out("  {}  {}", (*r)[static_cast<std::size_t>(i)].symbol,
+                (*r)[static_cast<std::size_t>(i)].markPrice);
     }
     co_return 0;
 }
 
 boost::cobalt::task<int> cmd_klines(binapi2::fapi::client& c, const args_t& args)
 {
-    if (args.size() < 2) { std::cerr << "usage: klines <symbol> <interval> [limit]\n"; co_return 1; }
+    if (args.size() < 2) { spdlog::error("usage: klines <symbol> <interval> [limit]"); co_return 1; }
 
     types::klines_request_t req;
     req.symbol = args[0];
@@ -254,16 +251,15 @@ boost::cobalt::task<int> cmd_klines(binapi2::fapi::client& c, const args_t& args
         print_json(*r);
     } else {
         for (auto& k : *r)
-            std::cout << "  " << k.openTime
-                      << "  O:" << k.open << " H:" << k.high
-                      << " L:" << k.low << " C:" << k.close << '\n';
+            out("  {}  O:{} H:{} L:{} C:{}", k.openTime,
+                k.open, k.high, k.low, k.close);
     }
     co_return 0;
 }
 
 boost::cobalt::task<int> cmd_funding_rate(binapi2::fapi::client& c, const args_t& args)
 {
-    if (args.empty()) { std::cerr << "usage: funding-rate <symbol> [limit]\n"; co_return 1; }
+    if (args.empty()) { spdlog::error("usage: funding-rate <symbol> [limit]"); co_return 1; }
 
     types::funding_rate_history_request_t req;
     req.symbol = args[0];
@@ -276,7 +272,7 @@ boost::cobalt::task<int> cmd_funding_rate(binapi2::fapi::client& c, const args_t
 
 boost::cobalt::task<int> cmd_open_interest(binapi2::fapi::client& c, const args_t& args)
 {
-    if (args.empty()) { std::cerr << "usage: open-interest <symbol>\n"; co_return 1; }
+    if (args.empty()) { spdlog::error("usage: open-interest <symbol>"); co_return 1; }
 
     types::open_interest_request_t req;
     req.symbol = args[0];

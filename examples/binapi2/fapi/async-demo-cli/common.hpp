@@ -46,22 +46,33 @@ inline std::string stdout_loglevel;
 // Command function pointer type: async, takes client& and args.
 using command_fn = boost::cobalt::task<int> (*)(binapi2::fapi::client&, const args_t&);
 
-// Initialize spdlog (call once from main).
+// Initialize async spdlog (call once from main).
 void init_logging();
+
+// Flush and shutdown all async loggers (call before exit).
+void shutdown_logging();
 
 // Build config from BINANCE_API_KEY / BINANCE_SECRET_KEY env vars.
 binapi2::fapi::config make_config();
 
+// Async stdout output — non-blocking, enqueues to spdlog "out" logger.
+template<typename... Args>
+void out(spdlog::format_string_t<Args...> fmt, Args&&... args)
+{
+    if (auto logger = spdlog::get("out"))
+        logger->info(fmt, std::forward<Args>(args)...);
+}
+
 // Print error details via spdlog.
 void print_error(const binapi2::fapi::error& err);
 
-// Print a value as pretty JSON to stdout.
+// Print a value as pretty JSON via async output.
 template<typename T>
 void print_json(const T& value)
 {
     auto json = glz::write<glz::opts{ .prettify = true }>(value);
     if (json) {
-        std::cout << *json << '\n';
+        out("{}", *json);
     }
 }
 

@@ -9,8 +9,6 @@
 
 #include <spdlog/spdlog.h>
 
-#include <iostream>
-
 namespace demo {
 
 namespace types = binapi2::fapi::types;
@@ -39,8 +37,7 @@ boost::cobalt::task<int> cmd_balances(binapi2::fapi::client& c, const args_t& /*
     } else {
         for (auto& b : *r) {
             if (b.balance.is_zero()) continue;
-            std::cout << "  " << b.asset << "  balance: " << b.balance
-                      << "  available: " << b.availableBalance << '\n';
+            out("  {}  balance: {}  available: {}", b.asset, b.balance, b.availableBalance);
         }
     }
     co_return 0;

@@ -3,10 +3,6 @@
 
 
 
-what is still not async in async-demo-cli?
-cout, cerr - how can make it async?
-what else?
-
 
 review and update documents in docs/binapi2 according to current state, remove plans
 

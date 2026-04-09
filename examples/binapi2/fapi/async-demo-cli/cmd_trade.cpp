@@ -11,8 +11,6 @@
 
 #include <spdlog/spdlog.h>
 
-#include <iostream>
-
 namespace demo {
 
 namespace types = binapi2::fapi::types;
@@ -40,8 +38,7 @@ make_order_request(const args_t& args)
 boost::cobalt::task<int> cmd_new_order(binapi2::fapi::client& c, const args_t& args)
 {
     if (args.size() < 3) {
-        std::cerr << "usage: new-order <symbol> <side> <type> [-q|--quantity Q] [-p|--price P] [-t|--tif TIF]\n";
-        co_return 1;
+        spdlog::error("usage: new-order <symbol> <side> <type> [-q|--quantity Q] [-p|--price P] [-t|--tif TIF]"); co_return 1;
     }
 
     auto req = make_order_request(args);
@@ -53,8 +50,7 @@ boost::cobalt::task<int> cmd_new_order(binapi2::fapi::client& c, const args_t& a
 boost::cobalt::task<int> cmd_test_order(binapi2::fapi::client& c, const args_t& args)
 {
     if (args.size() < 3) {
-        std::cerr << "usage: test-order <symbol> <side> <type> [-q|--quantity Q] [-p|--price P] [-t|--tif TIF]\n";
-        co_return 1;
+        spdlog::error("usage: test-order <symbol> <side> <type> [-q|--quantity Q] [-p|--price P] [-t|--tif TIF]"); co_return 1;
     }
 
     auto order = make_order_request(args);
@@ -73,7 +69,7 @@ boost::cobalt::task<int> cmd_test_order(binapi2::fapi::client& c, const args_t& 
 
 boost::cobalt::task<int> cmd_cancel_order(binapi2::fapi::client& c, const args_t& args)
 {
-    if (args.size() < 2) { std::cerr << "usage: cancel-order <symbol> <orderId>\n"; co_return 1; }
+    if (args.size() < 2) { spdlog::error("usage: cancel-order <symbol> <orderId>"); co_return 1; }
 
     types::cancel_order_request_t req;
     req.symbol = args[0];
@@ -86,7 +82,7 @@ boost::cobalt::task<int> cmd_cancel_order(binapi2::fapi::client& c, const args_t
 
 boost::cobalt::task<int> cmd_query_order(binapi2::fapi::client& c, const args_t& args)
 {
-    if (args.size() < 2) { std::cerr << "usage: query-order <symbol> <orderId>\n"; co_return 1; }
+    if (args.size() < 2) { spdlog::error("usage: query-order <symbol> <orderId>"); co_return 1; }
 
     types::query_order_request_t req;
     req.symbol = args[0];

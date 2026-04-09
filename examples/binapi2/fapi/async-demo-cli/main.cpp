@@ -168,13 +168,17 @@ boost::cobalt::main co_main(int argc, char* argv[])
     // Create client once, pass to all commands.
     binapi2::fapi::client c(demo::make_config());
 
+    int rc = 1;
     for (const auto& cmd : commands) {
         if (cmd.name == cmd_name) {
-            co_return co_await cmd.fn(c, sub_args);
+            rc = co_await cmd.fn(c, sub_args);
+            demo::shutdown_logging();
+            co_return rc;
         }
     }
 
-    std::cerr << "unknown command: " << cmd_name << "\n\n";
+    spdlog::error("unknown command: {}", cmd_name);
     print_usage(prog);
+    demo::shutdown_logging();
     co_return 1;
 }

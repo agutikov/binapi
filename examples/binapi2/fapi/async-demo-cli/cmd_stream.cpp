@@ -10,15 +10,13 @@
 
 #include <spdlog/spdlog.h>
 
-#include <iostream>
-
 namespace demo {
 
 namespace types = binapi2::fapi::types;
 
 boost::cobalt::task<int> cmd_stream_book_ticker(binapi2::fapi::client& c, const args_t& args)
 {
-    if (args.empty()) { std::cerr << "usage: stream-book-ticker <symbol>\n"; co_return 1; }
+    if (args.empty()) { spdlog::error("usage: stream-book-ticker <symbol>"); co_return 1; }
 
     spdlog::info("subscribing to book_ticker_t stream for {}", args[0]);
     types::book_ticker_subscription sub;
@@ -31,9 +29,9 @@ boost::cobalt::task<int> cmd_stream_book_ticker(binapi2::fapi::client& c, const 
         if (!event) { print_error(event.err); co_return 1; }
         if (verbosity >= 1) { print_json(*event); }
         else {
-            std::cout << event->symbol
-                      << "  bid: " << event->best_bid_price << " x " << event->best_bid_qty
-                      << "  ask: " << event->best_ask_price << " x " << event->best_ask_qty << '\n';
+            out("{}  bid: {} x {}  ask: {} x {}", event->symbol,
+                event->best_bid_price, event->best_bid_qty,
+                event->best_ask_price, event->best_ask_qty);
         }
     }
     co_return 0;
@@ -41,7 +39,7 @@ boost::cobalt::task<int> cmd_stream_book_ticker(binapi2::fapi::client& c, const 
 
 boost::cobalt::task<int> cmd_stream_mark_price(binapi2::fapi::client& c, const args_t& args)
 {
-    if (args.empty()) { std::cerr << "usage: stream-mark-price <symbol>\n"; co_return 1; }
+    if (args.empty()) { spdlog::error("usage: stream-mark-price <symbol>"); co_return 1; }
 
     spdlog::info("subscribing to mark_price_t stream for {}", args[0]);
     types::mark_price_subscription sub;
@@ -53,10 +51,8 @@ boost::cobalt::task<int> cmd_stream_mark_price(binapi2::fapi::client& c, const a
         if (!event) { print_error(event.err); co_return 1; }
         if (verbosity >= 1) { print_json(*event); }
         else {
-            std::cout << event->symbol
-                      << "  mark: " << event->mark_price_t
-                      << "  index: " << event->index_price
-                      << "  funding: " << event->funding_rate << '\n';
+            out("{}  mark: {}  index: {}  funding: {}", event->symbol,
+                event->mark_price_t, event->index_price, event->funding_rate);
         }
     }
     co_return 0;
@@ -64,7 +60,7 @@ boost::cobalt::task<int> cmd_stream_mark_price(binapi2::fapi::client& c, const a
 
 boost::cobalt::task<int> cmd_stream_kline(binapi2::fapi::client& c, const args_t& args)
 {
-    if (args.size() < 2) { std::cerr << "usage: stream-kline <symbol> <interval>\n"; co_return 1; }
+    if (args.size() < 2) { spdlog::error("usage: stream-kline <symbol> <interval>"); co_return 1; }
 
     spdlog::info("subscribing to kline_t stream for {} {}", args[0], args[1]);
     types::kline_subscription sub;
@@ -77,9 +73,9 @@ boost::cobalt::task<int> cmd_stream_kline(binapi2::fapi::client& c, const args_t
         if (!event) { print_error(event.err); co_return 1; }
         if (verbosity >= 1) { print_json(*event); }
         else {
-            std::cout << event->symbol << "  O:" << event->kline_t.open_price
-                      << " H:" << event->kline_t.high_price << " L:" << event->kline_t.low_price
-                      << " C:" << event->kline_t.close_price << '\n';
+            out("{}  O:{} H:{} L:{} C:{}", event->symbol,
+                event->kline_t.open_price, event->kline_t.high_price,
+                event->kline_t.low_price, event->kline_t.close_price);
         }
     }
     co_return 0;
@@ -87,7 +83,7 @@ boost::cobalt::task<int> cmd_stream_kline(binapi2::fapi::client& c, const args_t
 
 boost::cobalt::task<int> cmd_stream_ticker(binapi2::fapi::client& c, const args_t& args)
 {
-    if (args.empty()) { std::cerr << "usage: stream-ticker <symbol>\n"; co_return 1; }
+    if (args.empty()) { spdlog::error("usage: stream-ticker <symbol>"); co_return 1; }
 
     spdlog::info("subscribing to ticker stream for {}", args[0]);
     types::ticker_subscription sub;
@@ -99,8 +95,8 @@ boost::cobalt::task<int> cmd_stream_ticker(binapi2::fapi::client& c, const args_
         if (!event) { print_error(event.err); co_return 1; }
         if (verbosity >= 1) { print_json(*event); }
         else {
-            std::cout << event->symbol << "  last: " << event->last_price
-                      << "  change: " << event->price_change_pct << "%\n";
+            out("{}  last: {}  change: {}%", event->symbol,
+                event->last_price, event->price_change_pct);
         }
     }
     co_return 0;
@@ -108,7 +104,7 @@ boost::cobalt::task<int> cmd_stream_ticker(binapi2::fapi::client& c, const args_
 
 boost::cobalt::task<int> cmd_stream_depth(binapi2::fapi::client& c, const args_t& args)
 {
-    if (args.empty()) { std::cerr << "usage: stream-depth <symbol> [levels]\n"; co_return 1; }
+    if (args.empty()) { spdlog::error("usage: stream-depth <symbol> [levels]"); co_return 1; }
 
     types::partial_book_depth_subscription sub;
     sub.symbol = args[0];
@@ -122,8 +118,8 @@ boost::cobalt::task<int> cmd_stream_depth(binapi2::fapi::client& c, const args_t
         if (!event) { print_error(event.err); co_return 1; }
         if (verbosity >= 1) { print_json(*event); }
         else {
-            std::cout << event->symbol << "  bids: " << event->bids.size()
-                      << "  asks: " << event->asks.size() << '\n';
+            out("{}  bids: {}  asks: {}", event->symbol,
+                event->bids.size(), event->asks.size());
         }
     }
     co_return 0;
@@ -139,7 +135,7 @@ boost::cobalt::task<int> cmd_stream_all_book_tickers(binapi2::fapi::client& c, c
         if (!event) { print_error(event.err); co_return 1; }
         if (verbosity >= 1) { print_json(*event); }
         else {
-            std::cout << event->symbol << "  " << event->best_bid_price << " / " << event->best_ask_price << '\n';
+            out("{}  {} / {}", event->symbol, event->best_bid_price, event->best_ask_price);
         }
     }
     co_return 0;
@@ -155,7 +151,7 @@ boost::cobalt::task<int> cmd_stream_all_tickers(binapi2::fapi::client& c, const 
         if (!event) { print_error(event.err); co_return 1; }
         if (verbosity >= 1) { print_json(*event); }
         else {
-            std::cout << "tickers: " << event->size() << '\n';
+            out("tickers: {}", event->size());
         }
     }
     co_return 0;
@@ -171,7 +167,7 @@ boost::cobalt::task<int> cmd_stream_all_mini_tickers(binapi2::fapi::client& c, c
         if (!event) { print_error(event.err); co_return 1; }
         if (verbosity >= 1) { print_json(*event); }
         else {
-            std::cout << "mini_tickers: " << event->size() << '\n';
+            out("mini_tickers: {}", event->size());
         }
     }
     co_return 0;
@@ -179,7 +175,7 @@ boost::cobalt::task<int> cmd_stream_all_mini_tickers(binapi2::fapi::client& c, c
 
 boost::cobalt::task<int> cmd_stream_liquidation(binapi2::fapi::client& c, const args_t& args)
 {
-    if (args.empty()) { std::cerr << "usage: stream-liquidation <symbol>\n"; co_return 1; }
+    if (args.empty()) { spdlog::error("usage: stream-liquidation <symbol>"); co_return 1; }
 
     spdlog::info("subscribing to liquidation_order stream for {}", args[0]);
     types::liquidation_order_subscription sub;
@@ -191,8 +187,8 @@ boost::cobalt::task<int> cmd_stream_liquidation(binapi2::fapi::client& c, const 
         if (!event) { print_error(event.err); co_return 1; }
         if (verbosity >= 1) { print_json(*event); }
         else {
-            std::cout << "liquidation: " << event->order.symbol
-                      << "  " << to_string(event->order.side) << "  " << event->order.price << '\n';
+            out("liquidation: {}  {}  {}", event->order.symbol,
+                to_string(event->order.side), event->order.price);
         }
     }
     co_return 0;
