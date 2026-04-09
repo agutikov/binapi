@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 //
-// binapi2-fapi-demo-cli — demonstration client and usage example for the
-// binapi2 fapi library.  Each source file in this directory shows a different
+// binapi2-fapi-async-demo-cli — async demonstration client and usage example for
+// the binapi2 fapi library.  Each source file in this directory shows a different
 // aspect of the library (REST, WebSocket API, streams, local order book).
 //
 // Usage:
-//   binapi2-fapi-demo-cli [flags] <command> [args...]
+//   binapi2-fapi-async-demo-cli [flags] <command> [args...]
 //
 // Flags:
 //   -v                      Print full JSON responses
@@ -15,7 +15,6 @@
 //       --testnet               Use testnet endpoints (default)
 //   -S, --save-request <file>   Save request to file
 //   -R, --save-response <file>  Save response body to file
-//   -r, --record <file>         Record raw WebSocket stream frames to JSONL file
 //   -L, --log-file <file>       Log to file
 //   -F, --file-loglevel <lvl>   File log level (trace/debug/info/warn/error/off)
 //   -O, --stdout-loglevel <lvl> Stdout log level (trace/debug/info/warn/error/off)
@@ -30,6 +29,9 @@
 #include "cmd_user_stream.hpp"
 #include "cmd_order_book.hpp"
 
+#include <binapi2/fapi/client.hpp>
+
+#include <boost/cobalt/main.hpp>
 #include <spdlog/spdlog.h>
 
 #include <iostream>
@@ -40,13 +42,13 @@ namespace {
 struct command_entry
 {
     std::string_view name;
-    int (*fn)(const demo::args_t& args);
+    demo::command_fn fn;
     std::string_view help;
 };
 
 // clang-format off
 constexpr command_entry commands[] = {
-    // Market data (public, sync)
+    // Market data (public, async)
     { "ping",                    demo::cmd_ping,                    "Test API connectivity" },
     { "time",                    demo::cmd_time,                    "Get server time" },
     { "exchange-info",           demo::cmd_exchange_info,           "Exchange info [symbol]" },
@@ -63,20 +65,20 @@ constexpr command_entry commands[] = {
     { "funding-rate",            demo::cmd_funding_rate,            "Funding rate history <symbol> [limit]" },
     { "open-interest",           demo::cmd_open_interest,           "Open interest <symbol>" },
 
-    // Account (auth, sync)
+    // Account (auth, async)
     { "account-info",            demo::cmd_account_info,            "Account information (auth)" },
     { "balances",                demo::cmd_balances,                "Account balances (auth)" },
     { "position-risk",           demo::cmd_position_risk,           "Position risk [symbol] (auth)" },
     { "income-history",          demo::cmd_income_history,          "Income history [symbol] [limit] (auth)" },
 
-    // Trade (auth, sync)
+    // Trade (auth, async)
     { "new-order",               demo::cmd_new_order,               "Place order <sym> <side> <type> [-q Q] [-p P] [-t TIF]" },
     { "test-order",              demo::cmd_test_order,              "Test order (validates, does not place)" },
     { "cancel-order",            demo::cmd_cancel_order,            "Cancel order <symbol> <orderId>" },
     { "query-order",             demo::cmd_query_order,             "Query order <symbol> <orderId>" },
     { "open-orders",             demo::cmd_open_orders,             "Open orders [symbol]" },
 
-    // WebSocket API (auth, sync)
+    // WebSocket API (auth, async)
     { "ws-logon",                demo::cmd_ws_logon,                "WebSocket API session logon (auth)" },
     { "ws-account-status",       demo::cmd_ws_account_status,       "Account status via WS API (auth)" },
     { "ws-order-place",          demo::cmd_ws_order_place,          "Place order via WS API <sym> <side> <type> [-q Q] [-p P]" },
@@ -128,9 +130,9 @@ void print_usage(const char* prog)
 
 } // namespace
 
-int main(int argc, char* argv[])
+boost::cobalt::main co_main(int argc, char* argv[])
 {
-    if (argc < 2) { print_usage(argv[0]); return 1; }
+    if (argc < 2) { print_usage(argv[0]); co_return 1; }
 
     // Strip global flags, collect remaining args.
     demo::args_t cmd_args;
@@ -149,11 +151,11 @@ int main(int argc, char* argv[])
         else if ((arg == "--log-file"      || arg == "-L") && i + 1 < argc) { demo::log_file           = argv[++i]; }
         else if ((arg == "--file-loglevel" || arg == "-F") && i + 1 < argc) { demo::file_loglevel      = argv[++i]; }
         else if ((arg == "--stdout-loglevel" || arg == "-O") && i + 1 < argc) { demo::stdout_loglevel  = argv[++i]; }
-        else if (arg == "--help" || arg == "-h") { print_usage(prog); return 0; }
+        else if (arg == "--help" || arg == "-h") { print_usage(prog); co_return 0; }
         else { cmd_args.emplace_back(arg); }
     }
 
-    if (cmd_args.empty()) { print_usage(prog); return 1; }
+    if (cmd_args.empty()) { print_usage(prog); co_return 1; }
 
     demo::init_logging();
 
@@ -163,13 +165,16 @@ int main(int argc, char* argv[])
     // Remove the command name, pass only subcommand args.
     demo::args_t sub_args(cmd_args.begin() + 1, cmd_args.end());
 
+    // Create client once, pass to all commands.
+    binapi2::fapi::client c(demo::make_config());
+
     for (const auto& cmd : commands) {
         if (cmd.name == cmd_name) {
-            return cmd.fn(sub_args);
+            co_return co_await cmd.fn(c, sub_args);
         }
     }
 
     std::cerr << "unknown command: " << cmd_name << "\n\n";
     print_usage(prog);
-    return 1;
+    co_return 1;
 }

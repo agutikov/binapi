@@ -999,11 +999,11 @@ Phase 0 ─── Rewrite tests to async              ✅ DONE
           │
           Phase 7 ─── Unified traits across all APIs     ✅ DONE
           │
-          Phase 8 ─── Stream generators
+          Phase 8 ─── Stream generators              ✅ DONE
           │
-          Phase 9 ─── Add sync bridging tests
+          Phase 9 ─── Add sync bridging tests        ✅ DONE
           │
-          Phase 10 ── Rename and restructure examples
+          Phase 10 ── Rename and restructure examples ✅ DONE
 ```
 
 Build and run tests after every phase. Examples may be temporarily disabled (comment out `add_subdirectory` in CMake) during Phases 1-7 since they use sync API that's being removed. Tests (converted in Phase 0) stay green throughout.

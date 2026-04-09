@@ -2,7 +2,7 @@
 //
 // Local order book demo — real-time order book synchronized from the diff depth
 // stream with a REST snapshot, displayed in the terminal with ANSI escape codes.
-// Demonstrates: local_order_book class, snapshot_callback, thread-safe access.
+// Demonstrates: local_order_book with async_run() coroutine.
 
 #include "cmd_order_book.hpp"
 
@@ -16,16 +16,17 @@
 
 namespace demo {
 
-int cmd_order_book_live(const args_t& args)
+namespace types = binapi2::fapi::types;
+
+boost::cobalt::task<int> cmd_order_book_live(binapi2::fapi::client& c, const args_t& args)
 {
-    if (args.empty()) { std::cerr << "usage: order-book-live <symbol> [depth]\n"; return 1; }
+    if (args.empty()) { std::cerr << "usage: order-book-live <symbol> [depth]\n"; co_return 1; }
 
     const std::string symbol = args[0];
     const int depth = (args.size() > 1) ? std::stoi(args[1]) : 1000;
     constexpr int display_levels = 10;
 
-    binapi2::fapi::client client{ make_config() };
-    binapi2::fapi::streams::local_order_book book{ client.streams(), client };
+    binapi2::fapi::streams::local_order_book book(c.streams(), c.rest());
 
     spdlog::info("starting local order book for {} depth={}", symbol, depth);
 
@@ -37,7 +38,7 @@ int cmd_order_book_live(const args_t& args)
         std::cout << "=== " << symbol << " Order Book (update " << snap.last_update_id << ") ===\n\n";
 
         std::cout << "  ASKS (best " << display_levels << ")\n";
-        std::vector<std::pair<binapi2::fapi::types::decimal_t, binapi2::fapi::types::decimal_t>> top_asks;
+        std::vector<std::pair<types::decimal_t, types::decimal_t>> top_asks;
         {
             auto it = snap.asks.begin();
             for (int i = 0; i < display_levels && it != snap.asks.end(); ++i, ++it)
@@ -57,9 +58,9 @@ int cmd_order_book_live(const args_t& args)
         std::cout << std::flush;
     });
 
-    auto r = book.start(symbol, depth);
-    if (!r) { print_error(r.err); return 1; }
-    return 0;
+    auto r = co_await book.async_run(types::symbol_t{symbol}, depth);
+    if (!r) { print_error(r.err); co_return 1; }
+    co_return 0;
 }
 
 } // namespace demo

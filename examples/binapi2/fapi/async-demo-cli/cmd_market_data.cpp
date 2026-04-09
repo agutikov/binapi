@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 // Market data commands — public REST endpoints, no authentication required.
-// Demonstrates: execute() with endpoint_traits, named methods for shared
-// request types, and parameterless list endpoints.
+// Demonstrates: async_execute() with endpoint_traits, distinct request types,
+// and parameterless list endpoints.
 
 #include "cmd_market_data.hpp"
 
@@ -14,63 +14,57 @@
 
 namespace demo {
 
-int cmd_ping(const args_t& /*args*/)
-{
-    binapi2::fapi::client client{ make_config() };
+namespace types = binapi2::fapi::types;
 
+boost::cobalt::task<int> cmd_ping(binapi2::fapi::client& c, const args_t& /*args*/)
+{
     spdlog::debug("executing ping request");
-    auto r = client.market_data.execute(binapi2::fapi::types::ping_request_t{});
-    if (!r) { print_error(r.err); return 1; }
+    auto r = co_await c.market_data.async_execute(types::ping_request_t{});
+    if (!r) { print_error(r.err); co_return 1; }
 
     spdlog::info("pong");
     if (verbosity >= 1) print_json(*r);
-    return 0;
+    co_return 0;
 }
 
-int cmd_time(const args_t& /*args*/)
+boost::cobalt::task<int> cmd_time(binapi2::fapi::client& c, const args_t& /*args*/)
 {
-    binapi2::fapi::client client{ make_config() };
-
     spdlog::debug("executing server_time request");
-    auto r = client.market_data.execute(binapi2::fapi::types::server_time_request_t{});
-    if (!r) { print_error(r.err); return 1; }
+    auto r = co_await c.market_data.async_execute(types::server_time_request_t{});
+    if (!r) { print_error(r.err); co_return 1; }
 
     spdlog::info("server time: {}", r->serverTime);
     if (verbosity >= 1) print_json(*r);
-    return 0;
+    co_return 0;
 }
 
-int cmd_exchange_info(const args_t& args)
+boost::cobalt::task<int> cmd_exchange_info(binapi2::fapi::client& c, const args_t& args)
 {
-    binapi2::fapi::client client{ make_config() };
-
-    binapi2::fapi::types::exchange_info_request_t req;
+    types::exchange_info_request_t req;
     if (!args.empty()) req.symbol = args[0];
 
     spdlog::debug("executing exchange_info request symbol={}",
                   req.symbol.value_or("(all)"));
-    auto r = client.market_data.execute(req);
-    if (!r) { print_error(r.err); return 1; }
+    auto r = co_await c.market_data.async_execute(req);
+    if (!r) { print_error(r.err); co_return 1; }
 
     spdlog::info("symbols: {}  rate_limits: {}", r->symbols.size(), r->rateLimits.size());
     if (verbosity >= 1) print_json(*r);
-    return 0;
+    co_return 0;
 }
 
-int cmd_order_book(const args_t& args)
+boost::cobalt::task<int> cmd_order_book(binapi2::fapi::client& c, const args_t& args)
 {
-    if (args.empty()) { std::cerr << "usage: order-book <symbol> [limit]\n"; return 1; }
+    if (args.empty()) { std::cerr << "usage: order-book <symbol> [limit]\n"; co_return 1; }
 
-    binapi2::fapi::client client{ make_config() };
-
-    binapi2::fapi::types::order_book_request_t req;
+    types::order_book_request_t req;
     req.symbol = args[0];
     if (args.size() > 1) req.limit = std::stoi(args[1]);
 
     spdlog::debug("executing order_book request symbol={} limit={}",
                   req.symbol, req.limit.value_or(0));
-    auto r = client.market_data.execute(req);
-    if (!r) { print_error(r.err); return 1; }
+    auto r = co_await c.market_data.async_execute(req);
+    if (!r) { print_error(r.err); co_return 1; }
 
     spdlog::info("order book: bids={} asks={} lastUpdateId={}",
                  r->bids.size(), r->asks.size(), r->lastUpdateId);
@@ -87,22 +81,20 @@ int cmd_order_book(const args_t& args)
             std::cout << "  ask " << r->asks[static_cast<std::size_t>(i)].price
                       << " x " << r->asks[static_cast<std::size_t>(i)].quantity << '\n';
     }
-    return 0;
+    co_return 0;
 }
 
-int cmd_recent_trades(const args_t& args)
+boost::cobalt::task<int> cmd_recent_trades(binapi2::fapi::client& c, const args_t& args)
 {
-    if (args.empty()) { std::cerr << "usage: recent-trades <symbol> [limit]\n"; return 1; }
+    if (args.empty()) { std::cerr << "usage: recent-trades <symbol> [limit]\n"; co_return 1; }
 
-    binapi2::fapi::client client{ make_config() };
-
-    binapi2::fapi::types::recent_trades_request_t req;
+    types::recent_trades_request_t req;
     req.symbol = args[0];
     if (args.size() > 1) req.limit = std::stoi(args[1]);
 
     spdlog::debug("executing recent_trades request symbol={}", req.symbol);
-    auto r = client.market_data.execute(req);
-    if (!r) { print_error(r.err); return 1; }
+    auto r = co_await c.market_data.async_execute(req);
+    if (!r) { print_error(r.err); co_return 1; }
 
     spdlog::info("trades: {}", r->size());
     if (verbosity >= 1) {
@@ -112,21 +104,19 @@ int cmd_recent_trades(const args_t& args)
             std::cout << "  " << t.price << " x " << t.qty
                       << (t.isBuyerMaker ? " sell" : " buy") << '\n';
     }
-    return 0;
+    co_return 0;
 }
 
-int cmd_book_ticker(const args_t& args)
+boost::cobalt::task<int> cmd_book_ticker(binapi2::fapi::client& c, const args_t& args)
 {
-    if (args.empty()) { std::cerr << "usage: book-ticker <symbol>\n"; return 1; }
+    if (args.empty()) { std::cerr << "usage: book-ticker <symbol>\n"; co_return 1; }
 
-    binapi2::fapi::client client{ make_config() };
-
-    binapi2::fapi::types::book_ticker_request_t req;
+    types::book_ticker_request_t req;
     req.symbol = args[0];
 
     spdlog::debug("executing book_ticker_t request symbol={}", *req.symbol);
-    auto r = client.market_data.execute(req);
-    if (!r) { print_error(r.err); return 1; }
+    auto r = co_await c.market_data.async_execute(req);
+    if (!r) { print_error(r.err); co_return 1; }
 
     if (verbosity >= 1) {
         print_json(*r);
@@ -134,16 +124,14 @@ int cmd_book_ticker(const args_t& args)
         std::cout << r->symbol << "  bid: " << r->bidPrice << " x " << r->bidQty
                   << "  ask: " << r->askPrice << " x " << r->askQty << '\n';
     }
-    return 0;
+    co_return 0;
 }
 
-int cmd_book_tickers(const args_t& /*args*/)
+boost::cobalt::task<int> cmd_book_tickers(binapi2::fapi::client& c, const args_t& /*args*/)
 {
-    binapi2::fapi::client client{ make_config() };
-
     spdlog::debug("executing book_tickers (all symbols)");
-    auto r = client.market_data.book_tickers();
-    if (!r) { print_error(r.err); return 1; }
+    auto r = co_await c.market_data.async_execute(types::book_tickers_request_t{});
+    if (!r) { print_error(r.err); co_return 1; }
 
     spdlog::info("book_tickers: {}", r->size());
     if (verbosity >= 1) {
@@ -155,37 +143,33 @@ int cmd_book_tickers(const args_t& /*args*/)
                       << "  " << (*r)[static_cast<std::size_t>(i)].bidPrice
                       << " / " << (*r)[static_cast<std::size_t>(i)].askPrice << '\n';
     }
-    return 0;
+    co_return 0;
 }
 
-int cmd_price_ticker(const args_t& args)
+boost::cobalt::task<int> cmd_price_ticker(binapi2::fapi::client& c, const args_t& args)
 {
-    if (args.empty()) { std::cerr << "usage: price-ticker <symbol>\n"; return 1; }
+    if (args.empty()) { std::cerr << "usage: price-ticker <symbol>\n"; co_return 1; }
 
-    binapi2::fapi::client client{ make_config() };
-
-    binapi2::fapi::types::price_ticker_request_t req;
+    types::price_ticker_request_t req;
     req.symbol = args[0];
 
     spdlog::debug("executing price_ticker_t request symbol={}", *req.symbol);
-    auto r = client.market_data.execute(req);
-    if (!r) { print_error(r.err); return 1; }
+    auto r = co_await c.market_data.async_execute(req);
+    if (!r) { print_error(r.err); co_return 1; }
 
     if (verbosity >= 1) {
         print_json(*r);
     } else {
         std::cout << r->symbol << "  price: " << r->price << '\n';
     }
-    return 0;
+    co_return 0;
 }
 
-int cmd_price_tickers(const args_t& /*args*/)
+boost::cobalt::task<int> cmd_price_tickers(binapi2::fapi::client& c, const args_t& /*args*/)
 {
-    binapi2::fapi::client client{ make_config() };
-
     spdlog::debug("executing price_tickers (all symbols)");
-    auto r = client.market_data.price_tickers();
-    if (!r) { print_error(r.err); return 1; }
+    auto r = co_await c.market_data.async_execute(types::price_tickers_request_t{});
+    if (!r) { print_error(r.err); co_return 1; }
 
     spdlog::info("price_tickers: {}", r->size());
     if (verbosity >= 1) {
@@ -196,35 +180,31 @@ int cmd_price_tickers(const args_t& /*args*/)
             std::cout << "  " << (*r)[static_cast<std::size_t>(i)].symbol
                       << "  " << (*r)[static_cast<std::size_t>(i)].price << '\n';
     }
-    return 0;
+    co_return 0;
 }
 
-int cmd_ticker_24hr(const args_t& args)
+boost::cobalt::task<int> cmd_ticker_24hr(binapi2::fapi::client& c, const args_t& args)
 {
-    if (args.empty()) { std::cerr << "usage: ticker-24hr <symbol>\n"; return 1; }
+    if (args.empty()) { std::cerr << "usage: ticker-24hr <symbol>\n"; co_return 1; }
 
-    binapi2::fapi::client client{ make_config() };
-
-    binapi2::fapi::types::ticker_24hr_request_t req;
+    types::ticker_24hr_request_t req;
     req.symbol = args[0];
 
     spdlog::debug("executing ticker_24hr_t request symbol={}", *req.symbol);
-    auto r = client.market_data.execute(req);
-    return handle_result(r);
+    auto r = co_await c.market_data.async_execute(req);
+    co_return handle_result(r);
 }
 
-int cmd_mark_price(const args_t& args)
+boost::cobalt::task<int> cmd_mark_price(binapi2::fapi::client& c, const args_t& args)
 {
-    if (args.empty()) { std::cerr << "usage: mark-price <symbol>\n"; return 1; }
+    if (args.empty()) { std::cerr << "usage: mark-price <symbol>\n"; co_return 1; }
 
-    binapi2::fapi::client client{ make_config() };
-
-    binapi2::fapi::types::mark_price_request_t req;
+    types::mark_price_request_t req;
     req.symbol = args[0];
 
     spdlog::debug("executing mark_price_t request symbol={}", *req.symbol);
-    auto r = client.market_data.execute(req);
-    if (!r) { print_error(r.err); return 1; }
+    auto r = co_await c.market_data.async_execute(req);
+    if (!r) { print_error(r.err); co_return 1; }
 
     if (verbosity >= 1) {
         print_json(*r);
@@ -233,16 +213,14 @@ int cmd_mark_price(const args_t& args)
                   << "  index: " << r->indexPrice
                   << "  funding: " << r->lastFundingRate << '\n';
     }
-    return 0;
+    co_return 0;
 }
 
-int cmd_mark_prices(const args_t& /*args*/)
+boost::cobalt::task<int> cmd_mark_prices(binapi2::fapi::client& c, const args_t& /*args*/)
 {
-    binapi2::fapi::client client{ make_config() };
-
     spdlog::debug("executing mark_prices (all symbols)");
-    auto r = client.market_data.mark_prices();
-    if (!r) { print_error(r.err); return 1; }
+    auto r = co_await c.market_data.async_execute(types::mark_prices_request_t{});
+    if (!r) { print_error(r.err); co_return 1; }
 
     spdlog::info("mark_prices: {}", r->size());
     if (verbosity >= 1) {
@@ -253,25 +231,23 @@ int cmd_mark_prices(const args_t& /*args*/)
             std::cout << "  " << (*r)[static_cast<std::size_t>(i)].symbol
                       << "  " << (*r)[static_cast<std::size_t>(i)].markPrice << '\n';
     }
-    return 0;
+    co_return 0;
 }
 
-int cmd_klines(const args_t& args)
+boost::cobalt::task<int> cmd_klines(binapi2::fapi::client& c, const args_t& args)
 {
-    if (args.size() < 2) { std::cerr << "usage: klines <symbol> <interval> [limit]\n"; return 1; }
+    if (args.size() < 2) { std::cerr << "usage: klines <symbol> <interval> [limit]\n"; co_return 1; }
 
-    binapi2::fapi::client client{ make_config() };
-
-    binapi2::fapi::types::kline_request_t req;
+    types::klines_request_t req;
     req.symbol = args[0];
-    req.interval = parse_enum<binapi2::fapi::types::kline_interval_t>(args[1]);
+    req.interval = parse_enum<types::kline_interval_t>(args[1]);
     if (args.size() > 2) req.limit = std::stoi(args[2]);
 
     spdlog::debug("executing klines request symbol={} interval={}",
                   req.symbol, to_string(req.interval));
 
-    auto r = client.market_data.klines(req);
-    if (!r) { print_error(r.err); return 1; }
+    auto r = co_await c.market_data.async_execute(req);
+    if (!r) { print_error(r.err); co_return 1; }
 
     spdlog::info("klines: {}", r->size());
     if (verbosity >= 1) {
@@ -282,36 +258,32 @@ int cmd_klines(const args_t& args)
                       << "  O:" << k.open << " H:" << k.high
                       << " L:" << k.low << " C:" << k.close << '\n';
     }
-    return 0;
+    co_return 0;
 }
 
-int cmd_funding_rate(const args_t& args)
+boost::cobalt::task<int> cmd_funding_rate(binapi2::fapi::client& c, const args_t& args)
 {
-    if (args.empty()) { std::cerr << "usage: funding-rate <symbol> [limit]\n"; return 1; }
+    if (args.empty()) { std::cerr << "usage: funding-rate <symbol> [limit]\n"; co_return 1; }
 
-    binapi2::fapi::client client{ make_config() };
-
-    binapi2::fapi::types::funding_rate_history_request_t req;
+    types::funding_rate_history_request_t req;
     req.symbol = args[0];
     if (args.size() > 1) req.limit = std::stoi(args[1]);
 
     spdlog::debug("executing funding_rate_history request symbol={}", *req.symbol);
-    auto r = client.market_data.execute(req);
-    return handle_result(r);
+    auto r = co_await c.market_data.async_execute(req);
+    co_return handle_result(r);
 }
 
-int cmd_open_interest(const args_t& args)
+boost::cobalt::task<int> cmd_open_interest(binapi2::fapi::client& c, const args_t& args)
 {
-    if (args.empty()) { std::cerr << "usage: open-interest <symbol>\n"; return 1; }
+    if (args.empty()) { std::cerr << "usage: open-interest <symbol>\n"; co_return 1; }
 
-    binapi2::fapi::client client{ make_config() };
-
-    binapi2::fapi::types::open_interest_request_t req;
+    types::open_interest_request_t req;
     req.symbol = args[0];
 
     spdlog::debug("executing open_interest_t request symbol={}", req.symbol);
-    auto r = client.market_data.execute(req);
-    return handle_result(r);
+    auto r = co_await c.market_data.async_execute(req);
+    co_return handle_result(r);
 }
 
 } // namespace demo

@@ -3,11 +3,9 @@
 
 
 
-
-
-
-
-
+what is still not async in async-demo-cli?
+cout, cerr - how can make it async?
+what else?
 
 
 review and update documents in docs/binapi2 according to current state, remove plans
@@ -17,11 +15,14 @@ review and update documents in docs/binapi2 according to current state, remove p
 --------------------------------------------------------------------------------
 
 
+How to implement Throughput benchmarks w/o server?
+Or without transport?
 
-Throughput benchmarks w/o WS transport.
-    - record some samples from testnet
-        - or generate if no keys available
-    - write a benchmark that repeats those samples
+At lease streams parsing benchmark:
+- record some samples from testnet
+    - or generate if no keys available
+- write a benchmark that repeats those samples
+- implement in tests/binapi2/fapi/benchmarks
 
 
 --------------------------------------------------------------------------------
@@ -40,7 +41,8 @@ parsing json into variant
 --------------------------------------------------------------------------------
 
 
-REST benchmark with postman mock
+ benchmark REST with postman mock
+
 
 --------------------------------------------------------------------------------
 
@@ -130,7 +132,6 @@ all tests from demo-cli, including local order book
 
 binapi2 connect to real account
 
-record something
 
 
 --------------------------------------------------------------------------------

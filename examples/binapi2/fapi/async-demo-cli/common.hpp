@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 //
-// binapi2-fapi-demo-cli: demonstration client for the binapi2 fapi library.
+// binapi2-fapi-async-demo-cli: async demonstration client for the binapi2 fapi library.
 
 #pragma once
 
@@ -8,6 +8,8 @@
 #include <binapi2/fapi/error.hpp>
 #include <binapi2/fapi/result.hpp>
 #include <binapi2/fapi/types/enums.hpp>
+
+#include <boost/cobalt/task.hpp>
 
 #include <glaze/glaze.hpp>
 #include <spdlog/spdlog.h>
@@ -18,6 +20,8 @@
 #include <string>
 #include <string_view>
 #include <vector>
+
+namespace binapi2::fapi { class client; }
 
 namespace demo {
 
@@ -38,6 +42,9 @@ inline std::string record_file;
 inline std::string log_file;
 inline std::string file_loglevel;
 inline std::string stdout_loglevel;
+
+// Command function pointer type: async, takes client& and args.
+using command_fn = boost::cobalt::task<int> (*)(binapi2::fapi::client&, const args_t&);
 
 // Initialize spdlog (call once from main).
 void init_logging();
@@ -107,6 +114,6 @@ E parse_enum(std::string_view s)
 }
 
 // Find a --key (or -k short) value pair in args, return value or empty.
-std::string_view find_flag(const args_t& args, std::string_view key, std::string_view short_key = {});
+std::string_view find_flag(const args_t& args, std::string_view key, std::string_view short_key);
 
 } // namespace demo
