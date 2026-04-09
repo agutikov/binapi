@@ -14,9 +14,10 @@ skinparam packageStyle frame
 package "binapi2::fapi" {
 
   [client] as CLI
+  note right of CLI : Pure container.\nNo threads, no io_context,\nno executor ownership.
 
-  package "REST Services" {
-    [service (base)] as SVC
+  package "REST" {
+    [rest::pipeline] as PIP
     [market_data_service] as MDS
     [account_service] as ACS
     [trade_service] as TRS
@@ -24,14 +25,14 @@ package "binapi2::fapi" {
     [user_data_stream_service] as UDS
   }
 
-  package "WebSocket Streams" {
+  package "WebSocket API" {
+    [websocket_api::client] as WSA
+  }
+
+  package "Streams" {
     [market_streams] as MS
     [user_streams] as US
     [local_order_book] as LOB
-  }
-
-  package "WebSocket API" {
-    [websocket_api::client] as WSA
   }
 
   package "Transport" {
@@ -39,14 +40,25 @@ package "binapi2::fapi" {
     [websocket_client] as WS
   }
 
-  package "Infrastructure" {
-    [config] as CFG
+  package "Pure Functions" {
     [signing] as SIGN
     [query (to_query_map)] as QRY
+    [json_opts / decode] as DEC
     [endpoint_traits] as ET
+  }
+
+  package "Types" {
+    [request_tags] as RTAG
+    [subscriptions] as SUB
     [result<T> / error] as RES
     [types] as TYP
   }
+}
+
+package "User-provided Execution" {
+  [cobalt::main] as CMAIN
+  [io_thread] as IOT
+  [thread_pool / io_context] as POOL
 }
 
 cloud "Binance" {
@@ -55,10 +67,11 @@ cloud "Binance" {
   [WebSocket API\nws-fapi.binance.com] as BWSAPI
 }
 
-MDS --|> SVC
-ACS --|> SVC
-TRS --|> SVC
-CVS --|> SVC
+MDS --> PIP
+ACS --> PIP
+TRS --> PIP
+CVS --> PIP
+UDS --> PIP
 
 CLI --> MDS
 CLI --> ACS
@@ -66,41 +79,56 @@ CLI --> TRS
 CLI --> CVS
 CLI --> UDS
 
-SVC --> CLI : execute / async_execute
-SVC --> ET : endpoint_traits<Request>
-SVC --> QRY : to_query_map(request)
+PIP --> HTTP
+PIP --> SIGN
+PIP --> QRY
+PIP --> DEC
+PIP ..> ET
 
-CLI --> HTTP
 WSA --> WS
+WSA --> SIGN
 
 MS --> WS
 US --> WS
 LOB --> MS
-LOB --> CLI
+LOB --> PIP
 
-HTTP --> SIGN
-WSA --> SIGN
 HTTP --> BREST
 WS --> BSTREAM
 WS --> BWSAPI
+
+CMAIN ..> CLI : drives coroutines
+IOT ..> CLI : run_sync bridge
+POOL ..> CLI : spawn + future
 @enduml
 ```
+
+### Layer Architecture
+
+| Layer | Components | Owns executor? |
+|---|---|---|
+| **1. Pure functions** | `signing.hpp`, `query.hpp`, `json_opts.hpp`, `detail/decode.hpp` | No |
+| **2. Async I/O** | `transport::http_client`, `transport::websocket_client` | No -- uses `this_coro::executor` |
+| **3. Protocol** | `rest::pipeline`, `websocket_api::client`, `streams::market_streams`, `streams::user_streams` | No |
+| **4. Execution** | `detail::io_thread`, `cobalt::main`, `thread_pool`, manual `io_context` | Yes -- user-provided |
+| **5. Facade** | `client` | No -- pure container |
 
 ---
 
 ## Async Model
 
-All I/O is built on **Boost.Cobalt** C++20 coroutines. The async implementation is the primary layer; sync wraps async.
+All I/O is built on **Boost.Cobalt** C++20 coroutines. Every method returns
+`cobalt::task<result<T>>`. There are no sync wrappers anywhere in the library.
 
 ```plantuml
 @startuml
 skinparam classAttributeIconSize 0
 
-package "Transport (async primary)" {
+package "Transport (async only)" {
   class http_client {
     +async_request(...) : cobalt::task<result<http_response>>
-    +request(...) : result<http_response>
-    .. sync wraps async via cobalt::run() ..
+    .. config-only constructor ..
+    .. no sync wrappers ..
   }
 
   class websocket_client {
@@ -108,57 +136,65 @@ package "Transport (async primary)" {
     +async_write_text(...) : cobalt::task<result<void>>
     +async_read_text() : cobalt::task<result<string>>
     +async_close() : cobalt::task<result<void>>
-    .. sync wrappers ..
-    +connect(...) : result<void>
-    +write_text(...) : result<void>
-    +read_text() : result<string>
-    +close() : result<void>
+    .. config-only constructor ..
+    .. no sync wrappers ..
   }
 }
 
-package "Client" {
-  class client {
-    +execute<Request>(request) : result<response_type>
+package "Pipeline" {
+  class "rest::pipeline" as pip {
     +async_execute<Request>(request) : cobalt::task<result<response_type>>
+    +async_execute<Response>(verb, path, query, signed) : cobalt::task<result<Response>>
   }
 }
 
-package "Service" {
+package "Services" {
   class "rest::service" as svc {
-    +execute<Request>(request) : result<response_type>
+    #pipeline_ : pipeline&
+  }
+  class "account_service" as acs {
     +async_execute<Request>(request) : cobalt::task<result<response_type>>
+    .. requires is_account_request<Request> ..
   }
 }
 
-svc --> client : delegates
-client --> http_client : async_request / request
+acs --|> svc
+svc --> pip : delegates
+pip --> http_client : async_request
 @enduml
 ```
 
-**Transport**: `http_client::async_request()` uses `co_await` at each I/O step (resolve, connect, TLS handshake, write, read) — non-blocking, yields to the event loop between steps. `request()` wraps it with `cobalt::run()`.
+**Transport**: `http_client::async_request()` uses `co_await` at each I/O step
+(resolve, connect, TLS handshake, write, read) -- non-blocking, yields to the event
+loop between steps.
 
-**No callbacks**: the old `callback_type<T> = std::function<void(result<T>)>` pattern is removed. Async methods return `cobalt::task<result<T>>` which is awaitable.
+**No callbacks**: the old `callback_type<T> = std::function<void(result<T>)>` pattern
+is removed. Async methods return `cobalt::task<result<T>>` which is awaitable.
+
+**No sync wrappers**: there are no `execute()` methods that wrap async. Bridging to
+sync is done by the user via `io_thread::run_sync()` or `cobalt::spawn + use_future`.
 
 **Usage:**
 ```cpp
-// Sync:
-auto result = client.trade.execute(new_order_request{...});
-
-// Async (in a coroutine):
-auto result = co_await client.trade.async_execute(new_order_request{...});
-
-// Async entry point:
+// Async (in cobalt::main):
 boost::cobalt::main co_main(int, char*[]) {
-    auto result = co_await client.market_data.async_execute(ping_request{});
+    fapi::client c(cfg);
+    auto result = co_await c.market_data.async_execute(exchange_info_request{});
     co_return 0;
 }
+
+// Sync bridge (via io_thread):
+fapi::detail::io_thread io;
+fapi::client c(cfg);
+auto result = io.run_sync(c.market_data.async_execute(exchange_info_request{}));
 ```
 
 ---
 
 ## Generic Request Dispatch
 
-The core design pattern: **request types carry all the information needed to dispatch an API call**.
+The core design pattern: **request types carry all the information needed to dispatch
+an API call**.
 
 ### REST API
 
@@ -166,15 +202,16 @@ The core design pattern: **request types carry all the information needed to dis
 @startuml
 skinparam classAttributeIconSize 0
 
-class "rest::service" as SVC {
-  #owner_ : client&
+class "rest::pipeline" as PIP {
+  -cfg_ : config&
+  -http_ : http_client&
   --
-  +execute<Request>(request) : result<response_type>
   +async_execute<Request>(request) : task<result<response_type>>
+  +async_execute<Response>(verb, path, query, signed) : task<result<Response>>
 }
 
 class "rest::endpoint_traits<Request>" as ET <<specialization>> {
-  +{static} response_type : type alias
+  +{static} response_type_t : type alias
   +{static} endpoint : endpoint_metadata&
 }
 
@@ -193,40 +230,42 @@ class "to_query_map<T>" as QM <<function>> {
   Returns query_map
 }
 
-class "market_data_service" as MDS {
-  Inherits execute/async_execute
-  --
-  using ping_request = types::ping_request
-  using exchange_info_request = ...
-  ... (type aliases)
-  --
-  klines(kline_request) : named method
-  async_klines(kline_request) : task
-  .. (shared request type methods)
-}
-
-class "client" as CLI {
-  +execute<Request>(request) : result<response_type>
+class "account_service" as ACS {
   +async_execute<Request>(request) : task<result<response_type>>
+  .. requires is_account_request<Request> ..
   --
-  -prepare_and_send(method, path, query, signed) : result<http_response>
-  -async_prepare_and_send(method, path, query, signed) : task<result<http_response>>
+  using account_information_request = ...
+  using balances_request = ...
+  ... (type aliases)
 }
 
-MDS --|> SVC
-SVC --> CLI : delegates
-SVC ..> ET : resolves endpoint
-SVC ..> QM : serializes request
+class "rest::service" as SVC {
+  #pipeline_ : pipeline&
+}
+
+ACS --|> SVC
+SVC --> PIP : delegates
+PIP ..> ET : resolves endpoint
+PIP ..> QM : serializes request
 ET --> EM
 @enduml
 ```
 
 **How it works:**
 
-1. `service::execute(request)` looks up `endpoint_traits<Request>` at compile time to get the endpoint metadata and response type
-2. `to_query_map(request)` uses `glz::reflect<T>` to serialize the request struct fields into a `query_map`, skipping `std::optional` nullopts and converting enums via `to_string()`
-3. `client::execute<Response>()` handles signing, query string encoding, HTTP transport, and JSON response deserialization
-4. `async_execute` follows the same path but uses `co_await` through `async_prepare_and_send` → `http_client::async_request`
+1. `service::async_execute(request)` is constrained by a per-service concept
+   (e.g., `is_account_request<Request>`) that checks the request type's tag
+2. Delegates to `pipeline::async_execute(request)` which looks up
+   `endpoint_traits<Request>` at compile time
+3. `to_query_map(request)` uses `glz::reflect<T>` to serialize the request struct
+   fields into a `query_map`
+4. Pipeline handles signing, query string encoding, HTTP transport, and JSON
+   response deserialization
+
+**Service concepts and tags:** Each request type carries a tag from `request_tags.hpp`
+(e.g., `rest_account_tag`, `rest_market_data_tag`). Service tags live in
+`endpoint_traits` -- not in request structs -- because glaze reflection breaks with
+struct inheritance/using declarations.
 
 ### WebSocket API
 
@@ -235,142 +274,147 @@ ET --> EM
 skinparam classAttributeIconSize 0
 
 class "websocket_api::client" as WSC {
-  +execute<Request>(request) : result<ws_response<response_type>>
+  +async_connect() : task<result<void>>
+  +async_close() : task<result<void>>
   +async_execute<Request>(request) : task<result<ws_response<response_type>>>
-  --
-  -inject_auth(request) : Request
-  -send_rpc<Response>(method, params) : result<ws_response<Response>>
-  -make_signed_request_base() : signed_request
+  +async_session_logon() : task<result<ws_response<logon_result>>>
 }
 
 class "ws::endpoint_traits<Request>" as WET <<specialization>> {
-  +{static} response_type : type alias
+  +{static} response_type_t : type alias
   +{static} method : string_view (RPC method name)
+  +{static} auth : ws_auth_mode (optional)
+}
+
+enum ws_auth_mode {
+  inject
+  none
+  signed_base
+  api_key_only
 }
 
 note right of WSC
-  Auth injection is automatic:
-  if Request inherits from
-  websocket_api_signed_request,
-  auth fields are populated.
+  Auth mode dispatch via if constexpr:
+  - inject: inject_auth(request) for signed requests with user params
+  - none: send as-is (unsigned market data)
+  - signed_base: make_signed_request_base() for parameterless signed
+  - api_key_only: {apiKey: ...} for user data stream management
 end note
 
-WSC ..> WET : resolves method + response
+WSC ..> WET : resolves method + response + auth
 @enduml
 ```
+
+`async_execute` is the single generic entry point. Auth mode is resolved at compile time
+from `ws::endpoint_traits`. `session_logon` is the only named method (custom auth flow
+that cannot use the generic dispatch).
 
 ---
 
-## Request Flow
-
-### Sync
-
-```plantuml
-@startuml
-actor User
-participant "service" as SVC
-participant "endpoint_traits" as ET
-participant "to_query_map" as QM
-participant "client" as C
-participant "signing" as S
-participant "http_client" as H
-participant "Binance REST" as B
-
-User -> SVC: execute(kline_request{symbol, interval, ...})
-SVC -> ET: endpoint_traits<kline_request>::endpoint
-ET --> SVC: {GET, "/fapi/v1/klines", unsigned}
-SVC -> QM: to_query_map(request)
-QM --> SVC: query_map{"symbol":"BTCUSDT","interval":"1h",...}
-SVC -> C: execute<vector<kline>>(GET, path, query, false)
-C -> C: prepare_and_send(method, path, query, signed)
-C -> S: inject_auth_query + sign_query (if signed)
-C -> H: request(method, target, body, content_type, api_key)
-note right: cobalt::run(async_request(...))
-H -> B: HTTPS GET /fapi/v1/klines?...
-B --> H: JSON response
-H --> C: result<http_response>
-C -> C: decode_response<vector<kline>>
-C --> User: result<vector<kline>>
-@enduml
-```
-
-### Async
+## Request Flow (Async)
 
 ```plantuml
 @startuml
 actor "User\n(coroutine)" as User
 participant "service" as SVC
-participant "client" as C
+participant "pipeline" as PIP
+participant "endpoint_traits" as ET
+participant "to_query_map" as QM
+participant "signing" as S
 participant "http_client" as H
 participant "Binance REST" as B
 
-User -> SVC: co_await async_execute(kline_request{...})
-SVC -> C: co_await async_execute(request)
-C -> C: co_await async_prepare_and_send(...)
-C -> H: co_await async_request(...)
+User -> SVC: co_await async_execute(kline_request{symbol, interval, ...})
+SVC -> PIP: co_await async_execute(request)
+PIP -> ET: endpoint_traits<kline_request>::endpoint
+ET --> PIP: {GET, "/fapi/v1/klines", unsigned}
+PIP -> QM: to_query_map(request)
+QM --> PIP: query_map{"symbol":"BTCUSDT","interval":"1h",...}
+PIP -> S: inject_auth_query + sign_query (if signed)
+PIP -> H: co_await async_request(method, target, body, content_type, api_key)
 
-H -> H: co_await resolver.async_resolve(...)
+H -> H: co_await async_resolve()
 note right: yields to event loop
-H -> H: co_await async_connect(...)
-note right: yields to event loop
-H -> H: co_await async_handshake(...)
-note right: yields to event loop
-H -> H: co_await async_write(...)
-note right: yields to event loop
-H -> H: co_await async_read(...)
-note right: yields to event loop
+H -> H: co_await async_connect()
+H -> H: co_await async_handshake()
+H -> H: co_await async_write()
+H -> H: co_await async_read()
 
-H --> C: result<http_response>
-C -> C: decode_response<vector<kline>>
-C --> User: result<vector<kline>>
+H --> PIP: result<http_response>
+PIP -> PIP: decode_response<vector<kline>>
+PIP --> User: result<vector<kline>>
 @enduml
 ```
 
 ---
 
-## Stream Lifecycle
+## Stream Architecture
+
+### Generator Pattern (recommended)
+
+Streams use `cobalt::generator` for typed async iteration:
 
 ```plantuml
 @startuml
 actor User
 participant "market_streams" as MS
+participant "stream_traits" as ST
 participant "websocket_client" as WS
 participant "Binance WSS" as B
 
-User -> MS: connect_aggregate_trade({symbol:"BTCUSDT"})
-MS -> WS: connect("fstream.binance.com", "/ws/btcusdt@aggTrade")
-WS -> B: WSS handshake
+User -> MS: subscribe(book_ticker_subscription{.symbol = "BTCUSDT"})
+MS -> ST: stream_traits<Subscription>::target(cfg, sub)
+ST --> MS: "/ws/btcusdt@bookTicker"
+MS -> WS: co_await async_connect(host, target)
+WS -> B: TLS + WSS handshake
 B --> WS: connected
-WS --> MS: result<void> success
-MS --> User: result<void>
+MS --> User: generator<result<book_ticker_stream_event_t>>
 
-User -> MS: read_aggregate_trade_loop(handler)
-loop until handler returns false
-  B --> WS: JSON message
+loop co_await generator
+  B --> WS: JSON frame
   WS --> MS: raw text
-  MS -> MS: deserialize to aggregate_trade_stream_event
-  MS -> User: handler(event) -> bool
+  MS -> MS: glz::read<Event>(payload)
+  MS --> User: co_yield result<Event>::success(event)
 end
 @enduml
 ```
 
----
+`stream_traits<Subscription>` maps subscription types to target URLs and event types
+at compile time. The generator yields `result<Event>` until an error or disconnect.
 
-## Local Order Book Sync
+### User Data Streams
+
+User streams return a `cobalt::generator<result<user_stream_event_t>>` where
+`user_stream_event_t` is a `std::variant` of 10 event types:
+
+```cpp
+auto stream = c.user_streams().subscribe(listen_key);
+while (stream) {
+    auto event = co_await stream;
+    if (!event) break;
+    std::visit(overloaded{
+        [](const order_trade_update_event_t& e) { /* ... */ },
+        [](const account_update_event_t& e) { /* ... */ },
+        [](const auto&) {}
+    }, *event);
+}
+```
+
+### Local Order Book
 
 ```plantuml
 @startuml
 participant "local_order_book" as LOB
 participant "market_streams" as MS
-participant "client (REST)" as REST
+participant "rest::pipeline" as REST
 participant "Binance" as B
 
-LOB -> MS: connect_diff_book_depth({symbol})
+LOB -> MS: subscribe(depth_subscription{symbol})
 MS -> B: WSS subscribe depth stream
 
 LOB -> LOB: buffer incoming depth events
 
-LOB -> REST: execute(order_book_request{symbol, limit})
+LOB -> REST: co_await async_execute(order_book_request{symbol, limit})
 REST -> B: GET /fapi/v1/depth
 B --> REST: snapshot (lastUpdateId = S)
 REST --> LOB: order_book_response
@@ -379,7 +423,7 @@ LOB -> LOB: discard buffered events where u <= S
 LOB -> LOB: apply remaining buffered events
 LOB -> LOB: synced = true
 
-loop continuous
+loop continuous (async_run coroutine)
   B --> MS: depth diff event
   MS --> LOB: apply_event(event)
   LOB -> LOB: update bids/asks maps
@@ -388,13 +432,18 @@ end
 @enduml
 ```
 
+`local_order_book::async_run(symbol, depth_limit)` is a coroutine that runs the
+entire sync algorithm. It takes references to `market_streams` and `rest::pipeline`.
+
 ---
 
 ## Type System
 
-### Request → Endpoint Mapping
+### Request -> Endpoint Mapping
 
-Request types with a 1:1 endpoint mapping have `endpoint_traits` (REST) or `ws::endpoint_traits` (WebSocket API) specializations. These are dispatched generically via `execute(request)` / `async_execute(request)`.
+Request types with a 1:1 endpoint mapping have `endpoint_traits` (REST) or
+`ws::endpoint_traits` (WebSocket API) specializations. These are dispatched generically
+via `async_execute(request)`.
 
 Shared request types (used by multiple endpoints) retain named service methods:
 
@@ -408,57 +457,81 @@ Shared request types (used by multiple endpoints) retain named service methods:
 
 ### Query Serialization
 
-`to_query_map<T>(request)` uses compile-time reflection via `glz::reflect<T>` to automatically build URL query parameters from request struct fields:
+`to_query_map<T>(request)` uses compile-time reflection via `glz::reflect<T>` to
+automatically build URL query parameters from request struct fields:
 
-- `std::string` → passed as-is
-- `std::uint64_t`, `int` → `std::to_string()`
-- `bool` → `"true"` / `"false"`
-- fapi enums → `types::to_string()` (e.g., `order_side::buy` → `"BUY"`)
-- `std::optional<T>` where value is nullopt → skipped entirely
+- `std::string` -> passed as-is
+- `std::uint64_t`, `int` -> `std::to_string()`
+- `bool` -> `"true"` / `"false"`
+- fapi enums -> `types::to_string()` (e.g., `order_side::buy` -> `"BUY"`)
+- `std::optional<T>` where value is nullopt -> skipped entirely
 - Works with both `glz::meta`-annotated and plain `reflectable` aggregates
 
 ---
 
 ## Access Modes
 
-Every method supports **synchronous** (returns `result<T>`) and **asynchronous** (returns `cobalt::task<result<T>>`) access. Sync wraps async via `cobalt::run()`.
+All methods are async-only (`cobalt::task<result<T>>`). Sync access is achieved via
+user-provided bridging (e.g., `io_thread::run_sync()`).
 
 | Access Mode | Transport | Authentication | Latency | Use Case |
 |---|---|---|---|---|
 | REST Request | HTTPS | API key in header, HMAC-SHA256 signed query | Medium | Account queries, order placement, market data snapshots |
 | WebSocket Stream | WSS | None (market) / Listen key (user) | Low | Real-time market data, account events |
-| WebSocket API | WSS | HMAC-SHA256 per message | Lowest | Low-latency trading without HTTP overhead |
+| WebSocket API | WSS | HMAC-SHA256 per message (4 auth modes) | Lowest | Low-latency trading without HTTP overhead |
 | Local Order Book | WSS + REST | None | Low | Synchronized local depth book |
 
 ---
 
 ## Service Classes
 
-Services inherit from `rest::service` which provides generic `execute(request)` / `async_execute(request)`. Each service pulls request types from the `types` namespace via `using` declarations. Named methods have both sync (`method`) and async (`async_method`) variants.
+Services inherit from `rest::service` which holds a `pipeline&` reference. Each
+derived service provides a constrained `async_execute` that only accepts request types
+tagged for that service (via concepts like `is_account_request`, `is_market_data_request`).
 
 ### 1. Market Data Service (`rest::market_data_service`)
 
 Public endpoints. No authentication required.
 
-Generic (via `execute` / `async_execute`): `ping_request`, `server_time_request`, `exchange_info_request`, `order_book_request`, `recent_trades_request`, `aggregate_trades_request`, `continuous_kline_request`, `index_price_kline_request`, `book_ticker_request`, `price_ticker_request`, `ticker_24hr_request`, `mark_price_request`, `funding_rate_history_request`, `open_interest_request`, `historical_trades_request`, `basis_request`, `price_ticker_v2_request`, `delivery_price_request`, `composite_index_info_request`, `index_constituents_request`, `asset_index_request`, `insurance_fund_request`, `adl_risk_request`, `rpi_depth_request`, `trading_schedule_request`
+Generic (via `async_execute`): `ping_request`, `server_time_request`,
+`exchange_info_request`, `order_book_request`, `recent_trades_request`,
+`aggregate_trades_request`, `continuous_kline_request`, `index_price_kline_request`,
+`book_ticker_request`, `price_ticker_request`, `ticker_24hr_request`,
+`mark_price_request`, `funding_rate_history_request`, `open_interest_request`,
+`historical_trades_request`, `basis_request`, `price_ticker_v2_request`,
+`delivery_price_request`, `composite_index_info_request`, `index_constituents_request`,
+`asset_index_request`, `insurance_fund_request`, `adl_risk_request`,
+`rpi_depth_request`, `trading_schedule_request`
 
-Named methods: `klines` / `async_klines`, `mark_price_klines` / `async_mark_price_klines`, `premium_index_klines` / `async_premium_index_klines` (shared `kline_request`); `open_interest_statistics` / `async_open_interest_statistics`, `top_long_short_account_ratio` / `async_top_long_short_account_ratio`, `top_trader_long_short_ratio` / `async_top_trader_long_short_ratio`, `long_short_ratio` / `async_long_short_ratio`, `taker_buy_sell_volume` / `async_taker_buy_sell_volume` (shared `futures_data_request`); `book_tickers` / `async_book_tickers`, `price_tickers` / `async_price_tickers`, `price_tickers_v2` / `async_price_tickers_v2`, `ticker_24hrs` / `async_ticker_24hrs`, `mark_prices` / `async_mark_prices`, `funding_rate_info` / `async_funding_rate_info` (parameterless)
+Parameterless request types: `balances_request_t`, `klines_request_t`, etc.
+Named methods for shared request types: `klines`, `mark_price_klines`,
+`premium_index_klines`, `open_interest_statistics`, etc.
 
 ### 2. Account Service (`rest::account_service`)
 
 Signed endpoints.
 
-Generic: `position_risk_request`, `symbol_config_request`, `income_history_request`, `leverage_bracket_request`, `commission_rate_request`, `toggle_bnb_burn_request`, `quantitative_rules_request`, `pm_account_info_request`
-
-Named methods: `account_information` / `async_account_information`, `balances` / `async_balances`, `account_config` / `async_account_config`, `get_multi_assets_mode` / `async_get_multi_assets_mode`, `get_position_mode` / `async_get_position_mode`, `rate_limit_order` / `async_rate_limit_order`, `get_bnb_burn` / `async_get_bnb_burn` (parameterless); `download_id_*` / `async_download_id_*`, `download_link_*` / `async_download_link_*` (shared request types)
+Generic: `account_information_request`, `balances_request`, `account_config_request`,
+`position_risk_request`, `symbol_config_request`, `income_history_request`,
+`leverage_bracket_request`, `commission_rate_request`, `get_multi_assets_mode_request`,
+`get_position_mode_request`, `rate_limit_order_request`, `get_bnb_burn_request`,
+`toggle_bnb_burn_request`, `quantitative_rules_request`, `pm_account_info_request`,
+`download_id_*_request`, `download_link_*_request`
 
 ### 3. Trade Service (`rest::trade_service`)
 
 Signed endpoints.
 
-Generic: `new_order_request`, `modify_order_request`, `cancel_order_request`, `query_order_request`, `cancel_all_open_orders_request`, `auto_cancel_request`, `query_open_order_request`, `all_open_orders_request`, `all_orders_request`, `position_info_v3_request`, `adl_quantile_request`, `force_orders_request`, `account_trade_request`, `change_position_mode_request`, `change_multi_assets_mode_request`, `change_leverage_request`, `change_margin_type_request`, `modify_isolated_margin_request`, `position_margin_history_request`, `order_modify_history_request`, `new_algo_order_request`, `cancel_algo_order_request`, `query_algo_order_request`, `all_algo_orders_request`
-
-Named methods: `test_order` / `async_test_order`, `batch_orders` / `async_batch_orders`, `modify_batch_orders` / `async_modify_batch_orders`, `cancel_batch_orders` / `async_cancel_batch_orders` (special); `open_algo_orders` / `async_open_algo_orders`, `cancel_all_algo_orders` / `async_cancel_all_algo_orders`, `tradfi_perps` / `async_tradfi_perps` (parameterless)
+Generic: `new_order_request`, `modify_order_request`, `cancel_order_request`,
+`query_order_request`, `cancel_all_open_orders_request`, `auto_cancel_request`,
+`query_open_order_request`, `all_open_orders_request`, `all_orders_request`,
+`position_info_v3_request`, `adl_quantile_request`, `force_orders_request`,
+`account_trade_request`, `change_position_mode_request`,
+`change_multi_assets_mode_request`, `change_leverage_request`,
+`change_margin_type_request`, `modify_isolated_margin_request`,
+`position_margin_history_request`, `order_modify_history_request`,
+`new_algo_order_request`, `cancel_algo_order_request`, `query_algo_order_request`,
+`all_algo_orders_request`
 
 ### 4. Convert Service (`rest::convert_service`)
 
@@ -466,25 +539,38 @@ Fully generic: `quote_request`, `accept_request`, `order_status_request`
 
 ### 5. User Data Stream Service (`rest::user_data_stream_service`)
 
-Named methods: `start` / `async_start`, `keepalive` / `async_keepalive`, `close` / `async_close`
+REST management of listen keys: `async_start`, `async_keepalive`, `async_close`
 
 ### 6. WebSocket API (`websocket_api::client`)
 
-Generic (via `execute` / `async_execute`): `order_place_request`, `order_query_request`, `order_cancel_request`, `order_modify_request`, `position_request`, `book_ticker_request`, `price_ticker_request`, `algo_order_place_request`, `algo_order_cancel_request`
+Generic (via `async_execute`): `order_place_request`, `order_query_request`,
+`order_cancel_request`, `order_modify_request`, `position_request`,
+`book_ticker_request`, `price_ticker_request`, `algo_order_place_request`,
+`algo_order_cancel_request`, `account_status_request`, `account_status_v2_request`,
+`account_balance_request`, `user_data_stream_start_request`,
+`user_data_stream_ping_request`, `user_data_stream_stop_request`
 
-Named methods: `session_logon` / `async_session_logon`, `account_status` / `async_account_status`, `account_status_v2` / `async_account_status_v2`, `account_balance` / `async_account_balance`, `account_position_v2` / `async_account_position_v2` (shared type), `user_data_stream_start` / `async_user_data_stream_start`, `user_data_stream_ping` / `async_user_data_stream_ping`, `user_data_stream_stop` / `async_user_data_stream_stop` (shared type), `connect` / `async_connect`, `close` / `async_close`
+Named methods: `async_session_logon` (custom auth flow), `async_connect`, `async_close`
 
 ### 7. Market Streams (`streams::market_streams`)
 
-Real-time WebSocket market data. Connect/read loop pattern per stream type. See [implementation_status.md] for full stream list.
+Real-time WebSocket market data via generator pattern:
+- `subscribe(subscription)` -> `cobalt::generator<result<Event>>`
+- `async_connect(subscription)` + `async_read_event<Event>()` for typed connect/read
+- `async_connect(target)` + `async_read_text()` for low-level access
 
 ### 8. User Streams (`streams::user_streams`)
 
-Real-time account events via listen key. Multiplexed event handlers for order updates, balance changes, margin calls, etc.
+Real-time account events:
+- `subscribe(listen_key)` -> `cobalt::generator<result<user_stream_event_t>>`
+- `async_connect(listen_key)` + `async_read_text()` for low-level access
 
 ### 9. Local Order Book (`streams::local_order_book`)
 
-Thread-safe synchronized local order book. Combines REST snapshots with WebSocket depth diffs.
+Async locally maintained order book:
+- `async_run(symbol, depth_limit)` -> `cobalt::task<result<void>>`
+- Takes `market_streams&` and `rest::pipeline&` references
+- Thread-safe snapshot via `snapshot()` method
 
 ---
 

@@ -34,6 +34,41 @@ Source: `include/binapi2/fapi/types/enums.hpp`
 [common-definition.md]: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
 
 
+## Strong types
+
+Source: `include/binapi2/fapi/types/detail/symbol.hpp`, `include/binapi2/fapi/types/detail/pair.hpp`, `include/binapi2/fapi/types/detail/decimal.hpp`
+
+| Type | Source | Notes |
+|---|---|---|
+| `symbol_t` | `types/detail/symbol.hpp` | Strong type for trading symbols (e.g., "BTCUSDT") |
+| `pair_t` | `types/detail/pair.hpp` | Strong type for trading pairs (e.g., "BTCUSD") |
+| `decimal_t` | `types/detail/decimal.hpp` | String-backed decimal. Has `fmt::formatter<decimal_t>` for spdlog/fmt integration. |
+
+
+## Request tags
+
+Source: `include/binapi2/fapi/types/request_tags.hpp`
+
+Empty tag base types for service-level request type categorization. Each request type's endpoint_traits carries the tag of the service it belongs to. Used by per-service concepts to constrain `async_execute`.
+
+| Tag | Service |
+|---|---|
+| `rest_market_data_tag` | `rest::market_data_service` |
+| `rest_account_tag` | `rest::account_service` |
+| `rest_trade_tag` | `rest::trade_service` |
+| `rest_convert_tag` | `rest::convert_service` |
+| `rest_user_data_stream_tag` | `rest::user_data_stream_service` |
+| `ws_api_tag` | `websocket_api::client` |
+| `stream_tag` | `streams::market_streams` |
+
+
+## Subscription types
+
+Source: `include/binapi2/fapi/types/subscriptions.hpp`
+
+Subscription parameter types for WebSocket market streams. Each subscription type has a corresponding `stream_traits` specialization (in `streams/stream_traits.hpp`) that maps it to a target URL and event type. Used by `market_streams::subscribe()`.
+
+
 ## Common types
 
 Source: `include/binapi2/fapi/types/common.hpp`
@@ -280,7 +315,8 @@ Source: `include/binapi2/fapi/types/trade.hpp`
 
 ## WebSocket market stream types
 
-Source: `include/binapi2/fapi/types/streams.hpp`
+Source: `include/binapi2/fapi/types/market_stream_events.hpp`
+(also available via convenience header `include/binapi2/fapi/types/streams.hpp` which includes both market and user stream events)
 
 | Type | Doc | Status | Notes |
 |---|---|---|---|
@@ -325,7 +361,10 @@ Source: `include/binapi2/fapi/types/streams.hpp`
 
 ## User data stream types
 
-Source: `include/binapi2/fapi/types/streams.hpp`
+Source: `include/binapi2/fapi/types/user_stream_events.hpp`
+(also available via convenience header `include/binapi2/fapi/types/streams.hpp`)
+
+Note: `user_stream_event_t` is a `std::variant` of 10 event types defined at the bottom of `user_stream_events.hpp`. This variant is used by `streams::user_streams::subscribe()` which returns a `cobalt::generator<result<user_stream_event_t>>`.
 
 | Type | Doc | Status | Notes |
 |---|---|---|---|
@@ -421,3 +460,10 @@ Source: `include/binapi2/fapi/types/websocket_api.hpp`
 ## Summary
 
 All data types are complete. No types have missing fields relative to their API documentation.
+
+Key structural notes:
+- Stream event types are split into `market_stream_events.hpp` and `user_stream_events.hpp`. The convenience header `streams.hpp` includes both.
+- Subscription types live in `types/subscriptions.hpp` (not `streams/`).
+- `request_tags.hpp` provides empty tag types for per-service concept constraints.
+- `pair_t` and `symbol_t` are strong types for trading pairs and symbols.
+- `decimal_t` has a `fmt::formatter` specialization for direct use with spdlog/fmt.

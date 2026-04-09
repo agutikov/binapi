@@ -3,9 +3,9 @@
 
 
 
-
-review and update documents in docs/binapi2 according to current state, remove plans
-
+ws-api with keys
+rest with keys
+streams with keys
 
 
 --------------------------------------------------------------------------------

@@ -8,79 +8,114 @@ binapi2 provides three stream components:
 |---|---|---|---|
 | `streams::market_streams` | Public market data | 1 WS per stream (or combined) | book tickers, depth, klines, trades, etc. |
 | `streams::user_streams` | Private account events | 1 WS per listen key | orders, balances, margin calls, etc. |
-| `streams::local_order_book` | Synchronized order book | Uses market_streams + REST | Depth snapshots |
+| `streams::local_order_book` | Synchronized order book | Uses market_streams + rest::pipeline | Depth snapshots |
 
-All are built on `transport::websocket_client` which provides async-primary I/O via Boost.Cobalt coroutines.
+All are built on `transport::websocket_client` which provides async-only I/O via
+Boost.Cobalt coroutines. All methods return `cobalt::task` or `cobalt::generator`.
 
 ---
 
 ## Usage Patterns
 
-### Pattern 1: Sync callback loop
+### Pattern 1: Generator (recommended)
+
+The `subscribe()` method connects to the stream and returns a typed async generator:
 
 ```cpp
-client c(cfg);
+fapi::client c(cfg);
 auto& streams = c.streams();
 
-// Connect to a single stream
-streams.connect_book_ticker({.symbol = "BTCUSDT"});
+// subscribe() connects and returns a generator<result<Event>>
+auto stream = streams.subscribe(types::book_ticker_subscription{.symbol = "BTCUSDT"});
 
-// Block on read loop — handler called for each event.
-// Return true to keep reading, false to stop the loop.
-streams.read_book_ticker_loop([](const types::book_ticker_stream_event_t& e) {
-    std::cout << e.symbol << " " << e.best_bid_price << "/" << e.best_ask_price << "\n";
-    return true;  // true = keep reading, false = stop
-});
-
-streams.close();
-```
-
-The sync read loop blocks the calling thread. Internally: `run_read_loop` calls `read_text()` which calls `io_thread::run_sync(async_read_text())`.
-
-See `examples/binapi2/fapi/demo-cli/cmd_stream.cpp` for working examples of all stream types.
-
-### Pattern 2: Async coroutine loop
-
-```cpp
-client c(cfg, async_mode);
-auto& streams = c.streams();
-
-co_await streams.async_connect("/ws/btcusdt@bookTicker");
-
-while (true) {
-    auto msg = co_await streams.async_read_text();
-    if (!msg) break;
-
-    types::book_ticker_stream_event_t event{};
-    glz::context ctx{};
-    if (glz::read<detail::json_read_opts>(event, *msg, ctx)) continue;
-
-    // process event
+while (stream) {
+    auto event = co_await stream;
+    if (!event) {
+        spdlog::error("stream error: {}", event.err.message);
+        break;
+    }
+    spdlog::info("{} bid={} ask={}", event->symbol, event->best_bid_price, event->best_ask_price);
 }
 
 co_await streams.async_close();
 ```
 
-The async pattern uses `cobalt::task` — each `co_await` suspends, yielding to the event loop. No thread is blocked.
+The subscription type is resolved at compile time via `stream_traits<Subscription>`:
+- `stream_traits<Subscription>::target(cfg, sub)` builds the WS target URL
+- `stream_traits<Subscription>::event_type` is the parsed event type
 
-### Pattern 3: Local order book
+The generator yields `result<Event>` until an error occurs or the caller stops consuming.
+
+**Requires `cobalt::main`** or an equivalent event loop that can drive generators.
+Generators cannot be bridged through `io_thread::run_sync()`.
+
+See `examples/binapi2/fapi/async-demo-cli/` for working examples.
+
+### Pattern 2: Typed async connect + read event
+
+For per-event control without the generator wrapper:
 
 ```cpp
-client c(cfg);
-local_order_book book(c.streams(), c);
+auto& streams = c.streams();
 
-book.set_snapshot_callback([](const order_book_snapshot& snap) {
-    // called under mutex after each update
-    std::cout << "bids: " << snap.bids.size() << " asks: " << snap.asks.size() << "\n";
+// Connect using a subscription type (stream_traits resolves the target URL)
+co_await streams.async_connect(types::book_ticker_subscription{.symbol = "BTCUSDT"});
+
+// Read events one at a time, fully typed
+while (true) {
+    auto event = co_await streams.async_read_event<types::book_ticker_stream_event_t>();
+    if (!event) break;
+    // process event...
+}
+
+co_await streams.async_close();
+```
+
+This pattern works with both `cobalt::main` and `io_thread::run_sync()` (wrapping
+each `async_read_event` call individually).
+
+### Pattern 3: Low-level raw text
+
+For maximum control (custom parsing, combined streams, debugging):
+
+```cpp
+auto& streams = c.streams();
+
+// Connect with a raw target path
+co_await streams.async_connect("/ws/btcusdt@bookTicker");
+
+// Read raw JSON frames
+while (true) {
+    auto msg = co_await streams.async_read_text();
+    if (!msg) break;
+    // *msg is a raw JSON string — parse it yourself
+}
+
+co_await streams.async_close();
+```
+
+### Pattern 4: Local order book
+
+The local order book is an async coroutine that maintains a synchronized order book:
+
+```cpp
+fapi::client c(cfg);
+auto& streams = c.streams();
+
+streams::local_order_book book(streams, c.rest());
+
+book.set_snapshot_callback([](const streams::order_book_snapshot& snap) {
+    spdlog::info("bids: {} asks: {}", snap.bids.size(), snap.asks.size());
 });
 
-book.start("BTCUSDT", 1000);  // blocks until stop() or error
+// async_run is a coroutine — runs until stop() or error
+auto result = co_await book.async_run(types::symbol_t{"BTCUSDT"}, 1000);
 ```
 
 Internally:
-1. Connects to `@depth@100ms` diff stream
+1. Connects to `@depth@100ms` diff stream via `market_streams`
 2. Buffers incoming events
-3. Fetches REST snapshot (`/fapi/v1/depth`)
+3. Fetches REST snapshot via `rest::pipeline` (`/fapi/v1/depth`)
 4. Discards buffered events before snapshot
 5. Applies remaining buffered events
 6. Enters continuous apply loop
@@ -92,118 +127,115 @@ Internally:
 
 ### No internal queues
 
-Events flow synchronously from transport to handler with no intermediate buffering:
+Events flow from transport through the generator to the consumer with no intermediate
+buffering:
 
 ```
 Binance WS server
-    │
-    ▼
+    |
+    v
 transport::websocket_client::async_read_text()
-    │
-    ▼ raw JSON string
-stream_recorder callback (if configured — raw frame recording)
-    │
-    ▼ raw JSON string
-read_stream_loop<Event>()
-    │ glz::read<json_read_opts>(event, payload)
-    ▼ typed event
-handler(event) → bool
+    |
+    v raw JSON string
+market_streams::subscribe() generator body
+    | glz::read<json_read_opts>(event, payload)
+    v typed event
+co_yield result<Event>::success(event)
+    |
+    v
+consumer: co_await generator
 ```
 
-The handler runs on the io_thread's background thread (sync mode) or on the cobalt event loop thread (async mode). The next frame is not read until the handler returns.
+The consumer runs on the coroutine's executor (typically `cobalt::main`). The next
+frame is not read until the consumer resumes the generator by calling `co_await` again.
 
-**Consequence:** A slow handler blocks the entire stream. If processing takes longer than the inter-message interval, messages queue in the kernel TCP receive buffer and eventually in Binance's send buffer, potentially causing the server to drop the connection.
+**Consequence:** A slow consumer blocks the entire stream. If processing takes longer
+than the inter-message interval, messages queue in the kernel TCP receive buffer and
+eventually in Binance's send buffer, potentially causing the server to drop the
+connection.
 
 ### Where buffering exists today
 
 | Component | Buffer | Bounded? | Overflow |
 |---|---|---|---|
-| `transport::websocket_client` | Beast `flat_buffer` — 1 frame | Yes (1) | N/A — read one, process, repeat |
-| `local_order_book` | `std::vector<depth_event>` — pre-sync events | No | Unbounded growth until snapshot completes |
+| `transport::websocket_client` | Beast `flat_buffer` -- 1 frame | Yes (1) | N/A -- read one, yield, repeat |
+| `local_order_book` | `std::vector<depth_event>` -- pre-sync events | No | Unbounded growth until snapshot completes |
 | TCP kernel buffer | OS-level socket receive buffer | Yes (OS-tuned) | Binance drops connection |
 
 ### What's missing: application-level queues
 
 The library does not provide:
-- Bounded queues between transport and handlers
+- Bounded queues between transport and consumers
 - Overflow policies (drop oldest, drop newest, block, fail)
 - Async access to queued data (e.g., drain N events)
 - Backpressure signaling to the transport layer
 
 These are deliberately left to the application. Possible designs:
 
-**Option A: Lock-free ring buffer (SPSC)**
+**Option A: cobalt::channel**
 ```
-io_thread ──push──► ring_buffer ──pop──► processing thread
-                    (fixed size)
-```
-- Overflow policy: overwrite oldest (lossy) or block producer
-- Best for: high-frequency market data where latest state matters more than history
-
-**Option B: Bounded concurrent queue**
-```
-io_thread ──push──► mpsc_queue ──pop──► N consumer threads
-                    (bounded)
-```
-- Overflow policy: configurable (drop/block/fail)
-- Best for: order execution events where every event matters
-
-**Option C: Channel (cobalt::channel)**
-```
-co_await stream.async_read_text()
-    │
-    co_await channel.push(event)  ← suspends if full
-    │
+subscribe() generator
+    |
+    co_await channel.push(event)  <- suspends if full
+    |
 consumer: co_await channel.pop()
 ```
-- Overflow policy: backpressure (producer suspends)
-- Best for: async pipelines within a single io_context
+Coroutine-native, backpressure via suspension.
+
+**Option B: Lock-free ring buffer (SPSC)**
+```
+generator coroutine --push--> ring_buffer --pop--> processing thread
+                              (fixed size)
+```
+Best for high-frequency market data where latest state matters more than history.
 
 ---
 
-## Start / Stop / Subscribe / Unsubscribe
+## Stream Subscriptions
 
-### Single-stream connections
+### Subscription types
 
-Each `connect_*` method opens a dedicated WebSocket connection to a specific stream endpoint:
+Subscription parameter types live in `types/subscriptions.hpp`. Each subscription
+type has a corresponding `stream_traits` specialization in
+`streams/stream_traits.hpp`:
 
+```cpp
+// Example: book ticker subscription
+types::book_ticker_subscription sub{.symbol = "BTCUSDT"};
+
+// stream_traits resolves:
+// - target: "/ws/btcusdt@bookTicker"
+// - event_type: types::book_ticker_stream_event_t
+auto stream = streams.subscribe(sub);
+// stream is cobalt::generator<result<book_ticker_stream_event_t>>
 ```
-connect_book_ticker({.symbol = "BTCUSDT"})
-    → wss://fstream.binance.com/ws/btcusdt@bookTicker
-
-connect_kline({.symbol = "ETHUSDT", .interval = kline_interval_t::h1})
-    → wss://fstream.binance.com/ws/ethusdt@kline_1h
-```
-
-**Stop:** Call `close()` / `async_close()`. The WebSocket close handshake is performed.
-
-**No connection reuse:** After `close()`, the connection is gone. A new `connect_*` call creates a new TCP+TLS+WS connection. There is no reconnect or connection pool.
 
 ### Combined stream (subscribe/unsubscribe on one connection)
 
 ```cpp
 auto& streams = c.streams();
 
-// Open a single combined stream connection
-streams.connect_combined("/stream");
+// Open a combined stream connection
+co_await streams.async_connect("/stream");
 
 // Subscribe to topics dynamically
-streams.subscribe({"btcusdt@bookTicker", "ethusdt@bookTicker"});
+co_await streams.async_subscribe({"btcusdt@bookTicker", "ethusdt@bookTicker"});
 
 // Read events (all subscribed streams arrive on this connection)
-streams.read_book_ticker_loop([](const auto& e) {
-    // events from both BTCUSDT and ETHUSDT arrive here
-    return true;
-});
+while (true) {
+    auto msg = co_await streams.async_read_text();
+    if (!msg) break;
+    // dispatch based on "stream" field in JSON
+}
 
 // Modify subscriptions without disconnecting
-streams.unsubscribe({"ethusdt@bookTicker"});
-streams.subscribe({"btcusdt@depth@100ms"});
+co_await streams.async_unsubscribe({"ethusdt@bookTicker"});
+co_await streams.async_subscribe({"btcusdt@depth@100ms"});
 
 // Check what's active
-auto subs = streams.list_subscriptions();
+auto subs = co_await streams.async_list_subscriptions();
 
-streams.close();
+co_await streams.async_close();
 ```
 
 **Protocol:** Subscribe/unsubscribe send JSON control messages on the same WebSocket:
@@ -213,63 +245,31 @@ streams.close();
 {"method": "LIST_SUBSCRIPTIONS", "params": [], "id": 3}
 ```
 
-**Connection reuse:** Yes — the combined connection stays open across subscribe/unsubscribe cycles. Topics can be added and removed dynamically.
-
-**Limitation:** subscribe/unsubscribe currently don't validate Binance's response. Transport-level errors are caught, but a rejected subscription (e.g., invalid stream name) is silently ignored.
-
 ---
 
 ## Multiple Parallel Streams
 
-### Different connections (current implementation)
+### Different connections
 
-Each `market_streams` instance owns one `websocket_client`. To run multiple streams in parallel, create multiple `market_streams` instances:
+Each `market_streams` instance owns one `websocket_client`. To run multiple streams
+in parallel, create multiple `market_streams` instances:
 
 ```cpp
-// Each stream gets its own WebSocket connection
-streams::market_streams book_stream(io, cfg);
-streams::market_streams trade_stream(io, cfg);
+streams::market_streams book_stream(cfg);
+streams::market_streams trade_stream(cfg);
 
-book_stream.connect_book_ticker({.symbol = "BTCUSDT"});
-trade_stream.connect_aggregate_trade({.symbol = "BTCUSDT"});
-
-// These block — need separate threads or async
-std::thread t1([&] { book_stream.read_book_ticker_loop(handle_book); });
-std::thread t2([&] { trade_stream.read_aggregate_trade_loop(handle_trade); });
-```
-
-**Problem:** Each instance creates a separate TLS connection. For N streams = N connections = N TLS handshakes.
-
-**Async alternative:**
-```cpp
-// In cobalt::main or a spawned coroutine:
+// In cobalt::main, run both generators concurrently:
 co_await cobalt::join(
-    read_book_ticker(streams1),
-    read_aggregate_trade(streams2)
+    read_books(book_stream),
+    read_trades(trade_stream)
 );
 ```
 
 ### One connection (combined stream)
 
-Binance supports up to ~200 streams on a single combined connection:
-
-```cpp
-auto& streams = c.streams();
-streams.connect_combined("/stream");
-streams.subscribe({
-    "btcusdt@bookTicker",
-    "ethusdt@bookTicker",
-    "btcusdt@depth@100ms",
-    "btcusdt@aggTrade"
-});
-```
-
-**Caveat:** The combined connection delivers all events through a single read loop. The events arrive as:
-```json
-{"stream": "btcusdt@bookTicker", "data": { ... }}
-```
-
-The current typed `read_*_loop` methods assume a single-stream connection and parse the `data` field directly. For combined streams, the caller must use `async_read_text()` and dispatch manually based on the `"stream"` field.
+Binance supports up to ~200 streams on a single combined connection. Use the
+combined stream pattern (see above) with raw text reads and manual dispatch based
+on the `"stream"` field.
 
 ---
 
@@ -278,80 +278,104 @@ The current typed `read_*_loop` methods assume a single-stream connection and pa
 User streams require a listen key from the REST API:
 
 ```cpp
-// Get listen key
-auto key = c.user_data_streams.start();
+fapi::client c(cfg);
 
-// Connect
-auto& us = c.user_streams();
-us.connect(key->listenKey);
+// Get listen key via REST
+auto key = co_await c.user_data_streams.async_start();
 
-// Register handlers
-streams::user_streams::handlers h;
-h.on_order_trade_update = [](const auto& e) {
-    std::cout << e.order.symbol << " " << e.order.status << "\n";
-    return true;
-};
-h.on_account_update = [](const auto& e) { return true; };
-h.on_listen_key_expired = [](const auto& e) { return false; };  // stop on expiry
+// Subscribe returns a variant generator
+auto stream = c.user_streams().subscribe(key->listenKey);
 
-// Block on read loop
-us.read_loop(h);
-us.close();
+while (stream) {
+    auto event = co_await stream;
+    if (!event) break;
+
+    std::visit(overloaded{
+        [](const types::order_trade_update_event_t& e) {
+            spdlog::info("{} {} {}", e.order.symbol, e.order.side, e.order.status);
+        },
+        [](const types::account_update_event_t& e) {
+            spdlog::info("balance update: {} assets", e.data.balances.size());
+        },
+        [](const types::listen_key_expired_event_t&) {
+            spdlog::warn("listen key expired");
+        },
+        [](const auto&) {}
+    }, *event);
+}
 ```
 
-**Event dispatch:** String pattern matching on `"e"` field, then full JSON parse only for registered handlers. Unregistered event types are skipped without parsing.
+`user_stream_event_t` is a `std::variant` of 10 event types:
+- `account_update_event_t`
+- `order_trade_update_event_t`
+- `margin_call_event_t`
+- `listen_key_expired_event_t`
+- `account_config_update_event_t`
+- `trade_lite_event_t`
+- `algo_order_update_event_t`
+- `conditional_order_trigger_reject_event_t`
+- `grid_update_event_t`
+- `strategy_update_event_t`
+
+**Event dispatch:** The `parse_event()` method detects the event type from the `"e"`
+field in the raw JSON, then parses into the appropriate variant alternative.
 
 **Listen key lifecycle:**
-- `user_data_streams.start()` — creates listen key (valid 60 minutes)
-- `user_data_streams.keepalive()` — extend validity (call every 30 minutes)
-- `user_data_streams.close()` — invalidate listen key
-- `on_listen_key_expired` handler fires when server expires the key
+- `user_data_streams.async_start()` -- creates listen key (valid 60 minutes)
+- `user_data_streams.async_keepalive()` -- extend validity (call every 30 minutes)
+- `user_data_streams.async_close()` -- invalidate listen key
+- `listen_key_expired_event_t` arrives on the stream when the server expires the key
 
-The library does not automatically manage listen key keepalive. The application must schedule periodic keepalive calls.
+The library does not automatically manage listen key keepalive. The application must
+schedule periodic keepalive calls.
 
 ---
 
 ## Connection Lifecycle
 
 ```
-                    ┌──────────┐
-                    │ Idle     │
-                    └────┬─────┘
-                         │ connect_*() / async_connect()
-                         ▼
-              ┌──────────────────────┐
-              │ Connected            │
-              │  - DNS resolve       │
-              │  - TCP connect       │
-              │  - TLS handshake     │
-              │  - WS handshake      │
-              │  - ping/pong active  │
-              └──────────┬───────────┘
-                         │ read_*_loop() / async_read_text()
-                         ▼
-              ┌──────────────────────┐
-              │ Reading              │◄──── handler returns true
-              │  - frame arrives     │
-              │  - parse JSON        │
-              │  - invoke handler    ├────► handler returns false
-              └──────────┬───────────┘
-                         │
-                         ▼
-              ┌──────────────────────┐
-              │ Closing              │
-              │  - WS close frame    │
-              │  - TCP shutdown      │
-              └──────────┬───────────┘
-                         │
-                         ▼
-                    ┌──────────┐
-                    │ Closed   │  (no reuse — new connect needed)
-                    └──────────┘
+                    +----------+
+                    | Idle     |
+                    +----+-----+
+                         | async_connect()
+                         v
+              +----------------------+
+              | Connected            |
+              |  - DNS resolve       |
+              |  - TCP connect       |
+              |  - TLS handshake     |
+              |  - WS handshake      |
+              |  - ping/pong active  |
+              +----------+-----------+
+                         | subscribe() / async_read_*()
+                         v
+              +----------------------+
+              | Reading              |<---- generator yields / co_await resumes
+              |  - frame arrives     |
+              |  - parse JSON        |
+              |  - yield/return      +----> error or consumer stops
+              +----------+-----------+
+                         |
+                         v
+              +----------------------+
+              | Closing              |
+              |  - WS close frame    |
+              |  - TCP shutdown      |
+              +----------+-----------+
+                         |
+                         v
+                    +----------+
+                    | Closed   |  (no reuse -- new connect needed)
+                    +----------+
 ```
 
-**Ping/pong:** Installed automatically during WS handshake. Binance sends periodic pings; the transport replies with pong synchronously in the control callback. No application action needed.
+**Ping/pong:** Installed automatically during WS handshake. Binance sends periodic
+pings; the transport replies with pong synchronously in the control callback. No
+application action needed.
 
-**No automatic reconnection.** If the connection drops (network error, server disconnect, ping timeout), the read loop returns an error result. The application must detect this and reconnect.
+**No automatic reconnection.** If the connection drops (network error, server
+disconnect, ping timeout), the generator yields an error result. The application must
+detect this and reconnect.
 
 ---
 
@@ -359,13 +383,16 @@ The library does not automatically manage listen key keepalive. The application 
 
 | File | Role |
 |---|---|
-| `include/binapi2/fapi/streams/market_streams.hpp` | Market stream API: connect, read loops, combined stream control |
-| `src/binapi2/fapi/streams/market_streams.cpp` | Implementation: target URL construction, subscribe/unsubscribe JSON protocol |
-| `include/binapi2/fapi/streams/user_streams.hpp` | User data stream API: handlers struct, read loop overloads |
-| `src/binapi2/fapi/streams/user_streams.cpp` | Implementation: event type matching, dispatch chain |
-| `include/binapi2/fapi/streams/local_order_book.hpp` | Thread-safe local order book with automatic sync |
-| `src/binapi2/fapi/streams/local_order_book.cpp` | Implementation: buffer → snapshot → apply → gap detection |
-| `include/binapi2/fapi/transport/websocket_client.hpp` | Low-level WS transport: async/sync read/write/connect/close |
-| `include/binapi2/fapi/types/subscriptions.hpp` | Subscription parameter types (symbol_t, pair_t, intervals) |
-| `include/binapi2/fapi/types/streams.hpp` | Stream event types with glaze JSON metadata |
+| `include/binapi2/fapi/streams/market_streams.hpp` | Market stream API: subscribe (generator), async_connect, async_read_event, combined stream control |
+| `src/binapi2/fapi/streams/market_streams.cpp` | Implementation: target URL construction, async_connect, async_subscribe/unsubscribe |
+| `include/binapi2/fapi/streams/user_streams.hpp` | User data stream API: subscribe (variant generator), async_connect |
+| `src/binapi2/fapi/streams/user_streams.cpp` | Implementation: event type detection, parse_event, variant dispatch |
+| `include/binapi2/fapi/streams/local_order_book.hpp` | Async local order book: async_run coroutine, thread-safe snapshot |
+| `src/binapi2/fapi/streams/local_order_book.cpp` | Implementation: buffer -> snapshot -> apply -> gap detection |
+| `include/binapi2/fapi/streams/stream_traits.hpp` | Compile-time subscription -> target path + event type mapping |
+| `include/binapi2/fapi/transport/websocket_client.hpp` | Low-level WS transport: async-only connect/read/write/close |
+| `include/binapi2/fapi/types/subscriptions.hpp` | Subscription parameter types (symbol, pair, intervals) |
+| `include/binapi2/fapi/types/market_stream_events.hpp` | Market stream event types with glaze JSON metadata |
+| `include/binapi2/fapi/types/user_stream_events.hpp` | User stream event types + user_stream_event_t variant |
+| `include/binapi2/fapi/types/streams.hpp` | Convenience header: includes both market_stream_events.hpp and user_stream_events.hpp |
 | `include/binapi2/fapi/config.hpp` | Endpoint URLs, stream_recorder callback |
