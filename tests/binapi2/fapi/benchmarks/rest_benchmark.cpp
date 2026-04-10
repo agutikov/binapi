@@ -16,7 +16,7 @@
 ///   SSL_CERT_FILE=compose/postman-mock/certs/server.crt
 ///       ./_build/tests/binapi2/fapi/benchmarks/rest_benchmark
 
-#include <binapi2/fapi/client.hpp>
+#include <binapi2/futures_usdm_api.hpp>
 #include <binapi2/fapi/types/common.hpp>
 #include <binapi2/fapi/types/market_data.hpp>
 #include <binapi2/fapi/types/trade.hpp>
@@ -106,12 +106,17 @@ run_bench(const char* name, Fn&& fn)
 // Validation: verify mock server is reachable and endpoints return valid data
 // ---------------------------------------------------------------------------
 
-boost::cobalt::task<bool> validate(client& c)
+boost::cobalt::task<bool> validate(binapi2::futures_usdm_api& c)
 {
+    auto rest = co_await c.create_rest_client();
+    if (!rest) {
+        std::fprintf(stderr, "  FAIL create_rest_client: %s\n", rest.err.message.c_str());
+        co_return false;
+    }
     std::printf("== Validating mock server ==\n\n");
     int failures = 0;
 
-    auto ping = co_await c.market_data.async_execute(types::ping_request_t{});
+    auto ping = co_await (*rest)->market_data.async_execute(types::ping_request_t{});
     if (!ping) {
         std::fprintf(stderr, "  FAIL ping: %s\n", ping.err.message.c_str());
         ++failures;
@@ -119,7 +124,7 @@ boost::cobalt::task<bool> validate(client& c)
         std::printf("  OK   ping\n");
     }
 
-    auto time = co_await c.market_data.async_execute(types::server_time_request_t{});
+    auto time = co_await (*rest)->market_data.async_execute(types::server_time_request_t{});
     if (!time) {
         std::fprintf(stderr, "  FAIL server_time: %s\n", time.err.message.c_str());
         ++failures;
@@ -127,7 +132,7 @@ boost::cobalt::task<bool> validate(client& c)
         std::printf("  OK   server_time\n");
     }
 
-    auto depth = co_await c.market_data.async_execute(
+    auto depth = co_await (*rest)->market_data.async_execute(
         types::order_book_request_t{.symbol = "BTCUSDT", .limit = 5});
     if (!depth) {
         std::fprintf(stderr, "  FAIL order_book: %s\n", depth.err.message.c_str());
@@ -136,7 +141,7 @@ boost::cobalt::task<bool> validate(client& c)
         std::printf("  OK   order_book\n");
     }
 
-    auto acct = co_await c.account.async_execute(types::account_information_request_t{});
+    auto acct = co_await (*rest)->account.async_execute(types::account_information_request_t{});
     if (!acct) {
         std::fprintf(stderr, "  FAIL account: %s\n", acct.err.message.c_str());
         ++failures;
@@ -158,8 +163,13 @@ boost::cobalt::task<bool> validate(client& c)
 // Benchmarks
 // ---------------------------------------------------------------------------
 
-boost::cobalt::task<void> run_benchmarks(client& c)
+boost::cobalt::task<void> run_benchmarks(binapi2::futures_usdm_api& c)
 {
+    auto rest = co_await c.create_rest_client();
+    if (!rest) {
+        std::fprintf(stderr, "FAIL create_rest_client: %s\n", rest.err.message.c_str());
+        co_return;
+    }
     std::vector<bench_result> results;
     bench_result r{};
 
@@ -169,61 +179,61 @@ boost::cobalt::task<void> run_benchmarks(client& c)
     print_header();
 
     r = co_await run_bench("ping", [&]() -> boost::cobalt::task<void> {
-        auto res = co_await c.market_data.async_execute(types::ping_request_t{});
+        auto res = co_await (*rest)->market_data.async_execute(types::ping_request_t{});
         if (!res) std::fprintf(stderr, "ping failed\n");
     });
     results.push_back(r); print_result(r);
 
     r = co_await run_bench("server_time", [&]() -> boost::cobalt::task<void> {
-        auto res = co_await c.market_data.async_execute(types::server_time_request_t{});
+        auto res = co_await (*rest)->market_data.async_execute(types::server_time_request_t{});
         if (!res) std::fprintf(stderr, "server_time failed\n");
     });
     results.push_back(r); print_result(r);
 
     r = co_await run_bench("order_book (depth 5)", [&]() -> boost::cobalt::task<void> {
-        auto res = co_await c.market_data.async_execute(
+        auto res = co_await (*rest)->market_data.async_execute(
             types::order_book_request_t{.symbol = "BTCUSDT", .limit = 5});
         if (!res) std::fprintf(stderr, "order_book failed\n");
     });
     results.push_back(r); print_result(r);
 
     r = co_await run_bench("recent_trades", [&]() -> boost::cobalt::task<void> {
-        auto res = co_await c.market_data.async_execute(
+        auto res = co_await (*rest)->market_data.async_execute(
             types::recent_trades_request_t{.symbol = "BTCUSDT"});
         if (!res) std::fprintf(stderr, "recent_trades failed\n");
     });
     results.push_back(r); print_result(r);
 
     r = co_await run_bench("klines (1h)", [&]() -> boost::cobalt::task<void> {
-        auto res = co_await c.market_data.async_execute(
+        auto res = co_await (*rest)->market_data.async_execute(
             types::klines_request_t{.symbol = "BTCUSDT", .interval = types::kline_interval_t::h1});
         if (!res) std::fprintf(stderr, "klines failed\n");
     });
     results.push_back(r); print_result(r);
 
     r = co_await run_bench("price_ticker", [&]() -> boost::cobalt::task<void> {
-        auto res = co_await c.market_data.async_execute(
+        auto res = co_await (*rest)->market_data.async_execute(
             types::price_ticker_request_t{.symbol = "BTCUSDT"});
         if (!res) std::fprintf(stderr, "price_ticker failed\n");
     });
     results.push_back(r); print_result(r);
 
     r = co_await run_bench("book_ticker", [&]() -> boost::cobalt::task<void> {
-        auto res = co_await c.market_data.async_execute(
+        auto res = co_await (*rest)->market_data.async_execute(
             types::book_ticker_request_t{.symbol = "BTCUSDT"});
         if (!res) std::fprintf(stderr, "book_ticker failed\n");
     });
     results.push_back(r); print_result(r);
 
     r = co_await run_bench("mark_price", [&]() -> boost::cobalt::task<void> {
-        auto res = co_await c.market_data.async_execute(
+        auto res = co_await (*rest)->market_data.async_execute(
             types::mark_price_request_t{.symbol = "BTCUSDT"});
         if (!res) std::fprintf(stderr, "mark_price failed\n");
     });
     results.push_back(r); print_result(r);
 
     r = co_await run_bench("exchange_info", [&]() -> boost::cobalt::task<void> {
-        auto res = co_await c.market_data.async_execute(types::exchange_info_request_t{});
+        auto res = co_await (*rest)->market_data.async_execute(types::exchange_info_request_t{});
         if (!res) std::fprintf(stderr, "exchange_info failed\n");
     });
     results.push_back(r); print_result(r);
@@ -234,32 +244,32 @@ boost::cobalt::task<void> run_benchmarks(client& c)
     print_header();
 
     r = co_await run_bench("account_information", [&]() -> boost::cobalt::task<void> {
-        auto res = co_await c.account.async_execute(types::account_information_request_t{});
+        auto res = co_await (*rest)->account.async_execute(types::account_information_request_t{});
         if (!res) std::fprintf(stderr, "account failed\n");
     });
     results.push_back(r); print_result(r);
 
     r = co_await run_bench("balances", [&]() -> boost::cobalt::task<void> {
-        auto res = co_await c.account.async_execute(types::balances_request_t{});
+        auto res = co_await (*rest)->account.async_execute(types::balances_request_t{});
         if (!res) std::fprintf(stderr, "balances failed\n");
     });
     results.push_back(r); print_result(r);
 
     r = co_await run_bench("position_risk", [&]() -> boost::cobalt::task<void> {
-        auto res = co_await c.account.async_execute(types::position_risk_request_t{});
+        auto res = co_await (*rest)->account.async_execute(types::position_risk_request_t{});
         if (!res) std::fprintf(stderr, "position_risk failed\n");
     });
     results.push_back(r); print_result(r);
 
     r = co_await run_bench("query_order", [&]() -> boost::cobalt::task<void> {
-        auto res = co_await c.trade.async_execute(
+        auto res = co_await (*rest)->trade.async_execute(
             types::query_order_request_t{.symbol = "BTCUSDT", .orderId = 22542179});
         if (!res) std::fprintf(stderr, "query_order failed\n");
     });
     results.push_back(r); print_result(r);
 
     r = co_await run_bench("all_open_orders", [&]() -> boost::cobalt::task<void> {
-        auto res = co_await c.trade.async_execute(types::all_open_orders_request_t{});
+        auto res = co_await (*rest)->trade.async_execute(types::all_open_orders_request_t{});
         if (!res) std::fprintf(stderr, "all_open_orders failed\n");
     });
     results.push_back(r); print_result(r);
@@ -270,13 +280,13 @@ boost::cobalt::task<void> run_benchmarks(client& c)
     print_header();
 
     r = co_await run_bench("start_listen_key", [&]() -> boost::cobalt::task<void> {
-        auto res = co_await c.user_data_streams.async_execute(types::start_listen_key_request_t{});
+        auto res = co_await (*rest)->user_data_streams.async_execute(types::start_listen_key_request_t{});
         if (!res) std::fprintf(stderr, "start_listen_key failed\n");
     });
     results.push_back(r); print_result(r);
 
     r = co_await run_bench("keepalive_listen_key", [&]() -> boost::cobalt::task<void> {
-        auto res = co_await c.user_data_streams.async_execute(types::keepalive_listen_key_request_t{});
+        auto res = co_await (*rest)->user_data_streams.async_execute(types::keepalive_listen_key_request_t{});
         if (!res) std::fprintf(stderr, "keepalive_listen_key failed\n");
     });
     results.push_back(r); print_result(r);
@@ -315,7 +325,7 @@ boost::cobalt::main co_main(int, char*[])
     cfg.secret_key = "test-secret-key";
     cfg.ca_cert_file = env_or("SSL_CERT_FILE", "");
 
-    client c(cfg);
+    binapi2::futures_usdm_api c(cfg);
 
     if (!co_await validate(c))
         co_return 1;

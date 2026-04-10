@@ -6,7 +6,7 @@
 
 #include "cmd_order_book.hpp"
 
-#include <binapi2/fapi/client.hpp>
+#include <binapi2/futures_usdm_api.hpp>
 #include <binapi2/fapi/streams/local_order_book.hpp>
 
 #include <spdlog/spdlog.h>
@@ -15,15 +15,18 @@ namespace demo {
 
 namespace types = binapi2::fapi::types;
 
-boost::cobalt::task<int> cmd_order_book_live(binapi2::fapi::client& c, const args_t& args)
+boost::cobalt::task<int> cmd_order_book_live(binapi2::futures_usdm_api& c, const args_t& args)
 {
     if (args.empty()) { spdlog::error("usage: order-book-live <symbol> [depth]"); co_return 1; }
 
+    auto streams = c.create_market_streams();
+    auto rest = co_await c.create_rest_client();
+    if (!rest) { spdlog::error("connect: {}", rest.err.message); co_return 1; }
     const std::string symbol = args[0];
     const int depth = (args.size() > 1) ? std::stoi(args[1]) : 1000;
     constexpr int display_levels = 10;
 
-    binapi2::fapi::streams::local_order_book book(c.streams(), c.rest());
+    binapi2::fapi::streams::local_order_book book(*streams, (*rest)->rest_pipeline());
 
     spdlog::info("starting local order book for {} depth={}", symbol, depth);
 

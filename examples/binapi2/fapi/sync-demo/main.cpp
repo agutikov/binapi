@@ -4,7 +4,7 @@
 
 #include "examples.hpp"
 
-#include <binapi2/fapi/client.hpp>
+#include <binapi2/futures_usdm_api.hpp>
 #include <binapi2/fapi/config.hpp>
 
 #include <cstdlib>
@@ -22,7 +22,7 @@ int main()
     if (secret && secret[0] != '\0')
         cfg.secret_key = secret;
 
-    binapi2::fapi::client c(cfg);
+    binapi2::futures_usdm_api c(cfg);
 
     std::cout << "--- REST examples ---\n\n";
     sync_demo::rest_blocking(c);

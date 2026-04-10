@@ -13,7 +13,7 @@
 //   MOCK_HOST  — default "localhost"
 //   MOCK_PORT  — default "8443"
 
-#include <binapi2/fapi/client.hpp>
+#include <binapi2/futures_usdm_api.hpp>
 #include <binapi2/fapi/types/common.hpp>
 #include <binapi2/fapi/types/market_data.hpp>
 #include <binapi2/fapi/types/trade.hpp>
@@ -78,7 +78,12 @@ co_main(int, char*[])
     cfg.secret_key = "test-secret-key";
     cfg.ca_cert_file = env_or("SSL_CERT_FILE", "");
 
-    client c(cfg);
+    binapi2::futures_usdm_api c(cfg);
+    auto rest = co_await c.create_rest_client();
+    if (!rest) {
+        std::cerr << "FAIL create_rest_client: " << rest.err.message << "\n";
+        co_return 1;
+    }
 
     // =======================================================================
     // 1. Public market data endpoints (no auth).
@@ -88,13 +93,13 @@ co_main(int, char*[])
 
     // Ping
     {
-        auto r = co_await c.market_data.async_execute(types::ping_request_t{});
+        auto r = co_await (*rest)->market_data.async_execute(types::ping_request_t{});
         check("ping", r);
     }
 
     // Server time
     {
-        auto r = co_await c.market_data.async_execute(types::server_time_request_t{});
+        auto r = co_await (*rest)->market_data.async_execute(types::server_time_request_t{});
         if (check("server_time", r)) {
             if (r->serverTime.value == 0) {
                 std::cerr << "FAIL server_time: serverTime is 0\n";
@@ -106,7 +111,7 @@ co_main(int, char*[])
 
     // Exchange info
     {
-        auto r = co_await c.market_data.async_execute(types::exchange_info_request_t{});
+        auto r = co_await (*rest)->market_data.async_execute(types::exchange_info_request_t{});
         if (check("exchange_info", r)) {
             if (r->symbols.empty()) {
                 std::cerr << "FAIL exchange_info: symbols array is empty\n";
@@ -118,7 +123,7 @@ co_main(int, char*[])
 
     // Order book
     {
-        auto r = co_await c.market_data.async_execute(
+        auto r = co_await (*rest)->market_data.async_execute(
             types::order_book_request_t{.symbol = "BTCUSDT", .limit = 5});
         if (check("order_book", r)) {
             if (r->bids.empty() || r->asks.empty()) {
@@ -131,7 +136,7 @@ co_main(int, char*[])
 
     // Recent trades
     {
-        auto r = co_await c.market_data.async_execute(
+        auto r = co_await (*rest)->market_data.async_execute(
             types::recent_trades_request_t{.symbol = "BTCUSDT"});
         if (check("recent_trades", r)) {
             if (r->empty()) {
@@ -144,7 +149,7 @@ co_main(int, char*[])
 
     // Klines
     {
-        auto r = co_await c.market_data.async_execute(
+        auto r = co_await (*rest)->market_data.async_execute(
             types::klines_request_t{.symbol = "BTCUSDT", .interval = types::kline_interval_t::h1});
         if (check("klines", r)) {
             if (r->empty()) {
@@ -157,7 +162,7 @@ co_main(int, char*[])
 
     // Price ticker
     {
-        auto r = co_await c.market_data.async_execute(
+        auto r = co_await (*rest)->market_data.async_execute(
             types::price_ticker_request_t{.symbol = "BTCUSDT"});
         if (check("price_ticker", r)) {
             if (r->symbol.empty()) {
@@ -170,7 +175,7 @@ co_main(int, char*[])
 
     // Book ticker
     {
-        auto r = co_await c.market_data.async_execute(
+        auto r = co_await (*rest)->market_data.async_execute(
             types::book_ticker_request_t{.symbol = "BTCUSDT"});
         if (check("book_ticker", r)) {
             if (r->symbol.empty()) {
@@ -183,7 +188,7 @@ co_main(int, char*[])
 
     // Mark price
     {
-        auto r = co_await c.market_data.async_execute(
+        auto r = co_await (*rest)->market_data.async_execute(
             types::mark_price_request_t{.symbol = "BTCUSDT"});
         if (check("mark_price", r)) {
             if (r->symbol.empty()) {
@@ -196,7 +201,7 @@ co_main(int, char*[])
 
     // Funding rate history
     {
-        auto r = co_await c.market_data.async_execute(
+        auto r = co_await (*rest)->market_data.async_execute(
             types::funding_rate_history_request_t{.symbol = "BTCUSDT"});
         if (check("funding_rate_history", r)) {
             if (r->empty()) {
@@ -215,7 +220,7 @@ co_main(int, char*[])
 
     // Account information
     {
-        auto r = co_await c.account.async_execute(types::account_information_request_t{});
+        auto r = co_await (*rest)->account.async_execute(types::account_information_request_t{});
         if (check("account_information", r)) {
             if (r->assets.empty()) {
                 std::cerr << "FAIL account_information_t: assets empty\n";
@@ -227,7 +232,7 @@ co_main(int, char*[])
 
     // Balances
     {
-        auto r = co_await c.account.async_execute(types::balances_request_t{});
+        auto r = co_await (*rest)->account.async_execute(types::balances_request_t{});
         if (check("balances", r)) {
             if (r->empty()) {
                 std::cerr << "FAIL balances: empty array\n";
@@ -239,7 +244,7 @@ co_main(int, char*[])
 
     // Position risk
     {
-        auto r = co_await c.account.async_execute(types::position_risk_request_t{});
+        auto r = co_await (*rest)->account.async_execute(types::position_risk_request_t{});
         if (check("position_risk", r)) {
             if (r->empty()) {
                 std::cerr << "FAIL position_risk_t: empty array\n";
@@ -257,7 +262,7 @@ co_main(int, char*[])
 
     // Query order
     {
-        auto r = co_await c.trade.async_execute(
+        auto r = co_await (*rest)->trade.async_execute(
             types::query_order_request_t{.symbol = "BTCUSDT", .orderId = 22542179});
         if (check("query_order", r)) {
             if (r->symbol != "BTCUSDT") {
@@ -270,7 +275,7 @@ co_main(int, char*[])
 
     // All open orders
     {
-        auto r = co_await c.trade.async_execute(types::all_open_orders_request_t{});
+        auto r = co_await (*rest)->trade.async_execute(types::all_open_orders_request_t{});
         if (check("all_open_orders", r)) {
             if (r->empty()) {
                 std::cerr << "FAIL all_open_orders: empty array\n";
@@ -288,7 +293,7 @@ co_main(int, char*[])
 
     // Start listen key
     {
-        auto r = co_await c.user_data_streams.async_execute(types::start_listen_key_request_t{});
+        auto r = co_await (*rest)->user_data_streams.async_execute(types::start_listen_key_request_t{});
         if (check("start_listen_key", r)) {
             if (r->listenKey.empty()) {
                 std::cerr << "FAIL start_listen_key: listenKey empty\n";
@@ -300,13 +305,13 @@ co_main(int, char*[])
 
     // Keepalive listen key
     {
-        auto r = co_await c.user_data_streams.async_execute(types::keepalive_listen_key_request_t{});
+        auto r = co_await (*rest)->user_data_streams.async_execute(types::keepalive_listen_key_request_t{});
         check("keepalive_listen_key", r);
     }
 
     // Close listen key
     {
-        auto r = co_await c.user_data_streams.async_execute(types::close_listen_key_request_t{});
+        auto r = co_await (*rest)->user_data_streams.async_execute(types::close_listen_key_request_t{});
         check("close_listen_key", r);
     }
 

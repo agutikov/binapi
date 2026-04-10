@@ -29,7 +29,7 @@
 #include "cmd_user_stream.hpp"
 #include "cmd_order_book.hpp"
 
-#include <binapi2/fapi/client.hpp>
+#include <binapi2/futures_usdm_api.hpp>
 
 #include <boost/cobalt/main.hpp>
 #include <spdlog/spdlog.h>
@@ -166,7 +166,7 @@ boost::cobalt::main co_main(int argc, char* argv[])
     demo::args_t sub_args(cmd_args.begin() + 1, cmd_args.end());
 
     // Create client once, pass to all commands.
-    binapi2::fapi::client c(demo::make_config());
+    binapi2::futures_usdm_api c(demo::make_config());
 
     int rc = 1;
     for (const auto& cmd : commands) {

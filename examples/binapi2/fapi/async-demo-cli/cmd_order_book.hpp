@@ -6,6 +6,6 @@
 
 namespace demo {
 
-boost::cobalt::task<int> cmd_order_book_live(binapi2::fapi::client& c, const args_t& args);
+boost::cobalt::task<int> cmd_order_book_live(binapi2::futures_usdm_api& c, const args_t& args);
 
 } // namespace demo

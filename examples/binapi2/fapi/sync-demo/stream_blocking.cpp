@@ -4,7 +4,7 @@
 
 #include "examples.hpp"
 
-#include <binapi2/fapi/client.hpp>
+#include <binapi2/futures_usdm_api.hpp>
 #include <binapi2/fapi/detail/io_thread.hpp>
 #include <binapi2/fapi/streams/market_streams.hpp>
 #include <binapi2/fapi/types/market_stream_events.hpp>
@@ -23,7 +23,7 @@
 namespace sync_demo {
 
 namespace types = binapi2::fapi::types;
-using binapi2::fapi::client;
+using binapi2::futures_usdm_api;
 using binapi2::fapi::result;
 
 // Each invocation creates its own market_streams so the websocket_client's
@@ -61,7 +61,7 @@ static void print_events(const result<std::vector<types::book_ticker_stream_even
     }
 }
 
-void stream_blocking(client& c)
+void stream_blocking(futures_usdm_api& c)
 {
     auto cfg = c.configuration();
 

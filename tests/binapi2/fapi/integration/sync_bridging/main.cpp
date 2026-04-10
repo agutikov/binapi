@@ -7,7 +7,7 @@
 //
 // Prerequisites: same as postman_mock integration test.
 
-#include <binapi2/fapi/client.hpp>
+#include <binapi2/futures_usdm_api.hpp>
 #include <binapi2/fapi/detail/io_thread.hpp>
 #include <binapi2/fapi/types/common.hpp>
 #include <binapi2/fapi/types/market_data.hpp>
@@ -47,14 +47,17 @@ static bool check(const char* name, const result<T>& r)
 
 // The core async operation used by all bridging tests.
 static boost::cobalt::task<result<types::server_time_response_t>>
-get_server_time(client& c)
+get_server_time(binapi2::futures_usdm_api& c)
 {
-    co_return co_await c.market_data.async_execute(types::server_time_request_t{});
+    auto rest = co_await c.create_rest_client();
+    if (!rest)
+        co_return result<types::server_time_response_t>::failure(rest.err);
+    co_return co_await (*rest)->market_data.async_execute(types::server_time_request_t{});
 }
 
 // --- Test 1: io_thread::run_sync ---
 
-static void test_run_sync(client& c)
+static void test_run_sync(binapi2::futures_usdm_api& c)
 {
     std::cout << "--- run_sync ---\n";
     detail::io_thread io;
@@ -68,7 +71,7 @@ static void test_run_sync(client& c)
 
 // --- Test 2: future via cobalt::spawn ---
 
-static void test_future(client& c)
+static void test_future(binapi2::futures_usdm_api& c)
 {
     std::cout << "--- future ---\n";
     detail::io_thread io;
@@ -83,7 +86,7 @@ static void test_future(client& c)
 
 // --- Test 3: callback via cobalt::spawn ---
 
-static void test_callback(client& c)
+static void test_callback(binapi2::futures_usdm_api& c)
 {
     std::cout << "--- callback ---\n";
     detail::io_thread io;
@@ -110,7 +113,7 @@ static void test_callback(client& c)
 
 // --- Test 4: manual io_context ---
 
-static void test_manual_io_context(client& c)
+static void test_manual_io_context(binapi2::futures_usdm_api& c)
 {
     std::cout << "--- manual_io_context ---\n";
     boost::asio::io_context io;
@@ -134,7 +137,7 @@ int main()
     cfg.secret_key = "test-secret-key";
     cfg.ca_cert_file = env_or("SSL_CERT_FILE", "");
 
-    client c(cfg);
+    binapi2::futures_usdm_api c(cfg);
 
     test_run_sync(c);
     test_future(c);

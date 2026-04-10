@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <binapi2/futures_usdm_api.hpp>
 #include <binapi2/fapi/config.hpp>
 #include <binapi2/fapi/error.hpp>
 #include <binapi2/fapi/result.hpp>
@@ -44,7 +45,7 @@ inline std::string file_loglevel;
 inline std::string stdout_loglevel;
 
 // Command function pointer type: async, takes client& and args.
-using command_fn = boost::cobalt::task<int> (*)(binapi2::fapi::client&, const args_t&);
+using command_fn = boost::cobalt::task<int> (*)(binapi2::futures_usdm_api&, const args_t&);
 
 // Initialize async spdlog (call once from main).
 void init_logging();

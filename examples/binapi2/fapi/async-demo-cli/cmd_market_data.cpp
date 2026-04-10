@@ -6,7 +6,7 @@
 
 #include "cmd_market_data.hpp"
 
-#include <binapi2/fapi/client.hpp>
+#include <binapi2/futures_usdm_api.hpp>
 
 #include <spdlog/spdlog.h>
 
@@ -14,10 +14,12 @@ namespace demo {
 
 namespace types = binapi2::fapi::types;
 
-boost::cobalt::task<int> cmd_ping(binapi2::fapi::client& c, const args_t& /*args*/)
+boost::cobalt::task<int> cmd_ping(binapi2::futures_usdm_api& c, const args_t& /*args*/)
 {
+    auto rest = co_await c.create_rest_client();
+    if (!rest) { spdlog::error("connect: {}", rest.err.message); co_return 1; }
     spdlog::debug("executing ping request");
-    auto r = co_await c.market_data.async_execute(types::ping_request_t{});
+    auto r = co_await (*rest)->market_data.async_execute(types::ping_request_t{});
     if (!r) { print_error(r.err); co_return 1; }
 
     spdlog::info("pong");
@@ -25,10 +27,12 @@ boost::cobalt::task<int> cmd_ping(binapi2::fapi::client& c, const args_t& /*args
     co_return 0;
 }
 
-boost::cobalt::task<int> cmd_time(binapi2::fapi::client& c, const args_t& /*args*/)
+boost::cobalt::task<int> cmd_time(binapi2::futures_usdm_api& c, const args_t& /*args*/)
 {
+    auto rest = co_await c.create_rest_client();
+    if (!rest) { spdlog::error("connect: {}", rest.err.message); co_return 1; }
     spdlog::debug("executing server_time request");
-    auto r = co_await c.market_data.async_execute(types::server_time_request_t{});
+    auto r = co_await (*rest)->market_data.async_execute(types::server_time_request_t{});
     if (!r) { print_error(r.err); co_return 1; }
 
     spdlog::info("server time: {}", r->serverTime);
@@ -36,14 +40,16 @@ boost::cobalt::task<int> cmd_time(binapi2::fapi::client& c, const args_t& /*args
     co_return 0;
 }
 
-boost::cobalt::task<int> cmd_exchange_info(binapi2::fapi::client& c, const args_t& args)
+boost::cobalt::task<int> cmd_exchange_info(binapi2::futures_usdm_api& c, const args_t& args)
 {
+    auto rest = co_await c.create_rest_client();
+    if (!rest) { spdlog::error("connect: {}", rest.err.message); co_return 1; }
     types::exchange_info_request_t req;
     if (!args.empty()) req.symbol = args[0];
 
     spdlog::debug("executing exchange_info request symbol={}",
                   req.symbol.value_or("(all)"));
-    auto r = co_await c.market_data.async_execute(req);
+    auto r = co_await (*rest)->market_data.async_execute(req);
     if (!r) { print_error(r.err); co_return 1; }
 
     spdlog::info("symbols: {}  rate_limits: {}", r->symbols.size(), r->rateLimits.size());
@@ -51,17 +57,19 @@ boost::cobalt::task<int> cmd_exchange_info(binapi2::fapi::client& c, const args_
     co_return 0;
 }
 
-boost::cobalt::task<int> cmd_order_book(binapi2::fapi::client& c, const args_t& args)
+boost::cobalt::task<int> cmd_order_book(binapi2::futures_usdm_api& c, const args_t& args)
 {
     if (args.empty()) { spdlog::error("usage: order-book <symbol> [limit]"); co_return 1; }
 
+    auto rest = co_await c.create_rest_client();
+    if (!rest) { spdlog::error("connect: {}", rest.err.message); co_return 1; }
     types::order_book_request_t req;
     req.symbol = args[0];
     if (args.size() > 1) req.limit = std::stoi(args[1]);
 
     spdlog::debug("executing order_book request symbol={} limit={}",
                   req.symbol, req.limit.value_or(0));
-    auto r = co_await c.market_data.async_execute(req);
+    auto r = co_await (*rest)->market_data.async_execute(req);
     if (!r) { print_error(r.err); co_return 1; }
 
     spdlog::info("order book: bids={} asks={} lastUpdateId={}",
@@ -82,16 +90,18 @@ boost::cobalt::task<int> cmd_order_book(binapi2::fapi::client& c, const args_t& 
     co_return 0;
 }
 
-boost::cobalt::task<int> cmd_recent_trades(binapi2::fapi::client& c, const args_t& args)
+boost::cobalt::task<int> cmd_recent_trades(binapi2::futures_usdm_api& c, const args_t& args)
 {
     if (args.empty()) { spdlog::error("usage: recent-trades <symbol> [limit]"); co_return 1; }
 
+    auto rest = co_await c.create_rest_client();
+    if (!rest) { spdlog::error("connect: {}", rest.err.message); co_return 1; }
     types::recent_trades_request_t req;
     req.symbol = args[0];
     if (args.size() > 1) req.limit = std::stoi(args[1]);
 
     spdlog::debug("executing recent_trades request symbol={}", req.symbol);
-    auto r = co_await c.market_data.async_execute(req);
+    auto r = co_await (*rest)->market_data.async_execute(req);
     if (!r) { print_error(r.err); co_return 1; }
 
     spdlog::info("trades: {}", r->size());
@@ -105,15 +115,17 @@ boost::cobalt::task<int> cmd_recent_trades(binapi2::fapi::client& c, const args_
     co_return 0;
 }
 
-boost::cobalt::task<int> cmd_book_ticker(binapi2::fapi::client& c, const args_t& args)
+boost::cobalt::task<int> cmd_book_ticker(binapi2::futures_usdm_api& c, const args_t& args)
 {
     if (args.empty()) { spdlog::error("usage: book-ticker <symbol>"); co_return 1; }
 
+    auto rest = co_await c.create_rest_client();
+    if (!rest) { spdlog::error("connect: {}", rest.err.message); co_return 1; }
     types::book_ticker_request_t req;
     req.symbol = args[0];
 
     spdlog::debug("executing book_ticker_t request symbol={}", *req.symbol);
-    auto r = co_await c.market_data.async_execute(req);
+    auto r = co_await (*rest)->market_data.async_execute(req);
     if (!r) { print_error(r.err); co_return 1; }
 
     if (verbosity >= 1) {
@@ -125,10 +137,12 @@ boost::cobalt::task<int> cmd_book_ticker(binapi2::fapi::client& c, const args_t&
     co_return 0;
 }
 
-boost::cobalt::task<int> cmd_book_tickers(binapi2::fapi::client& c, const args_t& /*args*/)
+boost::cobalt::task<int> cmd_book_tickers(binapi2::futures_usdm_api& c, const args_t& /*args*/)
 {
+    auto rest = co_await c.create_rest_client();
+    if (!rest) { spdlog::error("connect: {}", rest.err.message); co_return 1; }
     spdlog::debug("executing book_tickers (all symbols)");
-    auto r = co_await c.market_data.async_execute(types::book_tickers_request_t{});
+    auto r = co_await (*rest)->market_data.async_execute(types::book_tickers_request_t{});
     if (!r) { print_error(r.err); co_return 1; }
 
     spdlog::info("book_tickers: {}", r->size());
@@ -144,15 +158,17 @@ boost::cobalt::task<int> cmd_book_tickers(binapi2::fapi::client& c, const args_t
     co_return 0;
 }
 
-boost::cobalt::task<int> cmd_price_ticker(binapi2::fapi::client& c, const args_t& args)
+boost::cobalt::task<int> cmd_price_ticker(binapi2::futures_usdm_api& c, const args_t& args)
 {
     if (args.empty()) { spdlog::error("usage: price-ticker <symbol>"); co_return 1; }
 
+    auto rest = co_await c.create_rest_client();
+    if (!rest) { spdlog::error("connect: {}", rest.err.message); co_return 1; }
     types::price_ticker_request_t req;
     req.symbol = args[0];
 
     spdlog::debug("executing price_ticker_t request symbol={}", *req.symbol);
-    auto r = co_await c.market_data.async_execute(req);
+    auto r = co_await (*rest)->market_data.async_execute(req);
     if (!r) { print_error(r.err); co_return 1; }
 
     if (verbosity >= 1) {
@@ -163,10 +179,12 @@ boost::cobalt::task<int> cmd_price_ticker(binapi2::fapi::client& c, const args_t
     co_return 0;
 }
 
-boost::cobalt::task<int> cmd_price_tickers(binapi2::fapi::client& c, const args_t& /*args*/)
+boost::cobalt::task<int> cmd_price_tickers(binapi2::futures_usdm_api& c, const args_t& /*args*/)
 {
+    auto rest = co_await c.create_rest_client();
+    if (!rest) { spdlog::error("connect: {}", rest.err.message); co_return 1; }
     spdlog::debug("executing price_tickers (all symbols)");
-    auto r = co_await c.market_data.async_execute(types::price_tickers_request_t{});
+    auto r = co_await (*rest)->market_data.async_execute(types::price_tickers_request_t{});
     if (!r) { print_error(r.err); co_return 1; }
 
     spdlog::info("price_tickers: {}", r->size());
@@ -181,27 +199,31 @@ boost::cobalt::task<int> cmd_price_tickers(binapi2::fapi::client& c, const args_
     co_return 0;
 }
 
-boost::cobalt::task<int> cmd_ticker_24hr(binapi2::fapi::client& c, const args_t& args)
+boost::cobalt::task<int> cmd_ticker_24hr(binapi2::futures_usdm_api& c, const args_t& args)
 {
     if (args.empty()) { spdlog::error("usage: ticker-24hr <symbol>"); co_return 1; }
 
+    auto rest = co_await c.create_rest_client();
+    if (!rest) { spdlog::error("connect: {}", rest.err.message); co_return 1; }
     types::ticker_24hr_request_t req;
     req.symbol = args[0];
 
     spdlog::debug("executing ticker_24hr_t request symbol={}", *req.symbol);
-    auto r = co_await c.market_data.async_execute(req);
+    auto r = co_await (*rest)->market_data.async_execute(req);
     co_return handle_result(r);
 }
 
-boost::cobalt::task<int> cmd_mark_price(binapi2::fapi::client& c, const args_t& args)
+boost::cobalt::task<int> cmd_mark_price(binapi2::futures_usdm_api& c, const args_t& args)
 {
     if (args.empty()) { spdlog::error("usage: mark-price <symbol>"); co_return 1; }
 
+    auto rest = co_await c.create_rest_client();
+    if (!rest) { spdlog::error("connect: {}", rest.err.message); co_return 1; }
     types::mark_price_request_t req;
     req.symbol = args[0];
 
     spdlog::debug("executing mark_price_t request symbol={}", *req.symbol);
-    auto r = co_await c.market_data.async_execute(req);
+    auto r = co_await (*rest)->market_data.async_execute(req);
     if (!r) { print_error(r.err); co_return 1; }
 
     if (verbosity >= 1) {
@@ -213,10 +235,12 @@ boost::cobalt::task<int> cmd_mark_price(binapi2::fapi::client& c, const args_t& 
     co_return 0;
 }
 
-boost::cobalt::task<int> cmd_mark_prices(binapi2::fapi::client& c, const args_t& /*args*/)
+boost::cobalt::task<int> cmd_mark_prices(binapi2::futures_usdm_api& c, const args_t& /*args*/)
 {
+    auto rest = co_await c.create_rest_client();
+    if (!rest) { spdlog::error("connect: {}", rest.err.message); co_return 1; }
     spdlog::debug("executing mark_prices (all symbols)");
-    auto r = co_await c.market_data.async_execute(types::mark_prices_request_t{});
+    auto r = co_await (*rest)->market_data.async_execute(types::mark_prices_request_t{});
     if (!r) { print_error(r.err); co_return 1; }
 
     spdlog::info("mark_prices: {}", r->size());
@@ -231,10 +255,12 @@ boost::cobalt::task<int> cmd_mark_prices(binapi2::fapi::client& c, const args_t&
     co_return 0;
 }
 
-boost::cobalt::task<int> cmd_klines(binapi2::fapi::client& c, const args_t& args)
+boost::cobalt::task<int> cmd_klines(binapi2::futures_usdm_api& c, const args_t& args)
 {
     if (args.size() < 2) { spdlog::error("usage: klines <symbol> <interval> [limit]"); co_return 1; }
 
+    auto rest = co_await c.create_rest_client();
+    if (!rest) { spdlog::error("connect: {}", rest.err.message); co_return 1; }
     types::klines_request_t req;
     req.symbol = args[0];
     req.interval = parse_enum<types::kline_interval_t>(args[1]);
@@ -243,7 +269,7 @@ boost::cobalt::task<int> cmd_klines(binapi2::fapi::client& c, const args_t& args
     spdlog::debug("executing klines request symbol={} interval={}",
                   req.symbol, to_string(req.interval));
 
-    auto r = co_await c.market_data.async_execute(req);
+    auto r = co_await (*rest)->market_data.async_execute(req);
     if (!r) { print_error(r.err); co_return 1; }
 
     spdlog::info("klines: {}", r->size());
@@ -257,28 +283,32 @@ boost::cobalt::task<int> cmd_klines(binapi2::fapi::client& c, const args_t& args
     co_return 0;
 }
 
-boost::cobalt::task<int> cmd_funding_rate(binapi2::fapi::client& c, const args_t& args)
+boost::cobalt::task<int> cmd_funding_rate(binapi2::futures_usdm_api& c, const args_t& args)
 {
     if (args.empty()) { spdlog::error("usage: funding-rate <symbol> [limit]"); co_return 1; }
 
+    auto rest = co_await c.create_rest_client();
+    if (!rest) { spdlog::error("connect: {}", rest.err.message); co_return 1; }
     types::funding_rate_history_request_t req;
     req.symbol = args[0];
     if (args.size() > 1) req.limit = std::stoi(args[1]);
 
     spdlog::debug("executing funding_rate_history request symbol={}", *req.symbol);
-    auto r = co_await c.market_data.async_execute(req);
+    auto r = co_await (*rest)->market_data.async_execute(req);
     co_return handle_result(r);
 }
 
-boost::cobalt::task<int> cmd_open_interest(binapi2::fapi::client& c, const args_t& args)
+boost::cobalt::task<int> cmd_open_interest(binapi2::futures_usdm_api& c, const args_t& args)
 {
     if (args.empty()) { spdlog::error("usage: open-interest <symbol>"); co_return 1; }
 
+    auto rest = co_await c.create_rest_client();
+    if (!rest) { spdlog::error("connect: {}", rest.err.message); co_return 1; }
     types::open_interest_request_t req;
     req.symbol = args[0];
 
     spdlog::debug("executing open_interest_t request symbol={}", req.symbol);
-    auto r = co_await c.market_data.async_execute(req);
+    auto r = co_await (*rest)->market_data.async_execute(req);
     co_return handle_result(r);
 }
 

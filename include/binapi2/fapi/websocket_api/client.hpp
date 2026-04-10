@@ -29,6 +29,9 @@ class client
 public:
     explicit client(config cfg);
 
+    client(const client&) = delete;
+    client& operator=(const client&) = delete;
+
     [[nodiscard]] boost::cobalt::task<result<void>> async_connect();
     [[nodiscard]] boost::cobalt::task<result<void>> async_close();
 

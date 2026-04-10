@@ -3,18 +3,19 @@
 # binapi2 USD-M Futures client library.
 
 set(BINAPI2_FAPI_HEADERS
-    ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/client.hpp
+    ${CMAKE_SOURCE_DIR}/include/binapi2/futures_usdm_api.hpp
+    ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/rest/client.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/config.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/error.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/result.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/signing.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/time.hpp
-    ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/rest/account.hpp
+    ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/rest/services/account.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/rest/generated_endpoints.hpp
-    ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/rest/convert.hpp
-    ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/rest/market_data.hpp
-    ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/rest/trade.hpp
-    ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/rest/user_data_streams.hpp
+    ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/rest/services/convert.hpp
+    ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/rest/services/market_data.hpp
+    ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/rest/services/trade.hpp
+    ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/rest/services/user_data_streams.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/streams/market_streams.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/streams/local_order_book.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/streams/user_streams.hpp
@@ -38,12 +39,12 @@ set(BINAPI2_FAPI_HEADERS
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/types/websocket_api.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/websocket_api/client.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/websocket_api/generated_methods.hpp
-    ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/websocket_api/methods.hpp
 )
 
 set(BINAPI2_FAPI_SOURCES
     decimal.cpp
     client.cpp
+    rest/client.cpp
     rest/pipeline.cpp
     rest/trade.cpp
     signing.cpp

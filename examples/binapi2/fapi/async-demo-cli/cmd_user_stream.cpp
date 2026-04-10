@@ -6,7 +6,7 @@
 
 #include "cmd_user_stream.hpp"
 
-#include <binapi2/fapi/client.hpp>
+#include <binapi2/futures_usdm_api.hpp>
 
 #include <spdlog/spdlog.h>
 
@@ -16,10 +16,12 @@ namespace demo {
 
 namespace types = binapi2::fapi::types;
 
-boost::cobalt::task<int> cmd_listen_key_start(binapi2::fapi::client& c, const args_t& /*args*/)
+boost::cobalt::task<int> cmd_listen_key_start(binapi2::futures_usdm_api& c, const args_t& /*args*/)
 {
+    auto rest = co_await c.create_rest_client();
+    if (!rest) { spdlog::error("connect: {}", rest.err.message); co_return 1; }
     spdlog::debug("requesting new listen key");
-    auto r = co_await c.user_data_streams.async_execute(types::start_listen_key_request_t{});
+    auto r = co_await (*rest)->user_data_streams.async_execute(types::start_listen_key_request_t{});
     if (!r) { print_error(r.err); co_return 1; }
 
     spdlog::info("listenKey: {}", r->listenKey);
@@ -27,20 +29,24 @@ boost::cobalt::task<int> cmd_listen_key_start(binapi2::fapi::client& c, const ar
     co_return 0;
 }
 
-boost::cobalt::task<int> cmd_listen_key_keepalive(binapi2::fapi::client& c, const args_t& /*args*/)
+boost::cobalt::task<int> cmd_listen_key_keepalive(binapi2::futures_usdm_api& c, const args_t& /*args*/)
 {
+    auto rest = co_await c.create_rest_client();
+    if (!rest) { spdlog::error("connect: {}", rest.err.message); co_return 1; }
     spdlog::debug("sending listen key keepalive");
-    auto r = co_await c.user_data_streams.async_execute(types::keepalive_listen_key_request_t{});
+    auto r = co_await (*rest)->user_data_streams.async_execute(types::keepalive_listen_key_request_t{});
     if (!r) { print_error(r.err); co_return 1; }
 
     spdlog::info("keepalive ok");
     co_return 0;
 }
 
-boost::cobalt::task<int> cmd_listen_key_close(binapi2::fapi::client& c, const args_t& /*args*/)
+boost::cobalt::task<int> cmd_listen_key_close(binapi2::futures_usdm_api& c, const args_t& /*args*/)
 {
+    auto rest = co_await c.create_rest_client();
+    if (!rest) { spdlog::error("connect: {}", rest.err.message); co_return 1; }
     spdlog::debug("closing listen key");
-    auto r = co_await c.user_data_streams.async_execute(types::close_listen_key_request_t{});
+    auto r = co_await (*rest)->user_data_streams.async_execute(types::close_listen_key_request_t{});
     if (!r) { print_error(r.err); co_return 1; }
 
     spdlog::info("listen key closed");
@@ -56,15 +62,18 @@ overloaded(Ts...) -> overloaded<Ts...>;
 
 } // namespace
 
-boost::cobalt::task<int> cmd_user_stream(binapi2::fapi::client& c, const args_t& /*args*/)
+boost::cobalt::task<int> cmd_user_stream(binapi2::futures_usdm_api& c, const args_t& /*args*/)
 {
+    auto rest = co_await c.create_rest_client();
+    if (!rest) { spdlog::error("connect: {}", rest.err.message); co_return 1; }
+    auto user_streams = c.create_user_streams();
     spdlog::info("requesting listen key...");
-    auto key = co_await c.user_data_streams.async_execute(types::start_listen_key_request_t{});
+    auto key = co_await (*rest)->user_data_streams.async_execute(types::start_listen_key_request_t{});
     if (!key) { print_error(key.err); co_return 1; }
     spdlog::info("listen key: {}", key->listenKey);
 
     spdlog::info("subscribing to user data stream...");
-    auto gen = c.user_streams().subscribe(key->listenKey);
+    auto gen = user_streams->subscribe(key->listenKey);
 
     spdlog::info("connected, reading events...");
     while (gen) {

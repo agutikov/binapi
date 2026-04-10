@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <binapi2/fapi/rest/service.hpp>
+#include <binapi2/fapi/rest/services/service.hpp>
 #include <binapi2/fapi/types/market_data.hpp>
 
 namespace binapi2::fapi::rest {

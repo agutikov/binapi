@@ -93,6 +93,9 @@ public:
     {
     }
 
+    basic_market_streams(const basic_market_streams&) = delete;
+    basic_market_streams& operator=(const basic_market_streams&) = delete;
+
     // -- Generator --
 
     /// @brief Subscribe and return a typed async generator.

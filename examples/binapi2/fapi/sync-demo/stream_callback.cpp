@@ -5,7 +5,7 @@
 
 #include "examples.hpp"
 
-#include <binapi2/fapi/client.hpp>
+#include <binapi2/futures_usdm_api.hpp>
 #include <binapi2/fapi/detail/io_thread.hpp>
 #include <binapi2/fapi/streams/market_streams.hpp>
 #include <binapi2/fapi/types/market_stream_events.hpp>
@@ -28,7 +28,7 @@
 namespace sync_demo {
 
 namespace types = binapi2::fapi::types;
-using binapi2::fapi::client;
+using binapi2::futures_usdm_api;
 using binapi2::fapi::result;
 
 /// Thread-safe queue for passing events from the I/O thread to the caller.
@@ -116,7 +116,7 @@ static void consume_queue(event_queue<event_t>& queue)
     std::cout << "  total events: " << n << "\n";
 }
 
-void stream_callback(client& c)
+void stream_callback(futures_usdm_api& c)
 {
     // --- 1. io_thread: spawn task, consume from queue on caller thread ---
     {

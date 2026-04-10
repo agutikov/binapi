@@ -14,6 +14,7 @@
 #include <boost/beast/http/verb.hpp>
 #include <boost/cobalt/task.hpp>
 
+#include <memory>
 #include <string>
 
 namespace binapi2::fapi::transport {
@@ -27,13 +28,20 @@ struct http_response
 
 /// @brief Async HTTP client for the Binance Futures REST API.
 ///
-/// Each call to async_request opens a fresh TLS connection, sends the request,
-/// reads the response, and closes. The coroutine runs on whatever executor
-/// drives it (via co_await this_coro::executor).
+/// Maintains a persistent TLS connection to rest_host:rest_port and reuses
+/// it across requests (HTTP/1.1 keep-alive). If the connection drops or
+/// a request fails, the client reconnects transparently and retries once.
+///
+/// The SSL context and resolver are created once. The TCP+TLS stream is
+/// established on the first request and reused for subsequent requests.
 class http_client final : public session_base
 {
 public:
     explicit http_client(config cfg);
+    ~http_client();
+
+    /// @brief Establish the TLS connection. If already connected, no-op.
+    [[nodiscard]] boost::cobalt::task<result<void>> async_connect();
 
     [[nodiscard]] boost::cobalt::task<result<http_response>>
     async_request(boost::beast::http::verb method,
@@ -41,6 +49,10 @@ public:
                   std::string body,
                   std::string content_type,
                   std::string api_key);
+
+private:
+    struct impl;
+    std::unique_ptr<impl> impl_;
 };
 
 } // namespace binapi2::fapi::transport

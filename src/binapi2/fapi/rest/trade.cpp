@@ -4,7 +4,7 @@
 
 /// @file Trade methods with custom serialization that can't use generic execute.
 
-#include <binapi2/fapi/rest/trade.hpp>
+#include <binapi2/fapi/rest/services/trade.hpp>
 
 #include <binapi2/fapi/rest/pipeline.hpp>
 #include <binapi2/fapi/rest/generated_endpoints.hpp>

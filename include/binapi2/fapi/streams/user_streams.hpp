@@ -84,6 +84,9 @@ public:
     {
     }
 
+    basic_user_streams(const basic_user_streams&) = delete;
+    basic_user_streams& operator=(const basic_user_streams&) = delete;
+
     // -- Generator --
 
     /// @brief Subscribe and return a typed async generator yielding user_stream_event_t variants.

@@ -2,49 +2,50 @@
 //
 // binapi2 USD-M Futures client library.
 
-/// @file Implements the client facade. Construction initializes HTTP transport
-/// and REST pipeline. WebSocket components are lazy-initialized on first access.
+/// @file Implements the futures_usdm_api async factory.
 
-#include <binapi2/fapi/client.hpp>
+#include <binapi2/futures_usdm_api.hpp>
 
-namespace binapi2::fapi {
+namespace binapi2 {
 
-client::client(config cfg) :
-    account(pipeline_), convert(pipeline_), market_data(pipeline_), trade(pipeline_), user_data_streams(pipeline_),
-    cfg_(std::move(cfg)),
-    http_(cfg_),
-    pipeline_(cfg_, http_)
+futures_usdm_api::futures_usdm_api(fapi::config cfg) :
+    cfg_(std::move(cfg))
 {
 }
 
-client::~client() = default;
+fapi::config& futures_usdm_api::configuration() noexcept { return cfg_; }
+const fapi::config& futures_usdm_api::configuration() const noexcept { return cfg_; }
 
-config& client::configuration() noexcept { return cfg_; }
-const config& client::configuration() const noexcept { return cfg_; }
-rest::pipeline& client::rest() noexcept { return pipeline_; }
-
-websocket_api::client&
-client::ws_api()
+boost::cobalt::task<fapi::result<std::unique_ptr<fapi::rest::client>>>
+futures_usdm_api::create_rest_client()
 {
-    if (!ws_api_)
-        ws_api_ = std::make_unique<websocket_api::client>(cfg_);
-    return *ws_api_;
+    auto c = std::make_unique<fapi::rest::client>(cfg_);
+    auto conn = co_await c->async_connect();
+    if (!conn)
+        co_return fapi::result<std::unique_ptr<fapi::rest::client>>::failure(conn.err);
+    co_return fapi::result<std::unique_ptr<fapi::rest::client>>::success(std::move(c));
 }
 
-streams::market_streams&
-client::streams()
+boost::cobalt::task<fapi::result<std::unique_ptr<fapi::websocket_api::client>>>
+futures_usdm_api::create_ws_api_client()
 {
-    if (!streams_)
-        streams_ = std::make_unique<streams::market_streams>(cfg_);
-    return *streams_;
+    auto c = std::make_unique<fapi::websocket_api::client>(cfg_);
+    auto conn = co_await c->async_connect();
+    if (!conn)
+        co_return fapi::result<std::unique_ptr<fapi::websocket_api::client>>::failure(conn.err);
+    co_return fapi::result<std::unique_ptr<fapi::websocket_api::client>>::success(std::move(c));
 }
 
-streams::user_streams&
-client::user_streams()
+std::unique_ptr<fapi::streams::market_streams>
+futures_usdm_api::create_market_streams()
 {
-    if (!user_streams_)
-        user_streams_ = std::make_unique<streams::user_streams>(cfg_);
-    return *user_streams_;
+    return std::make_unique<fapi::streams::market_streams>(cfg_);
 }
 
-} // namespace binapi2::fapi
+std::unique_ptr<fapi::streams::user_streams>
+futures_usdm_api::create_user_streams()
+{
+    return std::make_unique<fapi::streams::user_streams>(cfg_);
+}
+
+} // namespace binapi2

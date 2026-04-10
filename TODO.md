@@ -4,20 +4,59 @@
 
 
 
+---
 
 
+do we need event_type in event? while the particular event is of it's own type already
 
-
-
-connection pooling for REST and WSAPI
+make simple and effective mapping between event type:
+    - string value
+    - enum value
+    - struct type
 
 
 ---
 
+
+
+include/binapi2/fapi/streams/market_streams.hpp
+
+what is string argument of async_connect ?
+
+how multiple subscriptions per connection are expected to be used?
+    - how multiple event types should be handled?
+    - without variant?
+    - while dynamic variant is impossible I don't see we can use it
+
+hide async_read_text, provide only C++-ish events
+    - and optional recoreder
+
+do we need async_read_event while have generator?
+
+shouldn't be stream_recorder async?
+like:
+    - websocket_client is producer of json strings
+    - then goes optional configurable buffering
+    - then goes 2 both optional consumers:
+        - recoreder
+        - parser
+    - then parser is a consumer of strings, generator/producer of structs
+        - with optional configurable output buffering
+    - subscription == parser
+    - how this can work with multiple subscriptions?
+        - variant
+        - multiple parsers per one connection (string producer)
+
+
+Ok, basic_market_streams, while own transport - represent connection.
+But then subscription should be represented by something - by some producer, source of events of certain type.
+
+
+
 connection-related refactoring for streams
 
 streams:
-    - mapping stream/generator-connection-service
+    - mapping (stream/generator) <-> (connection) <-> (service)
     - what is market_streams or user_streams now?
 
 

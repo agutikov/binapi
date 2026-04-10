@@ -4,7 +4,7 @@
 
 #include "examples.hpp"
 
-#include <binapi2/fapi/client.hpp>
+#include <binapi2/futures_usdm_api.hpp>
 #include <binapi2/fapi/detail/io_thread.hpp>
 #include <binapi2/fapi/types/market_data.hpp>
 #include <binapi2/fapi/types/websocket_api.hpp>
@@ -22,26 +22,29 @@
 namespace sync_demo {
 
 namespace types = binapi2::fapi::types;
-using binapi2::fapi::client;
+using binapi2::futures_usdm_api;
 using binapi2::fapi::result;
 
 static boost::cobalt::task<result<types::book_ticker_t>>
-ws_book_ticker(client& c)
+ws_book_ticker(futures_usdm_api& c)
 {
-    auto& ws = c.ws_api();
-    auto conn = co_await ws.async_connect();
+    auto ws = co_await c.create_ws_api_client();
+    if (!ws)
+        co_return result<types::book_ticker_t>::failure(ws.err);
+
+    auto conn = co_await (*ws)->async_connect();
     if (!conn)
         co_return result<types::book_ticker_t>::failure(conn.err);
 
     if (!c.configuration().api_key.empty()) {
-        auto logon = co_await ws.async_session_logon();
+        auto logon = co_await (*ws)->async_session_logon();
         if (!logon)
             co_return result<types::book_ticker_t>::failure(logon.err);
     }
 
-    auto r = co_await ws.async_execute(
+    auto r = co_await (*ws)->async_execute(
         types::websocket_api_book_ticker_request_t{.symbol = "BTCUSDT"});
-    co_await ws.async_close();
+    co_await (*ws)->async_close();
 
     if (!r || !r->result)
         co_return result<types::book_ticker_t>::failure(r.err);
@@ -58,7 +61,7 @@ static void print_result(const result<types::book_ticker_t>& r)
         std::cout << "  error: " << r.err.message << "\n";
 }
 
-void ws_api_blocking(client& c)
+void ws_api_blocking(futures_usdm_api& c)
 {
     const char* key = std::getenv("BINANCE_API_KEY");
     if (!key || key[0] == '\0') {

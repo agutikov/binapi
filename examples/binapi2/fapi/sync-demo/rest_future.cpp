@@ -4,7 +4,7 @@
 
 #include "examples.hpp"
 
-#include <binapi2/fapi/client.hpp>
+#include <binapi2/futures_usdm_api.hpp>
 #include <binapi2/fapi/detail/io_thread.hpp>
 #include <binapi2/fapi/types/market_data.hpp>
 
@@ -20,16 +20,19 @@
 namespace sync_demo {
 
 namespace types = binapi2::fapi::types;
-using binapi2::fapi::client;
+using binapi2::futures_usdm_api;
 using binapi2::fapi::result;
 
 static boost::cobalt::task<result<types::server_time_response_t>>
-get_server_time(client& c)
+get_server_time(futures_usdm_api& c)
 {
-    co_return co_await c.market_data.async_execute(types::server_time_request_t{});
+    auto rest = co_await c.create_rest_client();
+    if (!rest)
+        co_return result<types::server_time_response_t>::failure(rest.err);
+    co_return co_await (*rest)->market_data.async_execute(types::server_time_request_t{});
 }
 
-void rest_future(client& c)
+void rest_future(futures_usdm_api& c)
 {
     // --- 1. io_thread: spawn returns future, do work, then get ---
     {
