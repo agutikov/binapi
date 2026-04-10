@@ -8,7 +8,7 @@ Always use the project build scripts — never add `-j$(nproc)` or custom parall
 
 ```bash
 ./build.sh          # CMake configure (Debug) + build with -j10
-./test.sh           # Run all tests via ctest -j20
+./run_tests.sh           # Run all tests via ctest -j20
 ```
 
 Run a single test binary directly:
@@ -27,7 +27,7 @@ scripts/testnet_ws_api.sh    # WebSocket API
 Integration tests require Docker (Postman mock server):
 ```bash
 scripts/api/postman_mock/start.sh   # Start mock
-scripts/api/postman_mock/run_test.sh
+scripts/api/postman_mock/run_run_tests.sh
 scripts/api/postman_mock/stop.sh
 ```
 

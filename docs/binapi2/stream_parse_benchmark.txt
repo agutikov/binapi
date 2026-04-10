@@ -1,0 +1,49 @@
+== Validating fixtures ==
+
+  OK   book_ticker                    141 bytes
+  OK   ticker_24hr                    281 bytes
+  OK   mark_price                     153 bytes
+  OK   aggregate_trade                146 bytes
+  OK   depth                          353 bytes
+  OK   kline                          287 bytes
+  OK   liquidation                    190 bytes
+  OK   account_update                 350 bytes
+  OK   order_trade_update             514 bytes
+  OK   margin_call                    170 bytes
+
+All fixtures OK.
+
+== Market stream: subscribe() generator, 1000 msgs/round ==
+
+Benchmark                                       iters      ns/op      ops/sec       MB/s
+------------------------------------------ ---------- ---------- ------------ ----------
+subscribe/book_ticker                          256000       7024       142371       19.1
+subscribe/ticker_24hr                          128000       8598       116304       31.2
+subscribe/mark_price                           256000       6760       147927       21.6
+subscribe/kline                                128000       8932       111963       30.6
+subscribe/depth                                128000      11034        90629       30.5
+
+== Market stream: async_read_event(), 1000 msgs/round ==
+
+Benchmark                                       iters      ns/op      ops/sec       MB/s
+------------------------------------------ ---------- ---------- ------------ ----------
+read_event/book_ticker                         256000       5665       176519       23.7
+read_event/ticker_24hr                         256000       7576       131997       35.4
+read_event/aggregate_trade                     256000       5489       182179       25.4
+read_event/depth                               128000      10087        99136       33.4
+read_event/kline                               128000       7993       125102       34.2
+read_event/liquidation                         256000       6201       161263       29.2
+
+== User stream: subscribe() dispatch, 1000 msgs/round ==
+
+Benchmark                                       iters      ns/op      ops/sec       MB/s
+------------------------------------------ ---------- ---------- ------------ ----------
+subscribe/account_update                       128000      11496        86985       29.0
+subscribe/order_trade_update                   128000      15450        64723       31.7
+subscribe/margin_call                          128000      10453        95668       15.5
+
+== Summary ==
+
+Fastest: 5489 ns/op  (182179 ops/sec)
+Slowest: 15450 ns/op  (64723 ops/sec)
+Total benchmarks: 14

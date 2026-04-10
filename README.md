@@ -23,7 +23,7 @@ cd binapi
 ./build.sh
 
 # Run unit tests
-./test.sh
+./run_tests.sh
 
 # Try the demo CLI (uses testnet by default)
 export BINANCE_API_KEY="your-testnet-key"
@@ -108,7 +108,7 @@ cmake --build _build -j16
 ### Run tests
 
 ```bash
-./test.sh                     # all unit tests via ctest
+./run_tests.sh                     # all unit tests via ctest
 ```
 
 ## Dependencies
@@ -227,7 +227,7 @@ python3 scripts/api/docs/convert_usdm_json_to_markdown.py \
 Located in `tests/binapi2/fapi/`.  Run with:
 
 ```bash
-./test.sh
+./run_tests.sh
 ```
 
 | Test | What it covers |
@@ -249,7 +249,7 @@ deserialization) against a mock Binance API server running in Docker.
 ./scripts/api/postman_mock/start.sh
 
 # Run the integration test
-./scripts/api/postman_mock/run_test.sh
+./scripts/api/postman_mock/run_run_tests.sh
 
 # Stop the mock server
 ./scripts/api/postman_mock/stop.sh

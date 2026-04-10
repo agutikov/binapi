@@ -12,6 +12,7 @@
 #include <binapi2/fapi/result.hpp>
 #include <binapi2/fapi/streams/stream_traits.hpp>
 #include <binapi2/fapi/transport/websocket_client.hpp>
+#include <binapi2/fapi/transport/websocket_transport.hpp>
 
 #include <boost/cobalt/generator.hpp>
 #include <boost/cobalt/task.hpp>
@@ -26,6 +27,41 @@ namespace binapi2::fapi::streams {
 /// @brief Typed async event generator returned by market_streams::subscribe().
 template<class Event>
 using event_generator = boost::cobalt::generator<result<Event>>;
+
+namespace detail {
+
+struct stream_control_request
+{
+    std::string method{};
+    std::vector<std::string> params{};
+    unsigned int id{};
+};
+
+struct stream_list_response
+{
+    std::vector<std::string> result{};
+    unsigned int id{};
+};
+
+} // namespace detail
+
+} // namespace binapi2::fapi::streams
+
+template<>
+struct glz::meta<binapi2::fapi::streams::detail::stream_control_request>
+{
+    using T = binapi2::fapi::streams::detail::stream_control_request;
+    static constexpr auto value = object("method", &T::method, "params", &T::params, "id", &T::id);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::streams::detail::stream_list_response>
+{
+    using T = binapi2::fapi::streams::detail::stream_list_response;
+    static constexpr auto value = object("result", &T::result, "id", &T::id);
+};
+
+namespace binapi2::fapi::streams {
 
 /// @brief Async client for Binance USD-M Futures market data WebSocket streams.
 ///
@@ -46,10 +82,16 @@ using event_generator = boost::cobalt::generator<result<Event>>;
 /// Low-level (raw):
 ///   co_await streams.async_connect("/ws/btcusdt@bookTicker");
 ///   auto msg = co_await streams.async_read_text();
-class market_streams
+///
+/// @tparam Transport WebSocket transport type (default: transport::websocket_client).
+template<transport::websocket_transport Transport = transport::websocket_client>
+class basic_market_streams
 {
 public:
-    explicit market_streams(config cfg);
+    explicit basic_market_streams(config cfg) :
+        transport_(cfg), cfg_(std::move(cfg))
+    {
+    }
 
     // -- Generator --
 
@@ -117,31 +159,91 @@ public:
     // -- Low-level --
 
     /// @brief Connect to a stream endpoint by raw target path.
-    [[nodiscard]] boost::cobalt::task<result<void>> async_connect(std::string target);
+    [[nodiscard]] boost::cobalt::task<result<void>> async_connect(std::string target)
+    {
+        co_return co_await transport_.async_connect(cfg_.stream_host, cfg_.stream_port, std::move(target));
+    }
 
     /// @brief Read a single raw text frame.
-    [[nodiscard]] boost::cobalt::task<result<std::string>> async_read_text();
+    [[nodiscard]] boost::cobalt::task<result<std::string>> async_read_text()
+    {
+        co_return co_await transport_.async_read_text();
+    }
 
     /// @brief Close the stream connection.
-    [[nodiscard]] boost::cobalt::task<result<void>> async_close();
+    [[nodiscard]] boost::cobalt::task<result<void>> async_close()
+    {
+        co_return co_await transport_.async_close();
+    }
 
     // -- Combined stream management --
 
     /// @brief Subscribe to stream topics on an existing combined connection.
-    [[nodiscard]] boost::cobalt::task<result<void>> async_subscribe(const std::vector<std::string>& streams);
+    [[nodiscard]] boost::cobalt::task<result<void>> async_subscribe(const std::vector<std::string>& streams)
+    {
+        detail::stream_control_request req{ .method = "SUBSCRIBE", .params = streams, .id = 1 };
+        auto json = glz::write_json(req);
+        if (!json) co_return result<void>::failure({ error_code::json, 0, 0, "failed to serialize subscribe request", {} });
+
+        auto wr = co_await transport_.async_write_text(*json);
+        if (!wr) co_return result<void>::failure(wr.err);
+
+        auto rd = co_await transport_.async_read_text();
+        if (!rd) co_return result<void>::failure(rd.err);
+
+        co_return result<void>::success();
+    }
 
     /// @brief Unsubscribe from stream topics.
-    [[nodiscard]] boost::cobalt::task<result<void>> async_unsubscribe(const std::vector<std::string>& streams);
+    [[nodiscard]] boost::cobalt::task<result<void>> async_unsubscribe(const std::vector<std::string>& streams)
+    {
+        detail::stream_control_request req{ .method = "UNSUBSCRIBE", .params = streams, .id = 2 };
+        auto json = glz::write_json(req);
+        if (!json) co_return result<void>::failure({ error_code::json, 0, 0, "failed to serialize unsubscribe request", {} });
+
+        auto wr = co_await transport_.async_write_text(*json);
+        if (!wr) co_return result<void>::failure(wr.err);
+
+        auto rd = co_await transport_.async_read_text();
+        if (!rd) co_return result<void>::failure(rd.err);
+
+        co_return result<void>::success();
+    }
 
     /// @brief List active subscriptions.
-    [[nodiscard]] boost::cobalt::task<result<std::vector<std::string>>> async_list_subscriptions();
+    [[nodiscard]] boost::cobalt::task<result<std::vector<std::string>>> async_list_subscriptions()
+    {
+        detail::stream_control_request req{ .method = "LIST_SUBSCRIPTIONS", .params = {}, .id = 3 };
+        auto json = glz::write_json(req);
+        if (!json) co_return result<std::vector<std::string>>::failure({ error_code::json, 0, 0, "failed to serialize list request", {} });
+
+        auto wr = co_await transport_.async_write_text(*json);
+        if (!wr) co_return result<std::vector<std::string>>::failure(wr.err);
+
+        auto rd = co_await transport_.async_read_text();
+        if (!rd) co_return result<std::vector<std::string>>::failure(rd.err);
+
+        detail::stream_list_response response{};
+        glz::context ctx{};
+        if (glz::read<fapi::detail::json_read_opts>(response, *rd, ctx)) {
+            co_return result<std::vector<std::string>>::failure({ error_code::json, 0, 0, "failed to parse list response", *rd });
+        }
+
+        co_return result<std::vector<std::string>>::success(std::move(response.result));
+    }
 
     /// @brief Access the stream config.
     [[nodiscard]] const config& configuration() const noexcept { return cfg_; }
 
+    /// @brief Access the underlying transport.
+    [[nodiscard]] Transport& transport() noexcept { return transport_; }
+
 private:
-    transport::websocket_client transport_;
+    Transport transport_;
     config cfg_;
 };
+
+/// @brief Default market streams using the WebSocket transport.
+using market_streams = basic_market_streams<>;
 
 } // namespace binapi2::fapi::streams

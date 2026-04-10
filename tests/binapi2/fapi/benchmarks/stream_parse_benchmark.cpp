@@ -5,16 +5,17 @@
 /// @file stream_parse_benchmark.cpp
 /// @brief Throughput benchmarks for market and user stream event JSON parsing.
 ///
-/// Measures raw glz::read performance for each event type without transport.
-/// Fixtures are either recorded testnet samples or synthetic JSON matching
-/// the Binance wire format.
+/// Uses basic_market_streams and basic_user_streams with a replay transport
+/// that feeds pre-recorded JSON without any I/O.
 
-#include <binapi2/fapi/detail/json_opts.hpp>
-#include <binapi2/fapi/result.hpp>
-#include <binapi2/fapi/types/market_stream_events.hpp>
-#include <binapi2/fapi/types/user_stream_events.hpp>
+#include "replay_transport.hpp"
 
-#include <glaze/glaze.hpp>
+#include <binapi2/fapi/streams/market_streams.hpp>
+#include <binapi2/fapi/streams/user_streams.hpp>
+#include <binapi2/fapi/types/subscriptions.hpp>
+
+#include <boost/cobalt/main.hpp>
+#include <boost/cobalt/task.hpp>
 
 #include <algorithm>
 #include <chrono>
@@ -24,8 +25,12 @@
 #include <string>
 #include <vector>
 
-
 namespace {
+
+using namespace binapi2::fapi;
+using replay = benchmarks::replay_transport;
+using market_streams_replay = streams::basic_market_streams<replay>;
+using user_streams_replay = streams::basic_user_streams<replay>;
 
 // ---------------------------------------------------------------------------
 // Harness
@@ -56,36 +61,13 @@ void print_result(const bench_result& r)
                 r.name, r.iterations, r.ns_per_op, r.ops_per_sec, r.mb_per_sec);
 }
 
-/// Run `fn` repeatedly for at least `min_time` and return stats.
-template<typename Fn>
-bench_result run_bench(const char* name, std::size_t bytes_per_op, Fn&& fn)
+bench_result compute(const char* name, std::size_t bytes_per_op,
+                     std::size_t total_ops, long long elapsed_ns)
 {
-    using clock = std::chrono::high_resolution_clock;
-
-    // Warmup
-    for (int i = 0; i < 100; ++i) fn();
-
-    // Calibrate: find iteration count that fills ~1 second
-    const auto min_ns = std::chrono::nanoseconds(std::chrono::seconds(1));
-    std::size_t iters = 1000;
-    for (;;) {
-        auto t0 = clock::now();
-        for (std::size_t i = 0; i < iters; ++i) fn();
-        auto elapsed = clock::now() - t0;
-        if (elapsed >= min_ns) break;
-        iters *= 2;
-    }
-
-    // Measure
-    auto t0 = clock::now();
-    for (std::size_t i = 0; i < iters; ++i) fn();
-    auto elapsed_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(clock::now() - t0).count();
-
-    double ns_op = static_cast<double>(elapsed_ns) / static_cast<double>(iters);
+    double ns_op = static_cast<double>(elapsed_ns) / static_cast<double>(total_ops);
     double ops = 1e9 / ns_op;
     double mbps = (static_cast<double>(bytes_per_op) * ops) / (1024.0 * 1024.0);
-
-    return {name, iters, bytes_per_op, ns_op, ops, mbps};
+    return {name, total_ops, bytes_per_op, ns_op, ops, mbps};
 }
 
 // ---------------------------------------------------------------------------
@@ -104,241 +86,280 @@ std::string read_file(const std::string& path)
     return ss.str();
 }
 
-std::string read_first_line(const std::string& path)
-{
-    std::ifstream f(path);
-    if (!f) {
-        std::fprintf(stderr, "ERROR: cannot open %s\n", path.c_str());
-        std::exit(1);
-    }
-    std::string line;
-    std::getline(f, line);
-    return line;
-}
-
-std::vector<std::string> read_lines(const std::string& path)
-{
-    std::ifstream f(path);
-    if (!f) {
-        std::fprintf(stderr, "ERROR: cannot open %s\n", path.c_str());
-        std::exit(1);
-    }
-    std::vector<std::string> lines;
-    std::string line;
-    while (std::getline(f, line)) {
-        if (!line.empty()) lines.push_back(std::move(line));
-    }
-    return lines;
-}
 
 // ---------------------------------------------------------------------------
-// Parse helpers (same as production code, without transport)
+// Upfront fixture validation
 // ---------------------------------------------------------------------------
 
-template<typename Event>
-bool parse_event(const std::string& json, Event& out)
+template<typename T>
+bool validate_parse(const char* name, const std::string& json)
 {
+    if (json.empty()) {
+        std::fprintf(stderr, "  FAIL %-30s empty input\n", name);
+        return false;
+    }
+    T value{};
     glz::context ctx{};
-    return !glz::read<binapi2::fapi::detail::json_read_opts>(out, json, ctx);
+    auto ec = glz::read<binapi2::fapi::detail::json_read_opts>(value, json, ctx);
+    if (ec) {
+        std::fprintf(stderr, "  FAIL %-30s %s\n", name, glz::format_error(ec, json).c_str());
+        return false;
+    }
+    std::printf("  OK   %-30s %zu bytes\n", name, json.size());
+    return true;
 }
 
 // ---------------------------------------------------------------------------
 // Market stream benchmarks
 // ---------------------------------------------------------------------------
 
-template<typename Event>
-bench_result bench_market_event(const char* name, const std::string& json)
+template<class Subscription>
+boost::cobalt::task<bench_result>
+bench_market_subscribe(const char* name, const std::string& json,
+                       const Subscription& sub, std::size_t n)
 {
-    return run_bench(name, json.size(), [&] {
-        Event event{};
-        if (!parse_event(json, event)) {
-            std::fprintf(stderr, "FATAL: parse failed for %s\n", name);
-            std::exit(1);
+    using clock = std::chrono::high_resolution_clock;
+
+    auto cfg = config::testnet_config();
+    market_streams_replay ms(cfg);
+    ms.transport().messages.assign(n, json);
+
+    // Warmup
+    ms.transport().reset();
+    {
+        auto gen = ms.subscribe(sub);
+        while (gen) { auto ev = co_await gen; if (!ev) break; }
+    }
+
+    // Calibrate
+    std::size_t rounds = 4;
+    for (;;) {
+        auto t0 = clock::now();
+        for (std::size_t r = 0; r < rounds; ++r) {
+            ms.transport().reset();
+            auto gen = ms.subscribe(sub);
+            while (gen) { auto ev = co_await gen; if (!ev) break; }
         }
-    });
+        if (clock::now() - t0 >= std::chrono::seconds(1)) break;
+        rounds *= 2;
+    }
+
+    // Measure
+    auto t0 = clock::now();
+    for (std::size_t r = 0; r < rounds; ++r) {
+        ms.transport().reset();
+        auto gen = ms.subscribe(sub);
+        while (gen) { auto ev = co_await gen; if (!ev) break; }
+    }
+    auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(clock::now() - t0).count();
+
+    co_return compute(name, json.size(), rounds * n, elapsed);
 }
 
-// ---------------------------------------------------------------------------
-// User stream dispatch — mirrors production logic from user_streams.cpp
-// ---------------------------------------------------------------------------
-
-bool match_event(const std::string& payload, const char* event_name)
+template<class Event>
+boost::cobalt::task<bench_result>
+bench_market_read(const char* name, const std::string& json, std::size_t n)
 {
-    std::string with_space = std::string("\"e\": \"") + event_name + "\"";
-    std::string without_space = std::string("\"e\":\"") + event_name + "\"";
-    return payload.find(with_space) != std::string::npos
-        || payload.find(without_space) != std::string::npos;
-}
+    using clock = std::chrono::high_resolution_clock;
 
-template<typename Event>
-bool try_parse_user(const std::string& payload, const char* event_name,
-                    binapi2::fapi::types::user_stream_event_t& out)
-{
-    if (!match_event(payload, event_name)) return false;
-    Event event{};
-    glz::context ctx{};
-    if (glz::read<binapi2::fapi::detail::json_read_opts>(event, payload, ctx)) return false;
-    out = std::move(event);
-    return true;
-}
+    auto cfg = config::testnet_config();
+    market_streams_replay ms(cfg);
+    ms.transport().messages.assign(n, json);
 
-binapi2::fapi::result<binapi2::fapi::types::user_stream_event_t>
-dispatch_user_event(const std::string& payload)
-{
-    using namespace binapi2::fapi::types;
-    using R = binapi2::fapi::result<user_stream_event_t>;
+    // Warmup
+    ms.transport().reset();
+    co_await ms.async_connect("/ws/bench");
+    for (;;) { auto ev = co_await ms.template async_read_event<Event>(); if (!ev) break; }
 
-    user_stream_event_t event;
-
-    if (try_parse_user<account_update_event_t>(payload, "ACCOUNT_UPDATE", event)) return R::success(std::move(event));
-    if (try_parse_user<order_trade_update_event_t>(payload, "ORDER_TRADE_UPDATE", event)) return R::success(std::move(event));
-    if (try_parse_user<margin_call_event_t>(payload, "MARGIN_CALL", event)) return R::success(std::move(event));
-    if (try_parse_user<listen_key_expired_event_t>(payload, "listenKeyExpired", event)) return R::success(std::move(event));
-    if (try_parse_user<account_config_update_event_t>(payload, "ACCOUNT_CONFIG_UPDATE", event)) return R::success(std::move(event));
-    if (try_parse_user<trade_lite_event_t>(payload, "TRADE_LITE", event)) return R::success(std::move(event));
-    if (try_parse_user<algo_order_update_event_t>(payload, "ALGO_UPDATE", event)) return R::success(std::move(event));
-    if (try_parse_user<conditional_order_trigger_reject_event_t>(payload, "CONDITIONAL_ORDER_TRIGGER_REJECT", event)) return R::success(std::move(event));
-    if (try_parse_user<grid_update_event_t>(payload, "GRID_UPDATE", event)) return R::success(std::move(event));
-    if (try_parse_user<strategy_update_event_t>(payload, "STRATEGY_UPDATE", event)) return R::success(std::move(event));
-
-    return R::failure({binapi2::fapi::error_code::json, 0, 0, "unknown user stream event type", payload});
-}
-
-bench_result bench_user_dispatch(const char* name, const std::string& json)
-{
-    return run_bench(name, json.size(), [&] {
-        auto r = dispatch_user_event(json);
-        if (!r) {
-            std::fprintf(stderr, "FATAL: user dispatch failed for %s: %s\n",
-                         name, r.err.message.c_str());
-            std::exit(1);
+    // Calibrate
+    std::size_t rounds = 4;
+    for (;;) {
+        auto t0 = clock::now();
+        for (std::size_t r = 0; r < rounds; ++r) {
+            ms.transport().reset();
+            co_await ms.async_connect("/ws/bench");
+            for (;;) { auto ev = co_await ms.template async_read_event<Event>(); if (!ev) break; }
         }
-    });
+        if (clock::now() - t0 >= std::chrono::seconds(1)) break;
+        rounds *= 2;
+    }
+
+    // Measure
+    auto t0 = clock::now();
+    for (std::size_t r = 0; r < rounds; ++r) {
+        ms.transport().reset();
+        co_await ms.async_connect("/ws/bench");
+        for (;;) { auto ev = co_await ms.template async_read_event<Event>(); if (!ev) break; }
+    }
+    auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(clock::now() - t0).count();
+
+    co_return compute(name, json.size(), rounds * n, elapsed);
 }
 
 // ---------------------------------------------------------------------------
-// Batch (array) parse benchmark
+// User stream benchmarks
 // ---------------------------------------------------------------------------
 
-template<typename ArrayEvent>
-bench_result bench_array_event(const char* name, const std::string& json)
+boost::cobalt::task<bench_result>
+bench_user_subscribe(const char* name, const std::string& json, std::size_t n)
 {
-    return run_bench(name, json.size(), [&] {
-        ArrayEvent events{};
-        glz::context ctx{};
-        if (glz::read<binapi2::fapi::detail::json_read_opts>(events, json, ctx)) {
-            std::fprintf(stderr, "FATAL: array parse failed for %s\n", name);
-            std::exit(1);
+    using clock = std::chrono::high_resolution_clock;
+
+    auto cfg = config::testnet_config();
+    user_streams_replay us(cfg);
+    us.transport().messages.assign(n, json);
+
+    // Warmup
+    us.transport().reset();
+    {
+        auto gen = us.subscribe("fake-listen-key");
+        while (gen) { auto ev = co_await gen; if (!ev) break; }
+    }
+
+    // Calibrate
+    std::size_t rounds = 4;
+    for (;;) {
+        auto t0 = clock::now();
+        for (std::size_t r = 0; r < rounds; ++r) {
+            us.transport().reset();
+            auto gen = us.subscribe("fake-listen-key");
+            while (gen) { auto ev = co_await gen; if (!ev) break; }
         }
-    });
+        if (clock::now() - t0 >= std::chrono::seconds(1)) break;
+        rounds *= 2;
+    }
+
+    // Measure
+    auto t0 = clock::now();
+    for (std::size_t r = 0; r < rounds; ++r) {
+        us.transport().reset();
+        auto gen = us.subscribe("fake-listen-key");
+        while (gen) { auto ev = co_await gen; if (!ev) break; }
+    }
+    auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(clock::now() - t0).count();
+
+    co_return compute(name, json.size(), rounds * n, elapsed);
 }
 
-} // namespace
-
 // ---------------------------------------------------------------------------
-// main
+// Top-level coroutine
 // ---------------------------------------------------------------------------
 
-int main()
+boost::cobalt::task<void> run_benchmarks()
 {
     using namespace binapi2::fapi::types;
 
     const std::string fixtures = FIXTURES_PATH;
-    const std::string testnet = TESTNET_STREAMS_PATH;
+
+    constexpr std::size_t N = 1000;
 
     // -- Load fixtures --
-
-    // Market events: prefer testnet recordings, fall back to synthetic fixtures
-    const auto book_ticker_json = read_first_line(testnet + "/stream-book-ticker/stream.jsonl");
-    const auto ticker_json = read_first_line(testnet + "/stream-ticker/stream.jsonl");
-    const auto mark_price_json = read_first_line(testnet + "/stream-mark-price/stream.jsonl");
+    const auto book_ticker_json = read_file(fixtures + "/book_ticker.json");
+    const auto ticker_json = read_file(fixtures + "/ticker.json");
+    const auto mark_price_json = read_file(fixtures + "/mark_price.json");
     const auto agg_trade_json = read_file(fixtures + "/aggregate_trade.json");
     const auto depth_json = read_file(fixtures + "/depth.json");
     const auto kline_json = read_file(fixtures + "/kline.json");
     const auto liquidation_json = read_file(fixtures + "/liquidation.json");
-
-    // User events (synthetic)
     const auto account_update_json = read_file(fixtures + "/account_update.json");
     const auto order_trade_json = read_file(fixtures + "/order_trade_update.json");
     const auto margin_call_json = read_file(fixtures + "/margin_call.json");
 
-    // Array events (testnet recordings — large payloads)
-    const auto all_mini_tickers_lines = read_lines(testnet + "/stream-all-mini-tickers/stream.jsonl");
-    const auto all_tickers_lines = read_lines(testnet + "/stream-all-tickers/stream.jsonl");
+    // ── Validate all fixtures before benchmarking ──
+
+    std::printf("== Validating fixtures ==\n\n");
+    int failures = 0;
+
+    // Market events
+    if (!validate_parse<book_ticker_stream_event_t>("book_ticker", book_ticker_json)) ++failures;
+    if (!validate_parse<ticker_stream_event_t>("ticker_24hr", ticker_json)) ++failures;
+    if (!validate_parse<mark_price_stream_event_t>("mark_price", mark_price_json)) ++failures;
+    if (!validate_parse<aggregate_trade_stream_event_t>("aggregate_trade", agg_trade_json)) ++failures;
+    if (!validate_parse<depth_stream_event_t>("depth", depth_json)) ++failures;
+    if (!validate_parse<kline_stream_event_t>("kline", kline_json)) ++failures;
+    if (!validate_parse<liquidation_order_stream_event_t>("liquidation", liquidation_json)) ++failures;
+
+    // User events
+    if (!validate_parse<account_update_event_t>("account_update", account_update_json)) ++failures;
+    if (!validate_parse<order_trade_update_event_t>("order_trade_update", order_trade_json)) ++failures;
+    if (!validate_parse<margin_call_event_t>("margin_call", margin_call_json)) ++failures;
+
+    if (failures > 0) {
+        std::fprintf(stderr, "\n%d fixture(s) failed validation — aborting.\n", failures);
+        co_return;
+    }
+    std::printf("\nAll fixtures OK.\n");
 
     std::vector<bench_result> results;
+    bench_result r{};
 
-    // ── Market stream: single-event parsing ──
+    // ── Market stream: subscribe() generator ──
 
-    print_header();
-    std::printf("\n== Market stream events ==\n\n");
-    print_header();
-
-    results.push_back(bench_market_event<book_ticker_stream_event_t>("book_ticker", book_ticker_json));
-    print_result(results.back());
-
-    results.push_back(bench_market_event<ticker_stream_event_t>("ticker_24hr", ticker_json));
-    print_result(results.back());
-
-    results.push_back(bench_market_event<mark_price_stream_event_t>("mark_price", mark_price_json));
-    print_result(results.back());
-
-    results.push_back(bench_market_event<aggregate_trade_stream_event_t>("aggregate_trade", agg_trade_json));
-    print_result(results.back());
-
-    results.push_back(bench_market_event<depth_stream_event_t>("depth (5 levels)", depth_json));
-    print_result(results.back());
-
-    results.push_back(bench_market_event<kline_stream_event_t>("kline", kline_json));
-    print_result(results.back());
-
-    results.push_back(bench_market_event<liquidation_order_stream_event_t>("liquidation", liquidation_json));
-    print_result(results.back());
-
-    // ── Market stream: array/batch parsing ──
-
-    std::printf("\n== Market stream batch events ==\n\n");
+    std::printf("\n== Market stream: subscribe() generator, %zu msgs/round ==\n\n", N);
     print_header();
 
-    if (!all_mini_tickers_lines.empty()) {
-        results.push_back(bench_array_event<all_market_mini_ticker_stream_event>(
-            "all_mini_tickers (batch)", all_mini_tickers_lines[0]));
-        print_result(results.back());
-    }
+    r = co_await bench_market_subscribe("subscribe/book_ticker", book_ticker_json,
+        book_ticker_subscription{.symbol = "BTCUSDT"}, N);
+    results.push_back(r); print_result(r);
 
-    if (!all_tickers_lines.empty()) {
-        results.push_back(bench_array_event<all_market_ticker_stream_event>(
-            "all_tickers (batch)", all_tickers_lines[0]));
-        print_result(results.back());
-    }
+    r = co_await bench_market_subscribe("subscribe/ticker_24hr", ticker_json,
+        ticker_subscription{.symbol = "BTCUSDT"}, N);
+    results.push_back(r); print_result(r);
 
-    // ── User stream: direct parsing per type ──
+    r = co_await bench_market_subscribe("subscribe/mark_price", mark_price_json,
+        mark_price_subscription{.symbol = "BTCUSDT"}, N);
+    results.push_back(r); print_result(r);
 
-    std::printf("\n== User stream events (direct parse) ==\n\n");
+    r = co_await bench_market_subscribe("subscribe/kline", kline_json,
+        kline_subscription{.symbol = "BTCUSDT", .interval = kline_interval_t::m5}, N);
+    results.push_back(r); print_result(r);
+
+    r = co_await bench_market_subscribe("subscribe/depth", depth_json,
+        diff_book_depth_subscription{.symbol = "BTCUSDT", .speed = "100ms"}, N);
+    results.push_back(r); print_result(r);
+
+    // ── Market stream: async_read_event() ──
+
+    std::printf("\n== Market stream: async_read_event(), %zu msgs/round ==\n\n", N);
     print_header();
 
-    results.push_back(bench_market_event<account_update_event_t>("account_update", account_update_json));
-    print_result(results.back());
+    r = co_await bench_market_read<book_ticker_stream_event_t>(
+        "read_event/book_ticker", book_ticker_json, N);
+    results.push_back(r); print_result(r);
 
-    results.push_back(bench_market_event<order_trade_update_event_t>("order_trade_update", order_trade_json));
-    print_result(results.back());
+    r = co_await bench_market_read<ticker_stream_event_t>(
+        "read_event/ticker_24hr", ticker_json, N);
+    results.push_back(r); print_result(r);
 
-    results.push_back(bench_market_event<margin_call_event_t>("margin_call", margin_call_json));
-    print_result(results.back());
+    r = co_await bench_market_read<aggregate_trade_stream_event_t>(
+        "read_event/aggregate_trade", agg_trade_json, N);
+    results.push_back(r); print_result(r);
 
-    // ── User stream: full dispatch (match_event + try_parse chain) ──
+    r = co_await bench_market_read<depth_stream_event_t>(
+        "read_event/depth", depth_json, N);
+    results.push_back(r); print_result(r);
 
-    std::printf("\n== User stream dispatch (match + parse) ==\n\n");
+    r = co_await bench_market_read<kline_stream_event_t>(
+        "read_event/kline", kline_json, N);
+    results.push_back(r); print_result(r);
+
+    r = co_await bench_market_read<liquidation_order_stream_event_t>(
+        "read_event/liquidation", liquidation_json, N);
+    results.push_back(r); print_result(r);
+
+    // ── User stream: subscribe() dispatch ──
+
+    std::printf("\n== User stream: subscribe() dispatch, %zu msgs/round ==\n\n", N);
     print_header();
 
-    results.push_back(bench_user_dispatch("dispatch/account_update", account_update_json));
-    print_result(results.back());
+    r = co_await bench_user_subscribe("subscribe/account_update", account_update_json, N);
+    results.push_back(r); print_result(r);
 
-    results.push_back(bench_user_dispatch("dispatch/order_trade_update", order_trade_json));
-    print_result(results.back());
+    r = co_await bench_user_subscribe("subscribe/order_trade_update", order_trade_json, N);
+    results.push_back(r); print_result(r);
 
-    results.push_back(bench_user_dispatch("dispatch/margin_call", margin_call_json));
-    print_result(results.back());
+    r = co_await bench_user_subscribe("subscribe/margin_call", margin_call_json, N);
+    results.push_back(r); print_result(r);
 
     // ── Summary ──
 
@@ -346,14 +367,20 @@ int main()
 
     double min_ns = results[0].ns_per_op;
     double max_ns = results[0].ns_per_op;
-    for (const auto& r : results) {
-        min_ns = std::min(min_ns, r.ns_per_op);
-        max_ns = std::max(max_ns, r.ns_per_op);
+    for (const auto& br : results) {
+        min_ns = std::min(min_ns, br.ns_per_op);
+        max_ns = std::max(max_ns, br.ns_per_op);
     }
 
     std::printf("Fastest: %.0f ns/op  (%.0f ops/sec)\n", min_ns, 1e9 / min_ns);
     std::printf("Slowest: %.0f ns/op  (%.0f ops/sec)\n", max_ns, 1e9 / max_ns);
     std::printf("Total benchmarks: %zu\n", results.size());
+}
 
-    return 0;
+} // namespace
+
+boost::cobalt::main co_main(int, char*[])
+{
+    co_await run_benchmarks();
+    co_return 0;
 }
