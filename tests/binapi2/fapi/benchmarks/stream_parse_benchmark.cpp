@@ -10,6 +10,8 @@
 
 #include "replay_transport.hpp"
 
+#include <binapi2/fapi/streams/combined_market_stream.hpp>
+#include <binapi2/fapi/streams/dynamic_market_stream.hpp>
 #include <binapi2/fapi/streams/market_stream.hpp>
 #include <binapi2/fapi/streams/user_stream.hpp>
 #include <binapi2/fapi/types/subscriptions.hpp>
@@ -122,6 +124,7 @@ bench_market_subscribe(const char* name, const std::string& json,
 
     auto cfg = config::testnet_config();
     market_stream_replay ms(cfg);
+    ms.set_max_reconnects(0);
     ms.transport().messages.assign(n, json);
 
     // Warmup
@@ -167,6 +170,7 @@ bench_user_subscribe(const char* name, const std::string& json, std::size_t n)
 
     auto cfg = config::testnet_config();
     user_stream_replay us(cfg);
+    us.set_max_reconnects(0);
     us.transport().messages.assign(n, json);
 
     // Warmup

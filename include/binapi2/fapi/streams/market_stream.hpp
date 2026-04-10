@@ -58,39 +58,61 @@ public:
 
     // -- Generator --
 
-    /// @brief Subscribe and return a typed async generator.
+    /// @brief Subscribe and return a typed async generator with auto-reconnect.
+    ///
+    /// On connection drop, closes the stale connection and reconnects to the
+    /// same target. Yields events seamlessly across reconnects. Gives up after
+    /// max_reconnects consecutive failures and yields the last error.
     template<class Subscription>
         requires has_stream_traits<Subscription>
     event_generator<typename stream_traits<Subscription>::event_type>
     subscribe(const Subscription& sub)
     {
         using Event = typename stream_traits<Subscription>::event_type;
-        auto conn = co_await conn_.async_connect(
-            conn_.configuration().stream_host,
-            conn_.configuration().stream_port,
-            stream_traits<Subscription>::target(conn_.configuration(), sub));
-        if (!conn) {
-            co_yield result<Event>::failure(conn.err);
-        } else {
-            bool running = true;
-            while (running) {
+        const auto host = conn_.configuration().stream_host;
+        const auto port = conn_.configuration().stream_port;
+        const auto target = stream_traits<Subscription>::target(conn_.configuration(), sub);
+
+        error last_err;
+        int failures = 0;
+
+        while (failures <= max_reconnects_) {
+            auto conn = co_await conn_.async_connect(host, port, target);
+            if (!conn) {
+                last_err = conn.err;
+                ++failures;
+                continue;
+            }
+
+            failures = 0;
+
+            while (true) {
                 auto msg = co_await conn_.async_read_text();
                 if (!msg) {
-                    co_yield result<Event>::failure(msg.err);
-                    running = false;
-                } else {
-                    Event event{};
-                    glz::context ctx{};
-                    if (auto ec = glz::read<fapi::detail::json_read_opts>(event, *msg, ctx)) {
-                        co_yield result<Event>::failure({error_code::json, 0, 0, glz::format_error(ec, *msg), *msg});
-                        running = false;
-                    } else {
-                        co_yield result<Event>::success(std::move(event));
-                    }
+                    last_err = msg.err;
+                    co_await conn_.async_close();
+                    ++failures;
+                    break;
                 }
+
+                Event event{};
+                glz::context ctx{};
+                if (auto ec = glz::read<fapi::detail::json_read_opts>(event, *msg, ctx)) {
+                    co_yield result<Event>::failure(
+                        {error_code::json, 0, 0, glz::format_error(ec, *msg), *msg});
+                    failures = max_reconnects_ + 1;
+                    break;
+                }
+
+                co_yield result<Event>::success(std::move(event));
             }
         }
+
+        co_yield result<Event>::failure(last_err);
     }
+
+    /// @brief Set maximum consecutive reconnect attempts (default: 3).
+    void set_max_reconnects(int n) { max_reconnects_ = n; }
 
     // -- Typed read --
 
@@ -101,6 +123,7 @@ public:
 
 private:
     basic_stream_connection<Transport> conn_;
+    int max_reconnects_{3};
 };
 
 /// @brief Default market streams using the WebSocket transport.

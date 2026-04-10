@@ -88,30 +88,55 @@ public:
 
     // -- Generator --
 
+    /// @brief Subscribe with auto-reconnect.
+    ///
+    /// On connection drop, reconnects with the same listen key.
+    /// Note: if the listen key has expired, the reconnect will fail and
+    /// the generator yields the error. The caller must manage listen key
+    /// keepalive separately.
     user_event_generator subscribe(types::listen_key_t listen_key)
     {
         using Event = types::user_stream_event_t;
-        auto conn = co_await conn_.async_connect(
-            conn_.configuration().stream_host,
-            conn_.configuration().stream_port,
-            conn_.configuration().stream_base_target + "/" + listen_key);
-        if (!conn) {
-            co_yield result<Event>::failure(conn.err);
-        } else {
-            bool running = true;
-            while (running) {
+        const auto host = conn_.configuration().stream_host;
+        const auto port = conn_.configuration().stream_port;
+        const ws_target_t target = conn_.configuration().stream_base_target + "/" + listen_key;
+
+        error last_err;
+        int failures = 0;
+
+        while (failures <= max_reconnects_) {
+            auto conn = co_await conn_.async_connect(host, port, target);
+            if (!conn) {
+                last_err = conn.err;
+                ++failures;
+                continue;
+            }
+
+            failures = 0;
+
+            while (true) {
                 auto msg = co_await conn_.async_read_text();
                 if (!msg) {
-                    co_yield result<Event>::failure(msg.err);
-                    running = false;
-                } else {
-                    auto event = parse_user_event(*msg);
-                    co_yield std::move(event);
-                    if (!event) running = false;
+                    last_err = msg.err;
+                    co_await conn_.async_close();
+                    ++failures;
+                    break;
+                }
+
+                auto event = parse_user_event(*msg);
+                co_yield std::move(event);
+                if (!event) {
+                    failures = max_reconnects_ + 1;
+                    break;
                 }
             }
         }
+
+        co_yield result<Event>::failure(last_err);
     }
+
+    /// @brief Set maximum consecutive reconnect attempts (default: 3).
+    void set_max_reconnects(int n) { max_reconnects_ = n; }
 
     // -- Accessors --
 
@@ -120,6 +145,7 @@ public:
 
 private:
     basic_stream_connection<Transport> conn_;
+    int max_reconnects_{3};
 };
 
 /// @brief Default user streams using the WebSocket transport.

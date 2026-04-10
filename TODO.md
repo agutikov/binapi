@@ -12,23 +12,7 @@
 
 
 
-
-
-
-
-
-
-async recorder
-
---- 
-
-
-stream auto-reconnect
-
-
----
-
-stream listen key keepalive
+design stream listen key keepalive; I will review before implementation
 
 
 

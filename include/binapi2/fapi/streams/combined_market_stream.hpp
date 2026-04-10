@@ -94,7 +94,7 @@ public:
 
     // -- Subscribe and consume --
 
-    /// @brief Connect, subscribe, and yield typed variant events.
+    /// @brief Connect, subscribe, and yield typed variant events with auto-reconnect.
     template<typename Variant, class... Subscriptions>
         requires (has_stream_traits<Subscriptions> && ...)
     boost::cobalt::generator<result<Variant>>
@@ -104,46 +104,64 @@ public:
         std::string topics_path;
         ((topics_path.empty() ? topics_path : topics_path += "/",
           topics_path += stream_traits<Subscriptions>::topic(conn_.configuration(), subs)), ...);
-        ws_target_t target = conn_.configuration().combined_stream_target
+        const auto host = conn_.configuration().stream_host;
+        const auto port = conn_.configuration().stream_port;
+        const ws_target_t target = conn_.configuration().combined_stream_target
             + "?streams=" + topics_path;
-
-        auto conn = co_await conn_.async_connect(
-            conn_.configuration().stream_host,
-            conn_.configuration().stream_port,
-            target);
-        if (!conn) { co_yield result<Variant>::failure(conn.err); co_return; }
 
         // Dispatch table: topic string → parse function
         const fapi::detail::variant_entry<Variant> dispatch[] = {
             detail::make_stream_entry<Subscriptions, Variant>(conn_.configuration(), subs)...
         };
 
-        // Read loop
-        bool running = true;
-        while (running) {
-            auto msg = co_await conn_.async_read_text();
-            if (!msg) { co_yield result<Variant>::failure(msg.err); running = false; continue; }
+        error last_err;
+        int failures = 0;
 
-            // Parse the combined stream wrapper
-            detail::combined_frame frame{};
-            glz::context ctx{};
-            if (glz::read<fapi::detail::json_read_opts>(frame, *msg, ctx)) {
-                // Not a data frame (control response) — skip
+        while (failures <= max_reconnects_) {
+            auto conn = co_await conn_.async_connect(host, port, target);
+            if (!conn) {
+                last_err = conn.err;
+                ++failures;
                 continue;
             }
 
-            if (frame.stream.empty()) continue;
+            failures = 0;
 
-            auto parsed = fapi::detail::dispatch_variant<Variant>(frame.stream, frame.data.str, dispatch);
-            if (parsed) {
-                co_yield result<Variant>::success(std::move(*parsed));
-            } else {
-                co_yield result<Variant>::failure(
-                    {error_code::json, 0, 0, "parse failed for topic: " + frame.stream, frame.data.str});
-                running = false;
+            while (true) {
+                auto msg = co_await conn_.async_read_text();
+                if (!msg) {
+                    last_err = msg.err;
+                    co_await conn_.async_close();
+                    ++failures;
+                    break;
+                }
+
+                detail::combined_frame frame{};
+                glz::context ctx{};
+                if (glz::read<fapi::detail::json_read_opts>(frame, *msg, ctx))
+                    continue;
+
+                if (frame.stream.empty()) continue;
+
+                auto parsed = fapi::detail::dispatch_variant<Variant>(
+                    frame.stream, frame.data.str, dispatch);
+                if (parsed) {
+                    co_yield result<Variant>::success(std::move(*parsed));
+                } else {
+                    co_yield result<Variant>::failure(
+                        {error_code::json, 0, 0,
+                         "parse failed for topic: " + frame.stream, frame.data.str});
+                    failures = max_reconnects_ + 1;
+                    break;
+                }
             }
         }
+
+        co_yield result<Variant>::failure(last_err);
     }
+
+    /// @brief Set maximum consecutive reconnect attempts (default: 3).
+    void set_max_reconnects(int n) { max_reconnects_ = n; }
 
     // -- Accessors --
 
@@ -152,6 +170,7 @@ public:
 
 private:
     basic_stream_connection<Transport> conn_;
+    int max_reconnects_{3};
 };
 
 using combined_market_stream = basic_combined_market_stream<>;
