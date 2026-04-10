@@ -15,6 +15,9 @@
 
 #include <stdexcept>
 #include <string>
+#include <string_view>
+#include <type_traits>
+#include <utility>
 
 namespace binapi2::fapi::types {
 
@@ -125,16 +128,6 @@ enum class futures_type_t
     coin_margined = 1,
 };
 
-[[nodiscard]] inline std::string
-to_string(futures_type_t value)
-{
-    switch (value) {
-        case futures_type_t::u_margined:   return "U_MARGINED";
-        case futures_type_t::coin_margined: return "COIN_MARGINED";
-    }
-    throw std::invalid_argument("invalid futures_type_t: " + std::to_string(static_cast<int>(value)));
-}
-
 /// Position control side for POSITION_RISK_CONTROL filters.
 enum class position_control_side_t
 {
@@ -143,18 +136,6 @@ enum class position_control_side_t
     short_side = 2,
     both = 3,
 };
-
-[[nodiscard]] inline std::string
-to_string(position_control_side_t value)
-{
-    switch (value) {
-        case position_control_side_t::none:       return "NONE";
-        case position_control_side_t::long_side:  return "LONG";
-        case position_control_side_t::short_side: return "SHORT";
-        case position_control_side_t::both:       return "BOTH";
-    }
-    throw std::invalid_argument("invalid position_control_side_t: " + std::to_string(static_cast<int>(value)));
-}
 
 /// Trading permission type for symbol permissionSets.
 enum class trading_permission_t
@@ -165,19 +146,6 @@ enum class trading_permission_t
     rpi = 3,
     psb = 4,
 };
-
-[[nodiscard]] inline std::string
-to_string(trading_permission_t value)
-{
-    switch (value) {
-        case trading_permission_t::grid: return "GRID";
-        case trading_permission_t::copy: return "COPY";
-        case trading_permission_t::dca:  return "DCA";
-        case trading_permission_t::rpi:  return "RPI";
-        case trading_permission_t::psb:  return "PSB";
-    }
-    throw std::invalid_argument("invalid trading_permission_t: " + std::to_string(static_cast<int>(value)));
-}
 
 /// Futures contract delivery type (perpetual, quarterly, etc.).
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/common-definition.md
@@ -292,350 +260,6 @@ enum class futures_data_period_t
     d1 = 8,
 };
 
-[[nodiscard]] inline std::string
-to_string(security_type_t value)
-{
-    switch (value) {
-        case security_type_t::none:
-            return "none";
-        case security_type_t::market_data:
-            return "market_data";
-        case security_type_t::user_stream:
-            return "user_stream";
-        case security_type_t::user_data:
-            return "user_data";
-        case security_type_t::trade:
-            return "trade";
-    }
-    throw std::invalid_argument("invalid security_type_t: " + std::to_string(static_cast<int>(value)));
-}
-
-[[nodiscard]] inline std::string
-to_string(order_side_t value)
-{
-    switch (value) {
-        case order_side_t::buy:
-            return "BUY";
-        case order_side_t::sell:
-            return "SELL";
-    }
-    throw std::invalid_argument("invalid order_side_t: " + std::to_string(static_cast<int>(value)));
-}
-
-[[nodiscard]] inline std::string
-to_string(order_type_t value)
-{
-    switch (value) {
-        case order_type_t::limit:
-            return "LIMIT";
-        case order_type_t::market:
-            return "MARKET";
-        case order_type_t::stop:
-            return "STOP";
-        case order_type_t::stop_market:
-            return "STOP_MARKET";
-        case order_type_t::take_profit:
-            return "TAKE_PROFIT";
-        case order_type_t::take_profit_market:
-            return "TAKE_PROFIT_MARKET";
-        case order_type_t::trailing_stop_market:
-            return "TRAILING_STOP_MARKET";
-    }
-    throw std::invalid_argument("invalid order_type_t: " + std::to_string(static_cast<int>(value)));
-}
-
-[[nodiscard]] inline std::string
-to_string(time_in_force_t value)
-{
-    switch (value) {
-        case time_in_force_t::gtc:
-            return "GTC";
-        case time_in_force_t::ioc:
-            return "IOC";
-        case time_in_force_t::fok:
-            return "FOK";
-        case time_in_force_t::gtx:
-            return "GTX";
-        case time_in_force_t::gtd:
-            return "GTD";
-        case time_in_force_t::rpi:
-            return "RPI";
-    }
-    throw std::invalid_argument("invalid time_in_force_t: " + std::to_string(static_cast<int>(value)));
-}
-
-[[nodiscard]] inline std::string
-to_string(kline_interval_t value)
-{
-    switch (value) {
-        case kline_interval_t::m1:
-            return "1m";
-        case kline_interval_t::m3:
-            return "3m";
-        case kline_interval_t::m5:
-            return "5m";
-        case kline_interval_t::m15:
-            return "15m";
-        case kline_interval_t::m30:
-            return "30m";
-        case kline_interval_t::h1:
-            return "1h";
-        case kline_interval_t::h2:
-            return "2h";
-        case kline_interval_t::h4:
-            return "4h";
-        case kline_interval_t::h6:
-            return "6h";
-        case kline_interval_t::h8:
-            return "8h";
-        case kline_interval_t::h12:
-            return "12h";
-        case kline_interval_t::d1:
-            return "1d";
-        case kline_interval_t::d3:
-            return "3d";
-        case kline_interval_t::w1:
-            return "1w";
-        case kline_interval_t::mo1:
-            return "1M";
-    }
-    throw std::invalid_argument("invalid kline_interval_t: " + std::to_string(static_cast<int>(value)));
-}
-
-[[nodiscard]] inline std::string
-to_string(position_side_t value)
-{
-    switch (value) {
-        case position_side_t::both:
-            return "BOTH";
-        case position_side_t::long_side:
-            return "LONG";
-        case position_side_t::short_side:
-            return "SHORT";
-    }
-    throw std::invalid_argument("invalid position_side_t: " + std::to_string(static_cast<int>(value)));
-}
-
-[[nodiscard]] inline std::string
-to_string(working_type_t value)
-{
-    switch (value) {
-        case working_type_t::mark_price_t:
-            return "MARK_PRICE";
-        case working_type_t::contract_price:
-            return "CONTRACT_PRICE";
-    }
-    throw std::invalid_argument("invalid working_type_t: " + std::to_string(static_cast<int>(value)));
-}
-
-[[nodiscard]] inline std::string
-to_string(response_type_t value)
-{
-    switch (value) {
-        case response_type_t::ack:
-            return "ACK";
-        case response_type_t::result:
-            return "RESULT";
-    }
-    throw std::invalid_argument("invalid response_type_t: " + std::to_string(static_cast<int>(value)));
-}
-
-[[nodiscard]] inline std::string
-to_string(margin_type_t value)
-{
-    switch (value) {
-        case margin_type_t::isolated:
-            return "ISOLATED";
-        case margin_type_t::crossed:
-            return "CROSSED";
-    }
-    throw std::invalid_argument("invalid margin_type_t: " + std::to_string(static_cast<int>(value)));
-}
-
-[[nodiscard]] inline std::string
-to_string(contract_type_t value)
-{
-    switch (value) {
-        case contract_type_t::perpetual:
-            return "PERPETUAL";
-        case contract_type_t::current_month:
-            return "CURRENT_MONTH";
-        case contract_type_t::next_month:
-            return "NEXT_MONTH";
-        case contract_type_t::current_quarter:
-            return "CURRENT_QUARTER";
-        case contract_type_t::next_quarter:
-            return "NEXT_QUARTER";
-        case contract_type_t::perpetual_delivering:
-            return "PERPETUAL_DELIVERING";
-        case contract_type_t::current_quarter_delivering:
-            return "CURRENT_QUARTER DELIVERING";
-        case contract_type_t::tradifi_perpetual:
-            return "TRADIFI_PERPETUAL";
-    }
-    throw std::invalid_argument("invalid contract_type_t: " + std::to_string(static_cast<int>(value)));
-}
-
-[[nodiscard]] inline std::string
-to_string(contract_status_t value)
-{
-    switch (value) {
-        case contract_status_t::pending_trading:
-            return "PENDING_TRADING";
-        case contract_status_t::trading:
-            return "TRADING";
-        case contract_status_t::pre_delivering:
-            return "PRE_DELIVERING";
-        case contract_status_t::delivering:
-            return "DELIVERING";
-        case contract_status_t::delivered:
-            return "DELIVERED";
-        case contract_status_t::pre_settle:
-            return "PRE_SETTLE";
-        case contract_status_t::settling:
-            return "SETTLING";
-        case contract_status_t::close:
-            return "CLOSE";
-    }
-    throw std::invalid_argument("invalid contract_status_t: " + std::to_string(static_cast<int>(value)));
-}
-
-[[nodiscard]] inline std::string
-to_string(order_status_t value)
-{
-    switch (value) {
-        case order_status_t::new_order:
-            return "NEW";
-        case order_status_t::partially_filled:
-            return "PARTIALLY_FILLED";
-        case order_status_t::filled:
-            return "FILLED";
-        case order_status_t::canceled:
-            return "CANCELED";
-        case order_status_t::rejected:
-            return "REJECTED";
-        case order_status_t::expired:
-            return "EXPIRED";
-        case order_status_t::expired_in_match:
-            return "EXPIRED_IN_MATCH";
-    }
-    throw std::invalid_argument("invalid order_status_t: " + std::to_string(static_cast<int>(value)));
-}
-
-[[nodiscard]] inline std::string
-to_string(stp_mode_t value)
-{
-    switch (value) {
-        case stp_mode_t::none:
-            return "NONE";
-        case stp_mode_t::expire_taker:
-            return "EXPIRE_TAKER";
-        case stp_mode_t::expire_both:
-            return "EXPIRE_BOTH";
-        case stp_mode_t::expire_maker:
-            return "EXPIRE_MAKER";
-    }
-    throw std::invalid_argument("invalid stp_mode_t: " + std::to_string(static_cast<int>(value)));
-}
-
-[[nodiscard]] inline std::string
-to_string(price_match_t value)
-{
-    switch (value) {
-        case price_match_t::none:
-            return "NONE";
-        case price_match_t::opponent:
-            return "OPPONENT";
-        case price_match_t::opponent_5:
-            return "OPPONENT_5";
-        case price_match_t::opponent_10:
-            return "OPPONENT_10";
-        case price_match_t::opponent_20:
-            return "OPPONENT_20";
-        case price_match_t::queue:
-            return "QUEUE";
-        case price_match_t::queue_5:
-            return "QUEUE_5";
-        case price_match_t::queue_10:
-            return "QUEUE_10";
-        case price_match_t::queue_20:
-            return "QUEUE_20";
-    }
-    throw std::invalid_argument("invalid price_match_t: " + std::to_string(static_cast<int>(value)));
-}
-
-[[nodiscard]] inline std::string
-to_string(income_type_t value)
-{
-    switch (value) {
-        case income_type_t::transfer:
-            return "TRANSFER";
-        case income_type_t::welcome_bonus:
-            return "WELCOME_BONUS";
-        case income_type_t::realized_pnl:
-            return "REALIZED_PNL";
-        case income_type_t::funding_fee:
-            return "FUNDING_FEE";
-        case income_type_t::commission:
-            return "COMMISSION";
-        case income_type_t::insurance_clear:
-            return "INSURANCE_CLEAR";
-        case income_type_t::referral_kickback:
-            return "REFERRAL_KICKBACK";
-        case income_type_t::commission_rebate:
-            return "COMMISSION_REBATE";
-        case income_type_t::api_rebate:
-            return "API_REBATE";
-        case income_type_t::contest_reward:
-            return "CONTEST_REWARD";
-        case income_type_t::cross_collateral_transfer:
-            return "CROSS_COLLATERAL_TRANSFER";
-        case income_type_t::options_premium_fee:
-            return "OPTIONS_PREMIUM_FEE";
-        case income_type_t::options_settle_profit:
-            return "OPTIONS_SETTLE_PROFIT";
-        case income_type_t::internal_transfer:
-            return "INTERNAL_TRANSFER";
-        case income_type_t::auto_exchange:
-            return "AUTO_EXCHANGE";
-        case income_type_t::delivered_settelment:
-            return "DELIVERED_SETTELMENT";
-        case income_type_t::coin_swap_deposit:
-            return "COIN_SWAP_DEPOSIT";
-        case income_type_t::coin_swap_withdraw:
-            return "COIN_SWAP_WITHDRAW";
-        case income_type_t::position_limit_increase_fee:
-            return "POSITION_LIMIT_INCREASE_FEE";
-    }
-    throw std::invalid_argument("invalid income_type_t: " + std::to_string(static_cast<int>(value)));
-}
-
-[[nodiscard]] inline std::string
-to_string(futures_data_period_t value)
-{
-    switch (value) {
-        case futures_data_period_t::m5:
-            return "5m";
-        case futures_data_period_t::m15:
-            return "15m";
-        case futures_data_period_t::m30:
-            return "30m";
-        case futures_data_period_t::h1:
-            return "1h";
-        case futures_data_period_t::h2:
-            return "2h";
-        case futures_data_period_t::h4:
-            return "4h";
-        case futures_data_period_t::h6:
-            return "6h";
-        case futures_data_period_t::h12:
-            return "12h";
-        case futures_data_period_t::d1:
-            return "1d";
-    }
-    throw std::invalid_argument("invalid futures_data_period_t: " + std::to_string(static_cast<int>(value)));
-}
-
 /// Execution type in order update events.
 enum class execution_type_t
 {
@@ -648,21 +272,6 @@ enum class execution_type_t
     trade = 6,
 };
 
-[[nodiscard]] inline std::string
-to_string(execution_type_t value)
-{
-    switch (value) {
-        case execution_type_t::new_order: return "NEW";
-        case execution_type_t::partial_fill: return "PARTIAL_FILL";
-        case execution_type_t::fill: return "FILL";
-        case execution_type_t::canceled: return "CANCELED";
-        case execution_type_t::rejected: return "REJECTED";
-        case execution_type_t::expired: return "EXPIRED";
-        case execution_type_t::trade: return "TRADE";
-    }
-    throw std::invalid_argument("invalid execution_type_t: " + std::to_string(static_cast<int>(value)));
-}
-
 /// Rate limit type from exchange info.
 enum class rate_limit_type_t
 {
@@ -674,20 +283,6 @@ enum class rate_limit_type_t
     orders_1d = 5,
 };
 
-[[nodiscard]] inline std::string
-to_string(rate_limit_type_t value)
-{
-    switch (value) {
-        case rate_limit_type_t::request_weight: return "REQUEST_WEIGHT";
-        case rate_limit_type_t::orders: return "ORDERS";
-        case rate_limit_type_t::orders_1s: return "ORDERS_1S";
-        case rate_limit_type_t::orders_1m: return "ORDERS_1M";
-        case rate_limit_type_t::orders_1h: return "ORDERS_1H";
-        case rate_limit_type_t::orders_1d: return "ORDERS_1D";
-    }
-    throw std::invalid_argument("invalid rate_limit_type_t: " + std::to_string(static_cast<int>(value)));
-}
-
 /// Rate limit interval unit.
 enum class rate_limit_interval_t
 {
@@ -697,18 +292,6 @@ enum class rate_limit_interval_t
     day = 3,
 };
 
-[[nodiscard]] inline std::string
-to_string(rate_limit_interval_t value)
-{
-    switch (value) {
-        case rate_limit_interval_t::second: return "SECOND";
-        case rate_limit_interval_t::minute: return "MINUTE";
-        case rate_limit_interval_t::hour: return "HOUR";
-        case rate_limit_interval_t::day: return "DAY";
-    }
-    throw std::invalid_argument("invalid rate_limit_interval_t: " + std::to_string(static_cast<int>(value)));
-}
-
 /// Auto-close type for forced liquidation/ADL orders.
 enum class auto_close_type_t
 {
@@ -716,32 +299,12 @@ enum class auto_close_type_t
     adl = 1,
 };
 
-[[nodiscard]] inline std::string
-to_string(auto_close_type_t value)
-{
-    switch (value) {
-        case auto_close_type_t::liquidation: return "LIQUIDATION";
-        case auto_close_type_t::adl: return "ADL";
-    }
-    throw std::invalid_argument("invalid auto_close_type_t: " + std::to_string(static_cast<int>(value)));
-}
-
 /// Isolated margin delta direction.
 enum class delta_type_t
 {
     add = 1,
     reduce = 2,
 };
-
-[[nodiscard]] inline std::string
-to_string(delta_type_t value)
-{
-    switch (value) {
-        case delta_type_t::add: return "1";
-        case delta_type_t::reduce: return "2";
-    }
-    throw std::invalid_argument("invalid delta_type_t: " + std::to_string(static_cast<int>(value)));
-}
 
 /// Market stream event type (field "e" in WebSocket market data events).
 enum class market_event_type_t
@@ -762,28 +325,6 @@ enum class market_event_type_t
     commodity_update = 13,
 };
 
-[[nodiscard]] inline std::string
-to_string(market_event_type_t value)
-{
-    switch (value) {
-        case market_event_type_t::agg_trade: return "aggTrade";
-        case market_event_type_t::mark_price_update: return "markPriceUpdate";
-        case market_event_type_t::depth_update: return "depthUpdate";
-        case market_event_type_t::mini_ticker_24hr: return "24hrMiniTicker";
-        case market_event_type_t::ticker_24hr: return "24hrTicker";
-        case market_event_type_t::force_order: return "forceOrder";
-        case market_event_type_t::kline: return "kline";
-        case market_event_type_t::continuous_kline: return "continuous_kline";
-        case market_event_type_t::composite_index: return "compositeIndex";
-        case market_event_type_t::contract_info: return "contractInfo";
-        case market_event_type_t::asset_index_update: return "assetIndexUpdate";
-        case market_event_type_t::book_ticker: return "bookTicker";
-        case market_event_type_t::equity_update: return "EquityUpdate";
-        case market_event_type_t::commodity_update: return "CommodityUpdate";
-    }
-    throw std::invalid_argument("invalid market_event_type_t: " + std::to_string(static_cast<int>(value)));
-}
-
 /// User data stream event type (field "e" in WebSocket user data events).
 enum class user_event_type_t
 {
@@ -799,40 +340,12 @@ enum class user_event_type_t
     strategy_update = 9,
 };
 
-[[nodiscard]] inline std::string
-to_string(user_event_type_t value)
-{
-    switch (value) {
-        case user_event_type_t::account_update: return "ACCOUNT_UPDATE";
-        case user_event_type_t::order_trade_update: return "ORDER_TRADE_UPDATE";
-        case user_event_type_t::margin_call: return "MARGIN_CALL";
-        case user_event_type_t::listen_key_expired: return "listenKeyExpired";
-        case user_event_type_t::account_config_update: return "ACCOUNT_CONFIG_UPDATE";
-        case user_event_type_t::trade_lite: return "TRADE_LITE";
-        case user_event_type_t::algo_update: return "ALGO_UPDATE";
-        case user_event_type_t::conditional_order_trigger_reject: return "CONDITIONAL_ORDER_TRIGGER_REJECT";
-        case user_event_type_t::grid_update: return "GRID_UPDATE";
-        case user_event_type_t::strategy_update: return "STRATEGY_UPDATE";
-    }
-    throw std::invalid_argument("invalid user_event_type_t: " + std::to_string(static_cast<int>(value)));
-}
-
 /// Algo order type.
 enum class algo_type_t
 {
     twap = 0,
     vp = 1,
 };
-
-[[nodiscard]] inline std::string
-to_string(algo_type_t value)
-{
-    switch (value) {
-        case algo_type_t::twap: return "TWAP";
-        case algo_type_t::vp: return "VP";
-    }
-    throw std::invalid_argument("invalid algo_type_t: " + std::to_string(static_cast<int>(value)));
-}
 
 /// Algo order status.
 enum class algo_status_t
@@ -843,19 +356,6 @@ enum class algo_status_t
     expired = 3,
     triggered = 4,
 };
-
-[[nodiscard]] inline std::string
-to_string(algo_status_t value)
-{
-    switch (value) {
-        case algo_status_t::working: return "WORKING";
-        case algo_status_t::cancelled: return "CANCELLED";
-        case algo_status_t::rejected: return "REJECTED";
-        case algo_status_t::expired: return "EXPIRED";
-        case algo_status_t::triggered: return "TRIGGERED";
-    }
-    throw std::invalid_argument("invalid algo_status_t: " + std::to_string(static_cast<int>(value)));
-}
 
 /// Account update reason type (field "m" in ACCOUNT_UPDATE events).
 enum class reason_type_t
@@ -879,31 +379,6 @@ enum class reason_type_t
     coin_swap_withdraw = 16,
 };
 
-[[nodiscard]] inline std::string
-to_string(reason_type_t value)
-{
-    switch (value) {
-        case reason_type_t::deposit: return "DEPOSIT";
-        case reason_type_t::withdraw: return "WITHDRAW";
-        case reason_type_t::order: return "ORDER";
-        case reason_type_t::funding_fee: return "FUNDING_FEE";
-        case reason_type_t::withdraw_reject: return "WITHDRAW_REJECT";
-        case reason_type_t::adjustment: return "ADJUSTMENT";
-        case reason_type_t::insurance_clear: return "INSURANCE_CLEAR";
-        case reason_type_t::admin_deposit: return "ADMIN_DEPOSIT";
-        case reason_type_t::admin_withdraw: return "ADMIN_WITHDRAW";
-        case reason_type_t::margin_transfer: return "MARGIN_TRANSFER";
-        case reason_type_t::margin_type_change: return "MARGIN_TYPE_CHANGE";
-        case reason_type_t::asset_transfer: return "ASSET_TRANSFER";
-        case reason_type_t::options_premium_fee: return "OPTIONS_PREMIUM_FEE";
-        case reason_type_t::options_settle_profit: return "OPTIONS_SETTLE_PROFIT";
-        case reason_type_t::auto_exchange: return "AUTO_EXCHANGE";
-        case reason_type_t::coin_swap_deposit: return "COIN_SWAP_DEPOSIT";
-        case reason_type_t::coin_swap_withdraw: return "COIN_SWAP_WITHDRAW";
-    }
-    throw std::invalid_argument("invalid reason_type_t: " + std::to_string(static_cast<int>(value)));
-}
-
 /// Trading session type (field "S" in trading session stream events).
 enum class session_type_t
 {
@@ -914,33 +389,11 @@ enum class session_type_t
     no_trading = 4,
 };
 
-[[nodiscard]] inline std::string
-to_string(session_type_t value)
-{
-    switch (value) {
-        case session_type_t::pre_market: return "PRE_MARKET";
-        case session_type_t::regular: return "REGULAR";
-        case session_type_t::after_market: return "AFTER_MARKET";
-        case session_type_t::overnight: return "OVERNIGHT";
-        case session_type_t::no_trading: return "NO_TRADING";
-    }
-    throw std::invalid_argument("invalid session_type_t: " + std::to_string(static_cast<int>(value)));
-}
-
 /// Grid/strategy type (field "st" in GRID_UPDATE / STRATEGY_UPDATE events).
 enum class strategy_type_t
 {
     grid = 0,
 };
-
-[[nodiscard]] inline std::string
-to_string(strategy_type_t value)
-{
-    switch (value) {
-        case strategy_type_t::grid: return "GRID";
-    }
-    throw std::invalid_argument("invalid strategy_type_t: " + std::to_string(static_cast<int>(value)));
-}
 
 /// Grid/strategy status (field "ss" in GRID_UPDATE / STRATEGY_UPDATE events).
 enum class strategy_status_t
@@ -950,18 +403,6 @@ enum class strategy_status_t
     cancelled = 2,
     expired = 3,
 };
-
-[[nodiscard]] inline std::string
-to_string(strategy_status_t value)
-{
-    switch (value) {
-        case strategy_status_t::new_strategy: return "NEW";
-        case strategy_status_t::working: return "WORKING";
-        case strategy_status_t::cancelled: return "CANCELLED";
-        case strategy_status_t::expired: return "EXPIRED";
-    }
-    throw std::invalid_argument("invalid strategy_status_t: " + std::to_string(static_cast<int>(value)));
-}
 
 } // namespace binapi2::fapi::types
 
@@ -1246,3 +687,47 @@ struct glz::meta<binapi2::fapi::types::strategy_status_t>
     static constexpr auto value = enumerate(
         "NEW", new_strategy, "WORKING", working, "CANCELLED", cancelled, "EXPIRED", expired);
 };
+
+template<>
+struct glz::meta<binapi2::fapi::types::security_type_t>
+{
+    using enum binapi2::fapi::types::security_type_t;
+    static constexpr auto value = enumerate(
+        "none", none, "market_data", market_data, "user_stream", user_stream,
+        "user_data", user_data, "trade", trade);
+};
+
+// ---------------------------------------------------------------------------
+// Generic to_string for all enum types that have a glz::meta specialization.
+// Walks the glaze enumerate tuple to find the wire-format string for a value.
+// ---------------------------------------------------------------------------
+
+namespace binapi2::fapi::types {
+
+namespace detail {
+
+template<class T, class Tuple, std::size_t... Is>
+[[nodiscard]] constexpr std::string_view
+enum_to_sv_impl(T value, const Tuple& tup, std::index_sequence<Is...>)
+{
+    std::string_view result{};
+    (void)((glz::get<Is * 2 + 1>(tup) == value ? (result = glz::get<Is * 2>(tup), true) : false) || ...);
+    return result;
+}
+
+} // namespace detail
+
+template<class T>
+    requires std::is_enum_v<T>
+[[nodiscard]] inline std::string
+to_string(T value)
+{
+    constexpr auto& tup = glz::meta<T>::value.value;
+    constexpr auto N = glz::tuple_size_v<std::decay_t<decltype(tup)>> / 2;
+    auto sv = detail::enum_to_sv_impl(value, tup, std::make_index_sequence<N>{});
+    if (!sv.empty()) [[likely]]
+        return std::string(sv);
+    throw std::invalid_argument("invalid enum value: " + std::to_string(static_cast<int>(value)));
+}
+
+} // namespace binapi2::fapi::types
