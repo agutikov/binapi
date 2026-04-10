@@ -32,7 +32,15 @@ namespace {
 using namespace binapi2::fapi;
 using replay = benchmarks::replay_transport;
 using market_stream_replay = streams::basic_market_stream<replay>;
+using combined_stream_replay = streams::basic_combined_market_stream<replay>;
+using dynamic_stream_replay = streams::basic_dynamic_market_stream<replay>;
 using user_stream_replay = streams::basic_user_stream<replay>;
+
+/// Wrap raw event JSON in a combined stream envelope.
+std::string wrap_combined(const std::string& topic, const std::string& event_json)
+{
+    return R"({"stream":")" + topic + R"(","data":)" + event_json + "}";
+}
 
 // ---------------------------------------------------------------------------
 // Harness
@@ -157,6 +165,118 @@ bench_market_subscribe(const char* name, const std::string& json,
     auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(clock::now() - t0).count();
 
     co_return compute(name, json.size(), rounds * n, elapsed);
+}
+
+// ---------------------------------------------------------------------------
+// Combined market stream benchmarks
+// ---------------------------------------------------------------------------
+
+template<typename Variant, class... Subscriptions>
+boost::cobalt::task<bench_result>
+bench_combined_subscribe(const char* name, const std::vector<std::string>& wrapped_msgs,
+                         std::size_t bytes_per_op, std::size_t n,
+                         const Subscriptions&... subs)
+{
+    using clock = std::chrono::high_resolution_clock;
+
+    auto cfg = config::testnet_config();
+    combined_stream_replay cs(cfg);
+    cs.set_max_reconnects(0);
+    cs.transport().messages = wrapped_msgs;
+
+    // Warmup + validate
+    cs.transport().reset();
+    {
+        std::size_t count = 0;
+        auto gen = cs.template subscribe<Variant>(subs...);
+        while (gen) {
+            auto ev = co_await gen;
+            if (!ev) {
+                if (count == 0)
+                    std::fprintf(stderr, "FATAL: %s: first event failed: %s\n",
+                                 name, ev.err.message.c_str());
+                break;
+            }
+            ++count;
+        }
+        if (count != n) {
+            std::fprintf(stderr, "FATAL: %s: expected %zu events, got %zu\n", name, n, count);
+            co_return bench_result{name, 0, 0, 0, 0, 0};
+        }
+    }
+
+    std::size_t rounds = 4;
+    for (;;) {
+        auto t0 = clock::now();
+        for (std::size_t r = 0; r < rounds; ++r) {
+            cs.transport().reset();
+            auto gen = cs.template subscribe<Variant>(subs...);
+            while (gen) { auto ev = co_await gen; if (!ev) break; }
+        }
+        if (clock::now() - t0 >= std::chrono::seconds(1)) break;
+        rounds *= 2;
+    }
+
+    auto t0 = clock::now();
+    for (std::size_t r = 0; r < rounds; ++r) {
+        cs.transport().reset();
+        auto gen = cs.template subscribe<Variant>(subs...);
+        while (gen) { auto ev = co_await gen; if (!ev) break; }
+    }
+    auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(clock::now() - t0).count();
+
+    co_return compute(name, bytes_per_op, rounds * n, elapsed);
+}
+
+// ---------------------------------------------------------------------------
+// Dynamic market stream benchmarks
+// ---------------------------------------------------------------------------
+
+boost::cobalt::task<bench_result>
+bench_dynamic_read(const char* name, const std::vector<std::string>& wrapped_msgs,
+                   std::size_t bytes_per_op, std::size_t n)
+{
+    using clock = std::chrono::high_resolution_clock;
+
+    auto cfg = config::testnet_config();
+    dynamic_stream_replay ds(cfg);
+    ds.transport().messages = wrapped_msgs;
+
+    // Warmup
+    ds.transport().reset();
+    co_await ds.async_connect();
+    for (std::size_t i = 0; i < n; ++i) {
+        auto ev = co_await ds.async_read_event();
+        if (!ev) break;
+    }
+
+    std::size_t rounds = 4;
+    for (;;) {
+        auto t0 = clock::now();
+        for (std::size_t r = 0; r < rounds; ++r) {
+            ds.transport().reset();
+            co_await ds.async_connect();
+            for (std::size_t i = 0; i < n; ++i) {
+                auto ev = co_await ds.async_read_event();
+                if (!ev) break;
+            }
+        }
+        if (clock::now() - t0 >= std::chrono::seconds(1)) break;
+        rounds *= 2;
+    }
+
+    auto t0 = clock::now();
+    for (std::size_t r = 0; r < rounds; ++r) {
+        ds.transport().reset();
+        co_await ds.async_connect();
+        for (std::size_t i = 0; i < n; ++i) {
+            auto ev = co_await ds.async_read_event();
+            if (!ev) break;
+        }
+    }
+    auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(clock::now() - t0).count();
+
+    co_return compute(name, bytes_per_op, rounds * n, elapsed);
 }
 
 // ---------------------------------------------------------------------------
@@ -288,6 +408,47 @@ boost::cobalt::task<void> run_benchmarks()
 
     r = co_await bench_market_subscribe("subscribe/liquidation", liquidation_json,
         liquidation_order_subscription{.symbol = "BTCUSDT"}, N);
+    results.push_back(r); print_result(r);
+
+    // ── Combined market stream: subscribe() variant generator ──
+
+    // Build wrapped messages alternating book_ticker and depth
+    std::vector<std::string> combined_msgs;
+    combined_msgs.reserve(N);
+    for (std::size_t i = 0; i < N; ++i) {
+        if (i % 2 == 0)
+            combined_msgs.push_back(wrap_combined("btcusdt@bookTicker", book_ticker_json));
+        else
+            combined_msgs.push_back(wrap_combined("btcusdt@depth@100ms", depth_json));
+    }
+    std::size_t combined_avg_bytes = 0;
+    for (const auto& m : combined_msgs) combined_avg_bytes += m.size();
+    combined_avg_bytes /= N;
+
+    std::printf("\n== Combined market stream: subscribe() variant, %zu msgs/round ==\n\n", N);
+    print_header();
+
+    using combined_variant = std::variant<book_ticker_stream_event_t, depth_stream_event_t>;
+    r = co_await bench_combined_subscribe<combined_variant>(
+        "combined/book_ticker+depth", combined_msgs, combined_avg_bytes, N,
+        book_ticker_subscription{.symbol = "BTCUSDT"},
+        diff_book_depth_subscription{.symbol = "BTCUSDT", .speed = "100ms"});
+    results.push_back(r); print_result(r);
+
+    // ── Dynamic market stream: async_read_event() ──
+
+    std::printf("\n== Dynamic market stream: async_read_event(), %zu msgs/round ==\n\n", N);
+    print_header();
+
+    // Single event type wrapped
+    std::vector<std::string> dyn_book_msgs(N, wrap_combined("btcusdt@bookTicker", book_ticker_json));
+    r = co_await bench_dynamic_read("dynamic/book_ticker",
+        dyn_book_msgs, dyn_book_msgs[0].size(), N);
+    results.push_back(r); print_result(r);
+
+    // Mixed events
+    r = co_await bench_dynamic_read("dynamic/book_ticker+depth",
+        combined_msgs, combined_avg_bytes, N);
     results.push_back(r); print_result(r);
 
     // ── User stream: subscribe() dispatch ──

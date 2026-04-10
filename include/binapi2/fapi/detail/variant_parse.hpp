@@ -3,24 +3,13 @@
 // binapi2 USD-M Futures client library.
 
 /// @file variant_parse.hpp
-/// @brief Generic discriminator-based JSON variant parser.
+/// @brief Enum-based discriminator dispatch for JSON variant parsing.
 ///
 /// Parses a JSON object into a std::variant by:
-///   1. Extracting a discriminator field value (single fast scan).
-///   2. Looking up the value in a compile-time mapping.
-///   3. Parsing once into the matched type via glaze.
-///
-/// This avoids the try-parse-rewind pattern where each variant alternative
-/// is attempted sequentially until one succeeds.
-///
-/// Usage:
-///
-///   constexpr variant_entry<my_variant_t> mapping[] = {
-///       make_entry<event_a_t>("EVENT_A"),
-///       make_entry<event_b_t>("EVENT_B"),
-///   };
-///
-///   auto result = parse_variant("e", json, mapping);
+///   1. Extracting the "e" discriminator field string from JSON.
+///   2. Converting to an enum via glaze enum metadata.
+///   3. Looking up the enum in a constexpr dispatch table.
+///   4. Parsing once into the matched type via glaze.
 
 #pragma once
 
@@ -32,7 +21,6 @@
 #include <optional>
 #include <string>
 #include <string_view>
-#include <variant>
 
 namespace binapi2::fapi::detail {
 
@@ -42,19 +30,10 @@ namespace binapi2::fapi::detail {
 
 /// @brief Extract the string value of a JSON field without full parse.
 ///
-/// Scans for "key":"value" or "key": "value" at the top level of the JSON
-/// object. Returns empty string_view if the key is not found or the value
-/// is not a string.
-///
-/// This is intentionally simple — it handles the common case of flat event
-/// objects with a string discriminator field. It does NOT handle:
-///   - keys inside nested objects (only top-level depth is scanned)
-///   - escaped quotes inside the discriminator value
-///   - non-string discriminator values
+/// Scans for "key":"value" at the top level of the JSON object.
+/// Returns empty string_view if not found.
 inline std::string_view extract_string_field(std::string_view json, std::string_view key)
 {
-    // Build the search pattern: "key"
-    // We look for the exact key with surrounding quotes.
     char needle[128];
     if (key.size() + 3 > sizeof(needle)) return {};
     needle[0] = '"';
@@ -63,75 +42,54 @@ inline std::string_view extract_string_field(std::string_view json, std::string_
     needle[key.size() + 2] = '\0';
     const std::string_view needle_sv(needle, key.size() + 2);
 
-    // Find the key at top level (brace depth 1)
     int depth = 0;
     std::size_t i = 0;
     while (i < json.size()) {
         char c = json[i];
-        if (c == '{' || c == '[') {
-            ++depth;
-            ++i;
-        } else if (c == '}' || c == ']') {
-            --depth;
-            ++i;
-        } else if (c == '"' && depth == 1) {
-            // Check if this is our key
+        if (c == '{' || c == '[') { ++depth; ++i; }
+        else if (c == '}' || c == ']') { --depth; ++i; }
+        else if (c == '"' && depth == 1) {
             if (json.substr(i, needle_sv.size()) == needle_sv) {
-                // Found the key — skip past it and the colon
                 i += needle_sv.size();
-                while (i < json.size() && (json[i] == ' ' || json[i] == ':'))
-                    ++i;
-                // Now extract the string value
+                while (i < json.size() && (json[i] == ' ' || json[i] == ':')) ++i;
                 if (i < json.size() && json[i] == '"') {
-                    ++i; // skip opening quote
+                    ++i;
                     std::size_t start = i;
-                    while (i < json.size() && json[i] != '"')
-                        ++i;
+                    while (i < json.size() && json[i] != '"') ++i;
                     return json.substr(start, i - start);
                 }
                 return {};
             }
-            // Skip past this string
-            ++i; // skip opening quote
-            while (i < json.size() && json[i] != '"') {
-                if (json[i] == '\\') ++i; // skip escaped char
-                ++i;
-            }
-            if (i < json.size()) ++i; // skip closing quote
-        } else {
             ++i;
-        }
+            while (i < json.size() && json[i] != '"') { if (json[i] == '\\') ++i; ++i; }
+            if (i < json.size()) ++i;
+        } else { ++i; }
     }
     return {};
 }
 
 // ---------------------------------------------------------------------------
-// Variant dispatch table
+// Enum-based variant dispatch
 // ---------------------------------------------------------------------------
 
-/// @brief A mapping entry: discriminator value → parse function.
+/// @brief A dispatch table entry: enum value → parse function.
 ///
+/// @tparam Enum    The discriminator enum type (e.g. market_event_type_t).
 /// @tparam Variant The std::variant type to construct.
-template<typename Variant>
+template<typename Enum, typename Variant>
 struct variant_entry
 {
-    std::string_view discriminator_value;
-
-    /// Attempt to parse the JSON into the specific type and wrap in Variant.
-    /// Returns true on success, false on parse failure.
-    bool (*try_parse)(const std::string& json, Variant& out);
+    Enum discriminator;
+    bool (*try_parse)(std::string_view json, Variant& out);
 };
 
-/// @brief Create a variant_entry for type T with the given discriminator value.
-///
-/// @tparam T      The concrete type (must be an alternative of Variant).
-/// @tparam Variant Deduced from context.
-template<typename T, typename Variant>
-constexpr variant_entry<Variant> make_entry(std::string_view discriminator_value)
+/// @brief Create a variant_entry for type T with the given enum discriminator.
+template<typename T, typename Enum, typename Variant>
+constexpr variant_entry<Enum, Variant> make_entry(Enum discriminator)
 {
     return {
-        discriminator_value,
-        [](const std::string& json, Variant& out) -> bool {
+        discriminator,
+        [](std::string_view json, Variant& out) -> bool {
             T value{};
             glz::context ctx{};
             if (glz::read<json_read_opts>(value, json, ctx)) return false;
@@ -141,31 +99,36 @@ constexpr variant_entry<Variant> make_entry(std::string_view discriminator_value
     };
 }
 
-// ---------------------------------------------------------------------------
-// Parse function
-// ---------------------------------------------------------------------------
-
-/// @brief Parse JSON into a variant using discriminator-based dispatch.
+/// @brief Convert a discriminator field string to an enum value.
 ///
-/// Extracts the discriminator field value, looks it up in the mapping table,
-/// and parses the JSON into the matched type. Exactly one glz::read call
-/// is made (the matched type), regardless of how many variant alternatives
-/// exist.
-///
-/// @param discriminator_key  The JSON field name used to discriminate (e.g. "e").
-/// @param json               The raw JSON string.
-/// @param mapping            Array of variant_entry mapping discriminator values to types.
-/// @return                   The parsed variant, or std::nullopt on failure.
-template<typename Variant, std::size_t N>
-std::optional<Variant> parse_variant(std::string_view discriminator_key,
-                                     const std::string& json,
-                                     const variant_entry<Variant> (&mapping)[N])
+/// Uses glaze enum metadata for the conversion.
+template<typename Enum>
+std::optional<Enum> parse_enum(std::string_view str)
 {
-    auto disc_value = extract_string_field(json, discriminator_key);
-    if (disc_value.empty()) return std::nullopt;
+    Enum value{};
+    const std::string quoted = "\"" + std::string(str) + "\"";
+    glz::context ctx{};
+    if (glz::read<glz::opts{}>(value, quoted, ctx)) return std::nullopt;
+    return value;
+}
+
+/// @brief Parse JSON into a variant using enum-based discriminator dispatch.
+///
+/// Extracts the "e" field, converts to enum, looks up in the dispatch table,
+/// and parses into the matched type.
+template<typename Enum, typename Variant, std::size_t N>
+std::optional<Variant> parse_variant(std::string_view discriminator_key,
+                                     std::string_view json,
+                                     const variant_entry<Enum, Variant> (&mapping)[N])
+{
+    auto disc_str = extract_string_field(json, discriminator_key);
+    if (disc_str.empty()) return std::nullopt;
+
+    auto disc_enum = parse_enum<Enum>(disc_str);
+    if (!disc_enum) return std::nullopt;
 
     for (const auto& entry : mapping) {
-        if (entry.discriminator_value == disc_value) {
+        if (entry.discriminator == *disc_enum) {
             Variant out;
             if (entry.try_parse(json, out))
                 return out;
@@ -175,25 +138,18 @@ std::optional<Variant> parse_variant(std::string_view discriminator_key,
     return std::nullopt;
 }
 
-/// @brief Look up a discriminator value in the mapping and parse JSON into the
-///        matched variant alternative.
+/// @brief Look up a pre-resolved enum value in the dispatch table and parse.
 ///
-/// Unlike parse_variant(key, json, mapping) which extracts the discriminator
-/// from the JSON, this function takes the discriminator value directly.
-/// Used when the discriminator and the parseable JSON come from different
-/// parts of the message (e.g. combined stream wrappers).
-///
-/// @param disc_value  The discriminator value (already extracted).
-/// @param json        The JSON to parse.
-/// @param mapping     Array of variant_entry mapping discriminator values to types.
-/// @return            The parsed variant, or std::nullopt on failure.
-template<typename Variant, std::size_t N>
-std::optional<Variant> dispatch_variant(std::string_view disc_value,
-                                        const std::string& json,
-                                        const variant_entry<Variant> (&mapping)[N])
+/// Used when the discriminator has already been extracted and converted
+/// (e.g. from a combined stream wrapper where the "e" field is in the "data"
+/// sub-object).
+template<typename Enum, typename Variant, std::size_t N>
+std::optional<Variant> dispatch_variant(Enum disc_value,
+                                        std::string_view json,
+                                        const variant_entry<Enum, Variant> (&mapping)[N])
 {
     for (const auto& entry : mapping) {
-        if (entry.discriminator_value == disc_value) {
+        if (entry.discriminator == disc_value) {
             Variant out;
             if (entry.try_parse(json, out))
                 return out;

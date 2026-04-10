@@ -16,6 +16,7 @@
 #include <binapi2/fapi/result.hpp>
 #include <binapi2/fapi/streams/stream_connection.hpp>
 #include <binapi2/fapi/streams/stream_traits.hpp>
+#include <binapi2/fapi/types/event_traits.hpp>
 #include <binapi2/fapi/transport/websocket_client.hpp>
 #include <binapi2/fapi/transport/websocket_transport.hpp>
 
@@ -32,36 +33,18 @@ namespace binapi2::fapi::streams {
 
 namespace detail {
 
-/// @brief Build a variant_entry for a subscription, keyed by its topic string.
+/// @brief Build enum-keyed dispatch entry for a subscription's event type.
 template<class Subscription, typename Variant>
     requires has_stream_traits<Subscription>
-fapi::detail::variant_entry<Variant>
-make_stream_entry(const config& cfg, const Subscription& sub)
+constexpr fapi::detail::variant_entry<types::market_event_type_t, Variant>
+make_combined_entry()
 {
-    return fapi::detail::make_entry<typename stream_traits<Subscription>::event_type, Variant>(
-        stream_traits<Subscription>::topic(cfg, sub));
+    using Event = typename stream_traits<Subscription>::event_type;
+    return fapi::detail::make_entry<Event, types::market_event_type_t, Variant>(
+        types::event_traits<Event>::enum_value);
 }
 
-/// @brief Combined stream JSON wrapper: {"stream": "topic", "data": {...}}.
-/// The "data" field is captured as raw JSON for separate typed parsing.
-struct combined_frame
-{
-    std::string stream{};
-    glz::raw_json data{};
-};
-
 } // namespace detail
-
-} // namespace binapi2::fapi::streams
-
-template<>
-struct glz::meta<binapi2::fapi::streams::detail::combined_frame>
-{
-    using T = binapi2::fapi::streams::detail::combined_frame;
-    static constexpr auto value = object("stream", &T::stream, "data", &T::data);
-};
-
-namespace binapi2::fapi::streams {
 
 /// @brief Combined market data stream — multiple subscriptions on one connection.
 ///
@@ -109,9 +92,9 @@ public:
         const ws_target_t target = conn_.configuration().combined_stream_target
             + "?streams=" + topics_path;
 
-        // Dispatch table: topic string → parse function
-        const fapi::detail::variant_entry<Variant> dispatch[] = {
-            detail::make_stream_entry<Subscriptions, Variant>(conn_.configuration(), subs)...
+        // Dispatch table: enum → parse function
+        constexpr fapi::detail::variant_entry<types::market_event_type_t, Variant> dispatch[] = {
+            detail::make_combined_entry<Subscriptions, Variant>()...
         };
 
         error last_err;
@@ -136,21 +119,21 @@ public:
                     break;
                 }
 
-                detail::combined_frame frame{};
+                types::combined_stream_frame_t frame{};
                 glz::context ctx{};
                 if (glz::read<fapi::detail::json_read_opts>(frame, *msg, ctx))
                     continue;
 
                 if (frame.stream.empty()) continue;
 
-                auto parsed = fapi::detail::dispatch_variant<Variant>(
-                    frame.stream, frame.data.str, dispatch);
+                auto parsed = fapi::detail::parse_variant<types::market_event_type_t, Variant>(
+                    "e", frame.data.str, dispatch);
                 if (parsed) {
                     co_yield result<Variant>::success(std::move(*parsed));
                 } else {
                     co_yield result<Variant>::failure(
                         {error_code::json, 0, 0,
-                         "parse failed for topic: " + frame.stream, frame.data.str});
+                         "parse failed for topic: " + frame.stream, std::string(frame.data.str)});
                     failures = max_reconnects_ + 1;
                     break;
                 }

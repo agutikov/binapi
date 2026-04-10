@@ -52,6 +52,11 @@ target_compile_definitions(postman_validation_test PRIVATE
 )
 gtest_discover_tests(postman_validation_test DISCOVERY_MODE PRE_TEST)
 
+add_executable(stream_test stream_test.cpp)
+target_link_libraries(stream_test PRIVATE binapi2_fapi GTest::gtest_main)
+target_compile_options(stream_test PRIVATE)
+gtest_discover_tests(stream_test DISCOVERY_MODE PRE_TEST)
+
 add_subdirectory(integration/postman_mock)
 add_subdirectory(integration/sync_bridging)
 add_subdirectory(benchmarks)

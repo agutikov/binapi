@@ -44,13 +44,6 @@ using dynamic_stream_message_t = std::variant<types::market_stream_event_t, cont
 
 namespace detail {
 
-/// @brief Wrapper for the combined stream JSON envelope.
-struct dynamic_frame
-{
-    std::string stream{};
-    glz::raw_json data{};
-};
-
 /// @brief Wrapper for control responses.
 struct dynamic_control_response
 {
@@ -61,13 +54,6 @@ struct dynamic_control_response
 } // namespace detail
 
 } // namespace binapi2::fapi::streams
-
-template<>
-struct glz::meta<binapi2::fapi::streams::detail::dynamic_frame>
-{
-    using T = binapi2::fapi::streams::detail::dynamic_frame;
-    static constexpr auto value = object("stream", &T::stream, "data", &T::data);
-};
 
 template<>
 struct glz::meta<binapi2::fapi::streams::detail::dynamic_control_response>
@@ -87,28 +73,27 @@ namespace binapi2::fapi::streams {
 
 namespace detail {
 
-// Market event dispatch table — maps "e" field values to market_stream_event_t alternatives.
-template<typename Event>
-constexpr fapi::detail::variant_entry<types::market_stream_event_t> market_event_entry()
-{
-    return fapi::detail::make_entry<Event, types::market_stream_event_t>(
-        types::event_traits<Event>::wire_name);
-}
+using market_enum = types::market_event_type_t;
+using market_variant = types::market_stream_event_t;
 
-inline constexpr fapi::detail::variant_entry<types::market_stream_event_t> market_event_mapping[] = {
-    market_event_entry<types::book_ticker_stream_event_t>(),
-    market_event_entry<types::aggregate_trade_stream_event_t>(),
-    market_event_entry<types::mark_price_stream_event_t>(),
-    market_event_entry<types::depth_stream_event_t>(),
-    market_event_entry<types::mini_ticker_stream_event_t>(),
-    market_event_entry<types::ticker_stream_event_t>(),
-    market_event_entry<types::liquidation_order_stream_event_t>(),
-    market_event_entry<types::kline_stream_event_t>(),
-    market_event_entry<types::continuous_contract_kline_stream_event_t>(),
-    market_event_entry<types::composite_index_stream_event_t>(),
-    market_event_entry<types::contract_info_stream_event_t>(),
-    market_event_entry<types::asset_index_stream_event_t>(),
-    market_event_entry<types::trading_session_stream_event_t>(),
+template<typename Event>
+constexpr auto market_entry = fapi::detail::make_entry<Event, market_enum, market_variant>(
+    types::event_traits<Event>::enum_value);
+
+inline constexpr fapi::detail::variant_entry<market_enum, market_variant> market_event_mapping[] = {
+    market_entry<types::book_ticker_stream_event_t>,
+    market_entry<types::aggregate_trade_stream_event_t>,
+    market_entry<types::mark_price_stream_event_t>,
+    market_entry<types::depth_stream_event_t>,
+    market_entry<types::mini_ticker_stream_event_t>,
+    market_entry<types::ticker_stream_event_t>,
+    market_entry<types::liquidation_order_stream_event_t>,
+    market_entry<types::kline_stream_event_t>,
+    market_entry<types::continuous_contract_kline_stream_event_t>,
+    market_entry<types::composite_index_stream_event_t>,
+    market_entry<types::contract_info_stream_event_t>,
+    market_entry<types::asset_index_stream_event_t>,
+    market_entry<types::trading_session_stream_event_t>,
 };
 
 } // namespace detail
@@ -196,17 +181,17 @@ public:
             co_return result<dynamic_stream_message_t>::failure(msg.err);
 
         // Try as data frame: {"stream": "...", "data": {...}}
-        detail::dynamic_frame frame{};
+        types::combined_stream_frame_t frame{};
         glz::context ctx{};
         if (!glz::read<fapi::detail::json_read_opts>(frame, *msg, ctx) && !frame.stream.empty()) {
-            // Parse the "data" field by "e" discriminator
-            auto parsed = fapi::detail::parse_variant<types::market_stream_event_t>(
+            // Parse the "data" field by "e" discriminator (enum-based)
+            auto parsed = fapi::detail::parse_variant<detail::market_enum, detail::market_variant>(
                 "e", frame.data.str, detail::market_event_mapping);
             if (parsed)
                 co_return result<dynamic_stream_message_t>::success(
                     dynamic_stream_message_t{std::move(*parsed)});
             co_return result<dynamic_stream_message_t>::failure(
-                {error_code::json, 0, 0, "unknown market event in topic: " + frame.stream, frame.data.str});
+                {error_code::json, 0, 0, "unknown market event in topic: " + frame.stream, std::string(frame.data.str)});
         }
 
         // Try as control response: {"result": ..., "id": ...}

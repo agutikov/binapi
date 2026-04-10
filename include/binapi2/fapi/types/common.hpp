@@ -154,7 +154,22 @@ struct listen_key_response_t
     listen_key_t listenKey{};
 };
 
+/// @brief Combined stream JSON wrapper: {"stream": "topic", "data": {...}}.
+/// The "data" field is captured as raw JSON (zero-copy view) for separate typed parsing.
+struct combined_stream_frame_t
+{
+    std::string stream{};
+    glz::raw_json_view data{};
+};
+
 } // namespace binapi2::fapi::types
+
+template<>
+struct glz::meta<binapi2::fapi::types::combined_stream_frame_t>
+{
+    using T = binapi2::fapi::types::combined_stream_frame_t;
+    static constexpr auto value = object("stream", &T::stream, "data", &T::data);
+};
 
 template<>
 struct glz::meta<binapi2::fapi::types::empty_response_t>

@@ -32,30 +32,29 @@ using user_event_generator = boost::cobalt::generator<result<types::user_stream_
 // ---------------------------------------------------------------------------
 
 using user_event_variant = types::user_stream_event_t;
+using user_enum = types::user_event_type_t;
 
 template<typename Event>
-constexpr fapi::detail::variant_entry<user_event_variant> user_event_entry()
-{
-    return fapi::detail::make_entry<Event, user_event_variant>(types::event_traits<Event>::wire_name);
-}
+constexpr auto user_entry = fapi::detail::make_entry<Event, user_enum, user_event_variant>(
+    types::event_traits<Event>::enum_value);
 
-inline constexpr fapi::detail::variant_entry<user_event_variant> user_event_mapping[] = {
-    user_event_entry<types::account_update_event_t>(),
-    user_event_entry<types::order_trade_update_event_t>(),
-    user_event_entry<types::margin_call_event_t>(),
-    user_event_entry<types::listen_key_expired_event_t>(),
-    user_event_entry<types::account_config_update_event_t>(),
-    user_event_entry<types::trade_lite_event_t>(),
-    user_event_entry<types::algo_order_update_event_t>(),
-    user_event_entry<types::conditional_order_trigger_reject_event_t>(),
-    user_event_entry<types::grid_update_event_t>(),
-    user_event_entry<types::strategy_update_event_t>(),
+inline constexpr fapi::detail::variant_entry<user_enum, user_event_variant> user_event_mapping[] = {
+    user_entry<types::account_update_event_t>,
+    user_entry<types::order_trade_update_event_t>,
+    user_entry<types::margin_call_event_t>,
+    user_entry<types::listen_key_expired_event_t>,
+    user_entry<types::account_config_update_event_t>,
+    user_entry<types::trade_lite_event_t>,
+    user_entry<types::algo_order_update_event_t>,
+    user_entry<types::conditional_order_trigger_reject_event_t>,
+    user_entry<types::grid_update_event_t>,
+    user_entry<types::strategy_update_event_t>,
 };
 
 /// @brief Parse a user stream event from raw JSON using discriminator dispatch.
 inline result<types::user_stream_event_t> parse_user_event(const std::string& payload)
 {
-    auto parsed = fapi::detail::parse_variant<user_event_variant>("e", payload, user_event_mapping);
+    auto parsed = fapi::detail::parse_variant<user_enum, user_event_variant>("e", payload, user_event_mapping);
     if (parsed)
         return result<user_event_variant>::success(std::move(*parsed));
     return result<user_event_variant>::failure(
