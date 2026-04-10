@@ -3,7 +3,7 @@
 
 
 
-
+Analyze streams architecture
 
 
 include/binapi2/fapi/streams/market_streams.hpp
@@ -47,7 +47,7 @@ streams:
     - what is market_streams or user_streams now?
 
 
-streams.md: what's missing
+docs/binapi2/streams.md: what's missing
     - application buffering
     - separate connections (transport) from subscriptions
     - flexible composition:
@@ -63,7 +63,9 @@ streams.md: what's missing
 --------------------------------------------------------------------------------
 
 
-thread pool
+stream application buffering for multithread implementation
+
+building block for buffering
 
 example of stream pipelining:
     - network thread
@@ -72,7 +74,6 @@ example of stream pipelining:
 
 
 
-I don't think auto-balanced thread bool is feasible now, right?
 
 
 --------------------------------------------------------------------------------

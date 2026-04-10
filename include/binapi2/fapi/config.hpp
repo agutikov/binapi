@@ -15,6 +15,10 @@
 
 namespace binapi2::fapi {
 
+/// WebSocket target path (e.g. "/ws/btcusdt@bookTicker").
+/// Constructed by stream_traits::target() from a subscription type.
+using ws_target_t = std::string;
+
 /// @brief Complete configuration for a Binance USD-M Futures client session.
 ///
 /// Default-constructed values point to the **production** endpoints.  Use
@@ -36,6 +40,7 @@ struct config
     std::string stream_host{ "fstream.binance.com" };
     std::string stream_port{ "443" };
     std::string stream_base_target{ "/ws" };
+    std::string combined_stream_target{ "/stream" };
 
     // -- Authentication & client settings ------------------------------------
     std::string api_key{};

@@ -18,6 +18,7 @@
 #include <map>
 #include <optional>
 #include <string>
+#include <variant>
 #include <vector>
 
 namespace binapi2::fapi::types {
@@ -276,6 +277,23 @@ struct trading_session_stream_event_t
     timestamp_ms_t session_end_time{};
     session_type_t session_type{};
 };
+
+/// @brief Variant of all market stream event types.
+using market_stream_event_t = std::variant<
+    book_ticker_stream_event_t,
+    aggregate_trade_stream_event_t,
+    mark_price_stream_event_t,
+    depth_stream_event_t,
+    mini_ticker_stream_event_t,
+    ticker_stream_event_t,
+    liquidation_order_stream_event_t,
+    kline_stream_event_t,
+    continuous_contract_kline_stream_event_t,
+    composite_index_stream_event_t,
+    contract_info_stream_event_t,
+    asset_index_stream_event_t,
+    trading_session_stream_event_t
+>;
 
 } // namespace binapi2::fapi::types
 

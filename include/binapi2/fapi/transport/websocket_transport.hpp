@@ -6,7 +6,7 @@
 /// @brief Concept defining the WebSocket transport interface.
 ///
 /// Any type satisfying websocket_transport can be used as the Transport
-/// parameter for basic_market_streams and basic_user_streams.
+/// parameter for basic_market_stream and basic_user_stream.
 
 #pragma once
 
@@ -22,8 +22,8 @@ namespace binapi2::fapi::transport {
 
 template<class T>
 concept websocket_transport = std::constructible_from<T, config> &&
-    requires(T t, std::string s) {
-        { t.async_connect(s, s, s) } -> std::same_as<boost::cobalt::task<result<void>>>;
+    requires(T t, std::string s, ws_target_t target) {
+        { t.async_connect(s, s, target) } -> std::same_as<boost::cobalt::task<result<void>>>;
         { t.async_read_text() } -> std::same_as<boost::cobalt::task<result<std::string>>>;
         { t.async_write_text(s) } -> std::same_as<boost::cobalt::task<result<void>>>;
         { t.async_close() } -> std::same_as<boost::cobalt::task<result<void>>>;

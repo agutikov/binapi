@@ -30,7 +30,7 @@ public:
     explicit websocket_client(config cfg);
     ~websocket_client();
 
-    [[nodiscard]] boost::cobalt::task<result<void>> async_connect(std::string host, std::string port, std::string target);
+    [[nodiscard]] boost::cobalt::task<result<void>> async_connect(std::string host, std::string port, ws_target_t target);
     [[nodiscard]] boost::cobalt::task<result<void>> async_write_text(std::string message);
     [[nodiscard]] boost::cobalt::task<result<std::string>> async_read_text();
     [[nodiscard]] boost::cobalt::task<result<void>> async_close();

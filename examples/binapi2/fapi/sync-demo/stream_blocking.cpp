@@ -6,7 +6,7 @@
 
 #include <binapi2/futures_usdm_api.hpp>
 #include <binapi2/fapi/detail/io_thread.hpp>
-#include <binapi2/fapi/streams/market_streams.hpp>
+#include <binapi2/fapi/streams/market_stream.hpp>
 #include <binapi2/fapi/types/market_stream_events.hpp>
 #include <binapi2/fapi/types/subscriptions.hpp>
 
@@ -26,25 +26,20 @@ namespace types = binapi2::fapi::types;
 using binapi2::futures_usdm_api;
 using binapi2::fapi::result;
 
-// Each invocation creates its own market_streams so the websocket_client's
+// Each invocation creates its own market_stream so the websocket_client's
 // lifetime is tied to the coroutine, not to the shared client.
 static boost::cobalt::task<result<std::vector<types::book_ticker_stream_event_t>>>
 read_stream_events(binapi2::fapi::config cfg, int count)
 {
-    binapi2::fapi::streams::market_streams streams(std::move(cfg));
-    auto conn = co_await streams.async_connect(
-        types::book_ticker_subscription{.symbol = "BTCUSDT"});
-    if (!conn)
-        co_return result<std::vector<types::book_ticker_stream_event_t>>::failure(conn.err);
+    binapi2::fapi::streams::market_stream streams(std::move(cfg));
+    auto gen = streams.subscribe(types::book_ticker_subscription{.symbol = "BTCUSDT"});
 
     std::vector<types::book_ticker_stream_event_t> events;
-    for (int i = 0; i < count; ++i) {
-        auto e = co_await streams.async_read_event<types::book_ticker_stream_event_t>();
-        if (!e)
-            break;
+    while (gen && static_cast<int>(events.size()) < count) {
+        auto e = co_await gen;
+        if (!e) break;
         events.push_back(std::move(*e));
     }
-    co_await streams.async_close();
     co_return result<std::vector<types::book_ticker_stream_event_t>>::success(std::move(events));
 }
 

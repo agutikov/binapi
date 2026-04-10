@@ -3,19 +3,17 @@
 // binapi2 USD-M Futures client library.
 
 /// @file Implements the async local order book synchronization algorithm.
+/// Uses market_stream::subscribe() for typed depth events and
+/// market_data_service for the REST snapshot.
 
-#include <binapi2/fapi/streams/local_order_book.hpp>
-
-#include <binapi2/fapi/detail/json_opts.hpp>
-
-#include <glaze/glaze.hpp>
+#include <binapi2/fapi/order_book/local_order_book.hpp>
 
 #include <algorithm>
 
-namespace binapi2::fapi::streams {
+namespace binapi2::fapi::order_book {
 
-local_order_book::local_order_book(market_streams& streams, rest::pipeline& rest)
-    : streams_(streams), rest_(rest)
+local_order_book::local_order_book(streams::market_stream& streams, rest::market_data_service& market_data)
+    : streams_(streams), market_data_(market_data)
 {
 }
 
@@ -67,29 +65,21 @@ local_order_book::async_run(types::symbol_t symbol, int depth_limit)
 {
     running_ = true;
 
-    // Step 1: connect to diff depth stream
-    std::string symbol_lower = symbol.str();
-    std::ranges::transform(symbol_lower, symbol_lower.begin(), ::tolower);
-    const auto target = streams_.configuration().stream_base_target
-        + "/" + symbol_lower + "@depth@100ms";
-
-    auto conn = co_await streams_.async_connect(target);
-    if (!conn) co_return result<void>::failure(conn.err);
+    // Subscribe to diff depth stream — typed events, no raw parsing needed
+    types::diff_book_depth_subscription sub;
+    sub.symbol = symbol;
+    sub.speed = "100ms";
+    auto gen = streams_.subscribe(sub);
 
     std::vector<types::depth_stream_event_t> buffer;
     bool synced = false;
     std::uint64_t last_u = 0;
 
-    while (running_) {
-        auto msg = co_await streams_.async_read_text();
-        if (!msg) co_return result<void>::failure(msg.err);
+    while (running_ && gen) {
+        auto ev_result = co_await gen;
+        if (!ev_result) co_return result<void>::failure(ev_result.err);
 
-        // Parse depth event
-        types::depth_stream_event_t event{};
-        glz::context ctx{};
-        if (glz::read<fapi::detail::json_read_opts>(event, *msg, ctx)) {
-            continue;  // skip unparseable frames
-        }
+        const auto& event = *ev_result;
 
         if (!synced) {
             buffer.push_back(event);
@@ -99,7 +89,7 @@ local_order_book::async_run(types::symbol_t symbol, int depth_limit)
                 types::order_book_request_t req;
                 req.symbol = symbol;
                 req.limit = depth_limit;
-                auto snap = co_await rest_.async_execute(req);
+                auto snap = co_await market_data_.async_execute(req);
                 if (!snap) continue;  // retry on next event
 
                 const auto snapshot_id = snap->lastUpdateId;
@@ -133,13 +123,13 @@ local_order_book::async_run(types::symbol_t symbol, int depth_limit)
 
                     // Apply buffered events
                     last_u = snapshot_id;
-                    for (const auto& ev : buffer) {
-                        if (ev.final_update_id <= snapshot_id) {
-                            last_u = ev.final_update_id;
+                    for (const auto& buffered : buffer) {
+                        if (buffered.final_update_id <= snapshot_id) {
+                            last_u = buffered.final_update_id;
                             continue;
                         }
-                        apply_event(ev);
-                        last_u = ev.final_update_id;
+                        apply_event(buffered);
+                        last_u = buffered.final_update_id;
                     }
 
                     if (on_snapshot_) on_snapshot_(book_);
@@ -149,8 +139,9 @@ local_order_book::async_run(types::symbol_t symbol, int depth_limit)
                 synced = true;
             }
         } else {
-            // Step 6: validate sequence continuity
+            // Validate sequence continuity
             if (event.prev_final_update_id != last_u) {
+                // Gap detected — re-sync
                 synced = false;
                 buffer.clear();
                 buffer.push_back(event);
@@ -166,8 +157,7 @@ local_order_book::async_run(types::symbol_t symbol, int depth_limit)
         }
     }
 
-    co_await streams_.async_close();
     co_return result<void>::success();
 }
 
-} // namespace binapi2::fapi::streams
+} // namespace binapi2::fapi::order_book

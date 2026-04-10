@@ -143,11 +143,15 @@ struct exchange_info_response_t
     std::vector<symbol_info_t> symbols{};
 };
 
+/// Listen key string obtained from user_data_stream_service (POST /fapi/v1/listenKey).
+/// Required to connect user data streams.
+using listen_key_t = std::string;
+
 /// Response from creating/querying a user data stream listen key.
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Start-User-Data-Stream.md
 struct listen_key_response_t
 {
-    std::string listenKey{};
+    listen_key_t listenKey{};
 };
 
 } // namespace binapi2::fapi::types

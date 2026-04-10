@@ -7,7 +7,7 @@
 #include "cmd_order_book.hpp"
 
 #include <binapi2/futures_usdm_api.hpp>
-#include <binapi2/fapi/streams/local_order_book.hpp>
+#include <binapi2/fapi/order_book/local_order_book.hpp>
 
 #include <spdlog/spdlog.h>
 
@@ -19,18 +19,18 @@ boost::cobalt::task<int> cmd_order_book_live(binapi2::futures_usdm_api& c, const
 {
     if (args.empty()) { spdlog::error("usage: order-book-live <symbol> [depth]"); co_return 1; }
 
-    auto streams = c.create_market_streams();
+    auto streams = c.create_market_stream();
     auto rest = co_await c.create_rest_client();
     if (!rest) { spdlog::error("connect: {}", rest.err.message); co_return 1; }
     const std::string symbol = args[0];
     const int depth = (args.size() > 1) ? std::stoi(args[1]) : 1000;
     constexpr int display_levels = 10;
 
-    binapi2::fapi::streams::local_order_book book(*streams, (*rest)->rest_pipeline());
+    binapi2::fapi::order_book::local_order_book book(*streams, (*rest)->market_data);
 
     spdlog::info("starting local order book for {} depth={}", symbol, depth);
 
-    book.set_snapshot_callback([&](const binapi2::fapi::streams::order_book_snapshot& snap) {
+    book.set_snapshot_callback([&](const binapi2::fapi::order_book::order_book_snapshot& snap) {
         spdlog::trace("order book update: id={} bids={} asks={}",
                       snap.last_update_id, snap.bids.size(), snap.asks.size());
 

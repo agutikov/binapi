@@ -2,16 +2,17 @@
 
 ## Overview
 
-binapi2 provides three stream components:
+binapi2 provides four stream components:
 
 | Component | Purpose | Connection | Events |
 |---|---|---|---|
-| `streams::market_streams` | Public market data | 1 WS per stream (or combined) | book tickers, depth, klines, trades, etc. |
-| `streams::user_streams` | Private account events | 1 WS per listen key | orders, balances, margin calls, etc. |
-| `streams::local_order_book` | Synchronized order book | Uses market_streams + rest::pipeline | Depth snapshots |
+| `streams::market_stream` | Single-subscription market data | 1 WS, 1 typed event | book ticker, depth, kline, etc. |
+| `streams::combined_market_stream` | Multi-subscription market data | 1 WS, variant events | Multiple event types via std::variant |
+| `streams::user_stream` | Private account events | 1 WS per listen key | orders, balances, margin calls (variant) |
+| `order_book::local_order_book` | Synchronized order book | Uses market_stream + market_data_service | Depth snapshots |
 
-All are built on `transport::websocket_client` which provides async-only I/O via
-Boost.Cobalt coroutines. All methods return `cobalt::task` or `cobalt::generator`.
+All are built on `streams::stream_connection` which wraps `transport::websocket_client`.
+All methods return `cobalt::task` or `cobalt::generator`.
 
 ---
 
@@ -22,22 +23,20 @@ Boost.Cobalt coroutines. All methods return `cobalt::task` or `cobalt::generator
 The `subscribe()` method connects to the stream and returns a typed async generator:
 
 ```cpp
-fapi::client c(cfg);
-auto& streams = c.streams();
+futures_usdm_api api(cfg);
+auto streams = api.create_market_stream();
 
 // subscribe() connects and returns a generator<result<Event>>
-auto stream = streams.subscribe(types::book_ticker_subscription{.symbol = "BTCUSDT"});
+auto gen = streams->subscribe(types::book_ticker_subscription{.symbol = "BTCUSDT"});
 
-while (stream) {
-    auto event = co_await stream;
+while (gen) {
+    auto event = co_await gen;
     if (!event) {
         spdlog::error("stream error: {}", event.err.message);
         break;
     }
     spdlog::info("{} bid={} ask={}", event->symbol, event->best_bid_price, event->best_ask_price);
 }
-
-co_await streams.async_close();
 ```
 
 The subscription type is resolved at compile time via `stream_traits<Subscription>`:
@@ -51,60 +50,36 @@ Generators cannot be bridged through `io_thread::run_sync()`.
 
 See `examples/binapi2/fapi/async-demo-cli/` for working examples.
 
-### Pattern 2: Typed async connect + read event
+### Pattern 2: Raw stream_connection
 
-For per-event control without the generator wrapper:
-
-```cpp
-auto& streams = c.streams();
-
-// Connect using a subscription type (stream_traits resolves the target URL)
-co_await streams.async_connect(types::book_ticker_subscription{.symbol = "BTCUSDT"});
-
-// Read events one at a time, fully typed
-while (true) {
-    auto event = co_await streams.async_read_event<types::book_ticker_stream_event_t>();
-    if (!event) break;
-    // process event...
-}
-
-co_await streams.async_close();
-```
-
-This pattern works with both `cobalt::main` and `io_thread::run_sync()` (wrapping
-each `async_read_event` call individually).
-
-### Pattern 3: Low-level raw text
-
-For maximum control (custom parsing, combined streams, debugging):
+For maximum control (custom parsing, combined streams, debugging), use
+`stream_connection` directly:
 
 ```cpp
-auto& streams = c.streams();
+streams::stream_connection conn(cfg);
+co_await conn.async_connect(cfg.stream_host, cfg.stream_port, "/ws/btcusdt@bookTicker");
 
-// Connect with a raw target path
-co_await streams.async_connect("/ws/btcusdt@bookTicker");
-
-// Read raw JSON frames
 while (true) {
-    auto msg = co_await streams.async_read_text();
+    auto msg = co_await conn.async_read_text();
     if (!msg) break;
     // *msg is a raw JSON string — parse it yourself
 }
 
-co_await streams.async_close();
+co_await conn.async_close();
 ```
 
-### Pattern 4: Local order book
+### Pattern 3: Local order book
 
 The local order book is an async coroutine that maintains a synchronized order book:
 
 ```cpp
-fapi::client c(cfg);
-auto& streams = c.streams();
+futures_usdm_api api(cfg);
+auto streams = api.create_market_stream();
+auto rest = co_await api.create_rest_client();
 
-streams::local_order_book book(streams, c.rest());
+order_book::local_order_book book(*streams, (*rest)->market_data);
 
-book.set_snapshot_callback([](const streams::order_book_snapshot& snap) {
+book.set_snapshot_callback([](const order_book::order_book_snapshot& snap) {
     spdlog::info("bids: {} asks: {}", snap.bids.size(), snap.asks.size());
 });
 
@@ -113,9 +88,9 @@ auto result = co_await book.async_run(types::symbol_t{"BTCUSDT"}, 1000);
 ```
 
 Internally:
-1. Connects to `@depth@100ms` diff stream via `market_streams`
-2. Buffers incoming events
-3. Fetches REST snapshot via `rest::pipeline` (`/fapi/v1/depth`)
+1. Subscribes to `@depth@100ms` diff stream via `market_stream::subscribe()`
+2. Buffers incoming typed `depth_stream_event_t` events
+3. Fetches REST snapshot via `market_data_service` (`/fapi/v1/depth`)
 4. Discards buffered events before snapshot
 5. Applies remaining buffered events
 6. Enters continuous apply loop
@@ -210,32 +185,60 @@ auto stream = streams.subscribe(sub);
 // stream is cobalt::generator<result<book_ticker_stream_event_t>>
 ```
 
-### Combined stream (subscribe/unsubscribe on one connection)
+### Combined stream (multiple subscriptions, one connection)
+
+`combined_market_stream` connects to the `/stream` combined endpoint and manages
+multiple subscriptions on a single WebSocket. Events arrive as a caller-specified
+`std::variant`, dispatched by the `"stream"` field in the JSON wrapper.
 
 ```cpp
-auto& streams = c.streams();
+futures_usdm_api api(cfg);
+auto combined = api.create_combined_market_stream();
 
-// Open a combined stream connection
-co_await streams.async_connect("/stream");
+// Define the variant of event types you want to receive
+using events_t = std::variant<
+    types::book_ticker_stream_event_t,
+    types::depth_stream_event_t>;
 
-// Subscribe to topics dynamically
-co_await streams.async_subscribe({"btcusdt@bookTicker", "ethusdt@bookTicker"});
+// subscribe() connects, sends SUBSCRIBE, and yields typed events
+auto gen = combined->subscribe<events_t>(
+    types::book_ticker_subscription{.symbol = "BTCUSDT"},
+    types::diff_book_depth_subscription{.symbol = "BTCUSDT", .speed = "100ms"});
 
-// Read events (all subscribed streams arrive on this connection)
-while (true) {
-    auto msg = co_await streams.async_read_text();
-    if (!msg) break;
-    // dispatch based on "stream" field in JSON
+while (gen) {
+    auto event = co_await gen;
+    if (!event) break;
+    std::visit(overloaded{
+        [](const types::book_ticker_stream_event_t& e) {
+            // handle book ticker
+        },
+        [](const types::depth_stream_event_t& e) {
+            // handle depth update
+        },
+    }, *event);
 }
+```
 
-// Modify subscriptions without disconnecting
-co_await streams.async_unsubscribe({"ethusdt@bookTicker"});
-co_await streams.async_subscribe({"btcusdt@depth@100ms"});
+The variant type must include exactly the event types corresponding to the
+subscriptions passed to `subscribe()`. The mapping from subscription type to
+event type is resolved at compile time via `stream_traits<Subscription>::event_type`.
 
-// Check what's active
-auto subs = co_await streams.async_list_subscriptions();
+Internally, each incoming frame is a JSON wrapper `{"stream": "topic", "data": {...}}`.
+The `"stream"` field is matched against the subscription topics, the `"data"` field
+is parsed into the correct variant alternative using `glz::raw_json` passthrough.
 
-co_await streams.async_close();
+**Standalone control methods** are also available for advanced use (without the generator):
+
+```cpp
+auto combined = api.create_combined_market_stream();
+co_await combined->async_connect();
+co_await combined->async_subscribe(
+    types::book_ticker_subscription{.symbol = "BTCUSDT"});
+// ... read raw frames via combined->connection().async_read_text() ...
+co_await combined->async_unsubscribe(
+    types::book_ticker_subscription{.symbol = "BTCUSDT"});
+auto subs = co_await combined->async_list_subscriptions();
+co_await combined->async_close();
 ```
 
 **Protocol:** Subscribe/unsubscribe send JSON control messages on the same WebSocket:
@@ -267,9 +270,9 @@ co_await cobalt::join(
 
 ### One connection (combined stream)
 
-Binance supports up to ~200 streams on a single combined connection. Use the
-combined stream pattern (see above) with raw text reads and manual dispatch based
-on the `"stream"` field.
+Binance supports up to ~200 streams on a single combined connection. Use
+`combined_market_stream` (see above) with a `std::variant` of the event types
+you want to receive.
 
 ---
 
@@ -278,16 +281,18 @@ on the `"stream"` field.
 User streams require a listen key from the REST API:
 
 ```cpp
-fapi::client c(cfg);
+futures_usdm_api api(cfg);
+auto rest = co_await api.create_rest_client();
 
-// Get listen key via REST
-auto key = co_await c.user_data_streams.async_start();
+// Get listen key via REST (user_data_stream_service)
+auto key = co_await (*rest)->user_data_streams.async_execute(types::start_listen_key_request_t{});
 
 // Subscribe returns a variant generator
-auto stream = c.user_streams().subscribe(key->listenKey);
+auto user = api.create_user_stream();
+auto gen = user->subscribe(key->listenKey);
 
-while (stream) {
-    auto event = co_await stream;
+while (gen) {
+    auto event = co_await gen;
     if (!event) break;
 
     std::visit(overloaded{
@@ -295,7 +300,7 @@ while (stream) {
             spdlog::info("{} {} {}", e.order.symbol, e.order.side, e.order.status);
         },
         [](const types::account_update_event_t& e) {
-            spdlog::info("balance update: {} assets", e.data.balances.size());
+            spdlog::info("balance update: {} assets", e.update_data.balances.size());
         },
         [](const types::listen_key_expired_event_t&) {
             spdlog::warn("listen key expired");
@@ -379,20 +384,85 @@ detect this and reconnect.
 
 ---
 
+---
+
+# Planned Architecture Redesign
+
+## Problems with current design
+
+`basic_market_streams` conflates three concerns:
+
+1. **Connection** — owns `websocket_client`, manages connect/close
+2. **Subscription management** — subscribe/unsubscribe control messages
+3. **Event parsing** — `glz::read` inside the generator body
+
+These are tightly coupled: one connection = one `subscribe()` call = one event type.
+The combined stream path (`async_subscribe` + `async_read_text`) exists but drops
+back to raw strings — no parsing, no typing.
+
+Other issues:
+
+- `async_connect(string target)` — raw URL path leaked into the stream API
+- `async_read_event<E>()` — redundant with the generator
+- `stream_recorder` — synchronous callback blocks the stream
+- No auto-reconnect, no listen key keepalive, no application buffering
+
+## Current Architecture
+
+```
+stream_connection          (raw WebSocket transport, protocol-agnostic)
+├── market_stream          (single subscription, typed generator)
+├── combined_market_stream (multiple subscriptions, variant generator, demux)
+└── user_stream            (single listen key, variant generator)
+
+order_book::local_order_book  (uses market_stream + market_data_service)
+```
+
+### Layered design
+
+```
+┌─────────────────────────────────────────────────────┐
+│  stream_connection                                   │
+│  - owns websocket_client                            │
+│  - async_connect(host, port, target)                │
+│  - async_read_text() / async_write_text()           │
+│  - async_close()                                    │
+│  - no Binance protocol knowledge                    │
+└──────────────┬──────────────────────────────────────┘
+               │
+    ┌──────────┼──────────┬─────────────────┐
+    │          │          │                 │
+    ▼          ▼          ▼                 ▼
+market_    combined_   user_          (direct use by
+stream     market_     stream        local_order_book,
+           stream                    custom components)
+```
+
+### Missing features (future)
+
+| Feature | Notes |
+|---------|-------|
+| Application buffering | `cobalt::channel` or ring buffer between generator and consumer |
+| Auto-reconnect | In `subscribe()` generator: catch error, reconnect, continue |
+| Listen key keepalive | Periodic REST call on async timer in user_stream |
+| Async recorder | Non-blocking frame recording on stream_connection |
+
+---
+
 ## Source Reference
 
 | File | Role |
 |---|---|
-| `include/binapi2/fapi/streams/market_streams.hpp` | Market stream API: subscribe (generator), async_connect, async_read_event, combined stream control |
-| `src/binapi2/fapi/streams/market_streams.cpp` | Implementation: target URL construction, async_connect, async_subscribe/unsubscribe |
-| `include/binapi2/fapi/streams/user_streams.hpp` | User data stream API: subscribe (variant generator), async_connect |
-| `src/binapi2/fapi/streams/user_streams.cpp` | Implementation: event type detection, parse_event, variant dispatch |
-| `include/binapi2/fapi/streams/local_order_book.hpp` | Async local order book: async_run coroutine, thread-safe snapshot |
-| `src/binapi2/fapi/streams/local_order_book.cpp` | Implementation: buffer -> snapshot -> apply -> gap detection |
-| `include/binapi2/fapi/streams/stream_traits.hpp` | Compile-time subscription -> target path + event type mapping |
-| `include/binapi2/fapi/transport/websocket_client.hpp` | Low-level WS transport: async-only connect/read/write/close |
-| `include/binapi2/fapi/types/subscriptions.hpp` | Subscription parameter types (symbol, pair, intervals) |
-| `include/binapi2/fapi/types/market_stream_events.hpp` | Market stream event types with glaze JSON metadata |
+| `include/binapi2/fapi/streams/stream_connection.hpp` | Raw WebSocket connection: connect/close/read/write |
+| `include/binapi2/fapi/streams/market_stream.hpp` | Single-subscription market stream with typed generator |
+| `include/binapi2/fapi/streams/combined_market_stream.hpp` | Multi-subscription stream with variant dispatch |
+| `include/binapi2/fapi/streams/user_stream.hpp` | User data stream with variant generator |
+| `include/binapi2/fapi/streams/stream_traits.hpp` | Compile-time subscription → topic/target/event_type mapping |
+| `include/binapi2/fapi/order_book/local_order_book.hpp` | Synchronized order book (market_stream + market_data_service) |
+| `include/binapi2/fapi/types/subscriptions.hpp` | Subscription parameter types |
+| `include/binapi2/fapi/types/market_stream_events.hpp` | Market stream event types with glaze metadata |
 | `include/binapi2/fapi/types/user_stream_events.hpp` | User stream event types + user_stream_event_t variant |
-| `include/binapi2/fapi/types/streams.hpp` | Convenience header: includes both market_stream_events.hpp and user_stream_events.hpp |
-| `include/binapi2/fapi/config.hpp` | Endpoint URLs, stream_recorder callback |
+| `include/binapi2/fapi/types/event_traits.hpp` | Compile-time event type → wire name mapping |
+| `include/binapi2/fapi/detail/variant_parse.hpp` | Generic discriminator-based variant JSON parser |
+| `include/binapi2/fapi/transport/websocket_client.hpp` | Low-level WS transport (pimpl over Beast) |
+| `include/binapi2/fapi/config.hpp` | Endpoint URLs, ws_target_t, listen_key_t |

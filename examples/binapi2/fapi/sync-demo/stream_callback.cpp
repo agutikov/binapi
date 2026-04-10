@@ -7,7 +7,7 @@
 
 #include <binapi2/futures_usdm_api.hpp>
 #include <binapi2/fapi/detail/io_thread.hpp>
-#include <binapi2/fapi/streams/market_streams.hpp>
+#include <binapi2/fapi/streams/market_stream.hpp>
 #include <binapi2/fapi/types/market_stream_events.hpp>
 #include <binapi2/fapi/types/subscriptions.hpp>
 
@@ -77,26 +77,18 @@ private:
 using event_t = result<types::book_ticker_stream_event_t>;
 
 /// Coroutine that reads events and pushes each to the queue.
-/// Creates its own market_streams so the websocket lifetime matches the coroutine.
+/// Creates its own market_stream so the websocket lifetime matches the coroutine.
 static boost::cobalt::task<void>
 read_and_post(binapi2::fapi::config cfg, int count, event_queue<event_t>& queue)
 {
-    binapi2::fapi::streams::market_streams streams(std::move(cfg));
-    auto conn = co_await streams.async_connect(
-        types::book_ticker_subscription{.symbol = "BTCUSDT"});
-    if (!conn) {
-        queue.push(result<types::book_ticker_stream_event_t>::failure(conn.err));
-        queue.close();
-        co_return;
-    }
+    binapi2::fapi::streams::market_stream streams(std::move(cfg));
+    auto gen = streams.subscribe(types::book_ticker_subscription{.symbol = "BTCUSDT"});
 
-    for (int i = 0; i < count; ++i) {
-        auto e = co_await streams.async_read_event<types::book_ticker_stream_event_t>();
+    for (int i = 0; i < count && gen; ++i) {
+        auto e = co_await gen;
         queue.push(std::move(e));
-        if (!e)
-            break;
+        if (!e) break;
     }
-    co_await streams.async_close();
     queue.close();
 }
 

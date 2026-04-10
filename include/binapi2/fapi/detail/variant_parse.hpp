@@ -175,4 +175,32 @@ std::optional<Variant> parse_variant(std::string_view discriminator_key,
     return std::nullopt;
 }
 
+/// @brief Look up a discriminator value in the mapping and parse JSON into the
+///        matched variant alternative.
+///
+/// Unlike parse_variant(key, json, mapping) which extracts the discriminator
+/// from the JSON, this function takes the discriminator value directly.
+/// Used when the discriminator and the parseable JSON come from different
+/// parts of the message (e.g. combined stream wrappers).
+///
+/// @param disc_value  The discriminator value (already extracted).
+/// @param json        The JSON to parse.
+/// @param mapping     Array of variant_entry mapping discriminator values to types.
+/// @return            The parsed variant, or std::nullopt on failure.
+template<typename Variant, std::size_t N>
+std::optional<Variant> dispatch_variant(std::string_view disc_value,
+                                        const std::string& json,
+                                        const variant_entry<Variant> (&mapping)[N])
+{
+    for (const auto& entry : mapping) {
+        if (entry.discriminator_value == disc_value) {
+            Variant out;
+            if (entry.try_parse(json, out))
+                return out;
+            return std::nullopt;
+        }
+    }
+    return std::nullopt;
+}
+
 } // namespace binapi2::fapi::detail

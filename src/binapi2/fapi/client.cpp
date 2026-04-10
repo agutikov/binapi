@@ -36,16 +36,28 @@ futures_usdm_api::create_ws_api_client()
     co_return fapi::result<std::unique_ptr<fapi::websocket_api::client>>::success(std::move(c));
 }
 
-std::unique_ptr<fapi::streams::market_streams>
-futures_usdm_api::create_market_streams()
+std::unique_ptr<fapi::streams::market_stream>
+futures_usdm_api::create_market_stream()
 {
-    return std::make_unique<fapi::streams::market_streams>(cfg_);
+    return std::make_unique<fapi::streams::market_stream>(cfg_);
 }
 
-std::unique_ptr<fapi::streams::user_streams>
-futures_usdm_api::create_user_streams()
+std::unique_ptr<fapi::streams::combined_market_stream>
+futures_usdm_api::create_combined_market_stream()
 {
-    return std::make_unique<fapi::streams::user_streams>(cfg_);
+    return std::make_unique<fapi::streams::combined_market_stream>(cfg_);
+}
+
+std::unique_ptr<fapi::streams::dynamic_market_stream>
+futures_usdm_api::create_dynamic_market_stream()
+{
+    return std::make_unique<fapi::streams::dynamic_market_stream>(cfg_);
+}
+
+std::unique_ptr<fapi::streams::user_stream>
+futures_usdm_api::create_user_stream()
+{
+    return std::make_unique<fapi::streams::user_stream>(cfg_);
 }
 
 } // namespace binapi2

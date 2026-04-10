@@ -5,13 +5,13 @@
 /// @file stream_parse_benchmark.cpp
 /// @brief Throughput benchmarks for market and user stream event JSON parsing.
 ///
-/// Uses basic_market_streams and basic_user_streams with a replay transport
+/// Uses basic_market_stream and basic_user_stream with a replay transport
 /// that feeds pre-recorded JSON without any I/O.
 
 #include "replay_transport.hpp"
 
-#include <binapi2/fapi/streams/market_streams.hpp>
-#include <binapi2/fapi/streams/user_streams.hpp>
+#include <binapi2/fapi/streams/market_stream.hpp>
+#include <binapi2/fapi/streams/user_stream.hpp>
 #include <binapi2/fapi/types/subscriptions.hpp>
 
 #include <boost/cobalt/main.hpp>
@@ -29,8 +29,8 @@ namespace {
 
 using namespace binapi2::fapi;
 using replay = benchmarks::replay_transport;
-using market_streams_replay = streams::basic_market_streams<replay>;
-using user_streams_replay = streams::basic_user_streams<replay>;
+using market_stream_replay = streams::basic_market_stream<replay>;
+using user_stream_replay = streams::basic_user_stream<replay>;
 
 // ---------------------------------------------------------------------------
 // Harness
@@ -121,7 +121,7 @@ bench_market_subscribe(const char* name, const std::string& json,
     using clock = std::chrono::high_resolution_clock;
 
     auto cfg = config::testnet_config();
-    market_streams_replay ms(cfg);
+    market_stream_replay ms(cfg);
     ms.transport().messages.assign(n, json);
 
     // Warmup
@@ -156,46 +156,6 @@ bench_market_subscribe(const char* name, const std::string& json,
     co_return compute(name, json.size(), rounds * n, elapsed);
 }
 
-template<class Event>
-boost::cobalt::task<bench_result>
-bench_market_read(const char* name, const std::string& json, std::size_t n)
-{
-    using clock = std::chrono::high_resolution_clock;
-
-    auto cfg = config::testnet_config();
-    market_streams_replay ms(cfg);
-    ms.transport().messages.assign(n, json);
-
-    // Warmup
-    ms.transport().reset();
-    co_await ms.async_connect("/ws/bench");
-    for (;;) { auto ev = co_await ms.template async_read_event<Event>(); if (!ev) break; }
-
-    // Calibrate
-    std::size_t rounds = 4;
-    for (;;) {
-        auto t0 = clock::now();
-        for (std::size_t r = 0; r < rounds; ++r) {
-            ms.transport().reset();
-            co_await ms.async_connect("/ws/bench");
-            for (;;) { auto ev = co_await ms.template async_read_event<Event>(); if (!ev) break; }
-        }
-        if (clock::now() - t0 >= std::chrono::seconds(1)) break;
-        rounds *= 2;
-    }
-
-    // Measure
-    auto t0 = clock::now();
-    for (std::size_t r = 0; r < rounds; ++r) {
-        ms.transport().reset();
-        co_await ms.async_connect("/ws/bench");
-        for (;;) { auto ev = co_await ms.template async_read_event<Event>(); if (!ev) break; }
-    }
-    auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(clock::now() - t0).count();
-
-    co_return compute(name, json.size(), rounds * n, elapsed);
-}
-
 // ---------------------------------------------------------------------------
 // User stream benchmarks
 // ---------------------------------------------------------------------------
@@ -206,7 +166,7 @@ bench_user_subscribe(const char* name, const std::string& json, std::size_t n)
     using clock = std::chrono::high_resolution_clock;
 
     auto cfg = config::testnet_config();
-    user_streams_replay us(cfg);
+    user_stream_replay us(cfg);
     us.transport().messages.assign(n, json);
 
     // Warmup
@@ -318,33 +278,12 @@ boost::cobalt::task<void> run_benchmarks()
         diff_book_depth_subscription{.symbol = "BTCUSDT", .speed = "100ms"}, N);
     results.push_back(r); print_result(r);
 
-    // ── Market stream: async_read_event() ──
-
-    std::printf("\n== Market stream: async_read_event(), %zu msgs/round ==\n\n", N);
-    print_header();
-
-    r = co_await bench_market_read<book_ticker_stream_event_t>(
-        "read_event/book_ticker", book_ticker_json, N);
+    r = co_await bench_market_subscribe("subscribe/aggregate_trade", agg_trade_json,
+        aggregate_trade_subscription{.symbol = "BTCUSDT"}, N);
     results.push_back(r); print_result(r);
 
-    r = co_await bench_market_read<ticker_stream_event_t>(
-        "read_event/ticker_24hr", ticker_json, N);
-    results.push_back(r); print_result(r);
-
-    r = co_await bench_market_read<aggregate_trade_stream_event_t>(
-        "read_event/aggregate_trade", agg_trade_json, N);
-    results.push_back(r); print_result(r);
-
-    r = co_await bench_market_read<depth_stream_event_t>(
-        "read_event/depth", depth_json, N);
-    results.push_back(r); print_result(r);
-
-    r = co_await bench_market_read<kline_stream_event_t>(
-        "read_event/kline", kline_json, N);
-    results.push_back(r); print_result(r);
-
-    r = co_await bench_market_read<liquidation_order_stream_event_t>(
-        "read_event/liquidation", liquidation_json, N);
+    r = co_await bench_market_subscribe("subscribe/liquidation", liquidation_json,
+        liquidation_order_subscription{.symbol = "BTCUSDT"}, N);
     results.push_back(r); print_result(r);
 
     // ── User stream: subscribe() dispatch ──

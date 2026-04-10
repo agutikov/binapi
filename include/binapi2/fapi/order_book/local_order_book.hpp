@@ -8,12 +8,13 @@
 #pragma once
 
 #include <binapi2/fapi/result.hpp>
-#include <binapi2/fapi/rest/pipeline.hpp>
-#include <binapi2/fapi/streams/market_streams.hpp>
+#include <binapi2/fapi/rest/services/market_data.hpp>
+#include <binapi2/fapi/streams/market_stream.hpp>
 #include <binapi2/fapi/types/detail/decimal.hpp>
 #include <binapi2/fapi/types/detail/symbol.hpp>
 #include <binapi2/fapi/types/market_data.hpp>
 #include <binapi2/fapi/types/market_stream_events.hpp>
+#include <binapi2/fapi/types/subscriptions.hpp>
 
 #include <boost/cobalt/task.hpp>
 
@@ -24,7 +25,7 @@
 #include <mutex>
 #include <vector>
 
-namespace binapi2::fapi::streams {
+namespace binapi2::fapi::order_book {
 
 /// @brief Snapshot of the locally maintained order book.
 struct order_book_snapshot
@@ -38,8 +39,8 @@ struct order_book_snapshot
 /// @brief Async locally maintained order book.
 ///
 /// Implements the Binance synchronization algorithm as a coroutine:
-///  1. Connect to @depth@100ms stream
-///  2. Buffer events, fetch REST snapshot
+///  1. Subscribe to @depth@100ms stream via market_stream
+///  2. Buffer events, fetch REST snapshot via market_data_service
 ///  3. Reconcile buffered events with snapshot
 ///  4. Apply live events, detect gaps, re-sync
 class local_order_book
@@ -47,11 +48,11 @@ class local_order_book
 public:
     using snapshot_callback = std::function<void(const order_book_snapshot&)>;
 
-    local_order_book(market_streams& streams, rest::pipeline& rest);
+    local_order_book(streams::market_stream& streams, rest::market_data_service& market_data);
 
     /// @brief Run the order book sync loop as a coroutine.
     ///
-    /// Connects to the stream, fetches snapshot, applies events.
+    /// Subscribes to the depth stream, fetches snapshot, applies events.
     /// Runs until stop() is called or an error occurs.
     [[nodiscard]] boost::cobalt::task<result<void>>
     async_run(types::symbol_t symbol, int depth_limit);
@@ -71,8 +72,8 @@ private:
     void apply_levels(const std::vector<types::price_level_t>& levels,
                       std::map<types::decimal_t, types::decimal_t, Compare>& side);
 
-    market_streams& streams_;
-    rest::pipeline& rest_;
+    streams::market_stream& streams_;
+    rest::market_data_service& market_data_;
 
     mutable std::mutex mutex_;
     order_book_snapshot book_;
@@ -80,4 +81,4 @@ private:
     std::atomic<bool> running_{false};
 };
 
-} // namespace binapi2::fapi::streams
+} // namespace binapi2::fapi::order_book

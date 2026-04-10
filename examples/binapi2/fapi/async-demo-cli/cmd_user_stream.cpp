@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 // User data stream commands — listen key management and real-time account events.
-// Demonstrates: async_execute() for listen key lifecycle, and user_streams
+// Demonstrates: async_execute() for listen key lifecycle, and user_stream
 // subscribe() returning a variant generator for all event types.
 
 #include "cmd_user_stream.hpp"
@@ -66,14 +66,14 @@ boost::cobalt::task<int> cmd_user_stream(binapi2::futures_usdm_api& c, const arg
 {
     auto rest = co_await c.create_rest_client();
     if (!rest) { spdlog::error("connect: {}", rest.err.message); co_return 1; }
-    auto user_streams = c.create_user_streams();
+    auto user_stream = c.create_user_stream();
     spdlog::info("requesting listen key...");
     auto key = co_await (*rest)->user_data_streams.async_execute(types::start_listen_key_request_t{});
     if (!key) { print_error(key.err); co_return 1; }
     spdlog::info("listen key: {}", key->listenKey);
 
     spdlog::info("subscribing to user data stream...");
-    auto gen = user_streams->subscribe(key->listenKey);
+    auto gen = user_stream->subscribe(key->listenKey);
 
     spdlog::info("connected, reading events...");
     while (gen) {

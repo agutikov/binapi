@@ -18,7 +18,7 @@ boost::cobalt::task<int> cmd_stream_book_ticker(binapi2::futures_usdm_api& c, co
 {
     if (args.empty()) { spdlog::error("usage: stream-book-ticker <symbol>"); co_return 1; }
 
-    auto streams = c.create_market_streams();
+    auto streams = c.create_market_stream();
     spdlog::info("subscribing to book_ticker_t stream for {}", args[0]);
     types::book_ticker_subscription sub;
     sub.symbol = args[0];
@@ -42,7 +42,7 @@ boost::cobalt::task<int> cmd_stream_mark_price(binapi2::futures_usdm_api& c, con
 {
     if (args.empty()) { spdlog::error("usage: stream-mark-price <symbol>"); co_return 1; }
 
-    auto streams = c.create_market_streams();
+    auto streams = c.create_market_stream();
     spdlog::info("subscribing to mark_price_t stream for {}", args[0]);
     types::mark_price_subscription sub;
     sub.symbol = args[0];
@@ -64,7 +64,7 @@ boost::cobalt::task<int> cmd_stream_kline(binapi2::futures_usdm_api& c, const ar
 {
     if (args.size() < 2) { spdlog::error("usage: stream-kline <symbol> <interval>"); co_return 1; }
 
-    auto streams = c.create_market_streams();
+    auto streams = c.create_market_stream();
     spdlog::info("subscribing to kline_t stream for {} {}", args[0], args[1]);
     types::kline_subscription sub;
     sub.symbol = args[0];
@@ -88,7 +88,7 @@ boost::cobalt::task<int> cmd_stream_ticker(binapi2::futures_usdm_api& c, const a
 {
     if (args.empty()) { spdlog::error("usage: stream-ticker <symbol>"); co_return 1; }
 
-    auto streams = c.create_market_streams();
+    auto streams = c.create_market_stream();
     spdlog::info("subscribing to ticker stream for {}", args[0]);
     types::ticker_subscription sub;
     sub.symbol = args[0];
@@ -110,7 +110,7 @@ boost::cobalt::task<int> cmd_stream_depth(binapi2::futures_usdm_api& c, const ar
 {
     if (args.empty()) { spdlog::error("usage: stream-depth <symbol> [levels]"); co_return 1; }
 
-    auto streams = c.create_market_streams();
+    auto streams = c.create_market_stream();
     types::partial_book_depth_subscription sub;
     sub.symbol = args[0];
     if (args.size() > 1) sub.levels = std::stoi(args[1]);
@@ -132,7 +132,7 @@ boost::cobalt::task<int> cmd_stream_depth(binapi2::futures_usdm_api& c, const ar
 
 boost::cobalt::task<int> cmd_stream_all_book_tickers(binapi2::futures_usdm_api& c, const args_t& /*args*/)
 {
-    auto streams = c.create_market_streams();
+    auto streams = c.create_market_stream();
     spdlog::info("subscribing to all_book_tickers stream");
     auto gen = streams->subscribe(types::all_book_ticker_subscription{});
 
@@ -149,7 +149,7 @@ boost::cobalt::task<int> cmd_stream_all_book_tickers(binapi2::futures_usdm_api& 
 
 boost::cobalt::task<int> cmd_stream_all_tickers(binapi2::futures_usdm_api& c, const args_t& /*args*/)
 {
-    auto streams = c.create_market_streams();
+    auto streams = c.create_market_stream();
     spdlog::info("subscribing to all_market_tickers stream");
     auto gen = streams->subscribe(types::all_market_ticker_subscription{});
 
@@ -166,7 +166,7 @@ boost::cobalt::task<int> cmd_stream_all_tickers(binapi2::futures_usdm_api& c, co
 
 boost::cobalt::task<int> cmd_stream_all_mini_tickers(binapi2::futures_usdm_api& c, const args_t& /*args*/)
 {
-    auto streams = c.create_market_streams();
+    auto streams = c.create_market_stream();
     spdlog::info("subscribing to all_market_mini_tickers stream");
     auto gen = streams->subscribe(types::all_market_mini_ticker_subscription{});
 
@@ -185,7 +185,7 @@ boost::cobalt::task<int> cmd_stream_liquidation(binapi2::futures_usdm_api& c, co
 {
     if (args.empty()) { spdlog::error("usage: stream-liquidation <symbol>"); co_return 1; }
 
-    auto streams = c.create_market_streams();
+    auto streams = c.create_market_stream();
     spdlog::info("subscribing to liquidation_order stream for {}", args[0]);
     types::liquidation_order_subscription sub;
     sub.symbol = args[0];

@@ -24,8 +24,8 @@ namespace binapi2::fapi::benchmarks {
 /// @brief Transport that replays a vector of JSON messages without I/O.
 ///
 /// Satisfies the same interface as transport::websocket_client so it can
-/// be used with basic_market_streams<replay_transport> and
-/// basic_user_streams<replay_transport>.
+/// be used with basic_market_stream<replay_transport> and
+/// basic_user_stream<replay_transport>.
 class replay_transport
 {
 public:
@@ -36,7 +36,7 @@ public:
 
     void reset() { index = 0; }
 
-    boost::cobalt::task<result<void>> async_connect(std::string, std::string, std::string)
+    boost::cobalt::task<result<void>> async_connect(std::string, std::string, ws_target_t)
     {
         co_return result<void>::success();
     }

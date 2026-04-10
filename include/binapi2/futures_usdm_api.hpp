@@ -11,8 +11,10 @@
 #include <binapi2/fapi/config.hpp>
 #include <binapi2/fapi/rest/client.hpp>
 #include <binapi2/fapi/result.hpp>
-#include <binapi2/fapi/streams/market_streams.hpp>
-#include <binapi2/fapi/streams/user_streams.hpp>
+#include <binapi2/fapi/streams/combined_market_stream.hpp>
+#include <binapi2/fapi/streams/dynamic_market_stream.hpp>
+#include <binapi2/fapi/streams/market_stream.hpp>
+#include <binapi2/fapi/streams/user_stream.hpp>
 #include <binapi2/fapi/websocket_api/client.hpp>
 
 #include <boost/cobalt/task.hpp>
@@ -50,11 +52,17 @@ public:
     [[nodiscard]] boost::cobalt::task<fapi::result<std::unique_ptr<fapi::websocket_api::client>>>
     create_ws_api_client();
 
-    /// @brief Create a market data stream client (connect via subscribe).
-    [[nodiscard]] std::unique_ptr<fapi::streams::market_streams> create_market_streams();
+    /// @brief Create a single-subscription market data stream client.
+    [[nodiscard]] std::unique_ptr<fapi::streams::market_stream> create_market_stream();
 
-    /// @brief Create a user data stream client (connect via subscribe).
-    [[nodiscard]] std::unique_ptr<fapi::streams::user_streams> create_user_streams();
+    /// @brief Create a combined market data stream client (fixed subscriptions, variant generator).
+    [[nodiscard]] std::unique_ptr<fapi::streams::combined_market_stream> create_combined_market_stream();
+
+    /// @brief Create a dynamic market data stream client (live subscribe/unsubscribe).
+    [[nodiscard]] std::unique_ptr<fapi::streams::dynamic_market_stream> create_dynamic_market_stream();
+
+    /// @brief Create a user data stream client.
+    [[nodiscard]] std::unique_ptr<fapi::streams::user_stream> create_user_stream();
 
 private:
     fapi::config cfg_;

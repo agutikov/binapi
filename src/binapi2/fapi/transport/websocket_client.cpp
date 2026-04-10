@@ -62,7 +62,7 @@ websocket_client::~websocket_client() = default;
 // --- Async (primary) ---
 
 boost::cobalt::task<result<void>>
-websocket_client::async_connect(std::string host, std::string port, std::string target)
+websocket_client::async_connect(std::string host, std::string port, ws_target_t target)
 {
     try {
         // Create I/O objects on the coroutine's executor so that io_thread::run_sync()
