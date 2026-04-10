@@ -3,15 +3,6 @@
 
 
 
-stream tests and benchmarks
-
----
-
-generators don't work in io_thread?
-then examples/binapi2/fapi/sync-demo stream examples also won't work?
-
-fix io_thread - make cobalt context allow run generators, add tests for this case
-
 
 ---
 

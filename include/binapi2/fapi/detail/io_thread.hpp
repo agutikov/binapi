@@ -4,8 +4,7 @@
 
 /// @file io_thread.hpp
 /// @brief Background I/O thread that drives a persistent io_context for
-///        async operations. Used by self-contained client mode where the
-///        client owns its execution context.
+///        async operations, with full cobalt coroutine and generator support.
 
 #pragma once
 
@@ -14,6 +13,7 @@
 #include <boost/asio/use_future.hpp>
 #include <boost/cobalt/spawn.hpp>
 #include <boost/cobalt/task.hpp>
+#include <boost/cobalt/this_thread.hpp>
 
 #include <future>
 #include <thread>
@@ -26,12 +26,23 @@ namespace binapi2::fapi::detail {
 /// io_context and blocks the calling thread until it completes. Unlike
 /// `cobalt::run()`, the io_context is long-lived — so WebSocket connections
 /// and other stateful I/O objects survive across multiple sync calls.
+///
+/// The background thread initializes the cobalt thread-local executor and
+/// PMR resource so that cobalt generators work correctly (not just tasks).
 class io_thread
 {
 public:
     io_thread()
         : work_(boost::asio::make_work_guard(io_))
-        , thread_([this] { io_.run(); })
+        , thread_([this] {
+            // Set up cobalt thread-local state so generators work on this thread.
+            boost::cobalt::this_thread::set_executor(io_.get_executor());
+#if !defined(BOOST_COBALT_NO_PMR)
+            pmr_resource_.emplace();
+            boost::cobalt::this_thread::set_default_resource(&*pmr_resource_);
+#endif
+            io_.run();
+        })
     {
     }
 
@@ -51,8 +62,8 @@ public:
     /// @brief Spawn a cobalt task on the io_context and block until it completes.
     ///
     /// The task runs on the background thread's io_context. The calling thread
-    /// blocks on a future until the result is available. This is safe because
-    /// the io_context is driven by a different thread.
+    /// blocks on a future until the result is available. Supports both cobalt
+    /// tasks and generators within the spawned task.
     template<typename T>
     T run_sync(boost::cobalt::task<T> task)
     {
@@ -64,6 +75,9 @@ public:
 private:
     boost::asio::io_context io_;
     boost::asio::executor_work_guard<boost::asio::io_context::executor_type> work_;
+#if !defined(BOOST_COBALT_NO_PMR)
+    std::optional<boost::cobalt::pmr::unsynchronized_pool_resource> pmr_resource_;
+#endif
     std::thread thread_;
 };
 

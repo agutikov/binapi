@@ -52,6 +52,11 @@ target_compile_definitions(postman_validation_test PRIVATE
 )
 gtest_discover_tests(postman_validation_test DISCOVERY_MODE PRE_TEST)
 
+add_executable(io_thread_test io_thread_test.cpp)
+target_link_libraries(io_thread_test PRIVATE binapi2_fapi GTest::gtest_main)
+target_compile_options(io_thread_test PRIVATE)
+gtest_discover_tests(io_thread_test DISCOVERY_MODE PRE_TEST)
+
 add_executable(stream_test stream_test.cpp)
 target_link_libraries(stream_test PRIVATE binapi2_fapi GTest::gtest_main)
 target_compile_options(stream_test PRIVATE)
