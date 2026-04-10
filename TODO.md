@@ -3,6 +3,24 @@
 
 
 
+stream data types
+
+
+event type is enum not string? 
+
+
+probably time fields are timestamp_ms_t, aren't they?
+
+
+what else string types could be more meaningful types?
+
+
+compare number of fields in C++ structs and documentation
+
+
+
+--------------------------------------------------------------------------------
+
 
 How to implement Throughput benchmarks w/o server?
 Or without transport?
@@ -165,14 +183,16 @@ provide analysis table
 
 
 
+scripts/audit_types.py
+
+
+
 Joern + clangd + clang-rename + mcp + python tooling  Agent/skill
 
 
-Claude HOWTO
-    - install
-        - mcp
-        - rag
-        - skill
-        - Agent
-        - what else?????
+
+or maybe skip all this until transition to fix8
+
+
+
 
