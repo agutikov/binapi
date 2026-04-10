@@ -13,7 +13,7 @@
 #include <binapi2/fapi/types/detail/decimal.hpp>
 #include <binapi2/fapi/types/detail/symbol.hpp>
 #include <binapi2/fapi/types/market_data.hpp>
-#include <binapi2/fapi/types/streams.hpp>
+#include <binapi2/fapi/types/market_stream_events.hpp>
 
 #include <boost/cobalt/task.hpp>
 

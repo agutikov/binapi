@@ -32,7 +32,8 @@ set(BINAPI2_FAPI_HEADERS
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/types/convert.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/types/enums.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/types/market_data.hpp
-    ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/types/streams.hpp
+    ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/types/market_stream_events.hpp
+    ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/types/user_stream_events.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/types/trade.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/types/websocket_api.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/websocket_api/client.hpp

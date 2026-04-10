@@ -2,21 +2,13 @@
 
 
 
+I want benchmark use class user_streams and class market_streams, how to do this?
 
 
-How to implement Throughput benchmarks w/o server?
-Or without transport?
 
-At lease streams parsing benchmark:
-- record some samples from testnet with existing scripts
-    - or generate if no keys available
-- write a benchmark that repeats those samples
-- implement in tests/binapi2/fapi/benchmarks
+where are user stream benchmark?
 
-
---------------------------------------------------------------------------------
-
-
+---
 
 user streams
 
@@ -109,7 +101,7 @@ SecretProvider
  └── TestSecretProvider (for tests only)
 
 
-implement this in a separate library
+implement this in a separate generic library
 
 add required interface for SecretProvider in binapi2 that works with both implementation
 
