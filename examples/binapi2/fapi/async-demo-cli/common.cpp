@@ -95,15 +95,6 @@ binapi2::fapi::config make_config()
     if (const char* secret = std::getenv("BINANCE_SECRET_KEY"))
         cfg.secret_key = secret;
 
-    // Stream recorder — uses async spdlog "rec" logger if -r was specified.
-    if (!record_file.empty()) {
-        spdlog::info("recording raw stream frames to {}", record_file);
-        cfg.stream_recorder = [](const std::string& payload) {
-            if (auto rec = spdlog::get("rec"))
-                rec->info("{}", payload);
-        };
-    }
-
     static constexpr std::size_t max_log_body = 512;
 
     cfg.logger = [](const binapi2::fapi::transport_log_entry& e) {

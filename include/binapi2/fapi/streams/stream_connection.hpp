@@ -10,6 +10,7 @@
 
 #include <binapi2/fapi/config.hpp>
 #include <binapi2/fapi/result.hpp>
+#include <binapi2/fapi/streams/stream_recorder.hpp>
 #include <binapi2/fapi/transport/websocket_client.hpp>
 #include <binapi2/fapi/transport/websocket_transport.hpp>
 
@@ -51,9 +52,8 @@ namespace binapi2::fapi::streams {
 /// Owns the WebSocket transport. Manages connect/close and raw frame I/O.
 /// Knows nothing about Binance stream protocol, subscriptions, or event types.
 ///
-/// Used directly by components that need raw access (local_order_book,
-/// combined_market_stream). Higher-level components (market_stream,
-/// user_stream) wrap this and add typed parsing.
+/// Optionally tees each received frame to a stream_recorder (async, with
+/// backpressure when the recorder's buffer is full).
 ///
 /// @tparam Transport WebSocket transport type (default: transport::websocket_client).
 template<transport::websocket_transport Transport = transport::websocket_client>
@@ -67,6 +67,11 @@ public:
 
     basic_stream_connection(const basic_stream_connection&) = delete;
     basic_stream_connection& operator=(const basic_stream_connection&) = delete;
+
+    // -- Recorder --
+
+    /// @brief Set a recorder to receive copies of all incoming frames.
+    void set_recorder(stream_recorder& recorder) { recorder_ = &recorder; }
 
     // -- Connection --
 
@@ -85,7 +90,11 @@ public:
 
     [[nodiscard]] boost::cobalt::task<result<std::string>> async_read_text()
     {
-        co_return co_await transport_.async_read_text();
+        auto msg = co_await transport_.async_read_text();
+        if (msg && recorder_) {
+            co_await recorder_->async_record(*msg);
+        }
+        co_return msg;
     }
 
     [[nodiscard]] boost::cobalt::task<result<void>> async_write_text(std::string message)
@@ -101,6 +110,7 @@ public:
 private:
     Transport transport_;
     config cfg_;
+    stream_recorder* recorder_{nullptr};
 };
 
 /// @brief Default stream connection using the WebSocket transport.

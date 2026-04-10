@@ -19,6 +19,7 @@ set(BINAPI2_FAPI_HEADERS
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/streams/stream_connection.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/streams/combined_market_stream.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/streams/dynamic_market_stream.hpp
+    ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/streams/stream_recorder.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/streams/market_stream.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/order_book/local_order_book.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/streams/user_stream.hpp

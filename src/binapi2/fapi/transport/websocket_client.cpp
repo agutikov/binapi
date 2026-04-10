@@ -169,9 +169,6 @@ websocket_client::async_read_text()
         impl_->buffer.consume(impl_->buffer.size());
         co_await impl_->stream->async_read(impl_->buffer, boost::cobalt::use_op);
         std::string data = boost::beast::buffers_to_string(impl_->buffer.data());
-        if (cfg_.stream_recorder) {
-            cfg_.stream_recorder(data);
-        }
         if (cfg_.logger) {
             cfg_.logger({ transport_direction::received, "WS", "WS", "", 0, data, {} });
         }
