@@ -12,6 +12,7 @@
 #include <binapi2/fapi/result.hpp>
 #include <binapi2/fapi/transport/websocket_client.hpp>
 #include <binapi2/fapi/transport/websocket_transport.hpp>
+#include <binapi2/fapi/types/event_traits.hpp>
 #include <binapi2/fapi/types/user_stream_events.hpp>
 
 #include <boost/cobalt/generator.hpp>
@@ -32,16 +33,26 @@ using user_event_generator = boost::cobalt::generator<result<types::user_stream_
 using user_event_variant = types::user_stream_event_t;
 
 inline constexpr fapi::detail::variant_entry<user_event_variant> user_event_mapping[] = {
-    fapi::detail::make_entry<types::account_update_event_t, user_event_variant>("ACCOUNT_UPDATE"),
-    fapi::detail::make_entry<types::order_trade_update_event_t, user_event_variant>("ORDER_TRADE_UPDATE"),
-    fapi::detail::make_entry<types::margin_call_event_t, user_event_variant>("MARGIN_CALL"),
-    fapi::detail::make_entry<types::listen_key_expired_event_t, user_event_variant>("listenKeyExpired"),
-    fapi::detail::make_entry<types::account_config_update_event_t, user_event_variant>("ACCOUNT_CONFIG_UPDATE"),
-    fapi::detail::make_entry<types::trade_lite_event_t, user_event_variant>("TRADE_LITE"),
-    fapi::detail::make_entry<types::algo_order_update_event_t, user_event_variant>("ALGO_UPDATE"),
-    fapi::detail::make_entry<types::conditional_order_trigger_reject_event_t, user_event_variant>("CONDITIONAL_ORDER_TRIGGER_REJECT"),
-    fapi::detail::make_entry<types::grid_update_event_t, user_event_variant>("GRID_UPDATE"),
-    fapi::detail::make_entry<types::strategy_update_event_t, user_event_variant>("STRATEGY_UPDATE"),
+    fapi::detail::make_entry<types::account_update_event_t, user_event_variant>(
+        types::event_traits<types::account_update_event_t>::wire_name),
+    fapi::detail::make_entry<types::order_trade_update_event_t, user_event_variant>(
+        types::event_traits<types::order_trade_update_event_t>::wire_name),
+    fapi::detail::make_entry<types::margin_call_event_t, user_event_variant>(
+        types::event_traits<types::margin_call_event_t>::wire_name),
+    fapi::detail::make_entry<types::listen_key_expired_event_t, user_event_variant>(
+        types::event_traits<types::listen_key_expired_event_t>::wire_name),
+    fapi::detail::make_entry<types::account_config_update_event_t, user_event_variant>(
+        types::event_traits<types::account_config_update_event_t>::wire_name),
+    fapi::detail::make_entry<types::trade_lite_event_t, user_event_variant>(
+        types::event_traits<types::trade_lite_event_t>::wire_name),
+    fapi::detail::make_entry<types::algo_order_update_event_t, user_event_variant>(
+        types::event_traits<types::algo_order_update_event_t>::wire_name),
+    fapi::detail::make_entry<types::conditional_order_trigger_reject_event_t, user_event_variant>(
+        types::event_traits<types::conditional_order_trigger_reject_event_t>::wire_name),
+    fapi::detail::make_entry<types::grid_update_event_t, user_event_variant>(
+        types::event_traits<types::grid_update_event_t>::wire_name),
+    fapi::detail::make_entry<types::strategy_update_event_t, user_event_variant>(
+        types::event_traits<types::strategy_update_event_t>::wire_name),
 };
 
 /// @brief Parse a user stream event from raw JSON using discriminator dispatch.

@@ -56,7 +56,6 @@ struct account_update_data_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Balance-and-Position-Update.md
 struct account_update_event_t
 {
-    user_event_type_t event_type{};
     timestamp_ms_t event_time{};
     timestamp_ms_t transaction_time{};
     account_update_data_t update_data{};
@@ -107,7 +106,6 @@ struct order_trade_update_order_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Order-Update.md
 struct order_trade_update_event_t
 {
-    user_event_type_t event_type{};
     timestamp_ms_t event_time{};
     timestamp_ms_t transaction_time{};
     order_trade_update_order_t order{};
@@ -129,7 +127,6 @@ struct margin_call_position_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Margin-Call.md
 struct margin_call_event_t
 {
-    user_event_type_t event_type{};
     timestamp_ms_t event_time{};
     decimal_t cross_wallet_balance{};
     std::vector<margin_call_position_t> positions{};
@@ -138,7 +135,6 @@ struct margin_call_event_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-User-Data-Stream-Expired.md
 struct listen_key_expired_event_t
 {
-    user_event_type_t event_type{};
     timestamp_ms_t event_time{};
     timestamp_ms_t transaction_time{};
     std::string listen_key{};
@@ -160,7 +156,6 @@ struct account_config_multi_assets_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Account-Configuration-Update-previous-Leverage-Update.md
 struct account_config_update_event_t
 {
-    user_event_type_t event_type{};
     timestamp_ms_t event_time{};
     timestamp_ms_t transaction_time{};
     std::optional<account_config_leverage_t> leverage_config{};
@@ -170,7 +165,6 @@ struct account_config_update_event_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Trade-Lite.md
 struct trade_lite_event_t
 {
-    user_event_type_t event_type{};
     timestamp_ms_t event_time{};
     timestamp_ms_t transaction_time{};
     symbol_t symbol{};
@@ -218,7 +212,6 @@ struct algo_order_update_data_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Algo-Order-Update.md
 struct algo_order_update_event_t
 {
-    user_event_type_t event_type{};
     timestamp_ms_t transaction_time{};
     timestamp_ms_t event_time{};
     algo_order_update_data_t order{};
@@ -235,7 +228,6 @@ struct conditional_order_reject_data_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Conditional-Order-Trigger-Reject.md
 struct conditional_order_trigger_reject_event_t
 {
-    user_event_type_t event_type{};
     timestamp_ms_t event_time{};
     timestamp_ms_t message_send_time{};
     conditional_order_reject_data_t order_reject{};
@@ -259,7 +251,6 @@ struct grid_update_data_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-GRID-UPDATE.md
 struct grid_update_event_t
 {
-    user_event_type_t event_type{};
     timestamp_ms_t transaction_time{};
     timestamp_ms_t event_time{};
     grid_update_data_t grid_update{};
@@ -279,7 +270,6 @@ struct strategy_update_data_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-STRATEGY-UPDATE.md
 struct strategy_update_event_t
 {
-    user_event_type_t event_type{};
     timestamp_ms_t transaction_time{};
     timestamp_ms_t event_time{};
     strategy_update_data_t strategy_update{};
@@ -328,7 +318,7 @@ template<>
 struct glz::meta<binapi2::fapi::types::account_update_event_t>
 {
     using T = binapi2::fapi::types::account_update_event_t;
-    static constexpr auto value = object("e", &T::event_type, "E", &T::event_time, "T", &T::transaction_time, "a", &T::update_data);
+    static constexpr auto value = object("E", &T::event_time, "T", &T::transaction_time, "a", &T::update_data);
 };
 
 template<>
@@ -349,7 +339,7 @@ template<>
 struct glz::meta<binapi2::fapi::types::order_trade_update_event_t>
 {
     using T = binapi2::fapi::types::order_trade_update_event_t;
-    static constexpr auto value = object("e", &T::event_type, "E", &T::event_time, "T", &T::transaction_time, "o", &T::order);
+    static constexpr auto value = object("E", &T::event_time, "T", &T::transaction_time, "o", &T::order);
 };
 
 template<>
@@ -364,14 +354,14 @@ template<>
 struct glz::meta<binapi2::fapi::types::margin_call_event_t>
 {
     using T = binapi2::fapi::types::margin_call_event_t;
-    static constexpr auto value = object("e", &T::event_type, "E", &T::event_time, "cw", &T::cross_wallet_balance, "p", &T::positions);
+    static constexpr auto value = object("E", &T::event_time, "cw", &T::cross_wallet_balance, "p", &T::positions);
 };
 
 template<>
 struct glz::meta<binapi2::fapi::types::listen_key_expired_event_t>
 {
     using T = binapi2::fapi::types::listen_key_expired_event_t;
-    static constexpr auto value = object("e", &T::event_type, "E", &T::event_time, "T", &T::transaction_time, "listenKey", &T::listen_key);
+    static constexpr auto value = object("E", &T::event_time, "T", &T::transaction_time, "listenKey", &T::listen_key);
 };
 
 
@@ -393,16 +383,14 @@ template<>
 struct glz::meta<binapi2::fapi::types::account_config_update_event_t>
 {
     using T = binapi2::fapi::types::account_config_update_event_t;
-    static constexpr auto value = object("e", &T::event_type, "E", &T::event_time, "T", &T::transaction_time, "ac", &T::leverage_config, "ai", &T::multi_assets_config);
+    static constexpr auto value = object("E", &T::event_time, "T", &T::transaction_time, "ac", &T::leverage_config, "ai", &T::multi_assets_config);
 };
 
 template<>
 struct glz::meta<binapi2::fapi::types::trade_lite_event_t>
 {
     using T = binapi2::fapi::types::trade_lite_event_t;
-    static constexpr auto value = object("e",
-                                         &T::event_type,
-                                         "E",
+    static constexpr auto value = object("E",
                                          &T::event_time,
                                          "T",
                                          &T::transaction_time,
@@ -488,7 +476,7 @@ template<>
 struct glz::meta<binapi2::fapi::types::algo_order_update_event_t>
 {
     using T = binapi2::fapi::types::algo_order_update_event_t;
-    static constexpr auto value = object("e", &T::event_type, "T", &T::transaction_time, "E", &T::event_time, "o", &T::order);
+    static constexpr auto value = object("T", &T::transaction_time, "E", &T::event_time, "o", &T::order);
 };
 
 template<>
@@ -502,7 +490,7 @@ template<>
 struct glz::meta<binapi2::fapi::types::conditional_order_trigger_reject_event_t>
 {
     using T = binapi2::fapi::types::conditional_order_trigger_reject_event_t;
-    static constexpr auto value = object("e", &T::event_type, "E", &T::event_time, "T", &T::message_send_time, "or", &T::order_reject);
+    static constexpr auto value = object("E", &T::event_time, "T", &T::message_send_time, "or", &T::order_reject);
 };
 
 template<>
@@ -535,7 +523,7 @@ template<>
 struct glz::meta<binapi2::fapi::types::grid_update_event_t>
 {
     using T = binapi2::fapi::types::grid_update_event_t;
-    static constexpr auto value = object("e", &T::event_type, "T", &T::transaction_time, "E", &T::event_time, "gu", &T::grid_update);
+    static constexpr auto value = object("T", &T::transaction_time, "E", &T::event_time, "gu", &T::grid_update);
 };
 
 template<>
@@ -549,5 +537,5 @@ template<>
 struct glz::meta<binapi2::fapi::types::strategy_update_event_t>
 {
     using T = binapi2::fapi::types::strategy_update_event_t;
-    static constexpr auto value = object("e", &T::event_type, "T", &T::transaction_time, "E", &T::event_time, "su", &T::strategy_update);
+    static constexpr auto value = object("T", &T::transaction_time, "E", &T::event_time, "su", &T::strategy_update);
 };

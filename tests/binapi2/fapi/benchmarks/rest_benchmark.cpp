@@ -306,7 +306,6 @@ boost::cobalt::task<void> run_benchmarks(binapi2::futures_usdm_api& c)
     std::printf("Fastest: %.0f us/op  (%.0f ops/sec)\n", min_us, 1e6 / min_us);
     std::printf("Slowest: %.0f us/op  (%.0f ops/sec)\n", max_us, 1e6 / max_us);
     std::printf("Total benchmarks: %zu\n", results.size());
-    std::printf("\nNote: includes TLS handshake + TCP connect per request (no connection pooling).\n");
 }
 
 } // namespace

@@ -26,7 +26,6 @@ namespace binapi2::fapi::types {
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Individual-Symbol-Book-Ticker-Streams.md
 struct book_ticker_stream_event_t
 {
-    market_event_type_t event_type{};
     std::uint64_t update_id{};
     symbol_t symbol{};
     decimal_t best_bid_price{};
@@ -40,7 +39,6 @@ struct book_ticker_stream_event_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Aggregate-Trade-Streams.md
 struct aggregate_trade_stream_event_t
 {
-    market_event_type_t event_type{};
     timestamp_ms_t event_time{};
     symbol_t symbol{};
     std::uint64_t agg_trade_id{};
@@ -56,7 +54,6 @@ struct aggregate_trade_stream_event_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Mark-Price-Stream.md
 struct mark_price_stream_event_t
 {
-    market_event_type_t event_type{};
     timestamp_ms_t event_time{};
     symbol_t symbol{};
     decimal_t mark_price_t{};
@@ -73,7 +70,6 @@ using all_market_mark_price_stream_event = std::vector<mark_price_stream_event_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Diff-Book-Depth-Streams.md
 struct depth_stream_event_t
 {
-    market_event_type_t event_type{};
     timestamp_ms_t event_time{};
     timestamp_ms_t transaction_time{};
     symbol_t symbol{};
@@ -87,7 +83,6 @@ struct depth_stream_event_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/All-Market-Mini-Tickers-Stream.md
 struct mini_ticker_stream_event_t
 {
-    market_event_type_t event_type{};
     timestamp_ms_t event_time{};
     symbol_t symbol{};
     decimal_t close_price{};
@@ -104,7 +99,6 @@ using all_market_mini_ticker_stream_event = std::vector<mini_ticker_stream_event
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/All-Market-Tickers-Streams.md
 struct ticker_stream_event_t
 {
-    market_event_type_t event_type{};
     timestamp_ms_t event_time{};
     symbol_t symbol{};
     decimal_t price_change{};
@@ -146,7 +140,6 @@ struct liquidation_order_stream_data_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/All-Market-Liquidation-Order-Streams.md
 struct liquidation_order_stream_event_t
 {
-    market_event_type_t event_type{};
     timestamp_ms_t event_time{};
     liquidation_order_stream_data_t order{};
 };
@@ -176,7 +169,6 @@ struct kline_stream_data_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Kline-Candlestick-Streams.md
 struct kline_stream_event_t
 {
-    market_event_type_t event_type{};
     timestamp_ms_t event_time{};
     symbol_t symbol{};
     kline_stream_data_t kline_t{};
@@ -206,7 +198,6 @@ struct continuous_contract_kline_stream_data_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Continuous-Contract-Kline-Candlestick-Streams.md
 struct continuous_contract_kline_stream_event_t
 {
-    market_event_type_t event_type{};
     timestamp_ms_t event_time{};
     pair_t pair{};
     contract_type_t contractType{};
@@ -226,7 +217,6 @@ struct composite_index_constituent_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Composite-Index-Symbol-Information-Streams.md
 struct composite_index_stream_event_t
 {
-    market_event_type_t event_type{};
     timestamp_ms_t event_time{};
     symbol_t symbol{};
     decimal_t price{};
@@ -249,7 +239,6 @@ struct contract_info_bracket_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Contract-Info-Stream.md
 struct contract_info_stream_event_t
 {
-    market_event_type_t event_type{};
     timestamp_ms_t event_time{};
     symbol_t symbol{};
     pair_t pair{};
@@ -263,7 +252,6 @@ struct contract_info_stream_event_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Asset-Index-Stream.md
 struct asset_index_stream_event_t
 {
-    market_event_type_t event_type{};
     timestamp_ms_t event_time{};
     symbol_t symbol{};
     decimal_t index_price{};
@@ -283,7 +271,6 @@ using all_asset_index_stream_event = std::vector<asset_index_stream_event_t>;
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Trading-Session-Stream.md
 struct trading_session_stream_event_t
 {
-    market_event_type_t event_type{};
     timestamp_ms_t event_time{};
     timestamp_ms_t session_start_time{};
     timestamp_ms_t session_end_time{};
@@ -297,16 +284,14 @@ struct glz::meta<binapi2::fapi::types::book_ticker_stream_event_t>
 {
     using T = binapi2::fapi::types::book_ticker_stream_event_t;
     static constexpr auto value =
-        object("e", &T::event_type, "u", &T::update_id, "s", &T::symbol, "b", &T::best_bid_price, "B", &T::best_bid_qty, "a", &T::best_ask_price, "A", &T::best_ask_qty, "T", &T::transaction_time, "E", &T::event_time);
+        object("u", &T::update_id, "s", &T::symbol, "b", &T::best_bid_price, "B", &T::best_bid_qty, "a", &T::best_ask_price, "A", &T::best_ask_qty, "T", &T::transaction_time, "E", &T::event_time);
 };
 
 template<>
 struct glz::meta<binapi2::fapi::types::aggregate_trade_stream_event_t>
 {
     using T = binapi2::fapi::types::aggregate_trade_stream_event_t;
-    static constexpr auto value = object("e",
-                                         &T::event_type,
-                                         "E",
+    static constexpr auto value = object("E",
                                          &T::event_time,
                                          "s",
                                          &T::symbol,
@@ -333,7 +318,7 @@ struct glz::meta<binapi2::fapi::types::mark_price_stream_event_t>
 {
     using T = binapi2::fapi::types::mark_price_stream_event_t;
     static constexpr auto value =
-        object("e", &T::event_type, "E", &T::event_time, "s", &T::symbol, "p", &T::mark_price_t, "ap", &T::mark_price_avg, "i", &T::index_price, "P", &T::settle_price, "r", &T::funding_rate, "T", &T::next_funding_time);
+        object("E", &T::event_time, "s", &T::symbol, "p", &T::mark_price_t, "ap", &T::mark_price_avg, "i", &T::index_price, "P", &T::settle_price, "r", &T::funding_rate, "T", &T::next_funding_time);
 };
 
 template<>
@@ -341,7 +326,7 @@ struct glz::meta<binapi2::fapi::types::depth_stream_event_t>
 {
     using T = binapi2::fapi::types::depth_stream_event_t;
     static constexpr auto value =
-        object("e", &T::event_type, "E", &T::event_time, "T", &T::transaction_time, "s", &T::symbol, "U", &T::first_update_id, "u", &T::final_update_id, "pu", &T::prev_final_update_id, "b", &T::bids, "a", &T::asks);
+        object("E", &T::event_time, "T", &T::transaction_time, "s", &T::symbol, "U", &T::first_update_id, "u", &T::final_update_id, "pu", &T::prev_final_update_id, "b", &T::bids, "a", &T::asks);
 };
 
 template<>
@@ -349,16 +334,14 @@ struct glz::meta<binapi2::fapi::types::mini_ticker_stream_event_t>
 {
     using T = binapi2::fapi::types::mini_ticker_stream_event_t;
     static constexpr auto value =
-        object("e", &T::event_type, "E", &T::event_time, "s", &T::symbol, "c", &T::close_price, "o", &T::open_price, "h", &T::high_price, "l", &T::low_price, "v", &T::base_volume, "q", &T::quote_volume);
+        object("E", &T::event_time, "s", &T::symbol, "c", &T::close_price, "o", &T::open_price, "h", &T::high_price, "l", &T::low_price, "v", &T::base_volume, "q", &T::quote_volume);
 };
 
 template<>
 struct glz::meta<binapi2::fapi::types::ticker_stream_event_t>
 {
     using T = binapi2::fapi::types::ticker_stream_event_t;
-    static constexpr auto value = object("e",
-                                         &T::event_type,
-                                         "E",
+    static constexpr auto value = object("E",
                                          &T::event_time,
                                          "s",
                                          &T::symbol,
@@ -426,7 +409,7 @@ template<>
 struct glz::meta<binapi2::fapi::types::liquidation_order_stream_event_t>
 {
     using T = binapi2::fapi::types::liquidation_order_stream_event_t;
-    static constexpr auto value = object("e", &T::event_type, "E", &T::event_time, "o", &T::order);
+    static constexpr auto value = object("E", &T::event_time, "o", &T::order);
 };
 
 template<>
@@ -473,7 +456,7 @@ template<>
 struct glz::meta<binapi2::fapi::types::kline_stream_event_t>
 {
     using T = binapi2::fapi::types::kline_stream_event_t;
-    static constexpr auto value = object("e", &T::event_type, "E", &T::event_time, "s", &T::symbol, "k", &T::kline_t);
+    static constexpr auto value = object("E", &T::event_time, "s", &T::symbol, "k", &T::kline_t);
 };
 
 template<>
@@ -518,7 +501,7 @@ template<>
 struct glz::meta<binapi2::fapi::types::continuous_contract_kline_stream_event_t>
 {
     using T = binapi2::fapi::types::continuous_contract_kline_stream_event_t;
-    static constexpr auto value = object("e", &T::event_type, "E", &T::event_time, "ps", &T::pair, "ct", &T::contractType, "k", &T::kline_t);
+    static constexpr auto value = object("E", &T::event_time, "ps", &T::pair, "ct", &T::contractType, "k", &T::kline_t);
 };
 
 
@@ -533,7 +516,7 @@ template<>
 struct glz::meta<binapi2::fapi::types::composite_index_stream_event_t>
 {
     using T = binapi2::fapi::types::composite_index_stream_event_t;
-    static constexpr auto value = object("e", &T::event_type, "E", &T::event_time, "s", &T::symbol, "p", &T::price, "C", &T::base_asset_type, "c", &T::composition);
+    static constexpr auto value = object("E", &T::event_time, "s", &T::symbol, "p", &T::price, "C", &T::base_asset_type, "c", &T::composition);
 };
 
 template<>
@@ -548,9 +531,7 @@ template<>
 struct glz::meta<binapi2::fapi::types::contract_info_stream_event_t>
 {
     using T = binapi2::fapi::types::contract_info_stream_event_t;
-    static constexpr auto value = object("e",
-                                         &T::event_type,
-                                         "E",
+    static constexpr auto value = object("E",
                                          &T::event_time,
                                          "s",
                                          &T::symbol,
@@ -572,9 +553,7 @@ template<>
 struct glz::meta<binapi2::fapi::types::asset_index_stream_event_t>
 {
     using T = binapi2::fapi::types::asset_index_stream_event_t;
-    static constexpr auto value = object("e",
-                                         &T::event_type,
-                                         "E",
+    static constexpr auto value = object("E",
                                          &T::event_time,
                                          "s",
                                          &T::symbol,
@@ -602,5 +581,5 @@ template<>
 struct glz::meta<binapi2::fapi::types::trading_session_stream_event_t>
 {
     using T = binapi2::fapi::types::trading_session_stream_event_t;
-    static constexpr auto value = object("e", &T::event_type, "E", &T::event_time, "t", &T::session_start_time, "T", &T::session_end_time, "S", &T::session_type);
+    static constexpr auto value = object("E", &T::event_time, "t", &T::session_start_time, "T", &T::session_end_time, "S", &T::session_type);
 };

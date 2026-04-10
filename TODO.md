@@ -4,19 +4,6 @@
 
 
 
----
-
-
-do we need event_type in event? while the particular event is of it's own type already
-
-make simple and effective mapping between event type:
-    - string value
-    - enum value
-    - struct type
-
-
----
-
 
 
 include/binapi2/fapi/streams/market_streams.hpp
@@ -71,9 +58,6 @@ streams.md: what's missing
     - keepalive
 
 
----
-
-update benchmarks
 
 
 --------------------------------------------------------------------------------

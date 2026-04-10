@@ -1,0 +1,49 @@
+REST benchmark against mock server localhost:8443
+
+== Validating mock server ==
+
+  OK   ping
+  OK   server_time
+  OK   order_book
+  OK   account (signed)
+
+All endpoints OK.
+
+== Public market data (unsigned) ==
+
+Benchmark                                iters        us/op      ops/sec
+----------------------------------- ---------- ------------ ------------
+ping                                     10240          168         5948
+server_time                              10240          171         5854
+order_book (depth 5)                      5120          205         4883
+recent_trades                              640         1866          536
+klines (1h)                               5120          208         4797
+price_ticker                              5120          187         5344
+book_ticker                               5120          201         4986
+mark_price                               10240          192         5199
+exchange_info                               80        18302           55
+
+== Signed endpoints (HMAC + auth header) ==
+
+Benchmark                                iters        us/op      ops/sec
+----------------------------------- ---------- ------------ ------------
+account_information                       5120          238         4194
+balances                                  5120          194         5159
+position_risk                             5120          221         4517
+query_order                               5120          242         4138
+all_open_orders                           5120          212         4725
+
+== User data streams (API key auth) ==
+
+Benchmark                                iters        us/op      ops/sec
+----------------------------------- ---------- ------------ ------------
+start_listen_key                         10240          110         9070
+keepalive_listen_key                     10240          110         9098
+
+== Summary ==
+
+Fastest: 110 us/op  (9098 ops/sec)
+Slowest: 18302 us/op  (55 ops/sec)
+Total benchmarks: 16
+
+Note: includes TLS handshake + TCP connect per request (no connection pooling).

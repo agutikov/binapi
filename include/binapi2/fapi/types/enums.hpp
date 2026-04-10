@@ -323,6 +323,7 @@ enum class market_event_type_t
     book_ticker = 11,
     equity_update = 12,
     commodity_update = 13,
+    trading_session = 14,
 };
 
 /// User data stream event type (field "e" in WebSocket user data events).
@@ -634,7 +635,8 @@ struct glz::meta<binapi2::fapi::types::market_event_type_t>
         "kline", kline, "continuous_kline", continuous_kline,
         "compositeIndex", composite_index, "contractInfo", contract_info,
         "assetIndexUpdate", asset_index_update, "bookTicker", book_ticker,
-        "EquityUpdate", equity_update, "CommodityUpdate", commodity_update);
+        "EquityUpdate", equity_update, "CommodityUpdate", commodity_update,
+        "tradingSession", trading_session);
 };
 
 template<>

@@ -22,7 +22,5 @@ if [[ ! -f "$CERT" ]]; then
     exit 1
 fi
 
-LOG_DIR="$REPO_ROOT/testnet_output/postman_mock"
-mkdir -p "$LOG_DIR"
 
-SSL_CERT_FILE="$CERT" "$BIN" "$@" 2>&1 | tee "$LOG_DIR/rest_benchmark.log"
+SSL_CERT_FILE="$CERT" exec "$BIN" "$@"
