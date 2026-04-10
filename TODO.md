@@ -3,24 +3,6 @@
 
 
 
-stream data types
-
-
-event type is enum not string? 
-
-
-probably time fields are timestamp_ms_t, aren't they?
-
-
-what else string types could be more meaningful types?
-
-
-compare number of fields in C++ structs and documentation
-
-
-
---------------------------------------------------------------------------------
-
 
 How to implement Throughput benchmarks w/o server?
 Or without transport?
@@ -43,6 +25,16 @@ parsing json into variant
 
 
 docs/binapi2/json_parsing_variant.md
+
+
+make generic library within the project for json variant parsing
+
+
+
+---
+
+
+do we have other variants in binapi2 data types?
 
 
 
@@ -184,6 +176,7 @@ provide analysis table
 
 
 scripts/audit_types.py
+with clangd or joern (on host)
 
 
 

@@ -9,6 +9,7 @@
 
 #include <binapi2/fapi/types/common.hpp>
 #include <binapi2/fapi/types/detail/decimal.hpp>
+#include <binapi2/fapi/types/detail/timestamp.hpp>
 #include <binapi2/fapi/types/enums.hpp>
 
 #include <glaze/glaze.hpp>
@@ -47,7 +48,7 @@ struct account_update_position_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Balance-and-Position-Update.md
 struct account_update_data_t
 {
-    std::string reason_type{};
+    reason_type_t reason_type{};
     std::vector<account_update_balance_t> balances{};
     std::vector<account_update_position_t> positions{};
 };
@@ -55,9 +56,9 @@ struct account_update_data_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Balance-and-Position-Update.md
 struct account_update_event_t
 {
-    std::string event_type{};
-    std::uint64_t event_time{};
-    std::uint64_t transaction_time{};
+    user_event_type_t event_type{};
+    timestamp_ms_t event_time{};
+    timestamp_ms_t transaction_time{};
     account_update_data_t update_data{};
 };
 
@@ -81,7 +82,7 @@ struct order_trade_update_order_t
     decimal_t last_filled_price{};
     std::string commission_asset{};
     decimal_t commission{};
-    std::uint64_t trade_time{};
+    timestamp_ms_t trade_time{};
     std::uint64_t trade_id{};
     decimal_t bids_notional{};
     decimal_t ask_notional{};
@@ -99,16 +100,16 @@ struct order_trade_update_order_t
     decimal_t realized_profit{};
     stp_mode_t stp{};
     price_match_t price_match_mode{};
-    std::optional<std::uint64_t> gtd_auto_cancel{};
+    std::optional<timestamp_ms_t> gtd_auto_cancel{};
     std::optional<std::string> expiry_reason{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Order-Update.md
 struct order_trade_update_event_t
 {
-    std::string event_type{};
-    std::uint64_t event_time{};
-    std::uint64_t transaction_time{};
+    user_event_type_t event_type{};
+    timestamp_ms_t event_time{};
+    timestamp_ms_t transaction_time{};
     order_trade_update_order_t order{};
 };
 
@@ -128,8 +129,8 @@ struct margin_call_position_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Margin-Call.md
 struct margin_call_event_t
 {
-    std::string event_type{};
-    std::uint64_t event_time{};
+    user_event_type_t event_type{};
+    timestamp_ms_t event_time{};
     decimal_t cross_wallet_balance{};
     std::vector<margin_call_position_t> positions{};
 };
@@ -137,9 +138,9 @@ struct margin_call_event_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-User-Data-Stream-Expired.md
 struct listen_key_expired_event_t
 {
-    std::string event_type{};
-    std::uint64_t event_time{};
-    std::uint64_t transaction_time{};
+    user_event_type_t event_type{};
+    timestamp_ms_t event_time{};
+    timestamp_ms_t transaction_time{};
     std::string listen_key{};
 };
 
@@ -159,9 +160,9 @@ struct account_config_multi_assets_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Account-Configuration-Update-previous-Leverage-Update.md
 struct account_config_update_event_t
 {
-    std::string event_type{};
-    std::uint64_t event_time{};
-    std::uint64_t transaction_time{};
+    user_event_type_t event_type{};
+    timestamp_ms_t event_time{};
+    timestamp_ms_t transaction_time{};
     std::optional<account_config_leverage_t> leverage_config{};
     std::optional<account_config_multi_assets_t> multi_assets_config{};
 };
@@ -169,9 +170,9 @@ struct account_config_update_event_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Trade-Lite.md
 struct trade_lite_event_t
 {
-    std::string event_type{};
-    std::uint64_t event_time{};
-    std::uint64_t transaction_time{};
+    user_event_type_t event_type{};
+    timestamp_ms_t event_time{};
+    timestamp_ms_t transaction_time{};
     symbol_t symbol{};
     decimal_t original_quantity{};
     decimal_t original_price{};
@@ -200,7 +201,7 @@ struct algo_order_update_data_t
     std::optional<std::string> matched_order_id{};
     std::optional<decimal_t> avg_fill_price{};
     std::optional<decimal_t> executed_quantity{};
-    std::optional<std::string> actual_order_type{};
+    std::optional<order_type_t> actual_order_type{};
     std::optional<decimal_t> trigger_price{};
     std::optional<decimal_t> order_price{};
     std::optional<stp_mode_t> stp{};
@@ -209,17 +210,17 @@ struct algo_order_update_data_t
     std::optional<bool> is_close_all{};
     std::optional<bool> price_protection{};
     std::optional<bool> is_reduce_only{};
-    std::optional<std::uint64_t> trigger_time{};
-    std::optional<std::uint64_t> gtd_cancel_time{};
+    std::optional<timestamp_ms_t> trigger_time{};
+    std::optional<timestamp_ms_t> gtd_cancel_time{};
     std::optional<std::string> reject_reason{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Algo-Order-Update.md
 struct algo_order_update_event_t
 {
-    std::string event_type{};
-    std::uint64_t transaction_time{};
-    std::uint64_t event_time{};
+    user_event_type_t event_type{};
+    timestamp_ms_t transaction_time{};
+    timestamp_ms_t event_time{};
     algo_order_update_data_t order{};
 };
 
@@ -234,9 +235,9 @@ struct conditional_order_reject_data_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-Conditional-Order-Trigger-Reject.md
 struct conditional_order_trigger_reject_event_t
 {
-    std::string event_type{};
-    std::uint64_t event_time{};
-    std::uint64_t message_send_time{};
+    user_event_type_t event_type{};
+    timestamp_ms_t event_time{};
+    timestamp_ms_t message_send_time{};
     conditional_order_reject_data_t order_reject{};
 };
 
@@ -244,23 +245,23 @@ struct conditional_order_trigger_reject_event_t
 struct grid_update_data_t
 {
     std::uint64_t strategy_id{};
-    std::string strategy_type{};
-    std::string strategy_status{};
+    strategy_type_t strategy_type{};
+    strategy_status_t strategy_status{};
     symbol_t symbol{};
     decimal_t realized_pnl{};
     decimal_t unmatched_avg_price{};
     decimal_t unmatched_qty{};
     decimal_t unmatched_fee{};
     decimal_t matched_pnl{};
-    std::uint64_t update_time{};
+    timestamp_ms_t update_time{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-GRID-UPDATE.md
 struct grid_update_event_t
 {
-    std::string event_type{};
-    std::uint64_t transaction_time{};
-    std::uint64_t event_time{};
+    user_event_type_t event_type{};
+    timestamp_ms_t transaction_time{};
+    timestamp_ms_t event_time{};
     grid_update_data_t grid_update{};
 };
 
@@ -268,19 +269,19 @@ struct grid_update_event_t
 struct strategy_update_data_t
 {
     std::uint64_t strategy_id{};
-    std::string strategy_type{};
-    std::string strategy_status{};
+    strategy_type_t strategy_type{};
+    strategy_status_t strategy_status{};
     symbol_t symbol{};
-    std::uint64_t update_time{};
+    timestamp_ms_t update_time{};
     int op_code{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/user-data-streams/Event-STRATEGY-UPDATE.md
 struct strategy_update_event_t
 {
-    std::string event_type{};
-    std::uint64_t transaction_time{};
-    std::uint64_t event_time{};
+    user_event_type_t event_type{};
+    timestamp_ms_t transaction_time{};
+    timestamp_ms_t event_time{};
     strategy_update_data_t strategy_update{};
 };
 

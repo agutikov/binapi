@@ -9,6 +9,7 @@
 
 #include <binapi2/fapi/types/common.hpp>
 #include <binapi2/fapi/types/detail/decimal.hpp>
+#include <binapi2/fapi/types/detail/timestamp.hpp>
 #include <binapi2/fapi/types/enums.hpp>
 
 #include <glaze/glaze.hpp>
@@ -25,29 +26,29 @@ namespace binapi2::fapi::types {
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Individual-Symbol-Book-Ticker-Streams.md
 struct book_ticker_stream_event_t
 {
-    std::string event_type{};
+    market_event_type_t event_type{};
     std::uint64_t update_id{};
     symbol_t symbol{};
     decimal_t best_bid_price{};
     decimal_t best_bid_qty{};
     decimal_t best_ask_price{};
     decimal_t best_ask_qty{};
-    std::uint64_t transaction_time{};
-    std::uint64_t event_time{};
+    timestamp_ms_t transaction_time{};
+    timestamp_ms_t event_time{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Aggregate-Trade-Streams.md
 struct aggregate_trade_stream_event_t
 {
-    std::string event_type{};
-    std::uint64_t event_time{};
+    market_event_type_t event_type{};
+    timestamp_ms_t event_time{};
     symbol_t symbol{};
     std::uint64_t agg_trade_id{};
     decimal_t price{};
     decimal_t quantity{};
     std::uint64_t first_trade_id{};
     std::uint64_t last_trade_id{};
-    std::uint64_t trade_time{};
+    timestamp_ms_t trade_time{};
     bool is_buyer_maker{};
     std::optional<decimal_t> normal_quantity{};
 };
@@ -55,15 +56,15 @@ struct aggregate_trade_stream_event_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Mark-Price-Stream.md
 struct mark_price_stream_event_t
 {
-    std::string event_type{};
-    std::uint64_t event_time{};
+    market_event_type_t event_type{};
+    timestamp_ms_t event_time{};
     symbol_t symbol{};
     decimal_t mark_price_t{};
     std::optional<decimal_t> mark_price_avg{};
     decimal_t index_price{};
     decimal_t settle_price{};
     decimal_t funding_rate{};
-    std::uint64_t next_funding_time{};
+    timestamp_ms_t next_funding_time{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Mark-Price-Stream-for-All-market.md
@@ -72,9 +73,9 @@ using all_market_mark_price_stream_event = std::vector<mark_price_stream_event_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Diff-Book-Depth-Streams.md
 struct depth_stream_event_t
 {
-    std::string event_type{};
-    std::uint64_t event_time{};
-    std::uint64_t transaction_time{};
+    market_event_type_t event_type{};
+    timestamp_ms_t event_time{};
+    timestamp_ms_t transaction_time{};
     symbol_t symbol{};
     std::uint64_t first_update_id{};
     std::uint64_t final_update_id{};
@@ -86,8 +87,8 @@ struct depth_stream_event_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/All-Market-Mini-Tickers-Stream.md
 struct mini_ticker_stream_event_t
 {
-    std::string event_type{};
-    std::uint64_t event_time{};
+    market_event_type_t event_type{};
+    timestamp_ms_t event_time{};
     symbol_t symbol{};
     decimal_t close_price{};
     decimal_t open_price{};
@@ -103,8 +104,8 @@ using all_market_mini_ticker_stream_event = std::vector<mini_ticker_stream_event
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/All-Market-Tickers-Streams.md
 struct ticker_stream_event_t
 {
-    std::string event_type{};
-    std::uint64_t event_time{};
+    market_event_type_t event_type{};
+    timestamp_ms_t event_time{};
     symbol_t symbol{};
     decimal_t price_change{};
     decimal_t price_change_pct{};
@@ -116,8 +117,8 @@ struct ticker_stream_event_t
     decimal_t low_price{};
     decimal_t base_volume{};
     decimal_t quote_volume{};
-    std::uint64_t stats_open_time{};
-    std::uint64_t stats_close_time{};
+    timestamp_ms_t stats_open_time{};
+    timestamp_ms_t stats_close_time{};
     std::uint64_t first_trade_id{};
     std::uint64_t last_trade_id{};
     std::uint64_t trade_count{};
@@ -139,22 +140,22 @@ struct liquidation_order_stream_data_t
     order_status_t status{};
     decimal_t last_filled_qty{};
     decimal_t filled_accum_qty{};
-    std::uint64_t trade_time{};
+    timestamp_ms_t trade_time{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/All-Market-Liquidation-Order-Streams.md
 struct liquidation_order_stream_event_t
 {
-    std::string event_type{};
-    std::uint64_t event_time{};
+    market_event_type_t event_type{};
+    timestamp_ms_t event_time{};
     liquidation_order_stream_data_t order{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Kline-Candlestick-Streams.md
 struct kline_stream_data_t
 {
-    std::uint64_t open_time{};
-    std::uint64_t close_time{};
+    timestamp_ms_t open_time{};
+    timestamp_ms_t close_time{};
     symbol_t symbol{};
     kline_interval_t interval{};
     std::uint64_t first_trade_id{};
@@ -175,8 +176,8 @@ struct kline_stream_data_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Kline-Candlestick-Streams.md
 struct kline_stream_event_t
 {
-    std::string event_type{};
-    std::uint64_t event_time{};
+    market_event_type_t event_type{};
+    timestamp_ms_t event_time{};
     symbol_t symbol{};
     kline_stream_data_t kline_t{};
 };
@@ -184,8 +185,8 @@ struct kline_stream_event_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Continuous-Contract-Kline-Candlestick-Streams.md
 struct continuous_contract_kline_stream_data_t
 {
-    std::uint64_t open_time{};
-    std::uint64_t close_time{};
+    timestamp_ms_t open_time{};
+    timestamp_ms_t close_time{};
     kline_interval_t interval{};
     std::uint64_t first_update_id{};
     std::uint64_t last_update_id{};
@@ -205,8 +206,8 @@ struct continuous_contract_kline_stream_data_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Continuous-Contract-Kline-Candlestick-Streams.md
 struct continuous_contract_kline_stream_event_t
 {
-    std::string event_type{};
-    std::uint64_t event_time{};
+    market_event_type_t event_type{};
+    timestamp_ms_t event_time{};
     pair_t pair{};
     contract_type_t contractType{};
     continuous_contract_kline_stream_data_t kline_t{};
@@ -225,8 +226,8 @@ struct composite_index_constituent_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Composite-Index-Symbol-Information-Streams.md
 struct composite_index_stream_event_t
 {
-    std::string event_type{};
-    std::uint64_t event_time{};
+    market_event_type_t event_type{};
+    timestamp_ms_t event_time{};
     symbol_t symbol{};
     decimal_t price{};
     std::optional<std::string> base_asset_type{};
@@ -248,13 +249,13 @@ struct contract_info_bracket_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Contract-Info-Stream.md
 struct contract_info_stream_event_t
 {
-    std::string event_type{};
-    std::uint64_t event_time{};
+    market_event_type_t event_type{};
+    timestamp_ms_t event_time{};
     symbol_t symbol{};
     pair_t pair{};
     contract_type_t contractType{};
-    std::uint64_t delivery_time{};
-    std::uint64_t onboard_time{};
+    timestamp_ms_t delivery_time{};
+    timestamp_ms_t onboard_time{};
     contract_status_t contractStatus{};
     std::optional<std::vector<contract_info_bracket_t>> brackets{};
 };
@@ -262,8 +263,8 @@ struct contract_info_stream_event_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Asset-Index-Stream.md
 struct asset_index_stream_event_t
 {
-    std::string event_type{};
-    std::uint64_t event_time{};
+    market_event_type_t event_type{};
+    timestamp_ms_t event_time{};
     symbol_t symbol{};
     decimal_t index_price{};
     decimal_t bid_buffer{};
@@ -282,11 +283,11 @@ using all_asset_index_stream_event = std::vector<asset_index_stream_event_t>;
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Trading-Session-Stream.md
 struct trading_session_stream_event_t
 {
-    std::string event_type{};
-    std::uint64_t event_time{};
-    std::uint64_t session_start_time{};
-    std::uint64_t session_end_time{};
-    std::string session_type{};
+    market_event_type_t event_type{};
+    timestamp_ms_t event_time{};
+    timestamp_ms_t session_start_time{};
+    timestamp_ms_t session_end_time{};
+    session_type_t session_type{};
 };
 
 } // namespace binapi2::fapi::types

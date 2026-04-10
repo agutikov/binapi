@@ -743,6 +743,80 @@ to_string(delta_type_t value)
     throw std::invalid_argument("invalid delta_type_t: " + std::to_string(static_cast<int>(value)));
 }
 
+/// Market stream event type (field "e" in WebSocket market data events).
+enum class market_event_type_t
+{
+    agg_trade = 0,
+    mark_price_update = 1,
+    depth_update = 2,
+    mini_ticker_24hr = 3,
+    ticker_24hr = 4,
+    force_order = 5,
+    kline = 6,
+    continuous_kline = 7,
+    composite_index = 8,
+    contract_info = 9,
+    asset_index_update = 10,
+    book_ticker = 11,
+    equity_update = 12,
+    commodity_update = 13,
+};
+
+[[nodiscard]] inline std::string
+to_string(market_event_type_t value)
+{
+    switch (value) {
+        case market_event_type_t::agg_trade: return "aggTrade";
+        case market_event_type_t::mark_price_update: return "markPriceUpdate";
+        case market_event_type_t::depth_update: return "depthUpdate";
+        case market_event_type_t::mini_ticker_24hr: return "24hrMiniTicker";
+        case market_event_type_t::ticker_24hr: return "24hrTicker";
+        case market_event_type_t::force_order: return "forceOrder";
+        case market_event_type_t::kline: return "kline";
+        case market_event_type_t::continuous_kline: return "continuous_kline";
+        case market_event_type_t::composite_index: return "compositeIndex";
+        case market_event_type_t::contract_info: return "contractInfo";
+        case market_event_type_t::asset_index_update: return "assetIndexUpdate";
+        case market_event_type_t::book_ticker: return "bookTicker";
+        case market_event_type_t::equity_update: return "EquityUpdate";
+        case market_event_type_t::commodity_update: return "CommodityUpdate";
+    }
+    throw std::invalid_argument("invalid market_event_type_t: " + std::to_string(static_cast<int>(value)));
+}
+
+/// User data stream event type (field "e" in WebSocket user data events).
+enum class user_event_type_t
+{
+    account_update = 0,
+    order_trade_update = 1,
+    margin_call = 2,
+    listen_key_expired = 3,
+    account_config_update = 4,
+    trade_lite = 5,
+    algo_update = 6,
+    conditional_order_trigger_reject = 7,
+    grid_update = 8,
+    strategy_update = 9,
+};
+
+[[nodiscard]] inline std::string
+to_string(user_event_type_t value)
+{
+    switch (value) {
+        case user_event_type_t::account_update: return "ACCOUNT_UPDATE";
+        case user_event_type_t::order_trade_update: return "ORDER_TRADE_UPDATE";
+        case user_event_type_t::margin_call: return "MARGIN_CALL";
+        case user_event_type_t::listen_key_expired: return "listenKeyExpired";
+        case user_event_type_t::account_config_update: return "ACCOUNT_CONFIG_UPDATE";
+        case user_event_type_t::trade_lite: return "TRADE_LITE";
+        case user_event_type_t::algo_update: return "ALGO_UPDATE";
+        case user_event_type_t::conditional_order_trigger_reject: return "CONDITIONAL_ORDER_TRIGGER_REJECT";
+        case user_event_type_t::grid_update: return "GRID_UPDATE";
+        case user_event_type_t::strategy_update: return "STRATEGY_UPDATE";
+    }
+    throw std::invalid_argument("invalid user_event_type_t: " + std::to_string(static_cast<int>(value)));
+}
+
 /// Algo order type.
 enum class algo_type_t
 {
@@ -781,6 +855,112 @@ to_string(algo_status_t value)
         case algo_status_t::triggered: return "TRIGGERED";
     }
     throw std::invalid_argument("invalid algo_status_t: " + std::to_string(static_cast<int>(value)));
+}
+
+/// Account update reason type (field "m" in ACCOUNT_UPDATE events).
+enum class reason_type_t
+{
+    deposit = 0,
+    withdraw = 1,
+    order = 2,
+    funding_fee = 3,
+    withdraw_reject = 4,
+    adjustment = 5,
+    insurance_clear = 6,
+    admin_deposit = 7,
+    admin_withdraw = 8,
+    margin_transfer = 9,
+    margin_type_change = 10,
+    asset_transfer = 11,
+    options_premium_fee = 12,
+    options_settle_profit = 13,
+    auto_exchange = 14,
+    coin_swap_deposit = 15,
+    coin_swap_withdraw = 16,
+};
+
+[[nodiscard]] inline std::string
+to_string(reason_type_t value)
+{
+    switch (value) {
+        case reason_type_t::deposit: return "DEPOSIT";
+        case reason_type_t::withdraw: return "WITHDRAW";
+        case reason_type_t::order: return "ORDER";
+        case reason_type_t::funding_fee: return "FUNDING_FEE";
+        case reason_type_t::withdraw_reject: return "WITHDRAW_REJECT";
+        case reason_type_t::adjustment: return "ADJUSTMENT";
+        case reason_type_t::insurance_clear: return "INSURANCE_CLEAR";
+        case reason_type_t::admin_deposit: return "ADMIN_DEPOSIT";
+        case reason_type_t::admin_withdraw: return "ADMIN_WITHDRAW";
+        case reason_type_t::margin_transfer: return "MARGIN_TRANSFER";
+        case reason_type_t::margin_type_change: return "MARGIN_TYPE_CHANGE";
+        case reason_type_t::asset_transfer: return "ASSET_TRANSFER";
+        case reason_type_t::options_premium_fee: return "OPTIONS_PREMIUM_FEE";
+        case reason_type_t::options_settle_profit: return "OPTIONS_SETTLE_PROFIT";
+        case reason_type_t::auto_exchange: return "AUTO_EXCHANGE";
+        case reason_type_t::coin_swap_deposit: return "COIN_SWAP_DEPOSIT";
+        case reason_type_t::coin_swap_withdraw: return "COIN_SWAP_WITHDRAW";
+    }
+    throw std::invalid_argument("invalid reason_type_t: " + std::to_string(static_cast<int>(value)));
+}
+
+/// Trading session type (field "S" in trading session stream events).
+enum class session_type_t
+{
+    pre_market = 0,
+    regular = 1,
+    after_market = 2,
+    overnight = 3,
+    no_trading = 4,
+};
+
+[[nodiscard]] inline std::string
+to_string(session_type_t value)
+{
+    switch (value) {
+        case session_type_t::pre_market: return "PRE_MARKET";
+        case session_type_t::regular: return "REGULAR";
+        case session_type_t::after_market: return "AFTER_MARKET";
+        case session_type_t::overnight: return "OVERNIGHT";
+        case session_type_t::no_trading: return "NO_TRADING";
+    }
+    throw std::invalid_argument("invalid session_type_t: " + std::to_string(static_cast<int>(value)));
+}
+
+/// Grid/strategy type (field "st" in GRID_UPDATE / STRATEGY_UPDATE events).
+enum class strategy_type_t
+{
+    grid = 0,
+};
+
+[[nodiscard]] inline std::string
+to_string(strategy_type_t value)
+{
+    switch (value) {
+        case strategy_type_t::grid: return "GRID";
+    }
+    throw std::invalid_argument("invalid strategy_type_t: " + std::to_string(static_cast<int>(value)));
+}
+
+/// Grid/strategy status (field "ss" in GRID_UPDATE / STRATEGY_UPDATE events).
+enum class strategy_status_t
+{
+    new_strategy = 0,
+    working = 1,
+    cancelled = 2,
+    expired = 3,
+};
+
+[[nodiscard]] inline std::string
+to_string(strategy_status_t value)
+{
+    switch (value) {
+        case strategy_status_t::new_strategy: return "NEW";
+        case strategy_status_t::working: return "WORKING";
+        case strategy_status_t::cancelled: return "CANCELLED";
+        case strategy_status_t::expired: return "EXPIRED";
+    }
+    throw std::invalid_argument("invalid strategy_status_t: " + std::to_string(static_cast<int>(value)));
 }
 
 } // namespace binapi2::fapi::types
@@ -1000,4 +1180,69 @@ struct glz::meta<binapi2::fapi::types::algo_status_t>
     static constexpr auto value = enumerate(
         "WORKING", working, "CANCELLED", cancelled, "REJECTED", rejected,
         "EXPIRED", expired, "TRIGGERED", triggered);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::market_event_type_t>
+{
+    using enum binapi2::fapi::types::market_event_type_t;
+    static constexpr auto value = enumerate(
+        "aggTrade", agg_trade, "markPriceUpdate", mark_price_update,
+        "depthUpdate", depth_update, "24hrMiniTicker", mini_ticker_24hr,
+        "24hrTicker", ticker_24hr, "forceOrder", force_order,
+        "kline", kline, "continuous_kline", continuous_kline,
+        "compositeIndex", composite_index, "contractInfo", contract_info,
+        "assetIndexUpdate", asset_index_update, "bookTicker", book_ticker,
+        "EquityUpdate", equity_update, "CommodityUpdate", commodity_update);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::user_event_type_t>
+{
+    using enum binapi2::fapi::types::user_event_type_t;
+    static constexpr auto value = enumerate(
+        "ACCOUNT_UPDATE", account_update, "ORDER_TRADE_UPDATE", order_trade_update,
+        "MARGIN_CALL", margin_call, "listenKeyExpired", listen_key_expired,
+        "ACCOUNT_CONFIG_UPDATE", account_config_update, "TRADE_LITE", trade_lite,
+        "ALGO_UPDATE", algo_update, "CONDITIONAL_ORDER_TRIGGER_REJECT", conditional_order_trigger_reject,
+        "GRID_UPDATE", grid_update, "STRATEGY_UPDATE", strategy_update);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::reason_type_t>
+{
+    using enum binapi2::fapi::types::reason_type_t;
+    static constexpr auto value = enumerate(
+        "DEPOSIT", deposit, "WITHDRAW", withdraw, "ORDER", order,
+        "FUNDING_FEE", funding_fee, "WITHDRAW_REJECT", withdraw_reject,
+        "ADJUSTMENT", adjustment, "INSURANCE_CLEAR", insurance_clear,
+        "ADMIN_DEPOSIT", admin_deposit, "ADMIN_WITHDRAW", admin_withdraw,
+        "MARGIN_TRANSFER", margin_transfer, "MARGIN_TYPE_CHANGE", margin_type_change,
+        "ASSET_TRANSFER", asset_transfer, "OPTIONS_PREMIUM_FEE", options_premium_fee,
+        "OPTIONS_SETTLE_PROFIT", options_settle_profit, "AUTO_EXCHANGE", auto_exchange,
+        "COIN_SWAP_DEPOSIT", coin_swap_deposit, "COIN_SWAP_WITHDRAW", coin_swap_withdraw);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::session_type_t>
+{
+    using enum binapi2::fapi::types::session_type_t;
+    static constexpr auto value = enumerate(
+        "PRE_MARKET", pre_market, "REGULAR", regular, "AFTER_MARKET", after_market,
+        "OVERNIGHT", overnight, "NO_TRADING", no_trading);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::strategy_type_t>
+{
+    using enum binapi2::fapi::types::strategy_type_t;
+    static constexpr auto value = enumerate("GRID", grid);
+};
+
+template<>
+struct glz::meta<binapi2::fapi::types::strategy_status_t>
+{
+    using enum binapi2::fapi::types::strategy_status_t;
+    static constexpr auto value = enumerate(
+        "NEW", new_strategy, "WORKING", working, "CANCELLED", cancelled, "EXPIRED", expired);
 };
