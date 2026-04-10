@@ -8,7 +8,7 @@
 #pragma once
 
 #include <binapi2/fapi/config.hpp>
-#include <binapi2/fapi/detail/json_opts.hpp>
+#include <binapi2/fapi/detail/variant_parse.hpp>
 #include <binapi2/fapi/result.hpp>
 #include <binapi2/fapi/transport/websocket_client.hpp>
 #include <binapi2/fapi/transport/websocket_transport.hpp>
@@ -16,7 +16,6 @@
 
 #include <boost/cobalt/generator.hpp>
 #include <boost/cobalt/task.hpp>
-#include <glaze/glaze.hpp>
 
 #include <string>
 #include <utility>
@@ -27,50 +26,35 @@ namespace binapi2::fapi::streams {
 using user_event_generator = boost::cobalt::generator<result<types::user_stream_event_t>>;
 
 // ---------------------------------------------------------------------------
-// User event parsing (transport-independent)
+// User event discriminator mapping
 // ---------------------------------------------------------------------------
 
-namespace detail {
+using user_event_variant = types::user_stream_event_t;
 
-inline bool match_event(const std::string& payload, const char* event_name)
-{
-    std::string with_space = std::string("\"e\": \"") + event_name + "\"";
-    std::string without_space = std::string("\"e\":\"") + event_name + "\"";
-    return payload.find(with_space) != std::string::npos
-        || payload.find(without_space) != std::string::npos;
-}
+inline constexpr fapi::detail::variant_entry<user_event_variant> user_event_mapping[] = {
+    fapi::detail::make_entry<types::account_update_event_t, user_event_variant>("ACCOUNT_UPDATE"),
+    fapi::detail::make_entry<types::order_trade_update_event_t, user_event_variant>("ORDER_TRADE_UPDATE"),
+    fapi::detail::make_entry<types::margin_call_event_t, user_event_variant>("MARGIN_CALL"),
+    fapi::detail::make_entry<types::listen_key_expired_event_t, user_event_variant>("listenKeyExpired"),
+    fapi::detail::make_entry<types::account_config_update_event_t, user_event_variant>("ACCOUNT_CONFIG_UPDATE"),
+    fapi::detail::make_entry<types::trade_lite_event_t, user_event_variant>("TRADE_LITE"),
+    fapi::detail::make_entry<types::algo_order_update_event_t, user_event_variant>("ALGO_UPDATE"),
+    fapi::detail::make_entry<types::conditional_order_trigger_reject_event_t, user_event_variant>("CONDITIONAL_ORDER_TRIGGER_REJECT"),
+    fapi::detail::make_entry<types::grid_update_event_t, user_event_variant>("GRID_UPDATE"),
+    fapi::detail::make_entry<types::strategy_update_event_t, user_event_variant>("STRATEGY_UPDATE"),
+};
 
-template<typename Event>
-bool try_parse(const std::string& payload, const char* event_name, types::user_stream_event_t& out)
-{
-    if (!match_event(payload, event_name)) return false;
-    Event event{};
-    glz::context ctx{};
-    if (glz::read<fapi::detail::json_read_opts>(event, payload, ctx)) return false;
-    out = std::move(event);
-    return true;
-}
-
-} // namespace detail
-
-/// @brief Detect event type string from raw JSON payload and parse into variant.
+/// @brief Parse a user stream event from raw JSON using discriminator dispatch.
+///
+/// Extracts the "e" field value, maps it to the correct variant alternative,
+/// and parses the JSON exactly once.
 inline result<types::user_stream_event_t> parse_user_event(const std::string& payload)
 {
-    types::user_stream_event_t event;
-
-    if (detail::try_parse<types::account_update_event_t>(payload, "ACCOUNT_UPDATE", event)) return result<types::user_stream_event_t>::success(std::move(event));
-    if (detail::try_parse<types::order_trade_update_event_t>(payload, "ORDER_TRADE_UPDATE", event)) return result<types::user_stream_event_t>::success(std::move(event));
-    if (detail::try_parse<types::margin_call_event_t>(payload, "MARGIN_CALL", event)) return result<types::user_stream_event_t>::success(std::move(event));
-    if (detail::try_parse<types::listen_key_expired_event_t>(payload, "listenKeyExpired", event)) return result<types::user_stream_event_t>::success(std::move(event));
-    if (detail::try_parse<types::account_config_update_event_t>(payload, "ACCOUNT_CONFIG_UPDATE", event)) return result<types::user_stream_event_t>::success(std::move(event));
-    if (detail::try_parse<types::trade_lite_event_t>(payload, "TRADE_LITE", event)) return result<types::user_stream_event_t>::success(std::move(event));
-    if (detail::try_parse<types::algo_order_update_event_t>(payload, "ALGO_UPDATE", event)) return result<types::user_stream_event_t>::success(std::move(event));
-    if (detail::try_parse<types::conditional_order_trigger_reject_event_t>(payload, "CONDITIONAL_ORDER_TRIGGER_REJECT", event)) return result<types::user_stream_event_t>::success(std::move(event));
-    if (detail::try_parse<types::grid_update_event_t>(payload, "GRID_UPDATE", event)) return result<types::user_stream_event_t>::success(std::move(event));
-    if (detail::try_parse<types::strategy_update_event_t>(payload, "STRATEGY_UPDATE", event)) return result<types::user_stream_event_t>::success(std::move(event));
-
-    return result<types::user_stream_event_t>::failure(
-        { error_code::json, 0, 0, "unknown user stream event type", payload });
+    auto parsed = fapi::detail::parse_variant<user_event_variant>("e", payload, user_event_mapping);
+    if (parsed)
+        return result<user_event_variant>::success(std::move(*parsed));
+    return result<user_event_variant>::failure(
+        { error_code::json, 0, 0, "unknown or unparseable user stream event", payload });
 }
 
 /// @brief Async client for user data stream events.

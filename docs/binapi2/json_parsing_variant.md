@@ -891,3 +891,72 @@ try parse / fail / rewind
 and gives near schema-compiler performance.
 
 ---
+
+# 28. Current Implementation Analysis
+
+## Approach used: Two-pass discriminator dispatch (§14 + §26)
+
+The current `user_stream_event_t` parser uses value-aware dispatch:
+
+1. `extract_string_field` scans for `"e":"VALUE"` — partial first pass, one field only.
+2. Linear lookup of VALUE in a `variant_entry` mapping table.
+3. `glz::read<T>` parses the full JSON into the matched type — second pass.
+
+This is the simplest viable strategy because user stream events carry an explicit
+discriminator field `"e"` whose value uniquely identifies the type.
+
+---
+
+## Approach comparison for this codebase
+
+| Approach | Section | What it does | When it helps | Needed here? |
+|----------|---------|-------------|---------------|--------------|
+| Structural dispatch | §2-§5 | Infer type from observed field set (bitmask) | No discriminator field exists | No — we have `"e"` |
+| Canonical storage | §5-§7 | Parse into shared intermediate struct, materialize later | Heavy field overlap, many variants, ambiguous until end | No — type is known after one field |
+| Single-pass stored values | §15 | Parse values during key scan, avoid second pass | Large JSON, expensive numeric types | Marginal — JSON is small, glaze is fast |
+| Single-pass stored offsets | §15 | Record byte ranges per field, parse after type chosen | Avoids double numeric parse without storage overhead | Most interesting potential upgrade |
+| Candidate bitmap pruning | §8-§10 | Eliminate candidates as fields arrive | No discriminator, must infer from field presence | Unnecessary — discriminator resolves immediately |
+| Field hash dispatch | §18 | `switch(hash(key))` instead of strcmp | Hot-path inner loop of single-pass parser | Only if writing a custom parser |
+| Compile-time schema | §17 | Generate registry, masks, offset tables from `glz::meta` | Full single-pass industrial parser | Major effort, diminishing returns at this scale |
+
+---
+
+## Discriminator extraction: glaze vs simdjson vs manual scan
+
+The discriminator field `"e"` typically appears within the first 10-20 bytes
+of the JSON payload. `extract_string_field` does a simple forward scan
+(~20-50 bytes touched), returns a `string_view` — zero allocation, under 100ns.
+
+**glaze** for discriminator extraction would require a throwaway struct with one
+field and a `glz::meta` specialization. It would parse and validate the entire
+JSON structure even though only one field is needed, and would allocate for
+string fields. Overhead far exceeds the manual scan.
+
+**simdjson** would build a full SIMD structural tape of the entire document
+(~150-500 bytes), then navigate it to find `"e"`. The SIMD indexing setup cost
+dominates for payloads this small. simdjson shines at multi-KB/MB documents
+where the SIMD scan amortizes across thousands of fields.
+
+Neither library adds value for extracting one short string from a small flat
+JSON object. A manual scan is the right tool.
+
+simdjson's tape **would** make sense if moving to the single-pass stored offsets
+approach (§15), where the entire document is structurally indexed once and
+fields are read by offset — effectively replacing `glz::read` entirely.
+
+---
+
+## When to revisit
+
+The advanced approaches (§2-§12, single-pass canonical storage) become
+worthwhile if:
+
+* the discriminator field is removed or becomes unreliable,
+* events grow to multi-KB with dozens of fields,
+* throughput target moves from ~100K ops/sec to millions,
+* multiple variant types need parsing in the same hot path.
+
+For 10 variant types and 150-500 byte payloads, discriminator + glaze two-pass
+gives ~100-180K ops/sec with simple, maintainable code.
+
+---

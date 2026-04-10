@@ -3,33 +3,8 @@
 
 
 
-user streams
 
 
-parsing json into variant
-
-
-docs/binapi2/json_parsing_variant.md
-
-
-make generic library within the project for json variant parsing
-
-
-
----
-
-
-do we have other variants in binapi2 data types?
-
-
-
---------------------------------------------------------------------------------
-
-
-benchmark REST with postman mock
-
-
---------------------------------------------------------------------------------
 
 
 
