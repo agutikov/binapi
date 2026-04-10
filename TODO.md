@@ -3,19 +3,12 @@
 
 
 
-ws-api with keys
-rest with keys
-streams with keys
-
-
---------------------------------------------------------------------------------
-
 
 How to implement Throughput benchmarks w/o server?
 Or without transport?
 
 At lease streams parsing benchmark:
-- record some samples from testnet
+- record some samples from testnet with existing scripts
     - or generate if no keys available
 - write a benchmark that repeats those samples
 - implement in tests/binapi2/fapi/benchmarks
@@ -27,17 +20,18 @@ At lease streams parsing benchmark:
 
 user streams
 
-and other clarifications
-
 
 parsing json into variant
+
+
+docs/binapi2/json_parsing_variant.md
 
 
 
 --------------------------------------------------------------------------------
 
 
- benchmark REST with postman mock
+benchmark REST with postman mock
 
 
 --------------------------------------------------------------------------------
@@ -111,6 +105,16 @@ add required interface for SecretProvider in binapi2 that works with both implem
 
 
 
+--------------------------------------------------------------------------------
+
+
+
+
+ws-api with keys
+rest with keys
+streams with keys
+
+
 
 --------------------------------------------------------------------------------
 
@@ -133,6 +137,12 @@ binapi2 connect to real account
 --------------------------------------------------------------------------------
 
 
+record something
+
+
+
+--------------------------------------------------------------------------------
+
 
 review what would need to be done to move on:
     - Folly
@@ -149,4 +159,20 @@ review what would need to be done to move on:
     - libufinex
 
 provide analysis table
+
+
+--------------------------------------------------------------------------------
+
+
+
+Joern + clangd + clang-rename + mcp + python tooling  Agent/skill
+
+
+Claude HOWTO
+    - install
+        - mcp
+        - rag
+        - skill
+        - Agent
+        - what else?????
 
