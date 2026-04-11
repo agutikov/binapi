@@ -46,10 +46,10 @@ struct websocket_api_status_t
 struct session_logon_result_t
 {
     std::optional<std::string> apiKey{};
-    std::optional<std::uint64_t> authorizedSince{};
-    std::optional<std::uint64_t> connectedSince{};
+    std::optional<timestamp_ms_t> authorizedSince{};
+    std::optional<timestamp_ms_t> connectedSince{};
     std::optional<bool> returnRateLimits{};
-    std::optional<std::string> serverTime{};
+    std::optional<timestamp_ms_t> serverTime{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-api-general-info.md

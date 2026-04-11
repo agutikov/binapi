@@ -14,6 +14,7 @@
 #include <binapi2/fapi/websocket_api/client.hpp>
 
 #include <binapi2/fapi/detail/json_opts.hpp>
+#include <binapi2/fapi/query.hpp>
 #include <binapi2/fapi/signing.hpp>
 #include <binapi2/fapi/time.hpp>
 
@@ -166,21 +167,31 @@ client::async_send_rpc(std::string_view method, const Params& params)
     co_return decode_rpc_response<Response>(*raw);
 }
 
-// Conditionally injects authentication fields into a request. Uses
-// if-constexpr to check at compile time whether the request type inherits
-// from websocket_api_signed_request_t; unsigned request types pass through
-// unmodified.
+// Conditionally injects authentication fields into a request. For signed
+// requests, the signature covers ALL params (auth + request-specific fields)
+// as required by the Binance WS API.
 template<class Request>
 Request
 client::inject_auth(const Request& request)
 {
     if constexpr (std::is_base_of_v<types::websocket_api_signed_request_t, Request>) {
-        auto auth = make_signed_request_base();
         Request authed = request;
-        authed.apiKey = auth.apiKey;
-        authed.timestamp = auth.timestamp;
-        authed.recvWindow = auth.recvWindow;
-        authed.signature = auth.signature;
+        authed.apiKey = cfg_.api_key;
+        authed.timestamp = current_timestamp_ms().value;
+        authed.recvWindow = cfg_.recv_window;
+
+        // Build query map from ALL fields (including order params), then sign.
+        auto qm = to_query_map(authed);
+        qm.erase("signature");
+        const auto canonical = build_query_string(qm);
+        switch (cfg_.sign_method) {
+        case sign_method_t::ed25519:
+            authed.signature = ed25519_sign_base64(cfg_.ed25519_private_key_pem, canonical);
+            break;
+        case sign_method_t::hmac:
+            authed.signature = hmac_sha256_hex(cfg_.secret_key, canonical);
+            break;
+        }
         return authed;
     }
     else {

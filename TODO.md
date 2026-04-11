@@ -3,13 +3,6 @@
 
 
 
-ws-api with keys
-rest with keys
-streams with keys
-
-
----
-
 add all requests and streams to demo-cli - every available API
 
 
