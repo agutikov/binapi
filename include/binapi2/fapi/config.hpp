@@ -15,6 +15,14 @@
 
 namespace binapi2::fapi {
 
+/// @brief Signing algorithm for authenticated requests.
+enum class sign_method_t
+{
+    ed25519, ///< Ed25519 asymmetric signing (recommended, required for WS API session.logon).
+    hmac,    ///< HMAC-SHA256 symmetric signing (deprecated by Binance).
+};
+
+
 /// WebSocket target path (e.g. "/ws/btcusdt@bookTicker").
 /// Constructed by stream_traits::target() from a subscription type.
 using ws_target_t = std::string;
@@ -45,6 +53,13 @@ struct config
     // -- Authentication & client settings ------------------------------------
     std::string api_key{};
     std::string secret_key{};
+
+    /// @brief PEM-encoded Ed25519 private key for request signing.
+    /// Required when `sign_method == sign_method_t::ed25519`.
+    std::string ed25519_private_key_pem{};
+
+    /// @brief Signing algorithm. Defaults to Ed25519 (recommended by Binance).
+    sign_method_t sign_method{ sign_method_t::ed25519 };
 
     /// @brief Server-side tolerance window (ms) for timestamp validation.
     /// Binance rejects requests whose timestamp differs from server time by

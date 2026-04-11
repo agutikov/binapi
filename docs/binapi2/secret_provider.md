@@ -72,8 +72,9 @@ Schema attributes: `{ "service": <service_name>, "key": <key> }`.
 
 ## binapi2 Integration
 
-`include/binapi2/fapi/secret_config.hpp` provides a helper to load both API
-credentials into a config:
+`include/binapi2/fapi/secret_config.hpp` provides a helper to load API
+credentials into a config. It loads the API key and either the Ed25519
+private key (default) or the HMAC secret key, depending on `cfg.sign_method`:
 
 ```cpp
 #include <binapi2/fapi/secret_config.hpp>
@@ -81,13 +82,12 @@ credentials into a config:
 
 secret_provider::libsecret_provider provider("binapi2");
 auto r = co_await binapi2::fapi::async_load_credentials(
-    cfg, provider, "binance/api_key", "binance/secret_key");
+    cfg, provider, "demo/api_key", "demo/ed25519_private_key", "demo/secret_key");
+```
 
-if (!r) {
-    // Fall back to environment variables
-    if (const char* k = std::getenv("BINANCE_API_KEY")) cfg.api_key = k;
-    if (const char* s = std::getenv("BINANCE_SECRET_KEY")) cfg.secret_key = s;
-}
+Store the Ed25519 private key PEM:
+```bash
+secret-tool store --label "binapi2 ed25519 key" service binapi2 key demo/ed25519_private_key < ed25519_private.pem
 ```
 
 ## Build

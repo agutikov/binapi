@@ -3,11 +3,13 @@
 // binapi2 USD-M Futures client library.
 
 /// @file signing.hpp
-/// @brief Utilities for building, percent-encoding, and HMAC-SHA256 signing
-///        Binance query strings as required by the authenticated REST/WS API.
+/// @brief Utilities for building, percent-encoding, and signing Binance query
+///        strings as required by the authenticated REST/WS API. Supports both
+///        HMAC-SHA256 (legacy) and Ed25519 (recommended) signing methods.
 
 #pragma once
 
+#include <binapi2/fapi/config.hpp>
 #include <binapi2/fapi/types/detail/timestamp.hpp>
 
 #include <cstdint>
@@ -58,6 +60,14 @@ build_query_string(const query_map& query);
 void
 inject_auth_query(query_map& query, std::uint64_t recv_window, types::timestamp_ms_t timestamp);
 
+/// @brief Sign the canonical query string using an Ed25519 private key.
+///
+/// @param pem   PEM-encoded Ed25519 private key.
+/// @param data  The message to sign (typically the canonical query string).
+/// @return Base64-encoded Ed25519 signature.
+[[nodiscard]] std::string
+ed25519_sign_base64(const std::string& pem, const std::string& data);
+
 /// @brief Compute and insert the `signature` parameter into @p query.
 ///
 /// Builds the canonical query string from the current map contents, computes
@@ -68,5 +78,13 @@ inject_auth_query(query_map& query, std::uint64_t recv_window, types::timestamp_
 /// @param secret_key  The Binance API secret key.
 void
 sign_query(query_map& query, const std::string& secret_key);
+
+/// @brief Compute and insert the `signature` parameter using the configured
+///        signing method (Ed25519 or HMAC-SHA256).
+///
+/// @param query  The parameter map to sign (modified in place).
+/// @param cfg    Configuration containing keys and sign_method.
+void
+sign_query(query_map& query, const config& cfg);
 
 } // namespace binapi2::fapi

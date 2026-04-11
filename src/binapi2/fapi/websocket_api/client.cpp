@@ -127,11 +127,20 @@ client::make_signed_request_base()
     auth_query["apiKey"] = cfg_.api_key;
 
     const auto canonical = build_query_string(auth_query);
+    std::string sig;
+    switch (cfg_.sign_method) {
+    case sign_method_t::ed25519:
+        sig = ed25519_sign_base64(cfg_.ed25519_private_key_pem, canonical);
+        break;
+    case sign_method_t::hmac:
+        sig = hmac_sha256_hex(cfg_.secret_key, canonical);
+        break;
+    }
     return {
         .apiKey = cfg_.api_key,
         .timestamp = std::stoull(auth_query["timestamp"]),
         .recvWindow = std::stoull(auth_query["recvWindow"]),
-        .signature = hmac_sha256_hex(cfg_.secret_key, canonical),
+        .signature = std::move(sig),
     };
 }
 
@@ -265,13 +274,21 @@ client::async_session_logon()
     auth_query["apiKey"] = cfg_.api_key;
 
     const auto canonical = build_query_string(auth_query);
-    const auto signature = hmac_sha256_hex(cfg_.secret_key, canonical);
+    std::string sig;
+    switch (cfg_.sign_method) {
+    case sign_method_t::ed25519:
+        sig = ed25519_sign_base64(cfg_.ed25519_private_key_pem, canonical);
+        break;
+    case sign_method_t::hmac:
+        sig = hmac_sha256_hex(cfg_.secret_key, canonical);
+        break;
+    }
 
     types::session_logon_request_t params{
         .apiKey = cfg_.api_key,
         .timestamp = std::stoull(auth_query["timestamp"]),
         .recvWindow = std::stoull(auth_query["recvWindow"]),
-        .signature = signature,
+        .signature = std::move(sig),
     };
 
     co_return co_await async_send_rpc<types::session_logon_result_t>(session_logon_method, params);

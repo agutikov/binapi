@@ -188,25 +188,29 @@ boost::cobalt::task<void> async_load_secrets(binapi2::fapi::config& cfg)
     spdlog::info("secrets: using provider '{}'", source);
 
     // Key names depend on provider type.
-    // libsecret:<profile> uses "<profile>/api_key", "<profile>/secret_key"
-    // systemd-creds:<dir> uses "api_key", "secret_key" as filenames
-    // env uses "BINANCE_API_KEY", "BINANCE_SECRET_KEY"
+    // libsecret:<profile> uses "<profile>/api_key", "<profile>/ed25519_private_key", "<profile>/secret_key"
+    // systemd-creds:<dir> uses "api_key", "ed25519_private_key", "secret_key" as filenames
+    // env uses "BINANCE_API_KEY", "BINANCE_ED25519_PRIVATE_KEY", "BINANCE_SECRET_KEY"
     std::string api_key_name;
+    std::string ed25519_key_name;
     std::string secret_key_name;
     if (source == "env") {
         api_key_name = "BINANCE_API_KEY";
+        ed25519_key_name = "BINANCE_ED25519_PRIVATE_KEY";
         secret_key_name = "BINANCE_SECRET_KEY";
     } else if (source.starts_with("libsecret:")) {
         auto profile = source.substr(10);
         api_key_name = profile + "/api_key";
+        ed25519_key_name = profile + "/ed25519_private_key";
         secret_key_name = profile + "/secret_key";
     } else {
         api_key_name = "api_key";
+        ed25519_key_name = "ed25519_private_key";
         secret_key_name = "secret_key";
     }
 
     auto r = co_await binapi2::fapi::async_load_credentials(
-        cfg, *provider, api_key_name, secret_key_name);
+        cfg, *provider, api_key_name, ed25519_key_name, secret_key_name);
     if (!r) {
         spdlog::warn("failed to load credentials: {}", r.err.message);
     }

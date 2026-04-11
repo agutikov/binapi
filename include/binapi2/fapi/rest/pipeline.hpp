@@ -73,7 +73,7 @@ pipeline::async_execute(boost::beast::http::verb method, std::string path,
     query_map final_query = std::move(query);
     if (signed_request) {
         inject_auth_query(final_query, cfg_.recv_window, current_timestamp_ms());
-        sign_query(final_query, cfg_.secret_key);
+        sign_query(final_query, cfg_);
     }
 
     const auto query_string = build_query_string(final_query);

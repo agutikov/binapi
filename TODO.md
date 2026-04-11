@@ -3,14 +3,14 @@
 
 
 
-
-
-
-
 ws-api with keys
 rest with keys
 streams with keys
 
+
+---
+
+add all requests and streams to demo-cli - every available API
 
 
 --------------------------------------------------------------------------------
@@ -83,6 +83,10 @@ streams and wsapi optimization - is a wide infinite task, postpone it, but provi
 --------------------------------------------------------------------------------
 
 review reconnects, should not work theoretically...
+
+--------------------------------------------------------------------------------
+
+review security - secrets storage and usage
 
 --------------------------------------------------------------------------------
 

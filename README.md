@@ -36,33 +36,60 @@ cd binapi
 
 ## API Keys
 
+The library supports two signing methods:
+
+| Method | Config | Status |
+|--------|--------|--------|
+| **Ed25519** | `sign_method_t::ed25519` (default) | Recommended by Binance, required for WS API `session.logon` |
+| HMAC-SHA256 | `sign_method_t::hmac` | Deprecated by Binance, REST-only |
+
 The demo CLI loads API credentials from a secret provider. The default is
 **libsecret** (GNOME Keyring / KDE Wallet). Keys are organized by profile —
 you can have multiple key sets (e.g. `demo`, `small`, `prod`).
 
+### Generate an Ed25519 keypair
+
+```bash
+# Generate private key
+openssl genpkey -algorithm Ed25519 -out ed25519_private.pem
+
+# Extract public key (paste this into Binance API key settings)
+openssl pkey -in ed25519_private.pem -pubout -out ed25519_public.pem
+cat ed25519_public.pem
+```
+
+Register the public key on [Binance](https://www.binance.com/en/my/settings/api-management)
+or the [testnet](https://testnet.binancefuture.com) — select **Ed25519** as the key type
+and paste the contents of `ed25519_public.pem`.
+
 ### Store keys (libsecret)
 
 ```bash
-# Store keys for the "demo" profile
+# Store Ed25519 keys for the "demo" profile
 secret-tool store --label "binapi2 demo api_key" \
     service binapi2 key demo/api_key <<< "your-api-key"
-secret-tool store --label "binapi2 demo secret_key" \
-    service binapi2 key demo/secret_key <<< "your-secret-key"
+secret-tool store --label "binapi2 demo ed25519_private_key" \
+    service binapi2 key demo/ed25519_private_key < ed25519_private.pem
 
 # Store keys for a "prod" profile
 secret-tool store --label "binapi2 prod api_key" \
     service binapi2 key prod/api_key <<< "your-prod-key"
-secret-tool store --label "binapi2 prod secret_key" \
-    service binapi2 key prod/secret_key <<< "your-prod-secret"
+secret-tool store --label "binapi2 prod ed25519_private_key" \
+    service binapi2 key prod/ed25519_private_key < ed25519_private.pem
+
+# For legacy HMAC keys (deprecated)
+secret-tool store --label "binapi2 demo secret_key" \
+    service binapi2 key demo/secret_key <<< "your-hmac-secret"
 
 # Verify
 secret-tool lookup service binapi2 key demo/api_key
+secret-tool lookup service binapi2 key demo/ed25519_private_key
 ```
 
 ### Use keys in the CLI
 
 ```bash
-# Use "demo" profile (testnet)
+# Use "demo" profile (testnet, Ed25519 by default)
 ./binapi2-fapi-async-demo-cli -K libsecret:demo -v account-info
 
 # Use "prod" profile (live)
@@ -77,12 +104,12 @@ secret-tool lookup service binapi2 key demo/api_key
 ```bash
 # systemd-creds (encrypted credential files)
 echo -n "your-key" | systemd-creds encrypt - /etc/credstore/api_key
-echo -n "your-secret" | systemd-creds encrypt - /etc/credstore/secret_key
+systemd-creds encrypt ed25519_private.pem /etc/credstore/ed25519_private_key
 ./binapi2-fapi-async-demo-cli -K systemd-creds:/etc/credstore -v account-info
 
 # Environment variables (DEPRECATED — shows warnings)
 export BINANCE_API_KEY="your-key"
-export BINANCE_SECRET_KEY="your-secret"
+export BINANCE_ED25519_PRIVATE_KEY="$(cat ed25519_private.pem)"
 ./binapi2-fapi-async-demo-cli -K env -v account-info
 ```
 
@@ -91,6 +118,7 @@ export BINANCE_SECRET_KEY="your-secret"
 ```bash
 # Remove a specific key
 secret-tool clear service binapi2 key demo/api_key
+secret-tool clear service binapi2 key demo/ed25519_private_key
 secret-tool clear service binapi2 key demo/secret_key
 ```
 
@@ -100,11 +128,20 @@ secret-tool clear service binapi2 key demo/secret_key
 #include <binapi2/fapi/client.hpp>
 #include <boost/asio/io_context.hpp>
 #include <iostream>
+#include <fstream>
 
 int main() {
     binapi2::fapi::config cfg;       // production by default
-    cfg.api_key    = "...";
-    cfg.secret_key = "...";
+
+    // Ed25519 (default, recommended)
+    cfg.api_key = "...";
+    std::ifstream pem("ed25519_private.pem");
+    cfg.ed25519_private_key_pem.assign(
+        std::istreambuf_iterator<char>(pem), {});
+
+    // Or HMAC (deprecated)
+    // cfg.sign_method = binapi2::fapi::sign_method_t::hmac;
+    // cfg.secret_key  = "...";
 
     boost::asio::io_context io;
     binapi2::fapi::client client(io, cfg);
@@ -292,7 +329,7 @@ Located in `tests/binapi2/fapi/`.  Run with:
 
 | Test | What it covers |
 |------|---------------|
-| `signing_test` | HMAC-SHA256 signing, query string construction, percent-encoding |
+| `signing_test` | HMAC-SHA256 and Ed25519 signing, query string construction, percent-encoding |
 | `enums_test` | Enum JSON serialization round-trips |
 | `decimal_test` | 128-bit decimal arithmetic, parsing, formatting |
 | `json_query_test` | Request struct serialization, query parameter conversion |
