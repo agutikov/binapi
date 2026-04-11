@@ -61,11 +61,12 @@ public:
         co_return result<std::vector<T>>::success(std::move(batch));
     }
 
-    /// @brief Drain loop — reads items and calls sink until channel is closed.
+    /// @brief Drain loop — reads items and calls sink until channel is
+    ///        closed and all buffered items are consumed.
     [[nodiscard]] boost::cobalt::task<void>
     async_drain(std::function<void(const T&)> sink)
     {
-        while (chan().is_open()) {
+        while (true) {
             auto rv = co_await boost::cobalt::as_result(chan().read());
             if (!rv) break;
             sink(*rv);

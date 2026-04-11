@@ -23,6 +23,7 @@
 #include <vector>
 
 namespace binapi2::fapi { class client; }
+namespace binapi2::fapi::detail { template<typename T> class hopping_stream_buffer; }
 
 namespace demo {
 
@@ -38,6 +39,10 @@ inline std::string save_response_file;
 
 // Record raw WebSocket stream frames to a JSONL file.
 inline std::string record_file;
+
+// Recording buffer — set by main if --record is used.
+// Stream commands attach this to their connection if non-null.
+inline ::binapi2::fapi::detail::hopping_stream_buffer<std::string>* record_buffer = nullptr;
 
 // File logging.
 inline std::string log_file;

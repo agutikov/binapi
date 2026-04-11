@@ -67,6 +67,7 @@ boost::cobalt::task<int> cmd_user_stream(binapi2::futures_usdm_api& c, const arg
     auto rest = co_await c.create_rest_client();
     if (!rest) { spdlog::error("connect: {}", rest.err.message); co_return 1; }
     auto user_stream = c.create_user_stream();
+    if (record_buffer) user_stream->connection().attach_buffer(*record_buffer);
     spdlog::info("requesting listen key...");
     auto key = co_await (*rest)->user_data_streams.async_execute(types::start_listen_key_request_t{});
     if (!key) { print_error(key.err); co_return 1; }

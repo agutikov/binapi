@@ -5,13 +5,13 @@
 
 
 
----
-
 stream_buffer, all 4 APIs and 3 buffers = 12 combinations:
-- tests
-- benchmarks
+- tests for every 12 combinations
+- benchmarks for every 12 combinations
 
-benchmark for stream_recorder - for generic , asio and spdlog implementations
+benchmark for stream_recorder with 3 sinks - generic , asio and spdlog implementations
+- also tests for all 3 sinks
+- also benchmarks for all 3 sinks
 
 ---
 

@@ -30,6 +30,7 @@
 #include "cmd_order_book.hpp"
 
 #include <binapi2/futures_usdm_api.hpp>
+#include <binapi2/fapi/streams/sinks/spdlog_sink.hpp>
 
 #include <boost/cobalt/main.hpp>
 #include <spdlog/spdlog.h>
@@ -159,6 +160,16 @@ boost::cobalt::main co_main(int argc, char* argv[])
 
     demo::init_logging();
 
+    // Set up stream recording if --record was specified.
+    std::unique_ptr<binapi2::fapi::streams::spdlog_stream_recorder> recorder;
+    if (auto rec_logger = spdlog::get("rec")) {
+        recorder = std::make_unique<binapi2::fapi::streams::spdlog_stream_recorder>(4096);
+        demo::record_buffer = &recorder->add_stream(
+            binapi2::fapi::streams::sinks::spdlog_sink(rec_logger));
+        recorder->start();
+        spdlog::info("recording stream frames to {}", demo::record_file);
+    }
+
     std::string_view cmd_name = cmd_args[0];
     spdlog::info("command: {}", cmd_name);
 
@@ -172,6 +183,7 @@ boost::cobalt::main co_main(int argc, char* argv[])
     for (const auto& cmd : commands) {
         if (cmd.name == cmd_name) {
             rc = co_await cmd.fn(c, sub_args);
+            if (recorder) recorder->stop();
             demo::shutdown_logging();
             co_return rc;
         }
@@ -179,6 +191,7 @@ boost::cobalt::main co_main(int argc, char* argv[])
 
     spdlog::error("unknown command: {}", cmd_name);
     print_usage(prog);
+    if (recorder) recorder->stop();
     demo::shutdown_logging();
     co_return 1;
 }

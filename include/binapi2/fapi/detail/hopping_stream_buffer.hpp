@@ -36,6 +36,11 @@ public:
     {
     }
 
+    hopping_stream_buffer(std::size_t buffer_size, boost::cobalt::executor exec) :
+        channel_(buffer_size, exec)
+    {
+    }
+
     hopping_stream_buffer(const hopping_stream_buffer&) = delete;
     hopping_stream_buffer& operator=(const hopping_stream_buffer&) = delete;
 

@@ -48,6 +48,14 @@ public:
         notify_.expires_at(boost::asio::steady_timer::time_point::max());
     }
 
+    threadsafe_stream_buffer(std::size_t buffer_size, boost::cobalt::executor exec) :
+        channel_(buffer_size, exec),
+        spsc_(buffer_size),
+        notify_(exec)
+    {
+        notify_.expires_at(boost::asio::steady_timer::time_point::max());
+    }
+
     threadsafe_stream_buffer(const threadsafe_stream_buffer&) = delete;
     threadsafe_stream_buffer& operator=(const threadsafe_stream_buffer&) = delete;
 
