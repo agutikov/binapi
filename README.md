@@ -25,13 +25,73 @@ cd binapi
 # Run unit tests
 ./run_tests.sh
 
-# Try the demo CLI (uses testnet by default)
-export BINANCE_API_KEY="your-testnet-key"
-export BINANCE_SECRET_KEY="your-testnet-secret"
+# Try the demo CLI (uses testnet by default, public endpoints need no keys)
+./_build/examples/binapi2/fapi/async-demo-cli/binapi2-fapi-async-demo-cli ping
+./_build/examples/binapi2/fapi/async-demo-cli/binapi2-fapi-async-demo-cli -v time
+./_build/examples/binapi2/fapi/async-demo-cli/binapi2-fapi-async-demo-cli -v order-book BTCUSDT 5
 
-./_build/examples/binapi2/fapi/demo-cli/binapi2-fapi-demo-cli ping
-./_build/examples/binapi2/fapi/demo-cli/binapi2-fapi-demo-cli -v time
-./_build/examples/binapi2/fapi/demo-cli/binapi2-fapi-demo-cli -v order-book BTCUSDT 5
+# For authenticated commands, store keys first (see "API Keys" below)
+./_build/examples/binapi2/fapi/async-demo-cli/binapi2-fapi-async-demo-cli -v account-info
+```
+
+## API Keys
+
+The demo CLI loads API credentials from a secret provider. The default is
+**libsecret** (GNOME Keyring / KDE Wallet). Keys are organized by profile —
+you can have multiple key sets (e.g. `demo`, `small`, `prod`).
+
+### Store keys (libsecret)
+
+```bash
+# Store keys for the "demo" profile
+secret-tool store --label "binapi2 demo api_key" \
+    service binapi2 key demo/api_key <<< "your-api-key"
+secret-tool store --label "binapi2 demo secret_key" \
+    service binapi2 key demo/secret_key <<< "your-secret-key"
+
+# Store keys for a "prod" profile
+secret-tool store --label "binapi2 prod api_key" \
+    service binapi2 key prod/api_key <<< "your-prod-key"
+secret-tool store --label "binapi2 prod secret_key" \
+    service binapi2 key prod/secret_key <<< "your-prod-secret"
+
+# Verify
+secret-tool lookup service binapi2 key demo/api_key
+```
+
+### Use keys in the CLI
+
+```bash
+# Use "demo" profile (testnet)
+./binapi2-fapi-async-demo-cli -K libsecret:demo -v account-info
+
+# Use "prod" profile (live)
+./binapi2-fapi-async-demo-cli -K libsecret:prod --live -v account-info
+
+# Default profile ("default") — no -K flag needed
+./binapi2-fapi-async-demo-cli -v account-info
+```
+
+### Other secret providers
+
+```bash
+# systemd-creds (encrypted credential files)
+echo -n "your-key" | systemd-creds encrypt - /etc/credstore/api_key
+echo -n "your-secret" | systemd-creds encrypt - /etc/credstore/secret_key
+./binapi2-fapi-async-demo-cli -K systemd-creds:/etc/credstore -v account-info
+
+# Environment variables (DEPRECATED — shows warnings)
+export BINANCE_API_KEY="your-key"
+export BINANCE_SECRET_KEY="your-secret"
+./binapi2-fapi-async-demo-cli -K env -v account-info
+```
+
+### Delete keys
+
+```bash
+# Remove a specific key
+secret-tool clear service binapi2 key demo/api_key
+secret-tool clear service binapi2 key demo/secret_key
 ```
 
 ### Minimal example (binapi2)
@@ -315,43 +375,46 @@ Flags:
 ### HOWTO: place and manage orders (testnet)
 
 ```bash
-export BINANCE_API_KEY="your-testnet-key"
-export BINANCE_SECRET_KEY="your-testnet-secret"
+# Store testnet keys first (see "API Keys" above)
+# Then use the demo profile:
 
 # Test order (validated but not placed)
-./binapi2-fapi-demo-cli -v test-order BTCUSDT BUY LIMIT --quantity 0.001 --price 50000 --tif GTC
+./binapi2-fapi-async-demo-cli -K libsecret:demo -v test-order BTCUSDT BUY LIMIT -q 0.001 -p 50000 -t GTC
 
 # Place a real order
-./binapi2-fapi-demo-cli -v new-order BTCUSDT BUY LIMIT --quantity 0.001 --price 50000 --tif GTC
+./binapi2-fapi-async-demo-cli -K libsecret:demo -v new-order BTCUSDT BUY LIMIT -q 0.001 -p 50000 -t GTC
 
 # Query order status
-./binapi2-fapi-demo-cli -v query-order BTCUSDT 123456789
+./binapi2-fapi-async-demo-cli -K libsecret:demo -v query-order BTCUSDT 123456789
 
 # Cancel order
-./binapi2-fapi-demo-cli -v cancel-order BTCUSDT 123456789
+./binapi2-fapi-async-demo-cli -K libsecret:demo -v cancel-order BTCUSDT 123456789
 ```
 
 ### HOWTO: stream market data
 
 ```bash
 # Live order book (synchronized via WebSocket depth stream + REST snapshot)
-./binapi2-fapi-demo-cli order-book-live BTCUSDT 10
+./binapi2-fapi-async-demo-cli order-book-live BTCUSDT 10
 
-# Kline stream
-./binapi2-fapi-demo-cli stream-kline BTCUSDT 1m
+# Pipeline order book (3-thread: network / parser / logic)
+./binapi2-fapi-async-demo-cli pipeline-order-book-live BTCUSDT 10
+
+# Kline stream (with recording to JSONL file)
+./binapi2-fapi-async-demo-cli -r klines.jsonl stream-kline BTCUSDT 1m
 
 # All book tickers (real-time best bid/ask for every symbol)
-./binapi2-fapi-demo-cli stream-all-book-tickers
+./binapi2-fapi-async-demo-cli stream-all-book-tickers
 ```
 
 ### HOWTO: use the WebSocket API
 
 ```bash
 # Authenticated WebSocket session
-./binapi2-fapi-demo-cli -v ws-logon
+./binapi2-fapi-async-demo-cli -K libsecret:demo -v ws-logon
 
 # Place order via WebSocket API
-./binapi2-fapi-demo-cli -v ws-order-place BTCUSDT BUY LIMIT --quantity 0.001 --price 50000 --tif GTC
+./binapi2-fapi-async-demo-cli -K libsecret:demo -v ws-order-place BTCUSDT BUY LIMIT -q 0.001 -p 50000 -t GTC
 ```
 
 ## License

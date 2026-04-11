@@ -442,63 +442,83 @@ detect this and reconnect.
 
 ---
 
-# Planned Architecture Redesign
+# Stream Consumer and Pipeline Architecture
 
-## Problems with current design
+## Consumer concept
 
-`basic_market_streams` conflates three concerns:
+All stream classes are templated on `<Transport, Consumer>`. The Consumer receives
+every raw JSON frame after it's read from the transport. Default is `inline_consumer`
+(zero-overhead no-op).
 
-1. **Connection** — owns `websocket_client`, manages connect/close
-2. **Subscription management** — subscribe/unsubscribe control messages
-3. **Event parsing** — `glz::read` inside the generator body
-
-These are tightly coupled: one connection = one `subscribe()` call = one event type.
-The combined stream path (`async_subscribe` + `async_read_text`) exists but drops
-back to raw strings — no parsing, no typing.
-
-Other issues:
-
-- `async_connect(string target)` — raw URL path leaked into the stream API
-- `async_read_event<E>()` — redundant with the generator
-- `stream_recorder` — synchronous callback blocks the stream
-- No auto-reconnect, no listen key keepalive, no application buffering
-
-## Current Architecture
-
-```
-stream_connection          (raw WebSocket transport, protocol-agnostic)
-├── market_stream          (single subscription, typed generator)
-├── combined_market_stream (multiple subscriptions, variant generator, demux)
-└── user_stream            (single listen key, variant generator)
-
-order_book::local_order_book  (uses market_stream + market_data_service)
+```cpp
+template<class C>
+concept stream_consumer = std::movable<C> &&
+    requires(C c, std::string s) { { c.on_frame(std::move(s)) }; } &&
+    requires(C c) { { c.close() }; };
 ```
 
-### Layered design
+| Consumer | on_frame | Use case |
+|----------|----------|----------|
+| `inline_consumer` | no-op (void) | Default — zero overhead |
+| `buffer_consumer<Buffer>` | pushes to buffer | Cross-thread forwarding |
+| `fan_out_consumer<C...>` | calls each C | Record + forward simultaneously |
+
+The consumer fires before the runtime-attached buffer (`attach_buffer`). Both
+mechanisms coexist: Consumer is compile-time pipeline topology, `attach_buffer`
+is runtime-optional recording.
+
+## Stream parser
+
+`stream_parser<Event>` is a generic parse stage that reads strings from a
+`threadsafe_stream_buffer<string>`, parses each into a typed event, and pushes
+into a `threadsafe_stream_buffer<Event>`. Runs as a coroutine on any executor.
+
+```cpp
+stream_parser<depth_stream_event_t> parser(raw_buf, event_buf,
+    [](const string& s) -> result<depth_stream_event_t> { /* glz::read */ });
+co_await parser.async_run();  // runs until input closes
+```
+
+## Multi-threaded pipeline
+
+The `pipeline_order_book` demonstrates a 3-thread pipeline:
 
 ```
-┌─────────────────────────────────────────────────────┐
-│  stream_connection                                   │
-│  - owns websocket_client                            │
-│  - async_connect(host, port, target)                │
-│  - async_read_text() / async_write_text()           │
-│  - async_close()                                    │
-│  - no Binance protocol knowledge                    │
-└──────────────┬──────────────────────────────────────┘
+Network thread          Parser thread           Logic thread
+[websocket_client]      [stream_parser]         [sync algorithm]
+  async_read_text ──>  tsb<string> ──>  tsb<depth_event> ──> apply_event
+  (Consumer pushes)    (forward+parse)  (forward+logic)      snapshot_cb
+```
+
+Each stage connected by `threadsafe_stream_buffer<T>` (SPSC lock-free, ~250 ns/op).
+
+```cpp
+pipeline_order_book book(cfg, market_data_service, buffer_size);
+book.set_snapshot_callback([](const auto& snap) { ... });
+auto r = co_await book.async_run(symbol, depth_limit);
+```
+
+Compared to `local_order_book` (single-threaded), the pipeline version
+dedicates separate threads to network I/O, JSON parsing, and order book logic.
+
+## Architecture diagram
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  basic_stream_connection<Transport, Consumer>                │
+│  - owns Transport (websocket_client or replay_transport)    │
+│  - owns Consumer (inline_consumer, buffer_consumer, etc.)   │
+│  - async_read_text(): Consumer.on_frame() + push_target_    │
+│  - attach_buffer(): runtime recording                        │
+└──────────────┬───────────────────────────────────────────────┘
                │
-    ┌──────────┼──────────┬─────────────────┐
-    │          │          │                 │
-    ▼          ▼          ▼                 ▼
-market_    combined_   user_          (direct use by
-stream     market_     stream        local_order_book,
-           stream                    custom components)
+    ┌──────────┼──────────┬──────────────┬──────────────┐
+    │          │          │              │              │
+    ▼          ▼          ▼              ▼              ▼
+market_    combined_   dynamic_      user_          (pipeline_
+stream     market_     market_       stream          order_book,
+           stream      stream                        custom)
 ```
-
-### Missing features (future)
-
-| Feature | Notes |
-|---------|-------|
-| Listen key keepalive | Periodic REST call on async timer in user_stream |
 
 ---
 
@@ -506,22 +526,25 @@ stream     market_     stream        local_order_book,
 
 | File | Role |
 |---|---|
-| `streams/stream_connection.hpp` | Raw WebSocket connection: connect/close/read/write, buffer attachment |
+| `streams/stream_connection.hpp` | Raw WebSocket connection `<Transport, Consumer>`: connect/close/read/write |
+| `streams/stream_consumer.hpp` | Consumer concept + inline/buffer/fan_out consumers |
+| `streams/stream_parser.hpp` | Generic parse stage: string buffer → typed event buffer |
 | `streams/market_stream.hpp` | Single-subscription market stream with typed generator |
 | `streams/combined_market_stream.hpp` | Multi-subscription stream with variant dispatch |
 | `streams/dynamic_market_stream.hpp` | Live subscribe/unsubscribe with async_read_event |
-| `streams/user_stream.hpp` | User data stream: generator + async_read_event |
+| `streams/user_stream.hpp` | User data stream: generator + async_read_event + keepalive |
 | `streams/stream_traits.hpp` | Compile-time subscription → topic/target/event_type mapping |
-| `streams/stream_recorder.hpp` | Multi-stream recorder with io_thread (basic_stream_recorder\<Sink\>) |
+| `streams/stream_recorder.hpp` | Multi-stream recorder with io_thread (`basic_stream_recorder<Sink>`) |
 | `streams/sinks/callback_sink.hpp` | Generic callback sink |
 | `streams/sinks/spdlog_sink.hpp` | spdlog async logger sink |
 | `streams/sinks/file_sink.hpp` | Async file sink (io_uring) |
 | `detail/stream_buffer.hpp` | Single-executor async buffer |
-| `detail/hopping_stream_buffer.hpp` | Cross-executor buffer with backpressure |
+| `detail/hopping_stream_buffer.hpp` | Cross-executor buffer with backpressure (2 hops/push) |
 | `detail/threadsafe_stream_buffer.hpp` | SPSC lock-free cross-thread buffer |
 | `detail/stream_buffer_consumer.hpp` | CRTP mixin: async_read, async_read_batch, async_drain, reader |
 | `detail/io_thread.hpp` | Background io_context thread for sync bridging |
-| `order_book/local_order_book.hpp` | Synchronized order book (market_stream + REST) |
+| `order_book/local_order_book.hpp` | Single-threaded synchronized order book |
+| `order_book/pipeline_order_book.hpp` | Multi-threaded 3-stage pipeline order book |
 | `types/subscriptions.hpp` | Subscription parameter types |
 | `types/market_stream_events.hpp` | Market stream event types with glaze metadata |
 | `types/user_stream_events.hpp` | User stream event types + user_stream_event_t variant |

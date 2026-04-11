@@ -6,33 +6,6 @@
 
 
 
---------------------------------------------------------------------------------
-
-
-
-binapi2-fapi-demo-cli load keys from storage
-
-add support of both:
-- libsecret
-- systemd-creds
-
-
-SecretProvider
- ├── LibSecretProvider
- ├── SystemdCredsProvider
- └── TestSecretProvider (for tests only)
-
-
-implement this in a separate generic library
-
-add required interface for SecretProvider in binapi2 that works with both implementation
-
-
-
---------------------------------------------------------------------------------
-
-
-
 
 ws-api with keys
 rest with keys

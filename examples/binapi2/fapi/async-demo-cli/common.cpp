@@ -2,6 +2,9 @@
 
 #include "common.hpp"
 
+#include <binapi2/fapi/secret_config.hpp>
+#include <secret_provider/factory.hpp>
+
 #include <spdlog/spdlog.h>
 #include <spdlog/async.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
@@ -95,10 +98,7 @@ void shutdown_logging()
 binapi2::fapi::config make_config()
 {
     auto cfg = use_testnet ? binapi2::fapi::config::testnet_config() : binapi2::fapi::config{};
-    if (const char* key = std::getenv("BINANCE_API_KEY"))
-        cfg.api_key = key;
-    if (const char* secret = std::getenv("BINANCE_SECRET_KEY"))
-        cfg.secret_key = secret;
+    // Credentials loaded separately via async_load_secrets().
 
     static constexpr std::size_t max_log_body = 512;
 
@@ -159,6 +159,57 @@ std::string_view find_flag(const args_t& args, std::string_view key, std::string
             return args[i + 1];
     }
     return {};
+}
+
+boost::cobalt::task<void> async_load_secrets(binapi2::fapi::config& cfg)
+{
+    // Default provider is libsecret with "demo" profile
+    std::string source = secrets_source.empty() ? "libsecret:demo" : secrets_source;
+
+    if (source == "env") {
+        spdlog::warn("DEPRECATED: --secrets env is deprecated. "
+                     "Use --secrets libsecret or --secrets systemd-creds:<dir>.");
+    }
+
+    auto provider = secret_provider::create(source);
+    if (!provider) {
+        spdlog::error("unknown or unavailable secrets provider: '{}'. Available: {}", source,
+                      [&] {
+                          std::string s;
+                          for (const auto& n : secret_provider::available()) {
+                              if (!s.empty()) s += ", ";
+                              s += n;
+                          }
+                          return s;
+                      }());
+        co_return;
+    }
+
+    spdlog::info("secrets: using provider '{}'", source);
+
+    // Key names depend on provider type.
+    // libsecret:<profile> uses "<profile>/api_key", "<profile>/secret_key"
+    // systemd-creds:<dir> uses "api_key", "secret_key" as filenames
+    // env uses "BINANCE_API_KEY", "BINANCE_SECRET_KEY"
+    std::string api_key_name;
+    std::string secret_key_name;
+    if (source == "env") {
+        api_key_name = "BINANCE_API_KEY";
+        secret_key_name = "BINANCE_SECRET_KEY";
+    } else if (source.starts_with("libsecret:")) {
+        auto profile = source.substr(10);
+        api_key_name = profile + "/api_key";
+        secret_key_name = profile + "/secret_key";
+    } else {
+        api_key_name = "api_key";
+        secret_key_name = "secret_key";
+    }
+
+    auto r = co_await binapi2::fapi::async_load_credentials(
+        cfg, *provider, api_key_name, secret_key_name);
+    if (!r) {
+        spdlog::warn("failed to load credentials: {}", r.err.message);
+    }
 }
 
 } // namespace demo

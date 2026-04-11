@@ -5,7 +5,7 @@
 # Usage: scripts/testnet_ws_api.sh [output_dir]
 #   output_dir defaults to testnet_output/ws_api
 #
-# Requires: BINANCE_API_KEY and BINANCE_SECRET_KEY
+# Requires: BINAPI2_SECRET (e.g. BINAPI2_SECRET=libsecret:demo)
 
 set -euo pipefail
 
@@ -15,11 +15,6 @@ CLI="$ROOT_DIR/_build/examples/binapi2/fapi/async-demo-cli/binapi2-fapi-async-de
 
 OUT="${1:-$ROOT_DIR/testnet_output/ws_api}"
 mkdir -p "$OUT"
-
-if [ -z "${BINANCE_API_KEY:-}" ]; then
-    echo "BINANCE_API_KEY not set. Export BINANCE_API_KEY and BINANCE_SECRET_KEY."
-    exit 1
-fi
 
 SYMBOL=BTCUSDT
 
@@ -34,6 +29,7 @@ run() {
         -R "$dir/response.json" \
         -L "$dir/log.txt" \
         -F trace \
+        -K "${BINAPI2_SECRET:-libsecret:demo}" \
         "$@" >/dev/null 2>&1; then
         echo "OK"
     else

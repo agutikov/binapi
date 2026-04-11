@@ -29,6 +29,7 @@ run_stream() {
             -r "$dir/stream.jsonl" \
             -L "$dir/log.txt" \
             -F trace \
+            -K "${BINAPI2_SECRET:-libsecret:demo}" \
             -v \
             "$@" \
         > "$dir/stdout.txt" 2>/dev/null || true) 2>/dev/null
@@ -51,12 +52,9 @@ run_stream stream-all-tickers      stream-all-tickers
 run_stream stream-all-mini-tickers stream-all-mini-tickers
 
 echo "=== WebSocket streams (auth) ==="
-if [ -z "${BINANCE_API_KEY:-}" ]; then
-    echo "BINANCE_API_KEY not set, skipping user-stream."
-else
-    run_stream listen-key-start    listen-key-start
-    run_stream user-stream         user-stream
-fi
+
+run_stream listen-key-start    listen-key-start
+run_stream user-stream         user-stream
 
 echo "=== Done ==="
 echo "Output in: $OUT"

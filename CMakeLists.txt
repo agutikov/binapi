@@ -44,6 +44,11 @@ add_subdirectory(examples/binapi2/fapi)
 option(BINAPI2_WITH_TESTS "Build binapi2 tests" ON)
 if(BINAPI2_WITH_TESTS)
     enable_testing()
+endif()
+
+add_subdirectory(libs/secret_provider)
+
+if(BINAPI2_WITH_TESTS)
     add_subdirectory(tests/binapi2/fapi)
 endif()
 

@@ -44,6 +44,9 @@ inline std::string record_file;
 // Stream commands attach this to their connection if non-null.
 inline ::binapi2::fapi::detail::threadsafe_stream_buffer<std::string>* record_buffer = nullptr;
 
+// Secret provider: "libsecret" (default), "env" (deprecated), "systemd-creds:<dir>"
+inline std::string secrets_source;
+
 // File logging.
 inline std::string log_file;
 inline std::string file_loglevel;
@@ -58,7 +61,7 @@ void init_logging();
 // Flush and shutdown all async loggers (call before exit).
 void shutdown_logging();
 
-// Build config from BINANCE_API_KEY / BINANCE_SECRET_KEY env vars.
+// Build config (credentials loaded separately via async_load_secrets).
 binapi2::fapi::config make_config();
 
 // Async stdout output — non-blocking, enqueues to spdlog "out" logger.
@@ -132,5 +135,9 @@ E parse_enum(std::string_view s)
 
 // Find a --key (or -k short) value pair in args, return value or empty.
 std::string_view find_flag(const args_t& args, std::string_view key, std::string_view short_key);
+
+// Load API credentials from the configured secret source into cfg.
+// Uses libsecret by default, falls back to env vars if --secrets env.
+boost::cobalt::task<void> async_load_secrets(binapi2::fapi::config& cfg);
 
 } // namespace demo

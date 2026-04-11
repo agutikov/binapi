@@ -14,13 +14,8 @@ int main()
 {
     auto cfg = binapi2::fapi::config::testnet_config();
 
-    // Optionally pick up API credentials from the environment.
-    const char* key = std::getenv("BINANCE_API_KEY");
-    const char* secret = std::getenv("BINANCE_SECRET_KEY");
-    if (key && key[0] != '\0')
-        cfg.api_key = key;
-    if (secret && secret[0] != '\0')
-        cfg.secret_key = secret;
+    // Credentials are loaded from libsecret by the async-demo-cli.
+    // This sync demo does not load credentials — auth endpoints will be skipped.
 
     binapi2::futures_usdm_api c(cfg);
 

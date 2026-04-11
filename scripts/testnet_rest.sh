@@ -27,6 +27,7 @@ run() {
         -R "$dir/response.json" \
         -L "$dir/log.txt" \
         -F trace \
+        -K "${BINAPI2_SECRET:-libsecret:demo}" \
         "$@" >/dev/null 2>&1; then
         echo "OK"
     else
@@ -54,11 +55,6 @@ run funding-rate      funding-rate "$SYMBOL" 5
 run open-interest     open-interest "$SYMBOL"
 
 echo "=== Authenticated REST endpoints ==="
-if [ -z "${BINANCE_API_KEY:-}" ]; then
-    echo "BINANCE_API_KEY not set, skipping auth endpoints."
-    echo "Export BINANCE_API_KEY and BINANCE_SECRET_KEY to run these."
-    exit 0
-fi
 
 run account-info      account-info
 run balances          balances

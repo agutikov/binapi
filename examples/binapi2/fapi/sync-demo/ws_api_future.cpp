@@ -63,9 +63,8 @@ static void print_result(const result<types::book_ticker_t>& r)
 
 void ws_api_future(futures_usdm_api& c)
 {
-    const char* key = std::getenv("BINANCE_API_KEY");
-    if (!key || key[0] == '\0') {
-        std::cout << "=== WS API future: SKIPPED (BINANCE_API_KEY not set) ===\n";
+    if (c.configuration().api_key.empty()) {
+        std::cout << "=== WS API future: SKIPPED (no API key) ===\n";
         return;
     }
 
