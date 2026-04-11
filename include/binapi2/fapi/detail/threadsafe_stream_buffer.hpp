@@ -9,6 +9,7 @@
 
 #include <binapi2/fapi/detail/stream_buffer_consumer.hpp>
 
+#include <boost/asio/post.hpp>
 #include <boost/asio/steady_timer.hpp>
 #include <boost/cobalt/channel.hpp>
 #include <boost/cobalt/op.hpp>
@@ -67,14 +68,14 @@ public:
     {
         if (closed_.load(std::memory_order_relaxed)) return false;
         bool ok = spsc_.push(std::move(value));
-        if (ok) notify_.cancel();
+        if (ok) wake();
         return ok;
     }
 
     void close()
     {
         closed_.store(true, std::memory_order_release);
-        notify_.cancel();
+        wake();
     }
 
     [[nodiscard]] bool is_open() const { return channel_.is_open(); }
@@ -87,7 +88,7 @@ public:
     [[nodiscard]] boost::cobalt::task<void> async_forward()
     {
         while (true) {
-            // Wait for notification from producer
+            // Wait for notification — cancel arrives via post to our executor
             co_await boost::cobalt::as_result(
                 notify_.async_wait(boost::cobalt::use_op));
 
@@ -114,6 +115,14 @@ public:
 private:
     boost::cobalt::channel<T>& channel() { return channel_; }
     const boost::cobalt::channel<T>& channel() const { return channel_; }
+
+    /// @brief Thread-safe wake: posts timer cancel to the channel's executor.
+    /// This ensures cancel() runs on the same thread as async_wait(),
+    /// avoiding data races on the timer's internal state.
+    void wake()
+    {
+        boost::asio::post(notify_.get_executor(), [this] { notify_.cancel(); });
+    }
 
     boost::cobalt::channel<T> channel_;
     boost::lockfree::spsc_queue<T> spsc_;

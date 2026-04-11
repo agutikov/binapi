@@ -11,16 +11,17 @@
 
 #pragma once
 
-#include <binapi2/fapi/detail/hopping_stream_buffer.hpp>
 #include <binapi2/fapi/detail/io_thread.hpp>
+#include <binapi2/fapi/detail/threadsafe_stream_buffer.hpp>
 
-#include <boost/cobalt/channel.hpp>
-#include <boost/cobalt/race.hpp>
 #include <boost/cobalt/result.hpp>
 #include <boost/cobalt/spawn.hpp>
 #include <boost/cobalt/task.hpp>
 
+#include <boost/asio/use_future.hpp>
+
 #include <cstddef>
+#include <future>
 #include <memory>
 #include <type_traits>
 #include <vector>
@@ -81,12 +82,12 @@ public:
     /// @brief Create a buffer on the recorder's executor and associate a sink.
     /// @return Reference to the buffer — pass to connection.attach_buffer().
     /// Must be called before start().
-    fapi::detail::hopping_stream_buffer<std::string>& add_stream(Sink sink)
+    fapi::detail::threadsafe_stream_buffer<std::string>& add_stream(Sink sink)
     {
         auto exec = boost::asio::require(
             io_.context().get_executor(),
             boost::asio::execution::outstanding_work.tracked);
-        auto buf = std::make_unique<fapi::detail::hopping_stream_buffer<std::string>>(
+        auto buf = std::make_unique<fapi::detail::threadsafe_stream_buffer<std::string>>(
             buffer_size_, boost::cobalt::executor(exec));
         auto& ref = *buf;
         streams_.push_back({std::move(buf), std::move(sink)});
@@ -96,53 +97,53 @@ public:
     /// @brief Access the recorder's io_context (e.g. for creating file_sinks).
     [[nodiscard]] boost::asio::io_context& io_context() noexcept { return io_.context(); }
 
-    /// @brief Start the drain coroutine on the background thread.
+    /// @brief Start forwarder + drain coroutines on the background thread.
+    /// One forwarder and one drain per stream.
     void start()
     {
-        boost::cobalt::spawn(io_.context(), async_drain_all(),
-                             [](std::exception_ptr) {});
+        for (auto& entry : streams_) {
+            futures_.push_back(
+                boost::cobalt::spawn(io_.context(), entry.buffer->async_forward(),
+                                     boost::asio::use_future));
+            futures_.push_back(
+                boost::cobalt::spawn(io_.context(), async_drain_one(entry),
+                                     boost::asio::use_future));
+        }
     }
 
-    /// @brief Stop recording — close all buffers, drain finishes naturally.
+    /// @brief Stop recording — close all buffers, wait for everything to finish.
+    ///
+    /// threadsafe_stream_buffer::close() is thread-safe (atomic + post),
+    /// so it can be called from any thread.
     void stop()
     {
         for (auto& entry : streams_) {
-            if (entry.buffer->is_open())
-                entry.buffer->close();
+            entry.buffer->close();
+        }
+        for (auto& f : futures_) {
+            if (f.valid()) f.get();
         }
     }
 
 private:
     struct stream_entry
     {
-        std::unique_ptr<fapi::detail::hopping_stream_buffer<std::string>> buffer;
+        std::unique_ptr<fapi::detail::threadsafe_stream_buffer<std::string>> buffer;
         Sink sink;
     };
 
-    boost::cobalt::task<void> async_drain_all()
+    /// @brief Drain a single stream until its channel is closed and empty.
+    boost::cobalt::task<void> async_drain_one(stream_entry& entry)
     {
         while (true) {
-            std::vector<boost::cobalt::channel_reader<std::string>> readers;
-            std::vector<std::size_t> idx_map;
-
-            for (std::size_t i = 0; i < streams_.size(); ++i) {
-                if (streams_[i].buffer->is_open()) {
-                    readers.push_back(streams_[i].buffer->reader());
-                    idx_map.push_back(i);
-                }
-            }
-            if (readers.empty()) break;
-
             auto rv = co_await boost::cobalt::as_result(
-                boost::cobalt::race(readers));
+                entry.buffer->reader());
             if (!rv) break;
-            auto [pos, value] = *rv;
-            auto& sink = streams_[idx_map[pos]].sink;
 
             if constexpr (recorder_detail::is_async_sink<Sink>::value) {
-                co_await sink(value);
+                co_await entry.sink(*rv);
             } else {
-                sink(value);
+                entry.sink(*rv);
             }
         }
     }
@@ -150,6 +151,7 @@ private:
     fapi::detail::io_thread io_;
     std::size_t buffer_size_;
     std::vector<stream_entry> streams_;
+    std::vector<std::future<void>> futures_;
 };
 
 } // namespace binapi2::fapi::streams

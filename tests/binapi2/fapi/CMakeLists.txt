@@ -67,6 +67,13 @@ target_link_libraries(stream_buffer_test PRIVATE binapi2_fapi GTest::gtest_main)
 target_compile_options(stream_buffer_test PRIVATE)
 gtest_discover_tests(stream_buffer_test DISCOVERY_MODE PRE_TEST)
 
+find_package(spdlog REQUIRED)
+
+add_executable(stream_recorder_test stream_recorder_test.cpp)
+target_link_libraries(stream_recorder_test PRIVATE binapi2_fapi spdlog::spdlog GTest::gtest_main)
+target_compile_options(stream_recorder_test PRIVATE)
+gtest_discover_tests(stream_recorder_test DISCOVERY_MODE PRE_TEST)
+
 add_subdirectory(integration/postman_mock)
 add_subdirectory(integration/sync_bridging)
 add_subdirectory(benchmarks)

@@ -56,7 +56,18 @@ public:
         co_await boost::asio::post(caller_exec, boost::cobalt::use_op);
     }
 
+    /// @brief Close the channel. Must be called from the channel's executor.
     void close() { channel_.close(); }
+
+    /// @brief Close the channel from any executor. Posts to the channel's executor.
+    [[nodiscard]] boost::cobalt::task<void> async_close()
+    {
+        auto caller_exec = co_await boost::cobalt::this_coro::executor;
+        co_await boost::asio::post(channel_.get_executor(), boost::cobalt::use_op);
+        channel_.close();
+        co_await boost::asio::post(caller_exec, boost::cobalt::use_op);
+    }
+
     [[nodiscard]] bool is_open() const { return channel_.is_open(); }
 
 private:

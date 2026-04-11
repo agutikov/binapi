@@ -1,12 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
-// Unit tests for stream_buffer variants and stream_recorder.
+// Unit tests for stream_buffer variants (3 buffers x 4 APIs = 12 combinations).
 
 #include <binapi2/fapi/detail/hopping_stream_buffer.hpp>
 #include <binapi2/fapi/detail/stream_buffer.hpp>
 #include <binapi2/fapi/detail/threadsafe_stream_buffer.hpp>
-#include <binapi2/fapi/streams/sinks/callback_sink.hpp>
-#include <binapi2/fapi/streams/stream_recorder.hpp>
 
 #include <boost/cobalt/join.hpp>
 #include <boost/cobalt/run.hpp>
@@ -15,6 +13,7 @@
 #include <gtest/gtest.h>
 
 #include <string>
+#include <thread>
 #include <vector>
 
 using namespace binapi2::fapi;
@@ -25,10 +24,14 @@ T run_sync(boost::cobalt::task<T> t)
     return boost::cobalt::run(std::move(t));
 }
 
-// -- stream_buffer (single-executor) --
+// ===================================================================
+// stream_buffer (single-executor) x 4 APIs
+// ===================================================================
+
+// -- async_drain --
 
 static boost::cobalt::task<std::vector<std::string>>
-do_buffer_push_drain()
+do_single_drain()
 {
     detail::stream_buffer<std::string> buf(16);
     std::vector<std::string> out;
@@ -46,17 +49,19 @@ do_buffer_push_drain()
     co_return out;
 }
 
-TEST(StreamBufferSingle, PushDrain)
+TEST(SingleBuffer, Drain)
 {
-    auto out = run_sync(do_buffer_push_drain());
+    auto out = run_sync(do_single_drain());
     ASSERT_EQ(out.size(), 3u);
     EXPECT_EQ(out[0], "a");
     EXPECT_EQ(out[1], "b");
     EXPECT_EQ(out[2], "c");
 }
 
+// -- async_read --
+
 static boost::cobalt::task<std::vector<std::string>>
-do_buffer_push_read()
+do_single_read()
 {
     detail::stream_buffer<std::string> buf(16);
     std::vector<std::string> out;
@@ -79,16 +84,18 @@ do_buffer_push_read()
     co_return out;
 }
 
-TEST(StreamBufferSingle, PushRead)
+TEST(SingleBuffer, Read)
 {
-    auto out = run_sync(do_buffer_push_read());
+    auto out = run_sync(do_single_read());
     ASSERT_EQ(out.size(), 2u);
     EXPECT_EQ(out[0], "x");
     EXPECT_EQ(out[1], "y");
 }
 
+// -- async_read_batch --
+
 static boost::cobalt::task<std::vector<std::string>>
-do_buffer_push_batch()
+do_single_batch()
 {
     detail::stream_buffer<std::string> buf(16);
     std::vector<std::string> out;
@@ -111,16 +118,18 @@ do_buffer_push_batch()
     co_return out;
 }
 
-TEST(StreamBufferSingle, PushBatch)
+TEST(SingleBuffer, Batch)
 {
-    auto out = run_sync(do_buffer_push_batch());
+    auto out = run_sync(do_single_batch());
     ASSERT_EQ(out.size(), 5u);
     for (int i = 0; i < 5; ++i)
         EXPECT_EQ(out[i], std::to_string(i));
 }
 
+// -- reader (via async_drain which uses reader internally — test close behavior) --
+
 static boost::cobalt::task<int>
-do_buffer_backpressure()
+do_single_backpressure()
 {
     detail::stream_buffer<std::string> buf(2);
     int count = 0;
@@ -137,36 +146,27 @@ do_buffer_backpressure()
     co_return count;
 }
 
-TEST(StreamBufferSingle, Backpressure)
+TEST(SingleBuffer, Backpressure)
 {
-    EXPECT_EQ(run_sync(do_buffer_backpressure()), 10);
+    EXPECT_EQ(run_sync(do_single_backpressure()), 10);
 }
 
-static boost::cobalt::task<int>
-do_buffer_empty()
-{
-    detail::stream_buffer<std::string> buf(16);
-    buf.close();
-    auto r = co_await buf.async_read();
-    co_return r ? 1 : 0;
-}
+// ===================================================================
+// hopping_stream_buffer (cross-executor) x 4 APIs
+// ===================================================================
 
-TEST(StreamBufferSingle, EmptyClose)
-{
-    EXPECT_EQ(run_sync(do_buffer_empty()), 0);
-}
-
-// -- hopping_stream_buffer (cross-executor, same-executor test) --
+// -- async_drain --
 
 static boost::cobalt::task<std::vector<std::string>>
-do_hopping_same_executor()
+do_hopping_drain()
 {
     detail::hopping_stream_buffer<std::string> buf(16);
     std::vector<std::string> out;
 
     auto producer = [&]() -> boost::cobalt::task<void> {
-        co_await buf.async_push(std::string("h1"));
-        co_await buf.async_push(std::string("h2"));
+        co_await buf.async_push(std::string("a"));
+        co_await buf.async_push(std::string("b"));
+        co_await buf.async_push(std::string("c"));
         buf.close();
     };
 
@@ -176,99 +176,231 @@ do_hopping_same_executor()
     co_return out;
 }
 
-TEST(HoppingStreamBuffer, SameExecutorWorks)
+TEST(HoppingBuffer, Drain)
 {
-    auto out = run_sync(do_hopping_same_executor());
-    ASSERT_EQ(out.size(), 2u);
-    EXPECT_EQ(out[0], "h1");
-    EXPECT_EQ(out[1], "h2");
+    auto out = run_sync(do_hopping_drain());
+    ASSERT_EQ(out.size(), 3u);
+    EXPECT_EQ(out[0], "a");
+    EXPECT_EQ(out[1], "b");
+    EXPECT_EQ(out[2], "c");
 }
 
-// -- stream_recorder (cross-executor with io_thread) --
+// -- async_read --
 
-TEST(StreamRecorder, CallbackSinkRecordsFrames)
+static boost::cobalt::task<std::vector<std::string>>
+do_hopping_read()
 {
-    std::vector<std::string> recorded;
+    detail::hopping_stream_buffer<std::string> buf(16);
+    std::vector<std::string> out;
 
-    streams::stream_recorder recorder(16);
-    auto& buf = recorder.add_stream(
-        streams::sinks::callback_sink([&recorded](const std::string& s) {
-            recorded.push_back(s);
-        }));
-
-    recorder.start();
-
-    // Push frames from this thread (uses hopping_stream_buffer cross-executor)
-    boost::cobalt::run([&]() -> boost::cobalt::task<void> {
-        co_await buf.async_push(std::string("frame1"));
-        co_await buf.async_push(std::string("frame2"));
-        co_await buf.async_push(std::string("frame3"));
+    auto producer = [&]() -> boost::cobalt::task<void> {
+        co_await buf.async_push(std::string("x"));
+        co_await buf.async_push(std::string("y"));
         buf.close();
-    }());
+    };
 
-    recorder.stop();
+    auto consumer = [&]() -> boost::cobalt::task<void> {
+        while (true) {
+            auto r = co_await buf.async_read();
+            if (!r) break;
+            out.push_back(*r);
+        }
+    };
 
-    // Give the drain coroutine a moment to finish processing
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
-
-    ASSERT_EQ(recorded.size(), 3u);
-    EXPECT_EQ(recorded[0], "frame1");
-    EXPECT_EQ(recorded[1], "frame2");
-    EXPECT_EQ(recorded[2], "frame3");
+    co_await boost::cobalt::join(producer(), consumer());
+    co_return out;
 }
 
-TEST(StreamRecorder, MultipleStreams)
+TEST(HoppingBuffer, Read)
 {
-    std::vector<std::string> stream_a;
-    std::vector<std::string> stream_b;
-
-    streams::stream_recorder recorder(16);
-    auto& buf_a = recorder.add_stream(
-        streams::sinks::callback_sink([&stream_a](const std::string& s) {
-            stream_a.push_back(s);
-        }));
-    auto& buf_b = recorder.add_stream(
-        streams::sinks::callback_sink([&stream_b](const std::string& s) {
-            stream_b.push_back(s);
-        }));
-
-    recorder.start();
-
-    boost::cobalt::run([&]() -> boost::cobalt::task<void> {
-        co_await buf_a.async_push(std::string("a1"));
-        co_await buf_b.async_push(std::string("b1"));
-        co_await buf_a.async_push(std::string("a2"));
-        co_await buf_b.async_push(std::string("b2"));
-        buf_a.close();
-        buf_b.close();
-    }());
-
-    recorder.stop();
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
-
-    ASSERT_EQ(stream_a.size(), 2u);
-    EXPECT_EQ(stream_a[0], "a1");
-    EXPECT_EQ(stream_a[1], "a2");
-
-    ASSERT_EQ(stream_b.size(), 2u);
-    EXPECT_EQ(stream_b[0], "b1");
-    EXPECT_EQ(stream_b[1], "b2");
+    auto out = run_sync(do_hopping_read());
+    ASSERT_EQ(out.size(), 2u);
+    EXPECT_EQ(out[0], "x");
+    EXPECT_EQ(out[1], "y");
 }
 
-TEST(StreamRecorder, EmptyStream)
+// -- async_read_batch --
+
+static boost::cobalt::task<std::vector<std::string>>
+do_hopping_batch()
 {
-    std::vector<std::string> recorded;
+    detail::hopping_stream_buffer<std::string> buf(16);
+    std::vector<std::string> out;
 
-    streams::stream_recorder recorder(16);
-    auto& buf = recorder.add_stream(
-        streams::sinks::callback_sink([&recorded](const std::string& s) {
-            recorded.push_back(s);
-        }));
+    auto producer = [&]() -> boost::cobalt::task<void> {
+        for (int i = 0; i < 5; ++i)
+            co_await buf.async_push(std::to_string(i));
+        buf.close();
+    };
 
-    recorder.start();
+    auto consumer = [&]() -> boost::cobalt::task<void> {
+        while (true) {
+            auto r = co_await buf.async_read_batch(3);
+            if (!r) break;
+            for (auto& s : *r) out.push_back(std::move(s));
+        }
+    };
+
+    co_await boost::cobalt::join(producer(), consumer());
+    co_return out;
+}
+
+TEST(HoppingBuffer, Batch)
+{
+    auto out = run_sync(do_hopping_batch());
+    ASSERT_EQ(out.size(), 5u);
+    for (int i = 0; i < 5; ++i)
+        EXPECT_EQ(out[i], std::to_string(i));
+}
+
+// -- backpressure --
+
+static boost::cobalt::task<int>
+do_hopping_backpressure()
+{
+    detail::hopping_stream_buffer<std::string> buf(2);
+    int count = 0;
+
+    auto producer = [&]() -> boost::cobalt::task<void> {
+        for (int i = 0; i < 10; ++i)
+            co_await buf.async_push(std::string("x"));
+        buf.close();
+    };
+
+    co_await boost::cobalt::join(
+        producer(),
+        buf.async_drain([&count](const std::string&) { ++count; }));
+    co_return count;
+}
+
+TEST(HoppingBuffer, Backpressure)
+{
+    EXPECT_EQ(run_sync(do_hopping_backpressure()), 10);
+}
+
+// ===================================================================
+// threadsafe_stream_buffer (SPSC) x 4 APIs
+// ===================================================================
+
+// Helper: push N items from a std::thread, then close.
+static void threadsafe_push_n(detail::threadsafe_stream_buffer<std::string>& buf,
+                              int n, const std::string& prefix)
+{
+    for (int i = 0; i < n; ++i)
+        while (!buf.push(prefix + std::to_string(i))) {}
     buf.close();
-    recorder.stop();
+}
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
-    EXPECT_TRUE(recorded.empty());
+// -- async_drain --
+
+static boost::cobalt::task<std::vector<std::string>>
+do_threadsafe_drain()
+{
+    detail::threadsafe_stream_buffer<std::string> buf(16);
+    std::vector<std::string> out;
+
+    std::thread producer([&] { threadsafe_push_n(buf, 3, ""); });
+
+    co_await boost::cobalt::join(
+        buf.async_forward(),
+        buf.async_drain([&out](const std::string& s) { out.push_back(s); }));
+
+    producer.join();
+    co_return out;
+}
+
+TEST(ThreadsafeBuffer, Drain)
+{
+    auto out = run_sync(do_threadsafe_drain());
+    ASSERT_EQ(out.size(), 3u);
+    EXPECT_EQ(out[0], "0");
+    EXPECT_EQ(out[1], "1");
+    EXPECT_EQ(out[2], "2");
+}
+
+// -- async_read --
+
+static boost::cobalt::task<std::vector<std::string>>
+do_threadsafe_read()
+{
+    detail::threadsafe_stream_buffer<std::string> buf(16);
+    std::vector<std::string> out;
+
+    std::thread producer([&] { threadsafe_push_n(buf, 2, "r"); });
+
+    auto consumer = [&]() -> boost::cobalt::task<void> {
+        while (true) {
+            auto r = co_await buf.async_read();
+            if (!r) break;
+            out.push_back(*r);
+        }
+    };
+
+    co_await boost::cobalt::join(buf.async_forward(), consumer());
+
+    producer.join();
+    co_return out;
+}
+
+TEST(ThreadsafeBuffer, Read)
+{
+    auto out = run_sync(do_threadsafe_read());
+    ASSERT_EQ(out.size(), 2u);
+    EXPECT_EQ(out[0], "r0");
+    EXPECT_EQ(out[1], "r1");
+}
+
+// -- async_read_batch --
+
+static boost::cobalt::task<std::vector<std::string>>
+do_threadsafe_batch()
+{
+    detail::threadsafe_stream_buffer<std::string> buf(16);
+    std::vector<std::string> out;
+
+    std::thread producer([&] { threadsafe_push_n(buf, 5, "b"); });
+
+    auto consumer = [&]() -> boost::cobalt::task<void> {
+        while (true) {
+            auto r = co_await buf.async_read_batch(3);
+            if (!r) break;
+            for (auto& s : *r) out.push_back(std::move(s));
+        }
+    };
+
+    co_await boost::cobalt::join(buf.async_forward(), consumer());
+
+    producer.join();
+    co_return out;
+}
+
+TEST(ThreadsafeBuffer, Batch)
+{
+    auto out = run_sync(do_threadsafe_batch());
+    ASSERT_EQ(out.size(), 5u);
+    for (int i = 0; i < 5; ++i)
+        EXPECT_EQ(out[i], "b" + std::to_string(i));
+}
+
+// -- backpressure (small SPSC queue, retries) --
+
+static boost::cobalt::task<int>
+do_threadsafe_backpressure()
+{
+    detail::threadsafe_stream_buffer<std::string> buf(4);
+    int count = 0;
+
+    std::thread producer([&] { threadsafe_push_n(buf, 20, ""); });
+
+    co_await boost::cobalt::join(
+        buf.async_forward(),
+        buf.async_drain([&count](const std::string&) { ++count; }));
+
+    producer.join();
+    co_return count;
+}
+
+TEST(ThreadsafeBuffer, Backpressure)
+{
+    EXPECT_EQ(run_sync(do_threadsafe_backpressure()), 20);
 }

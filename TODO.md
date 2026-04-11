@@ -3,15 +3,7 @@
 
 
 
-
-
-stream_buffer, all 4 APIs and 3 buffers = 12 combinations:
-- tests for every 12 combinations
-- benchmarks for every 12 combinations
-
-benchmark for stream_recorder with 3 sinks - generic , asio and spdlog implementations
-- also tests for all 3 sinks
-- also benchmarks for all 3 sinks
+benchmark for file sink
 
 ---
 
@@ -138,8 +130,10 @@ review what would need to be done to move on:
     - asyncio(C++)
     - packio
     - libufinex
-
+And does it make sense
 provide analysis table
+
+sort by expected: latency, throughput, complexity
 
 
 --------------------------------------------------------------------------------
@@ -154,15 +148,10 @@ streams and wsapi optimization - is a wide infinite task, postpone it, but provi
 
 
 scripts/audit_types.py
-with clangd or joern (on host)
+clangd
+joern
+clang-refactor
 
-
-
-Joern + clangd + clang-rename + mcp + python tooling  Agent/skill
-
-
-
-or maybe skip all this until transition to fix8
 
 
 
