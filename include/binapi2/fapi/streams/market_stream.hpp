@@ -14,6 +14,7 @@
 #include <binapi2/fapi/detail/json_opts.hpp>
 #include <binapi2/fapi/result.hpp>
 #include <binapi2/fapi/streams/stream_connection.hpp>
+#include <binapi2/fapi/streams/stream_consumer.hpp>
 #include <binapi2/fapi/streams/stream_traits.hpp>
 #include <binapi2/fapi/transport/websocket_client.hpp>
 #include <binapi2/fapi/transport/websocket_transport.hpp>
@@ -44,12 +45,19 @@ using event_generator = boost::cobalt::generator<result<Event>>;
 ///   }
 ///
 /// @tparam Transport WebSocket transport type (default: transport::websocket_client).
-template<transport::websocket_transport Transport = transport::websocket_client>
+/// @tparam Consumer  Frame consumer type (default: inline_consumer).
+template<transport::websocket_transport Transport = transport::websocket_client,
+         stream_consumer Consumer = inline_consumer>
 class basic_market_stream
 {
 public:
     explicit basic_market_stream(config cfg) :
         conn_(std::move(cfg))
+    {
+    }
+
+    basic_market_stream(config cfg, Consumer consumer) :
+        conn_(std::move(cfg), std::move(consumer))
     {
     }
 
@@ -119,10 +127,10 @@ public:
     // -- Accessors --
 
     [[nodiscard]] Transport& transport() noexcept { return conn_.transport(); }
-    [[nodiscard]] basic_stream_connection<Transport>& connection() noexcept { return conn_; }
+    [[nodiscard]] basic_stream_connection<Transport, Consumer>& connection() noexcept { return conn_; }
 
 private:
-    basic_stream_connection<Transport> conn_;
+    basic_stream_connection<Transport, Consumer> conn_;
     int max_reconnects_{3};
 };
 

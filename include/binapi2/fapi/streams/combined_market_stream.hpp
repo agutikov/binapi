@@ -15,6 +15,7 @@
 #include <binapi2/fapi/detail/variant_parse.hpp>
 #include <binapi2/fapi/result.hpp>
 #include <binapi2/fapi/streams/stream_connection.hpp>
+#include <binapi2/fapi/streams/stream_consumer.hpp>
 #include <binapi2/fapi/streams/stream_traits.hpp>
 #include <binapi2/fapi/types/event_traits.hpp>
 #include <binapi2/fapi/transport/websocket_client.hpp>
@@ -63,12 +64,18 @@ make_combined_entry()
 ///   }
 ///
 /// @tparam Transport WebSocket transport type (default: transport::websocket_client).
-template<transport::websocket_transport Transport = transport::websocket_client>
+template<transport::websocket_transport Transport = transport::websocket_client,
+         stream_consumer Consumer = inline_consumer>
 class basic_combined_market_stream
 {
 public:
     explicit basic_combined_market_stream(config cfg) :
         conn_(std::move(cfg))
+    {
+    }
+
+    basic_combined_market_stream(config cfg, Consumer consumer) :
+        conn_(std::move(cfg), std::move(consumer))
     {
     }
 
@@ -149,10 +156,10 @@ public:
     // -- Accessors --
 
     [[nodiscard]] Transport& transport() noexcept { return conn_.transport(); }
-    [[nodiscard]] basic_stream_connection<Transport>& connection() noexcept { return conn_; }
+    [[nodiscard]] basic_stream_connection<Transport, Consumer>& connection() noexcept { return conn_; }
 
 private:
-    basic_stream_connection<Transport> conn_;
+    basic_stream_connection<Transport, Consumer> conn_;
     int max_reconnects_{3};
 };
 

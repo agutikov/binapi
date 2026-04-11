@@ -28,6 +28,7 @@
 #include "cmd_stream.hpp"
 #include "cmd_user_stream.hpp"
 #include "cmd_order_book.hpp"
+#include "cmd_pipeline_order_book.hpp"
 
 #include <binapi2/futures_usdm_api.hpp>
 #include <binapi2/fapi/streams/sinks/spdlog_sink.hpp>
@@ -104,6 +105,7 @@ constexpr command_entry commands[] = {
 
     // Local order book
     { "order-book-live",         demo::cmd_order_book_live,         "Live order book <symbol> [depth]" },
+    { "pipeline-order-book-live", demo::cmd_pipeline_order_book_live, "Pipeline order book (3 threads) <symbol> [depth]" },
 };
 // clang-format on
 

@@ -69,6 +69,11 @@ gtest_discover_tests(stream_buffer_test DISCOVERY_MODE PRE_TEST)
 
 find_package(spdlog REQUIRED)
 
+add_executable(stream_consumer_test stream_consumer_test.cpp)
+target_link_libraries(stream_consumer_test PRIVATE binapi2_fapi GTest::gtest_main)
+target_compile_options(stream_consumer_test PRIVATE)
+gtest_discover_tests(stream_consumer_test DISCOVERY_MODE PRE_TEST)
+
 add_executable(stream_recorder_test stream_recorder_test.cpp)
 target_link_libraries(stream_recorder_test PRIVATE binapi2_fapi spdlog::spdlog GTest::gtest_main)
 target_compile_options(stream_recorder_test PRIVATE)

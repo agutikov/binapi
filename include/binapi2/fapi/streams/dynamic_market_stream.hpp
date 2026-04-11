@@ -16,6 +16,7 @@
 #include <binapi2/fapi/detail/variant_parse.hpp>
 #include <binapi2/fapi/result.hpp>
 #include <binapi2/fapi/streams/stream_connection.hpp>
+#include <binapi2/fapi/streams/stream_consumer.hpp>
 #include <binapi2/fapi/streams/stream_traits.hpp>
 #include <binapi2/fapi/transport/websocket_client.hpp>
 #include <binapi2/fapi/transport/websocket_transport.hpp>
@@ -120,12 +121,18 @@ inline constexpr fapi::detail::variant_entry<market_enum, market_variant> market
 ///   }
 ///
 /// @tparam Transport WebSocket transport type (default: transport::websocket_client).
-template<transport::websocket_transport Transport = transport::websocket_client>
+template<transport::websocket_transport Transport = transport::websocket_client,
+         stream_consumer Consumer = inline_consumer>
 class basic_dynamic_market_stream
 {
 public:
     explicit basic_dynamic_market_stream(config cfg) :
         conn_(std::move(cfg))
+    {
+    }
+
+    basic_dynamic_market_stream(config cfg, Consumer consumer) :
+        conn_(std::move(cfg), std::move(consumer))
     {
     }
 
@@ -209,7 +216,7 @@ public:
     // -- Accessors --
 
     [[nodiscard]] Transport& transport() noexcept { return conn_.transport(); }
-    [[nodiscard]] basic_stream_connection<Transport>& connection() noexcept { return conn_; }
+    [[nodiscard]] basic_stream_connection<Transport, Consumer>& connection() noexcept { return conn_; }
 
 private:
     unsigned int next_id() { return ++id_counter_; }
@@ -233,7 +240,7 @@ private:
         co_return co_await conn_.async_write_text(*json);
     }
 
-    basic_stream_connection<Transport> conn_;
+    basic_stream_connection<Transport, Consumer> conn_;
     unsigned int id_counter_{0};
 };
 

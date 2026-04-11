@@ -13,6 +13,7 @@
 #include <binapi2/fapi/detail/stream_buffer.hpp>
 #include <binapi2/fapi/detail/threadsafe_stream_buffer.hpp>
 #include <binapi2/fapi/result.hpp>
+#include <binapi2/fapi/streams/stream_consumer.hpp>
 #include <binapi2/fapi/transport/websocket_client.hpp>
 #include <binapi2/fapi/transport/websocket_transport.hpp>
 
@@ -102,16 +103,24 @@ namespace binapi2::fapi::streams {
 /// Owns the WebSocket transport. Manages connect/close and raw frame I/O.
 /// Knows nothing about Binance stream protocol, subscriptions, or event types.
 ///
-/// Optionally tees each received frame to a stream_buffer (async, with
-/// backpressure when the buffer is full).
+/// Two frame interception mechanisms:
+///   - Consumer template param (compile-time, zero-overhead for inline_consumer)
+///   - attach_buffer() (runtime, dynamic attach/detach)
 ///
 /// @tparam Transport WebSocket transport type (default: transport::websocket_client).
-template<transport::websocket_transport Transport = transport::websocket_client>
+/// @tparam Consumer  Frame consumer type (default: inline_consumer — no-op).
+template<transport::websocket_transport Transport = transport::websocket_client,
+         stream_consumer Consumer = inline_consumer>
 class basic_stream_connection
 {
 public:
     explicit basic_stream_connection(config cfg) :
         transport_(cfg), cfg_(std::move(cfg))
+    {
+    }
+
+    basic_stream_connection(config cfg, Consumer consumer) :
+        transport_(cfg), cfg_(std::move(cfg)), consumer_(std::move(consumer))
     {
     }
 
@@ -148,8 +157,17 @@ public:
     [[nodiscard]] boost::cobalt::task<result<std::string>> async_read_text()
     {
         auto msg = co_await transport_.async_read_text();
-        if (msg && push_target_) {
-            co_await push_target_->async_push(std::string(*msg));
+        if (msg) {
+            // Compile-time consumer (zero-overhead for inline_consumer)
+            if constexpr (consumer_detail::async_on_frame<Consumer>) {
+                co_await consumer_.on_frame(std::string(*msg));
+            } else {
+                consumer_.on_frame(std::string(*msg));
+            }
+            // Runtime-attached buffer (optional recording)
+            if (push_target_) {
+                co_await push_target_->async_push(std::string(*msg));
+            }
         }
         co_return msg;
     }
@@ -163,10 +181,12 @@ public:
 
     [[nodiscard]] const config& configuration() const noexcept { return cfg_; }
     [[nodiscard]] Transport& transport() noexcept { return transport_; }
+    [[nodiscard]] Consumer& consumer() noexcept { return consumer_; }
 
 private:
     Transport transport_;
     config cfg_;
+    Consumer consumer_;
     std::unique_ptr<frame_push_target> push_target_;
 };
 

@@ -58,6 +58,7 @@ set(BINAPI2_FAPI_SOURCES
     websocket_api/client.cpp
     streams/stream_connection.cpp
     order_book/local_order_book.cpp
+    order_book/pipeline_order_book.cpp
     streams/market_stream.cpp
     streams/user_stream.cpp
 )
