@@ -55,8 +55,8 @@ struct account_position_t
     decimal_t initialMargin{};
     decimal_t maintMargin{};
     decimal_t unrealizedProfit{};
-    decimal_t positionInitialMargin{};
-    decimal_t openOrderInitialMargin{};
+    std::optional<decimal_t> positionInitialMargin{};
+    std::optional<decimal_t> openOrderInitialMargin{};
     std::optional<decimal_t> leverage{};
     std::optional<bool> isolated{};
     std::optional<decimal_t> entryPrice{};
@@ -75,11 +75,11 @@ struct account_position_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/account/rest-api/Account-Information-V3.md
 struct account_information_t
 {
-    int feeTier{};
-    bool canTrade{};
-    bool canDeposit{};
-    bool canWithdraw{};
-    timestamp_ms_t updateTime{};
+    std::optional<int> feeTier{};
+    std::optional<bool> canTrade{};
+    std::optional<bool> canDeposit{};
+    std::optional<bool> canWithdraw{};
+    std::optional<timestamp_ms_t> updateTime{};
     std::optional<bool> multiAssetsMargin{};
     std::optional<int> tradeGroupId{};
     decimal_t totalInitialMargin{};

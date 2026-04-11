@@ -51,7 +51,8 @@ boost::cobalt::task<int> cmd_ws_account_status(binapi2::futures_usdm_api& c, con
     if (!r) { print_error(r.err); co_await (*ws)->async_close(); co_return 1; }
 
     if (r->result)
-        spdlog::info("feeTier={} canTrade={}", r->result->feeTier, r->result->canTrade);
+        spdlog::info("feeTier={} canTrade={}", r->result->feeTier.value_or(-1),
+                     r->result->canTrade.value_or(false));
     if (verbosity >= 1 && r->result) print_json(*r->result);
 
     co_await (*ws)->async_close();

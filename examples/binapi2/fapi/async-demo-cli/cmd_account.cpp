@@ -22,7 +22,8 @@ boost::cobalt::task<int> cmd_account_info(binapi2::futures_usdm_api& c, const ar
     if (!r) { print_error(r.err); co_return 1; }
 
     spdlog::info("feeTier={} canTrade={} assets={} positions={}",
-                 r->feeTier, r->canTrade, r->assets.size(), r->positions.size());
+                 r->feeTier.value_or(-1), r->canTrade.value_or(false),
+                 r->assets.size(), r->positions.size());
     if (verbosity >= 1) print_json(*r);
     co_return 0;
 }
