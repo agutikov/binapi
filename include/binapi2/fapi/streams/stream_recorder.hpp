@@ -12,6 +12,7 @@
 #pragma once
 
 #include <boost/cobalt/channel.hpp>
+#include <boost/cobalt/result.hpp>
 #include <boost/cobalt/task.hpp>
 
 #include <functional>
@@ -66,8 +67,9 @@ public:
     boost::cobalt::task<void> async_drain()
     {
         while (channel_.is_open()) {
-            auto frame = co_await channel_.read();
-            sink_(frame);
+            auto frame = co_await boost::cobalt::as_result(channel_.read());
+            if (!frame) break;
+            sink_(*frame);
         }
     }
 

@@ -4,12 +4,14 @@
 
 #include "benchmarks/replay_transport.hpp"
 
+#include <binapi2/fapi/detail/stream_buffer.hpp>
 #include <binapi2/fapi/streams/combined_market_stream.hpp>
 #include <binapi2/fapi/streams/dynamic_market_stream.hpp>
 #include <binapi2/fapi/streams/market_stream.hpp>
 #include <binapi2/fapi/streams/user_stream.hpp>
 #include <binapi2/fapi/types/subscriptions.hpp>
 
+#include <boost/cobalt/join.hpp>
 #include <boost/cobalt/run.hpp>
 #include <boost/cobalt/task.hpp>
 
@@ -401,4 +403,199 @@ TEST(ExtractStringField, MissingKey)
     std::string json = R"({"s":"BTCUSDT"})";
     auto val = detail::extract_string_field(json, "e");
     EXPECT_TRUE(val.empty());
+}
+
+// -- Stream buffer recording --
+
+static boost::cobalt::task<std::vector<std::string>>
+do_buffer_with_connection()
+{
+    auto cfg = config::testnet_config();
+    streams::basic_stream_connection<replay> conn(cfg);
+    conn.transport().messages = {book_ticker_json, depth_json, book_ticker_json};
+
+    std::vector<std::string> recorded;
+    detail::stream_buffer<std::string> buffer(16);
+    conn.attach_buffer(buffer);
+
+    co_await conn.async_connect("", "", "/ws/test");
+
+    auto read_all = [&]() -> boost::cobalt::task<void> {
+        while (true) {
+            auto msg = co_await conn.async_read_text();
+            if (!msg) break;
+        }
+        buffer.close();
+    };
+
+    co_await boost::cobalt::join(
+        read_all(),
+        buffer.async_drain([&recorded](const std::string& s) { recorded.push_back(s); }));
+    co_return recorded;
+}
+
+TEST(StreamBuffer, ConnectionRecordsAllFrames)
+{
+    auto recorded = run_sync(do_buffer_with_connection());
+    ASSERT_EQ(recorded.size(), 3u);
+    EXPECT_EQ(recorded[0], book_ticker_json);
+    EXPECT_EQ(recorded[1], depth_json);
+    EXPECT_EQ(recorded[2], book_ticker_json);
+}
+
+static boost::cobalt::task<std::vector<std::string>>
+do_buffer_with_market_stream()
+{
+    auto cfg = config::testnet_config();
+    streams::basic_market_stream<replay> ms(cfg);
+    ms.set_max_reconnects(0);
+    ms.transport().messages.assign(5, book_ticker_json);
+
+    std::vector<std::string> recorded;
+    detail::stream_buffer<std::string> buffer(16);
+    ms.connection().attach_buffer(buffer);
+
+    auto consume = [&]() -> boost::cobalt::task<void> {
+        auto gen = ms.subscribe(types::book_ticker_subscription{.symbol = "BTCUSDT"});
+        while (gen) {
+            auto ev = co_await gen;
+            if (!ev) break;
+        }
+        buffer.close();
+    };
+
+    co_await boost::cobalt::join(
+        consume(),
+        buffer.async_drain([&recorded](const std::string& s) { recorded.push_back(s); }));
+    co_return recorded;
+}
+
+TEST(StreamBuffer, MarketStreamRecordsAllFrames)
+{
+    auto recorded = run_sync(do_buffer_with_market_stream());
+    EXPECT_EQ(recorded.size(), 5u);
+    for (const auto& frame : recorded) {
+        EXPECT_EQ(frame, book_ticker_json);
+    }
+}
+
+static boost::cobalt::task<std::vector<std::string>>
+do_buffer_with_user_stream()
+{
+    auto cfg = config::testnet_config();
+    streams::basic_user_stream<replay> us(cfg);
+    us.set_max_reconnects(0);
+    us.transport().messages = {account_update_json, order_trade_json};
+
+    std::vector<std::string> recorded;
+    detail::stream_buffer<std::string> buffer(16);
+    us.connection().attach_buffer(buffer);
+
+    auto consume = [&]() -> boost::cobalt::task<void> {
+        auto gen = us.subscribe("fake-key");
+        while (gen) {
+            auto ev = co_await gen;
+            if (!ev) break;
+        }
+        buffer.close();
+    };
+
+    co_await boost::cobalt::join(
+        consume(),
+        buffer.async_drain([&recorded](const std::string& s) { recorded.push_back(s); }));
+    co_return recorded;
+}
+
+TEST(StreamBuffer, UserStreamRecordsAllFrames)
+{
+    auto recorded = run_sync(do_buffer_with_user_stream());
+    ASSERT_EQ(recorded.size(), 2u);
+    EXPECT_EQ(recorded[0], account_update_json);
+    EXPECT_EQ(recorded[1], order_trade_json);
+}
+
+static boost::cobalt::task<std::vector<std::string>>
+do_buffer_backpressure()
+{
+    auto cfg = config::testnet_config();
+    streams::basic_stream_connection<replay> conn(cfg);
+    conn.transport().messages.assign(10, book_ticker_json);
+
+    std::vector<std::string> recorded;
+    detail::stream_buffer<std::string> buffer(2);
+    conn.attach_buffer(buffer);
+
+    co_await conn.async_connect("", "", "/ws/test");
+
+    auto read_all = [&]() -> boost::cobalt::task<void> {
+        while (true) {
+            auto msg = co_await conn.async_read_text();
+            if (!msg) break;
+        }
+        buffer.close();
+    };
+
+    co_await boost::cobalt::join(
+        read_all(),
+        buffer.async_drain([&recorded](const std::string& s) { recorded.push_back(s); }));
+    co_return recorded;
+}
+
+TEST(StreamBuffer, BackpressurePreservesAllFrames)
+{
+    auto recorded = run_sync(do_buffer_backpressure());
+    EXPECT_EQ(recorded.size(), 10u);
+}
+
+static boost::cobalt::task<std::vector<std::string>>
+do_buffer_no_frames()
+{
+    auto cfg = config::testnet_config();
+    streams::basic_stream_connection<replay> conn(cfg);
+    conn.transport().messages = {};
+
+    std::vector<std::string> recorded;
+    detail::stream_buffer<std::string> buffer(16);
+    conn.attach_buffer(buffer);
+
+    co_await conn.async_connect("", "", "/ws/test");
+
+    auto read_all = [&]() -> boost::cobalt::task<void> {
+        [[maybe_unused]] auto msg = co_await conn.async_read_text();
+        buffer.close();
+    };
+
+    co_await boost::cobalt::join(
+        read_all(),
+        buffer.async_drain([&recorded](const std::string& s) { recorded.push_back(s); }));
+    co_return recorded;
+}
+
+TEST(StreamBuffer, NoFramesProducesEmptyRecording)
+{
+    auto recorded = run_sync(do_buffer_no_frames());
+    EXPECT_TRUE(recorded.empty());
+}
+
+static boost::cobalt::task<int>
+do_no_buffer_on_connection()
+{
+    auto cfg = config::testnet_config();
+    streams::basic_stream_connection<replay> conn(cfg);
+    conn.transport().messages = {book_ticker_json, depth_json};
+
+    co_await conn.async_connect("", "", "/ws/test");
+
+    int count = 0;
+    while (true) {
+        auto msg = co_await conn.async_read_text();
+        if (!msg) break;
+        ++count;
+    }
+    co_return count;
+}
+
+TEST(StreamBuffer, ConnectionWithoutBufferStillWorks)
+{
+    EXPECT_EQ(run_sync(do_no_buffer_on_connection()), 2);
 }

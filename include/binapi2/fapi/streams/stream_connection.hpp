@@ -9,8 +9,10 @@
 #pragma once
 
 #include <binapi2/fapi/config.hpp>
+#include <binapi2/fapi/detail/hopping_stream_buffer.hpp>
+#include <binapi2/fapi/detail/stream_buffer.hpp>
+#include <binapi2/fapi/detail/threadsafe_stream_buffer.hpp>
 #include <binapi2/fapi/result.hpp>
-#include <binapi2/fapi/streams/stream_recorder.hpp>
 #include <binapi2/fapi/transport/websocket_client.hpp>
 #include <binapi2/fapi/transport/websocket_transport.hpp>
 
@@ -18,11 +20,59 @@
 
 #include <glaze/glaze.hpp>
 
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>
 
 namespace binapi2::fapi::streams {
+
+/// @brief Type-erased push target for stream buffers.
+///
+/// Allows stream_connection to push frames into any buffer type
+/// (stream_buffer, hopping_stream_buffer, threadsafe_stream_buffer)
+/// without knowing the concrete type.
+class frame_push_target
+{
+public:
+    virtual ~frame_push_target() = default;
+    virtual boost::cobalt::task<void> async_push(std::string&& frame) = 0;
+};
+
+/// @brief Adapter that wraps a buffer with async_push into a frame_push_target.
+template<typename Buffer>
+class frame_push_adapter final : public frame_push_target
+{
+public:
+    explicit frame_push_adapter(Buffer& buffer) : buffer_(buffer) {}
+    boost::cobalt::task<void> async_push(std::string&& frame) override
+    {
+        co_await buffer_.async_push(std::move(frame));
+    }
+
+private:
+    Buffer& buffer_;
+};
+
+/// @brief Adapter for threadsafe_stream_buffer which uses non-coroutine push().
+template<typename T>
+class frame_push_adapter<fapi::detail::threadsafe_stream_buffer<T>> final
+    : public frame_push_target
+{
+public:
+    explicit frame_push_adapter(fapi::detail::threadsafe_stream_buffer<T>& buffer) :
+        buffer_(buffer)
+    {
+    }
+    boost::cobalt::task<void> async_push(std::string&& frame) override
+    {
+        buffer_.push(std::move(frame));
+        co_return;
+    }
+
+private:
+    fapi::detail::threadsafe_stream_buffer<T>& buffer_;
+};
 
 namespace detail {
 
@@ -52,8 +102,8 @@ namespace binapi2::fapi::streams {
 /// Owns the WebSocket transport. Manages connect/close and raw frame I/O.
 /// Knows nothing about Binance stream protocol, subscriptions, or event types.
 ///
-/// Optionally tees each received frame to a stream_recorder (async, with
-/// backpressure when the recorder's buffer is full).
+/// Optionally tees each received frame to a stream_buffer (async, with
+/// backpressure when the buffer is full).
 ///
 /// @tparam Transport WebSocket transport type (default: transport::websocket_client).
 template<transport::websocket_transport Transport = transport::websocket_client>
@@ -68,10 +118,17 @@ public:
     basic_stream_connection(const basic_stream_connection&) = delete;
     basic_stream_connection& operator=(const basic_stream_connection&) = delete;
 
-    // -- Recorder --
+    // -- Buffer --
 
-    /// @brief Set a recorder to receive copies of all incoming frames.
-    void set_recorder(stream_recorder& recorder) { recorder_ = &recorder; }
+    /// @brief Attach any stream buffer type to receive copies of all incoming frames.
+    template<typename Buffer>
+    void attach_buffer(Buffer& buffer)
+    {
+        push_target_ = std::make_unique<frame_push_adapter<Buffer>>(buffer);
+    }
+
+    /// @brief Detach the stream buffer.
+    void detach_buffer() { push_target_.reset(); }
 
     // -- Connection --
 
@@ -91,8 +148,8 @@ public:
     [[nodiscard]] boost::cobalt::task<result<std::string>> async_read_text()
     {
         auto msg = co_await transport_.async_read_text();
-        if (msg && recorder_) {
-            co_await recorder_->async_record(*msg);
+        if (msg && push_target_) {
+            co_await push_target_->async_push(std::string(*msg));
         }
         co_return msg;
     }
@@ -110,7 +167,7 @@ public:
 private:
     Transport transport_;
     config cfg_;
-    stream_recorder* recorder_{nullptr};
+    std::unique_ptr<frame_push_target> push_target_;
 };
 
 /// @brief Default stream connection using the WebSocket transport.

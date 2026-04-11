@@ -4,24 +4,60 @@
 
 
 
+
+---
+
+stream_buffer, all 4 APIs and 3 buffers = 12 combinations:
+- tests
+- benchmarks
+
+benchmark for stream_recorder - for generic , asio and spdlog implementations
+
 ---
 
 
-design stream listen key keepalive; show for review
+add async_read_event to user_stream - like dynamic stream it produces only one variant type
 
-
+make a table of streams and their features in docs
 
 ---
 
 
 stream application buffering for multithread implementation
 
-building block for buffering
+building block for buffering between async_read_text and parser already exist - stream_buffer
 
-example of stream pipelining:
+IMPORTANT: preserve existing async_read_event and generators
+
+separate more the subscription mechanism and messages consuming
+can we use consumer as template argument like transport?
+
+
+What would be the generic aproach for optional buffering (and composition) of:
+- string messages for recording
+- string messages for transferring to separate parser
+- materialized C++ structs
+
+
+finally:
+example of stream pipelining in examples/binapi2/fapi/async-demo-cli
     - network thread
     - parser thread
     - logic thread with local order book
+In addition to current single-thread async order book
+
+
+---
+
+??? transport_logger usage?
+
+
+---
+
+
+
+design stream listen key keepalive; show for review
+
 
 
 
@@ -104,6 +140,13 @@ review what would need to be done to move on:
     - libufinex
 
 provide analysis table
+
+
+--------------------------------------------------------------------------------
+
+
+streams and wsapi optimization - is a wide infinite task, postpone it, but provide rough start analysis
+
 
 
 --------------------------------------------------------------------------------
