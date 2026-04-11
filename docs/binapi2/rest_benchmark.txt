@@ -13,37 +13,35 @@ All endpoints OK.
 
 Benchmark                                iters        us/op      ops/sec
 ----------------------------------- ---------- ------------ ------------
-ping                                     10240          168         5948
-server_time                              10240          171         5854
-order_book (depth 5)                      5120          205         4883
-recent_trades                              640         1866          536
-klines (1h)                               5120          208         4797
-price_ticker                              5120          187         5344
-book_ticker                               5120          201         4986
-mark_price                               10240          192         5199
-exchange_info                               80        18302           55
+ping                                     10240          150         6654
+server_time                              10240          185         5403
+order_book (depth 5)                     10240          163         6144
+recent_trades                             2560          567         1765
+klines (1h)                              10240          171         5851
+price_ticker                             10240          165         6073
+book_ticker                              10240          169         5920
+mark_price                                5120          162         6171
+exchange_info                              320         4854          206
 
 == Signed endpoints (HMAC + auth header) ==
 
 Benchmark                                iters        us/op      ops/sec
 ----------------------------------- ---------- ------------ ------------
-account_information                       5120          238         4194
-balances                                  5120          194         5159
-position_risk                             5120          221         4517
-query_order                               5120          242         4138
-all_open_orders                           5120          212         4725
+account_information                      10240          182         5487
+balances                                 10240          169         5927
+position_risk                            10240          164         6083
+query_order                              10240          170         5880
+all_open_orders                          10240          160         6236
 
 == User data streams (API key auth) ==
 
 Benchmark                                iters        us/op      ops/sec
 ----------------------------------- ---------- ------------ ------------
-start_listen_key                         10240          110         9070
-keepalive_listen_key                     10240          110         9098
+start_listen_key                         20480           85        11800
+keepalive_listen_key                     20480           75        13337
 
 == Summary ==
 
-Fastest: 110 us/op  (9098 ops/sec)
-Slowest: 18302 us/op  (55 ops/sec)
+Fastest: 75 us/op  (13337 ops/sec)
+Slowest: 4854 us/op  (206 ops/sec)
 Total benchmarks: 16
-
-Note: includes TLS handshake + TCP connect per request (no connection pooling).

@@ -17,33 +17,37 @@ All fixtures OK.
 
 Benchmark                                       iters      ns/op      ops/sec       MB/s
 ------------------------------------------ ---------- ---------- ------------ ----------
-subscribe/book_ticker                          256000       6790       147284       19.8
-subscribe/ticker_24hr                          128000       8626       115928       31.1
-subscribe/mark_price                           256000       6726       148683       21.7
-subscribe/kline                                128000       8903       112327       30.7
-subscribe/depth                                128000      11280        88653       29.8
+subscribe/book_ticker                         2048000        745      1342671      180.5
+subscribe/ticker_24hr                         1024000       1042       959517      257.1
+subscribe/mark_price                          2048000        833      1199863      175.1
+subscribe/kline                               1024000       1110       900561      246.5
+subscribe/depth                               1024000       1341       745473      251.0
+subscribe/aggregate_trade                     2048000        732      1366056      190.2
+subscribe/liquidation                         2048000        843      1186590      215.0
 
-== Market stream: async_read_event(), 1000 msgs/round ==
+== Combined market stream: subscribe() variant, 1000 msgs/round ==
 
 Benchmark                                       iters      ns/op      ops/sec       MB/s
 ------------------------------------------ ---------- ---------- ------------ ----------
-read_event/book_ticker                         256000       5795       172549       23.2
-read_event/ticker_24hr                         256000       7544       132562       35.5
-read_event/aggregate_trade                     256000       5681       176025       24.5
-read_event/depth                               128000      10504        95201       32.0
-read_event/kline                               128000       7950       125791       34.4
-read_event/liquidation                         256000       6399       156263       28.3
+combined/book_ticker+depth                    1024000       1367       731529      199.5
+
+== Dynamic market stream: async_read_event(), 1000 msgs/round ==
+
+Benchmark                                       iters      ns/op      ops/sec       MB/s
+------------------------------------------ ---------- ---------- ------------ ----------
+dynamic/book_ticker                           2048000        889      1125071      193.1
+dynamic/book_ticker+depth                     1024000       1266       790094      215.5
 
 == User stream: subscribe() dispatch, 1000 msgs/round ==
 
 Benchmark                                       iters      ns/op      ops/sec       MB/s
 ------------------------------------------ ---------- ---------- ------------ ----------
-subscribe/account_update                       128000      10872        91980       30.7
-subscribe/order_trade_update                   128000      13748        72736       35.7
-subscribe/margin_call                          128000       8280       120778       19.6
+subscribe/account_update                      1024000       1282       779790      260.3
+subscribe/order_trade_update                  1024000       1476       677643      332.2
+subscribe/margin_call                         2048000        913      1094869      177.5
 
 == Summary ==
 
-Fastest: 5681 ns/op  (176025 ops/sec)
-Slowest: 13748 ns/op  (72736 ops/sec)
-Total benchmarks: 14
+Fastest: 732 ns/op  (1366056 ops/sec)
+Slowest: 1476 ns/op  (677643 ops/sec)
+Total benchmarks: 13
