@@ -33,10 +33,14 @@
 #include <binapi2/futures_usdm_api.hpp>
 #include <binapi2/fapi/streams/sinks/spdlog_sink.hpp>
 
+#include <boost/asio/signal_set.hpp>
 #include <boost/cobalt/main.hpp>
+#include <boost/cobalt/this_coro.hpp>
 #include <spdlog/spdlog.h>
 
+#include <algorithm>
 #include <iostream>
+#include <iterator>
 #include <string_view>
 
 namespace {
@@ -181,19 +185,32 @@ boost::cobalt::main co_main(int argc, char* argv[])
     // Create client once, pass to all commands.
     binapi2::futures_usdm_api c(demo::make_config());
 
+    // Install SIGINT/SIGTERM handler for graceful shutdown.
+    // On signal, cancels all pending operations on the signal_set's executor,
+    // causing the command coroutine to receive errors and return.
+    auto exec = co_await boost::cobalt::this_coro::executor;
+    boost::asio::signal_set signals(exec, SIGINT, SIGTERM);
+    signals.async_wait([exec](boost::system::error_code, int sig) mutable {
+        spdlog::info("signal {} received, shutting down...", sig);
+        static_cast<boost::asio::io_context&>(
+            boost::asio::query(exec, boost::asio::execution::context)).stop();
+    });
+
     int rc = 1;
     for (const auto& cmd : commands) {
         if (cmd.name == cmd_name) {
             rc = co_await cmd.fn(c, sub_args);
-            if (recorder) recorder->stop();
-            demo::shutdown_logging();
-            co_return rc;
+            break;
         }
     }
 
-    spdlog::error("unknown command: {}", cmd_name);
-    print_usage(prog);
+    if (rc == 1 && std::none_of(std::begin(commands), std::end(commands),
+                                [&](const auto& cmd) { return cmd.name == cmd_name; })) {
+        spdlog::error("unknown command: {}", cmd_name);
+        print_usage(prog);
+    }
+
     if (recorder) recorder->stop();
     demo::shutdown_logging();
-    co_return 1;
+    co_return rc;
 }

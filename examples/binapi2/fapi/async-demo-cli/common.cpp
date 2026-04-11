@@ -80,10 +80,15 @@ void init_logging()
         rec_logger->set_level(spdlog::level::info);
         spdlog::register_logger(rec_logger);
     }
+
+    // Flush all loggers every second — ensures recording frames reach disk
+    // even under abnormal termination.
+    spdlog::flush_every(std::chrono::seconds(1));
 }
 
 void shutdown_logging()
 {
+    spdlog::apply_all([](std::shared_ptr<spdlog::logger> l) { l->flush(); });
     spdlog::shutdown();
 }
 

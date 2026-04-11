@@ -24,7 +24,7 @@ run_stream() {
     local dir="$OUT/$name"
     mkdir -p "$dir"
     echo -n "  $name (${TIMEOUT}s) ... "
-    (timeout -s KILL "$TIMEOUT" \
+    (timeout "$TIMEOUT" \
         "$CLI" \
             -r "$dir/stream.jsonl" \
             -L "$dir/log.txt" \
