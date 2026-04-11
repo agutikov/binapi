@@ -42,6 +42,13 @@ async_load_credentials(config& cfg, secret_provider::secret_provider& provider,
         co_return result<void>::failure(
             {error_code::internal, 0, 0, "failed to load secret_key: " + secret_key.error(), {}});
 
+    auto trim = [](std::string& s) {
+        while (!s.empty() && (s.back() == '\n' || s.back() == '\r' || s.back() == ' '))
+            s.pop_back();
+    };
+    trim(*api_key);
+    trim(*secret_key);
+
     cfg.api_key = std::move(*api_key);
     cfg.secret_key = std::move(*secret_key);
     co_return result<void>::success();

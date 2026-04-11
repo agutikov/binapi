@@ -14,7 +14,7 @@ namespace secret_provider {
 // Attributes: "service" (application name) + "key" (secret identifier).
 static const SecretSchema schema = {
     "secret_provider.generic",
-    SECRET_SCHEMA_NONE,
+    SECRET_SCHEMA_DONT_MATCH_NAME,
     {
         {"service", SECRET_SCHEMA_ATTRIBUTE_STRING},
         {"key", SECRET_SCHEMA_ATTRIBUTE_STRING},

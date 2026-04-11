@@ -27,8 +27,7 @@ std::unique_ptr<secret_provider> create(std::string_view name)
         return std::make_unique<libsecret_provider>("binapi2");
     }
     if (name.starts_with("libsecret:")) {
-        auto service = std::string(name.substr(10));
-        return std::make_unique<libsecret_provider>(service);
+        return std::make_unique<libsecret_provider>("binapi2");
     }
 #endif
 
