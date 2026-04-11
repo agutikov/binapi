@@ -9,6 +9,7 @@
 
 #include <binapi2/fapi/config.hpp>
 #include <binapi2/fapi/detail/variant_parse.hpp>
+#include <binapi2/fapi/rest/services/user_data_streams.hpp>
 #include <binapi2/fapi/result.hpp>
 #include <binapi2/fapi/streams/stream_connection.hpp>
 #include <binapi2/fapi/streams/stream_consumer.hpp>
@@ -17,9 +18,17 @@
 #include <binapi2/fapi/types/event_traits.hpp>
 #include <binapi2/fapi/types/user_stream_events.hpp>
 
+#include <boost/asio/steady_timer.hpp>
+#include <boost/asio/use_future.hpp>
 #include <boost/cobalt/generator.hpp>
+#include <boost/cobalt/op.hpp>
+#include <boost/cobalt/result.hpp>
+#include <boost/cobalt/spawn.hpp>
 #include <boost/cobalt/task.hpp>
+#include <boost/cobalt/this_coro.hpp>
 
+#include <chrono>
+#include <future>
 #include <string>
 #include <utility>
 
@@ -144,6 +153,36 @@ public:
     /// @brief Set maximum consecutive reconnect attempts (default: 3).
     void set_max_reconnects(int n) { max_reconnects_ = n; }
 
+    // -- Keepalive --
+
+    /// @brief Enable automatic listen key keepalive.
+    ///
+    /// Must be called after subscribe() or async_connect(). Spawns a timer
+    /// coroutine on the current thread's executor that sends
+    /// PUT /fapi/v1/listenKey at the specified interval.
+    ///
+    /// @param service  REST service for sending keepalive requests.
+    /// @param interval Keepalive interval (recommended: 30 minutes).
+    void enable_keepalive(rest::user_data_stream_service& service,
+                          std::chrono::seconds interval)
+    {
+        keepalive_service_ = &service;
+        keepalive_interval_ = interval;
+        keepalive_running_ = true;
+
+        keepalive_future_ = boost::cobalt::spawn(
+            boost::cobalt::this_thread::get_executor(),
+            async_keepalive_loop_(), boost::asio::use_future);
+    }
+
+    /// @brief Stop the keepalive timer and wait for it to finish.
+    void stop_keepalive()
+    {
+        keepalive_running_ = false;
+        if (keepalive_future_.valid())
+            keepalive_future_.get();
+    }
+
     // -- Imperative API --
 
     /// @brief Connect to the user data stream endpoint.
@@ -181,8 +220,28 @@ public:
     [[nodiscard]] basic_stream_connection<Transport, Consumer>& connection() noexcept { return conn_; }
 
 private:
+    boost::cobalt::task<void> async_keepalive_loop_()
+    {
+        auto exec = co_await boost::cobalt::this_coro::executor;
+        boost::asio::steady_timer timer(exec);
+
+        while (keepalive_running_) {
+            timer.expires_after(keepalive_interval_);
+            auto rv = co_await boost::cobalt::as_result(
+                timer.async_wait(boost::cobalt::use_op));
+            if (!rv || !keepalive_running_) break;
+
+            co_await keepalive_service_->async_execute(
+                types::keepalive_listen_key_request_t{});
+        }
+    }
+
     basic_stream_connection<Transport, Consumer> conn_;
     int max_reconnects_{3};
+    rest::user_data_stream_service* keepalive_service_{nullptr};
+    std::chrono::seconds keepalive_interval_{};
+    bool keepalive_running_{false};
+    std::future<void> keepalive_future_;
 };
 
 /// @brief Default user streams using the WebSocket transport.

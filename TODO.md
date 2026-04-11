@@ -5,21 +5,6 @@
 
 
 
----
-
-??? transport_logger usage?
-
-
----
-
-
-
-design stream listen key keepalive
-
-
-
-
-
 
 --------------------------------------------------------------------------------
 
@@ -76,6 +61,20 @@ binapi2 connect to real account
 --------------------------------------------------------------------------------
 
 
+document overview of data types - rest, wsapi and streams:
+- what contains
+- what means
+- what can do with the data
+- duplication
+    - between rest and wsapi
+    - between streams and 2 other
+- detailed explanation of the fields meaning
+
+
+
+--------------------------------------------------------------------------------
+
+
 record something
 
 
@@ -108,6 +107,9 @@ sort by expected: latency, throughput, complexity
 streams and wsapi optimization - is a wide infinite task, postpone it, but provide rough start analysis
 
 
+--------------------------------------------------------------------------------
+
+review reconnects, should not work theoretically...
 
 --------------------------------------------------------------------------------
 

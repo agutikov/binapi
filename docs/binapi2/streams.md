@@ -367,13 +367,28 @@ while (gen) {
 field in the raw JSON, then parses into the appropriate variant alternative.
 
 **Listen key lifecycle:**
-- `user_data_streams.async_start()` -- creates listen key (valid 60 minutes)
-- `user_data_streams.async_keepalive()` -- extend validity (call every 30 minutes)
-- `user_data_streams.async_close()` -- invalidate listen key
+- `user_data_streams.async_execute(start_listen_key_request_t{})` — creates listen key (valid 60 minutes)
+- `user_data_streams.async_execute(keepalive_listen_key_request_t{})` — extend validity
+- `user_data_streams.async_execute(close_listen_key_request_t{})` — invalidate listen key
 - `listen_key_expired_event_t` arrives on the stream when the server expires the key
 
-The library does not automatically manage listen key keepalive. The application must
-schedule periodic keepalive calls.
+**Automatic keepalive:** Call `enable_keepalive()` after subscribing:
+
+```cpp
+auto user = api.create_user_stream();
+auto gen = user->subscribe(key->listenKey);
+
+// Start keepalive after subscribe (stream is on an active executor).
+user->enable_keepalive((*rest)->user_data_streams, std::chrono::minutes(30));
+
+while (gen) {
+    auto event = co_await gen;
+    if (!event) break;
+    std::visit(overloaded{...}, *event);
+}
+
+user->stop_keepalive();
+```
 
 ---
 

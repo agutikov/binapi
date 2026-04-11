@@ -10,6 +10,7 @@
 
 #include <spdlog/spdlog.h>
 
+#include <chrono>
 #include <variant>
 
 namespace demo {
@@ -76,10 +77,15 @@ boost::cobalt::task<int> cmd_user_stream(binapi2::futures_usdm_api& c, const arg
     spdlog::info("subscribing to user data stream...");
     auto gen = user_stream->subscribe(key->listenKey);
 
+    // Start keepalive after subscribe (stream is now on an active executor).
+    user_stream->enable_keepalive((*rest)->user_data_streams,
+                                  std::chrono::minutes(30));
+    spdlog::info("keepalive enabled (every 30m)");
+
     spdlog::info("connected, reading events...");
     while (gen) {
         auto event = co_await gen;
-        if (!event) { print_error(event.err); co_return 1; }
+        if (!event) { print_error(event.err); break; }
 
         bool should_stop = std::visit(overloaded{
             [](const types::account_update_event_t& e) {
@@ -120,6 +126,7 @@ boost::cobalt::task<int> cmd_user_stream(binapi2::futures_usdm_api& c, const arg
         if (should_stop) break;
     }
 
+    user_stream->stop_keepalive();
     spdlog::info("user stream ended");
     co_return 0;
 }
