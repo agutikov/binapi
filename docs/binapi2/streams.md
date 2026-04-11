@@ -2,16 +2,57 @@
 
 ## Overview
 
-binapi2 provides four stream components:
+binapi2 provides five stream components, all built on `streams::stream_connection`:
 
-| Component | Purpose | Connection | Events |
+| Component | Purpose | Connection | Event type | APIs |
+|---|---|---|---|---|
+| `market_stream` | Single-subscription market data | 1 WS per subscription | Single typed event | `subscribe()` generator |
+| `combined_market_stream` | Multi-subscription market data | 1 WS, multiplexed | `std::variant` of events | `subscribe()` generator |
+| `dynamic_market_stream` | Live subscribe/unsubscribe | 1 WS, control + data | `variant<event, control>` | `async_connect` / `async_read_event` / `async_subscribe` / `async_unsubscribe` |
+| `user_stream` | Private account events | 1 WS per listen key | `user_stream_event_t` variant | `subscribe()` generator **or** `async_connect` / `async_read_event` |
+| `local_order_book` | Synchronized depth book | Uses market_stream + REST | Depth snapshots | `async_run` coroutine |
+
+### API styles
+
+| Stream | Generator (`subscribe`) | Imperative (`async_read_event`) | Auto-reconnect |
 |---|---|---|---|
-| `streams::market_stream` | Single-subscription market data | 1 WS, 1 typed event | book ticker, depth, kline, etc. |
-| `streams::combined_market_stream` | Multi-subscription market data | 1 WS, variant events | Multiple event types via std::variant |
-| `streams::user_stream` | Private account events | 1 WS per listen key | orders, balances, margin calls (variant) |
-| `order_book::local_order_book` | Synchronized order book | Uses market_stream + market_data_service | Depth snapshots |
+| `market_stream` | Yes — typed event | No | Yes (configurable) |
+| `combined_market_stream` | Yes — variant | No | Yes (configurable) |
+| `dynamic_market_stream` | No | Yes — `variant<event, control>` | No |
+| `user_stream` | Yes — variant | Yes — variant | Yes (generator only) |
+| `local_order_book` | No (internal) | No | Yes (re-sync on gap) |
 
-All are built on `streams::stream_connection` which wraps `transport::websocket_client`.
+### Recording support
+
+All stream components expose `connection()` which returns `stream_connection&`.
+Any buffer type can be attached via `connection().attach_buffer(buf)` to tee
+raw JSON frames to a `stream_buffer` for recording:
+
+| Buffer | Threading | Backpressure | Use case |
+|---|---|---|---|
+| `stream_buffer<T>` | Same executor | Yes (channel suspend) | In-process analysis |
+| `hopping_stream_buffer<T>` | Cross-executor | Yes (2 hops/push) | Cross-thread with backpressure |
+| `threadsafe_stream_buffer<T>` | Cross-thread SPSC | No (fire-and-forget) | `stream_recorder` default |
+
+`stream_recorder` is a standalone component with its own `io_thread`:
+
+```cpp
+streams::stream_recorder recorder(4096);
+auto& buf = recorder.add_stream(sinks::callback_sink([](const std::string& s) { ... }));
+conn.attach_buffer(buf);
+recorder.start();
+// ... stream runs ...
+recorder.stop();  // waits for all frames to be drained
+```
+
+### Sink implementations
+
+| Sink | I/O model | Header |
+|---|---|---|
+| `callback_sink` | Sync — user-provided `std::function` | `sinks/callback_sink.hpp` |
+| `spdlog_sink` | Sync — delegates to spdlog async logger | `sinks/spdlog_sink.hpp` |
+| `file_sink` | Async — `asio::stream_file` via io_uring | `sinks/file_sink.hpp` (requires `BOOST_ASIO_HAS_IO_URING`) |
+
 All methods return `cobalt::task` or `cobalt::generator`.
 
 ---
@@ -442,10 +483,7 @@ stream     market_     stream        local_order_book,
 
 | Feature | Notes |
 |---------|-------|
-| Application buffering | `cobalt::channel` or ring buffer between generator and consumer |
-| Auto-reconnect | In `subscribe()` generator: catch error, reconnect, continue |
 | Listen key keepalive | Periodic REST call on async timer in user_stream |
-| Async recorder | Non-blocking frame recording on stream_connection |
 
 ---
 
@@ -453,16 +491,26 @@ stream     market_     stream        local_order_book,
 
 | File | Role |
 |---|---|
-| `include/binapi2/fapi/streams/stream_connection.hpp` | Raw WebSocket connection: connect/close/read/write |
-| `include/binapi2/fapi/streams/market_stream.hpp` | Single-subscription market stream with typed generator |
-| `include/binapi2/fapi/streams/combined_market_stream.hpp` | Multi-subscription stream with variant dispatch |
-| `include/binapi2/fapi/streams/user_stream.hpp` | User data stream with variant generator |
-| `include/binapi2/fapi/streams/stream_traits.hpp` | Compile-time subscription → topic/target/event_type mapping |
-| `include/binapi2/fapi/order_book/local_order_book.hpp` | Synchronized order book (market_stream + market_data_service) |
-| `include/binapi2/fapi/types/subscriptions.hpp` | Subscription parameter types |
-| `include/binapi2/fapi/types/market_stream_events.hpp` | Market stream event types with glaze metadata |
-| `include/binapi2/fapi/types/user_stream_events.hpp` | User stream event types + user_stream_event_t variant |
-| `include/binapi2/fapi/types/event_traits.hpp` | Compile-time event type → wire name mapping |
-| `include/binapi2/fapi/detail/variant_parse.hpp` | Generic discriminator-based variant JSON parser |
-| `include/binapi2/fapi/transport/websocket_client.hpp` | Low-level WS transport (pimpl over Beast) |
-| `include/binapi2/fapi/config.hpp` | Endpoint URLs, ws_target_t, listen_key_t |
+| `streams/stream_connection.hpp` | Raw WebSocket connection: connect/close/read/write, buffer attachment |
+| `streams/market_stream.hpp` | Single-subscription market stream with typed generator |
+| `streams/combined_market_stream.hpp` | Multi-subscription stream with variant dispatch |
+| `streams/dynamic_market_stream.hpp` | Live subscribe/unsubscribe with async_read_event |
+| `streams/user_stream.hpp` | User data stream: generator + async_read_event |
+| `streams/stream_traits.hpp` | Compile-time subscription → topic/target/event_type mapping |
+| `streams/stream_recorder.hpp` | Multi-stream recorder with io_thread (basic_stream_recorder\<Sink\>) |
+| `streams/sinks/callback_sink.hpp` | Generic callback sink |
+| `streams/sinks/spdlog_sink.hpp` | spdlog async logger sink |
+| `streams/sinks/file_sink.hpp` | Async file sink (io_uring) |
+| `detail/stream_buffer.hpp` | Single-executor async buffer |
+| `detail/hopping_stream_buffer.hpp` | Cross-executor buffer with backpressure |
+| `detail/threadsafe_stream_buffer.hpp` | SPSC lock-free cross-thread buffer |
+| `detail/stream_buffer_consumer.hpp` | CRTP mixin: async_read, async_read_batch, async_drain, reader |
+| `detail/io_thread.hpp` | Background io_context thread for sync bridging |
+| `order_book/local_order_book.hpp` | Synchronized order book (market_stream + REST) |
+| `types/subscriptions.hpp` | Subscription parameter types |
+| `types/market_stream_events.hpp` | Market stream event types with glaze metadata |
+| `types/user_stream_events.hpp` | User stream event types + user_stream_event_t variant |
+| `types/event_traits.hpp` | Compile-time event type → wire name mapping |
+| `detail/variant_parse.hpp` | Generic discriminator-based variant JSON parser |
+| `transport/websocket_client.hpp` | Low-level WS transport (pimpl over Beast) |
+| `config.hpp` | Endpoint URLs, ws_target_t, listen_key_t |

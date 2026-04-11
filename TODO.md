@@ -3,17 +3,6 @@
 
 
 
-benchmark for file sink
-
----
-
-
-add async_read_event to user_stream - like dynamic stream it produces only one variant type
-
-make a table of streams and their features in docs
-
----
-
 
 stream application buffering for multithread implementation
 
@@ -48,7 +37,7 @@ In addition to current single-thread async order book
 
 
 
-design stream listen key keepalive; show for review
+design stream listen key keepalive
 
 
 

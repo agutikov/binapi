@@ -137,6 +137,37 @@ public:
     /// @brief Set maximum consecutive reconnect attempts (default: 3).
     void set_max_reconnects(int n) { max_reconnects_ = n; }
 
+    // -- Imperative API --
+
+    /// @brief Connect to the user data stream endpoint.
+    [[nodiscard]] boost::cobalt::task<result<void>>
+    async_connect(types::listen_key_t listen_key)
+    {
+        const auto host = conn_.configuration().stream_host;
+        const auto port = conn_.configuration().stream_port;
+        const ws_target_t target = conn_.configuration().stream_base_target + "/" + listen_key;
+        co_return co_await conn_.async_connect(host, port, target);
+    }
+
+    /// @brief Read the next user event from the stream.
+    ///
+    /// Returns a parsed user_stream_event_t variant, or an error if the
+    /// connection is closed or the JSON is unrecognized.
+    [[nodiscard]] boost::cobalt::task<result<types::user_stream_event_t>>
+    async_read_event()
+    {
+        auto msg = co_await conn_.async_read_text();
+        if (!msg)
+            co_return result<types::user_stream_event_t>::failure(msg.err);
+        co_return parse_user_event(*msg);
+    }
+
+    /// @brief Close the connection.
+    [[nodiscard]] boost::cobalt::task<result<void>> async_close()
+    {
+        co_return co_await conn_.async_close();
+    }
+
     // -- Accessors --
 
     [[nodiscard]] Transport& transport() noexcept { return conn_.transport(); }

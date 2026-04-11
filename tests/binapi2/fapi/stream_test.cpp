@@ -124,6 +124,54 @@ TEST(UserStream, SubscribeYieldsVariantEvents)
     EXPECT_EQ(run_sync(do_user_subscribe()), 2);
 }
 
+static boost::cobalt::task<int>
+do_user_read_event()
+{
+    auto cfg = config::testnet_config();
+    streams::basic_user_stream<replay> us(cfg);
+    us.transport().messages = { account_update_json, order_trade_json };
+
+    co_await us.async_connect("fake-key");
+
+    int count = 0;
+    for (int i = 0; i < 2; ++i) {
+        auto ev = co_await us.async_read_event();
+        if (!ev) break;
+        ++count;
+    }
+    co_return count;
+}
+
+TEST(UserStream, AsyncReadEventParsesVariant)
+{
+    EXPECT_EQ(run_sync(do_user_read_event()), 2);
+}
+
+static boost::cobalt::task<int>
+do_user_read_event_types()
+{
+    auto cfg = config::testnet_config();
+    streams::basic_user_stream<replay> us(cfg);
+    us.transport().messages = { account_update_json, order_trade_json };
+
+    co_await us.async_connect("fake-key");
+
+    int account = 0;
+    int order = 0;
+    for (int i = 0; i < 2; ++i) {
+        auto ev = co_await us.async_read_event();
+        if (!ev) break;
+        if (std::holds_alternative<types::account_update_event_t>(*ev)) ++account;
+        if (std::holds_alternative<types::order_trade_update_event_t>(*ev)) ++order;
+    }
+    co_return account * 10 + order;
+}
+
+TEST(UserStream, AsyncReadEventDispatchesTypes)
+{
+    EXPECT_EQ(run_sync(do_user_read_event_types()), 11); // 1 account, 1 order
+}
+
 // -- Combined market stream --
 
 static boost::cobalt::task<int>
