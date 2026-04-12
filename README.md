@@ -324,10 +324,17 @@ Generate Doxygen HTML documentation:
 
 ### binapi2 documentation
 
-Full index in [docs/binapi2/README.md](docs/binapi2/README.md). Key documents:
+**New users start with the [user guide](docs/binapi2/guide/README.md)** — a
+task-oriented walkthrough of the library combining Binance API semantics,
+crypto derivatives fundamentals, and binapi2 type mappings. Six chapters
+cover architecture, market data, trading, account management, user stream
+events, and core types.
+
+Full index in [docs/binapi2/README.md](docs/binapi2/README.md). Reference documents:
 
 | Document | Description |
 |----------|-------------|
+| [docs/binapi2/guide/](docs/binapi2/guide/README.md) | **User guide** (6 chapters) |
 | [docs/binapi2/DESIGN.md](docs/binapi2/DESIGN.md) | Architecture, async model, request flow, stream lifecycle |
 | [docs/binapi2/streams.md](docs/binapi2/streams.md) | WebSocket stream components and usage patterns |
 | [docs/binapi2/threading_and_io.md](docs/binapi2/threading_and_io.md) | Executor ownership and coroutine environments |

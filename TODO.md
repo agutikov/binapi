@@ -5,33 +5,9 @@
 
 
 
-
-
-document overview of data types - rest, wsapi and streams:
-- what contains
-- what means
-- what can do with the data
-- duplication
-    - between rest and wsapi
-    - between streams and 2 other
-- detailed explanation of the fields meaning
-
-this should be an crypto exchange client library user guide in docs/binapi2/guide/
-combining information from binance api docs, library docs and generic crypto trading info
-
-
---------------------------------------------------------------------------------
-
-
-record something
-
-
-
---------------------------------------------------------------------------------
-
-
-review what would need to be done to move on:
+review potential changes needed for transition to:
     - Folly
+    - libufinex
     - Seastar
     - Boost.Fibers
     - CppCoro
@@ -42,11 +18,17 @@ review what would need to be done to move on:
     - asynC++
     - asyncio(C++)
     - packio
-    - libufinex
 And does it make sense
 provide analysis table
 
 sort by expected: latency, throughput, complexity
+
+
+--------------------------------------------------------------------------------
+
+
+record something
+
 
 
 
