@@ -121,7 +121,8 @@ binapi2::fapi::config make_config()
             if (!e.body.empty()) spdlog::debug(">> body: {}", truncate(e.body));
             if (!e.raw.empty()) spdlog::trace(">> raw:\n{}", truncate(e.raw));
 
-            if (!save_request_file.empty()) {
+            // Save request for HTTP and WS-API (not raw WS frame transport).
+            if (!save_request_file.empty() && e.protocol != "WS") {
                 std::string content = e.raw.empty() ? e.body : e.raw;
                 if (std::ofstream f(save_request_file); f) {
                     f << content;
@@ -133,7 +134,8 @@ binapi2::fapi::config make_config()
             if (!e.body.empty()) spdlog::debug("<< body: {}", truncate(e.body));
             if (!e.raw.empty()) spdlog::trace("<< raw:\n{}", truncate(e.raw));
 
-            if (!save_response_file.empty()) {
+            // Save response for HTTP and WS-API (not raw WS frame transport).
+            if (!save_response_file.empty() && e.protocol != "WS") {
                 std::string content = e.body;
                 if (std::ofstream f(save_response_file); f) {
                     f << content;

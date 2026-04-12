@@ -262,6 +262,56 @@ binapi2-fapi-async-demo-cli [flags] <command> [args...]
 
 ---
 
+## Known testnet issues
+
+The following commands fail on the Binance USD-M Futures **testnet** due to
+server-side limitations. These are not library bugs — the library types and
+parsing match the documented production API.
+
+### Endpoints not available on testnet (return `ok` instead of JSON)
+
+7 futures data analytics endpoints return the plain text `ok` (HTTP 200)
+instead of a JSON array. These endpoints are not operational on testnet.
+
+| Command | Expected response |
+|---------|-------------------|
+| `open-interest-stats` | `[{...}]` |
+| `top-ls-account-ratio` | `[{...}]` |
+| `top-ls-trader-ratio` | `[{...}]` |
+| `long-short-ratio` | `[{...}]` |
+| `taker-volume` | `[{...}]` |
+| `basis` | `[{...}]` |
+| `delivery-price` | `[{...}]` |
+
+### Endpoints returning non-standard responses on testnet
+
+| Command | Testnet response | Expected (per docs) | Error |
+|---------|-----------------|---------------------|-------|
+| `test-order` | `{"status":"","side":"",..}` — empty enum strings | `{"status":"NEW","side":"BUY",..}` | `unexpected_enum` |
+| `tradfi-perps` | Plain string `SUCCESS` | `{"code":200,"msg":"success"}` | `expected_brace` |
+
+### Endpoints not implemented on testnet
+
+| Command | HTTP status | Binance code | Message |
+|---------|-------------|--------------|---------|
+| `pm-account-info` | 404 | -5000 | `Path /fapi/v1/pmAccountInfo is invalid` |
+
+### Endpoints returning server errors on testnet
+
+| Command | HTTP status | Binance code | Message |
+|---------|-------------|--------------|---------|
+| `quantitative-rules` | 400 | -1000 | `An unknown error occured` |
+| `convert-quote` | 500 | -1000 | `internal error` |
+| `convert-order-status` | 500 | -1000 | `internal error` |
+
+### Orders requiring balance
+
+| Command | Note |
+|---------|------|
+| `ws-order-place` | Requires sufficient testnet balance to place |
+
+---
+
 ## Source files
 
 | File | Commands | Role |

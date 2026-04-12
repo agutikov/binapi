@@ -165,7 +165,7 @@ constexpr command_entry commands[] = {
     { "ws-account-status",       demo::cmd_ws_account_status,       "Account status via WS API (auth)" },
     { "ws-account-status-v2",    demo::cmd_ws_account_status_v2,    "Account status v2 via WS API (auth)" },
     { "ws-account-balance",      demo::cmd_ws_account_balance,      "Account balance via WS API (auth)" },
-    { "ws-order-place",          demo::cmd_ws_order_place,          "Place order via WS API <sym> <side> <type> [-q Q] [-p P]" },
+    { "ws-order-place",          demo::cmd_ws_order_place,          "Place order via WS API <sym> <side> <type> [-q Q] [-p P] [-t TIF]" },
     { "ws-order-query",          demo::cmd_ws_order_query,          "Query order via WS API <symbol> <orderId>" },
     { "ws-order-modify",         demo::cmd_ws_order_modify,         "Modify order via WS API <sym> <side> <orderId> -q Q -p P" },
     { "ws-order-cancel",         demo::cmd_ws_order_cancel,         "Cancel order via WS API <symbol> <orderId>" },

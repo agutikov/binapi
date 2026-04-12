@@ -42,7 +42,7 @@ boost::cobalt::task<int> cmd_ws_account_status(binapi2::futures_usdm_api& c, con
 boost::cobalt::task<int> cmd_ws_order_place(binapi2::futures_usdm_api& c, const args_t& args)
 {
     if (args.size() < 3) {
-        spdlog::error("usage: ws-order-place <symbol> <side> <type> [-q Q] [-p P]"); co_return 1;
+        spdlog::error("usage: ws-order-place <symbol> <side> <type> [-q Q] [-p P] [-t TIF]"); co_return 1;
     }
     types::websocket_api_order_place_request_t req;
     req.symbol = args[0];
@@ -52,6 +52,8 @@ boost::cobalt::task<int> cmd_ws_order_place(binapi2::futures_usdm_api& c, const 
         req.quantity = types::decimal_t(std::string(v));
     if (auto v = find_flag(args, "--price", "-p"); !v.empty())
         req.price = types::decimal_t(std::string(v));
+    if (auto v = find_flag(args, "--tif", "-t"); !v.empty())
+        req.timeInForce = parse_enum<types::time_in_force_t>(v);
     co_return co_await exec_ws_signed(c, req);
 }
 

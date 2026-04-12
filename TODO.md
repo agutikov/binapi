@@ -1,25 +1,9 @@
 
 
 
-All signed REST, WS API, and convert commands lack the request file. The market data ones (which ran
-  after the fix) have it, but account/trade/ws_api/convert/user_streams ran from the earlier run before
-  the fix was built. The WS API commands also lack request files because the transport logger path is
-  different for WebSocket — it doesn't go through the same HTTP logging path.
 
 
----
 
-document known issues discovered by testnet scripts
-
----
-
-write a library correctness verification checklist in README.md
-from run_tests.sh to testnet scripts
-
-
-add top level script that runs all existing tests and benchmarks and verifies output
-
----
 
 
 update documents
@@ -74,7 +58,8 @@ provide analysis table
 sort by expected: latency, throughput, complexity
 
 
---------------------------------------------------------------------------------
+
+================================================================================
 
 
 streams and wsapi optimization - is a wide infinite task, postpone it, but provide rough start analysis

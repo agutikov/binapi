@@ -154,6 +154,10 @@ client::async_send_rpc(std::string_view method, const Params& params)
         co_return result<types::websocket_api_response_t<Response>>::failure(payload.err);
     }
 
+    if (cfg_.logger) {
+        cfg_.logger({transport_direction::sent, "WS-API", std::string(method), {}, 0, *payload, {}});
+    }
+
     auto write_result = co_await transport_.async_write_text(*payload);
     if (!write_result) {
         co_return result<types::websocket_api_response_t<Response>>::failure(write_result.err);
@@ -162,6 +166,10 @@ client::async_send_rpc(std::string_view method, const Params& params)
     auto raw = co_await transport_.async_read_text();
     if (!raw) {
         co_return result<types::websocket_api_response_t<Response>>::failure(raw.err);
+    }
+
+    if (cfg_.logger) {
+        cfg_.logger({transport_direction::received, "WS-API", std::string(method), {}, 0, *raw, {}});
     }
 
     co_return decode_rpc_response<Response>(*raw);

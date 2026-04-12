@@ -319,43 +319,108 @@ python3 scripts/api/docs/convert_usdm_json_to_markdown.py \
 
 ## Testing
 
-### Unit tests
+### Verification checklist
 
-Located in `tests/binapi2/fapi/`.  Run with:
+The library is verified at four levels. All levels must pass before release.
 
-```bash
-./run_tests.sh
-```
-
-| Test | What it covers |
-|------|---------------|
-| `signing_test` | HMAC-SHA256 and Ed25519 signing, query string construction, percent-encoding |
-| `enums_test` | Enum JSON serialization round-trips |
-| `decimal_test` | 128-bit decimal arithmetic, parsing, formatting |
-| `json_query_test` | Request struct serialization, query parameter conversion |
-| `result_test` | `result<T>` monad semantics |
-| `postman_validation_test` | Validates all 95 endpoints against the official Binance Postman collection (path, method, parameters) |
-
-### Integration tests
-
-The integration test exercises the full client stack (TLS, HTTP, JSON
-deserialization) against a mock Binance API server running in Docker.
+#### Level 1: Unit tests (378 tests, offline)
 
 ```bash
-# Start the mock server
-./scripts/api/postman_mock/start.sh
-
-# Run the integration test
-./scripts/api/postman_mock/run_run_tests.sh
-
-# Stop the mock server
-./scripts/api/postman_mock/stop.sh
+./build.sh
+./run_tests.sh          # ctest -j20, ~1s
 ```
 
-The mock server uses `@jordanwalsh23/postman-local-mock-server` with the
-official Binance Postman collection enriched with response examples from the
-API documentation.  A merge script (`scripts/api/postman_mock/merge_responses.py`)
-injects the responses into the collection at start time.
+| Binary | Tests | What it covers |
+|--------|------:|----------------|
+| `signing_test` | 21 | HMAC-SHA256 hex, Ed25519 base64 signing, query string construction, percent-encoding, auth injection |
+| `enums_test` | 49 | Enum-to-string, string-to-enum, JSON round-trip for all 23 enum types |
+| `enum_set_test` | 32 | `enum_set<E>` bitset operations, JSON array serialization |
+| `decimal_test` | 114 | 128-bit decimal parsing (string and JSON number), arithmetic, overflow, comparison, formatting, JSON round-trip |
+| `json_query_test` | 14 | `to_query_map()` serialization, optional field omission, enum/decimal/timestamp encoding |
+| `result_test` | 46 | `result<T>` monad: success/failure, value access, error propagation, void specialization |
+| `response_parse_test` | 30 | JSON deserialization of all response types (valid, missing required, missing optional, extra fields, corrupted) |
+| `postman_validation_test` | 6 | Validates endpoint metadata (path, method, parameters) against the official Binance Postman collection |
+| `stream_test` | 32 | Market/user stream event parsing, subscription topic generation, stream trait dispatch |
+| `stream_buffer_test` | 12 | `threadsafe_stream_buffer` SPSC ring buffer, async read/write, close semantics |
+| `stream_consumer_test` | 8 | `buffer_consumer` and `inline_consumer` frame dispatch |
+| `stream_recorder_test` | 6 | Stream frame recording with callback and spdlog sinks |
+| `io_thread_test` | 4 | Dedicated I/O thread lifecycle, executor dispatch |
+
+#### Level 2: Integration tests (22 tests, requires Docker)
+
+```bash
+scripts/api/postman_mock/start.sh       # start mock server
+scripts/api/postman_mock/run_test.sh    # 18 async + 4 sync bridging tests
+scripts/api/postman_mock/stop.sh        # stop mock server
+```
+
+Exercises the full client stack (TLS, HTTP/1.1, JSON deserialization, signing)
+against a local mock Binance API server built from the official Postman
+collection with injected response examples.
+
+| Suite | Tests | What it covers |
+|-------|------:|----------------|
+| `postman_mock_integration` | 18 | REST pipeline end-to-end: ping, time, exchange info, order book, recent trades, klines, tickers (price, book, mark), funding rate, account info, balances, position risk, query order, open orders, listen key lifecycle |
+| `sync_bridging_test` | 4 | Synchronous wrappers: `run_sync`, `future`, `callback`, `manual_io_context` |
+
+#### Level 3: Benchmarks
+
+```bash
+# Offline (no server needed)
+./_build/tests/binapi2/fapi/benchmarks/stream_parse_benchmark
+./_build/tests/binapi2/fapi/benchmarks/stream_buffer_benchmark
+./_build/tests/binapi2/fapi/benchmarks/stream_recorder_benchmark
+
+# Online (requires mock server)
+scripts/api/postman_mock/run_benchmark.sh
+```
+
+| Binary | Online | What it measures |
+|--------|--------|-----------------|
+| `stream_parse_benchmark` | no | Stream JSON parsing throughput (book ticker, depth, kline, user events) |
+| `stream_buffer_benchmark` | no | `threadsafe_stream_buffer` SPSC throughput and latency |
+| `stream_recorder_benchmark` | no | Stream frame recording pipeline throughput |
+| `rest_benchmark` | mock | REST request-to-response latency and throughput (16 endpoints, public + signed) |
+
+#### Level 4: Testnet verification (135 commands, requires API keys)
+
+```bash
+scripts/testnet/market_data.sh      # 39 market data REST
+scripts/testnet/account.sh          # 21 account REST
+scripts/testnet/trade.sh            # 29 trade REST
+scripts/testnet/convert.sh          # 3 convert REST
+scripts/testnet/ws_api.sh           # 16 WebSocket API
+scripts/testnet/streams.sh          # 22 market data streams
+scripts/testnet/user_streams.sh     # 4 user data streams
+scripts/testnet/order_book.sh       # 2 live order book
+```
+
+Each script saves per-command output to `testnet_output/<group>/<command>/`:
+
+| File | Content |
+|------|---------|
+| `request` | Raw HTTP request or WS-API JSON |
+| `response.json` | Response body |
+| `log.txt` | Trace-level log |
+| `stdout.txt` | CLI output with parsed JSON (`-v`) |
+| `stream.jsonl` | Raw WebSocket frames (stream/order-book commands only) |
+
+**Expected results:** 120 pass, 15 fail (testnet-side issues, not library bugs).
+
+#### Known testnet failures (not fixable)
+
+These commands fail on the Binance USD-M Futures testnet due to server-side
+limitations. The library types match the documented production API.
+
+| Category | Commands | Cause |
+|----------|----------|-------|
+| Analytics not available | `open-interest-stats`, `top-ls-account-ratio`, `top-ls-trader-ratio`, `long-short-ratio`, `taker-volume`, `basis`, `delivery-price` | Testnet returns plain text `ok` instead of JSON |
+| Non-standard response | `test-order` | Testnet returns empty enum strings `""` in stub response |
+| Non-standard response | `tradfi-perps` | Testnet returns plain string `SUCCESS` instead of `{"code":200,"msg":"success"}` |
+| Endpoint missing | `pm-account-info` | HTTP 404 — endpoint not deployed on testnet |
+| Server error | `quantitative-rules` | HTTP 400, Binance code -1000 |
+| Service unavailable | `convert-quote`, `convert-order-status` | HTTP 500 — convert service not running on testnet |
+| Requires balance | `ws-order-place` | Needs testnet USDT balance to place orders |
 
 Infrastructure is in `compose/postman-mock/` (Dockerfile, docker-compose, response
 files, mapping config).
