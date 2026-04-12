@@ -29,6 +29,7 @@ binapi2 type mappings in a task-oriented narrative.
 | [async_io.md](async_io.md) | Async console, logging, and file recording patterns |
 | [threading_and_io.md](threading_and_io.md) | Executor ownership, coroutine environments (`cobalt::main`, `io_thread`, manual `io_context`) |
 | [streams.md](streams.md) | WebSocket stream components: market, combined, dynamic, user, local order book |
+| [alternative_runtimes.md](alternative_runtimes.md) | Analysis of 12 alternative async runtimes (Folly, Seastar, liburing4cpp, Fibers, etc.) — latency, throughput, complexity, cost |
 
 ### Data and parsing
 

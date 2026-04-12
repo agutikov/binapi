@@ -5,29 +5,9 @@
 
 
 
-review potential changes needed for transition to:
-    - Folly
-    - libufinex
-    - Seastar
-    - Boost.Fibers
-    - CppCoro
-    - liburing4cpp
-    - libco
-    - bthread
-    - uvw
-    - asynC++
-    - asyncio(C++)
-    - packio
-And does it make sense
-provide analysis table
-
-sort by expected: latency, throughput, complexity
-
-
---------------------------------------------------------------------------------
-
-
 record something
+
+
 
 
 
