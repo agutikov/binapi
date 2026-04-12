@@ -9,7 +9,7 @@ This document describes the current async-first architecture of binapi2.
 ### REST -- request/response over HTTP
 
 - Each request: build query -> sign -> HTTP request -> HTTP response -> parse JSON
-- Authentication: API key header + HMAC-SHA256 signature per request
+- Authentication: API key header + signed query (Ed25519 by default, HMAC-SHA256 as fallback)
 - Connection: one fresh TCP+TLS connection per request (no pooling)
 - Stateless: no session, no login
 
@@ -77,7 +77,7 @@ dimension: how the caller **consumes** multiple results over time.
 ### Layer 1: Pure functions (no I/O, no state)
 
 ```
-signing.hpp     -- hmac_sha256_hex, sign_query, inject_auth_query, build_query_string
+signing.hpp     -- hmac_sha256_hex, ed25519_sign_base64, sign_query, inject_auth_query, build_query_string
 query.hpp       -- to_query_map<T> (reflection-based serialization)
 json_opts.hpp   -- parse options
 decode.hpp      -- decode_response<T> (JSON -> typed result)

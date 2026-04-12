@@ -6,15 +6,6 @@
 
 
 
-update documents
-this is final version of binapi2 library
-prepare for release - review and update all documentation
-docs/binapi2
-README.md
-
-
----
-
 
 document overview of data types - rest, wsapi and streams:
 - what contains

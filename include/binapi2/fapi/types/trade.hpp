@@ -55,7 +55,7 @@ struct new_order_request_t
 struct order_response_t
 {
     std::string clientOrderId{};
-    decimal_t cumQty{};
+    std::optional<decimal_t> cumQty{};
     decimal_t cumQuote{};
     decimal_t executedQty{};
     std::optional<decimal_t> cumBase{};

@@ -4,13 +4,30 @@ C++ client library for the Binance cryptocurrency exchange API.
 
 Two library versions coexist in this repository:
 
-| Version | Namespace | API | C++ | Async model |
-|---------|-----------|-----|-----|-------------|
-| **binapi** (v1) | `binapi::rest`, `binapi::ws` | Spot | C++14 | Callbacks |
-| **binapi2** (v2) | `binapi2::fapi` | USD-M Futures | C++23 | Boost.Cobalt coroutines |
+| Version | Namespace | API | C++ | Async model | Status |
+|---------|-----------|-----|-----|-------------|--------|
+| **binapi** (v1) | `binapi::rest`, `binapi::ws` | Spot | C++14 | Callbacks | maintenance |
+| **binapi2** (v2) | `binapi2::fapi` | USD-M Futures | C++23 | Boost.Cobalt coroutines | **release** |
 
-binapi2 is the actively developed version.  binapi v1 is maintained for
-backward compatibility.
+binapi2 is the recommended version for new development. It provides a complete
+implementation of the Binance USD-M Futures API: REST, WebSocket API, market
+data streams, user data streams, and a synchronized local order book. binapi v1
+is maintained for backward compatibility.
+
+## binapi2 feature coverage
+
+| Area | Coverage |
+|------|----------|
+| REST endpoints | 110 (market data, account, trade, convert, user data streams) |
+| WebSocket API methods | 16 (public tickers, order place/modify/cancel/query, account/position, algo orders, listen key) |
+| Market data streams | 22 (per-symbol, all-symbol, meta) |
+| User data stream events | 10 (variant-based dispatch) |
+| Local order book | REST snapshot + WS deltas, plus 3-thread pipelined variant |
+| Signing methods | Ed25519 (default), HMAC-SHA256 |
+| Secret providers | libsecret (default), systemd-creds, env vars |
+| Unit tests | 378 |
+| Integration tests | 22 (against local mock server) |
+| Testnet verification | 135 commands via `scripts/testnet/*.sh` |
 
 ## Quick start
 
@@ -22,8 +39,11 @@ cd binapi
 # Build
 ./build.sh
 
-# Run unit tests
-./run_tests.sh
+# Run unit tests + offline benchmarks
+./verify.sh
+
+# Full verification (requires Docker for integration + testnet keys)
+./verify.sh --all
 
 # Try the demo CLI (uses testnet by default, public endpoints need no keys)
 ./_build/examples/binapi2/fapi/async-demo-cli/binapi2-fapi-async-demo-cli ping
@@ -122,56 +142,91 @@ secret-tool clear service binapi2 key demo/ed25519_private_key
 secret-tool clear service binapi2 key demo/secret_key
 ```
 
-### Minimal example (binapi2)
+### Minimal example (async coroutine)
+
+The library is async-only: every I/O method returns `boost::cobalt::task<result<T>>`.
+The user provides the executor (via `cobalt::main`, `io_thread`, or a manual
+`io_context`). The top-level entry point is `binapi2::futures_usdm_api`, which
+acts as a factory for REST, WS API, and stream clients.
 
 ```cpp
-#include <binapi2/fapi/client.hpp>
-#include <boost/asio/io_context.hpp>
-#include <iostream>
+#include <binapi2/futures_usdm_api.hpp>
+#include <binapi2/fapi/types/market_data.hpp>
+
+#include <boost/cobalt/main.hpp>
+#include <spdlog/spdlog.h>
+
 #include <fstream>
 
-int main() {
-    binapi2::fapi::config cfg;       // production by default
+boost::cobalt::main co_main(int, char*[])
+{
+    using namespace binapi2::fapi;
 
-    // Ed25519 (default, recommended)
+    config cfg = config::testnet_config();
+
+    // Ed25519 (default, recommended).
     cfg.api_key = "...";
     std::ifstream pem("ed25519_private.pem");
     cfg.ed25519_private_key_pem.assign(
         std::istreambuf_iterator<char>(pem), {});
 
-    // Or HMAC (deprecated)
-    // cfg.sign_method = binapi2::fapi::sign_method_t::hmac;
+    // Or HMAC (deprecated):
+    // cfg.sign_method = sign_method_t::hmac;
     // cfg.secret_key  = "...";
 
-    boost::asio::io_context io;
-    binapi2::fapi::client client(io, cfg);
+    binapi2::futures_usdm_api api(std::move(cfg));
 
-    // Public endpoint — no auth needed.
-    auto r = client.market_data.execute(binapi2::fapi::types::ping_request{});
-    if (!r) {
-        std::cerr << r.err.message << "\n";
-        return 1;
-    }
+    // Public REST call — no auth needed.
+    auto rest = co_await api.create_rest_client();
+    if (!rest) { spdlog::error("connect: {}", rest.err.message); co_return 1; }
 
-    // Authenticated endpoint.
-    auto bal = client.account.balances();
+    auto book = co_await (*rest)->market_data.async_execute(
+        types::order_book_request_t{ .symbol = "BTCUSDT", .limit = 5 });
+    if (!book) { spdlog::error("{}", book.err.message); co_return 1; }
+
+    spdlog::info("best bid: {} x {}", book->bids[0].price, book->bids[0].quantity);
+
+    // Authenticated REST call.
+    auto bal = co_await (*rest)->account.async_execute(types::balances_request_t{});
     if (bal) {
-        for (auto& b : *bal)
-            std::cout << b.asset << ": " << b.balance << "\n";
+        for (const auto& b : *bal)
+            spdlog::info("{}: {}", b.asset, b.balance);
     }
+
+    co_return 0;
 }
 ```
 
-### Coroutine example
+### Stream example (generator)
 
 ```cpp
-boost::cobalt::task<void> run(binapi2::fapi::client& client) {
-    auto r = co_await client.market_data.async_execute(
-        binapi2::fapi::types::order_book_request{.symbol = "BTCUSDT", .limit = 5});
-    if (r)
-        std::cout << "best bid: " << r->bids[0].price << "\n";
+auto streams = api.create_market_stream();
+auto gen = streams->subscribe(types::book_ticker_subscription{ .symbol = "BTCUSDT" });
+while (gen) {
+    auto event = co_await gen;
+    if (!event) break;
+    spdlog::info("{}  bid {} x {}  ask {} x {}",
+                 event->symbol, event->bidPrice, event->bidQty,
+                 event->askPrice, event->askQty);
 }
 ```
+
+### Sync bridging
+
+For non-async callers, `io_thread::run_sync()` wraps an async task:
+
+```cpp
+#include <binapi2/fapi/detail/io_thread.hpp>
+
+binapi2::fapi::detail::io_thread io;
+binapi2::futures_usdm_api api(cfg);
+
+auto rest = io.run_sync(api.create_rest_client());
+auto pong = io.run_sync((*rest)->market_data.async_execute(types::ping_request_t{}));
+```
+
+The `examples/binapi2/fapi/sync-demo/` directory has complete examples for
+blocking, `std::future`, callback, and manual `io_context` patterns.
 
 ## Build
 
@@ -267,13 +322,20 @@ Generate Doxygen HTML documentation:
 # Open _docs/html/index.html
 ```
 
-### Data types and implementation status
+### binapi2 documentation
+
+Full index in [docs/binapi2/README.md](docs/binapi2/README.md). Key documents:
 
 | Document | Description |
 |----------|-------------|
-| [docs/binapi2/implementation_status.md](docs/binapi2/implementation_status.md) | Per-endpoint coverage matrix (implemented/partial/TBD) |
-| [docs/binapi2/data_types.md](docs/binapi2/data_types.md) | All C++ types with field-level status (complete/partial/extra) |
 | [docs/binapi2/DESIGN.md](docs/binapi2/DESIGN.md) | Architecture, async model, request flow, stream lifecycle |
+| [docs/binapi2/streams.md](docs/binapi2/streams.md) | WebSocket stream components and usage patterns |
+| [docs/binapi2/threading_and_io.md](docs/binapi2/threading_and_io.md) | Executor ownership and coroutine environments |
+| [docs/binapi2/json_parsing.md](docs/binapi2/json_parsing.md) | Glaze deserializer behaviour |
+| [docs/binapi2/implementation_status.md](docs/binapi2/implementation_status.md) | Per-endpoint coverage matrix |
+| [docs/binapi2/data_types.md](docs/binapi2/data_types.md) | C++ request/response type catalog |
+| [docs/binapi2/demo_cli_all_apis.md](docs/binapi2/demo_cli_all_apis.md) | Demo CLI command reference + known testnet issues |
+| [docs/binapi2/secret_provider.md](docs/binapi2/secret_provider.md) | Credential loading (libsecret / systemd-creds) |
 
 ### Binance API reference (local)
 
@@ -319,9 +381,25 @@ python3 scripts/api/docs/convert_usdm_json_to_markdown.py \
 
 ## Testing
 
+### One-shot verification
+
+`verify.sh` runs every verification level and reports pass/fail/skipped counts.
+
+```bash
+./verify.sh              # Levels 1-2 (no Docker, no keys)
+./verify.sh --mock       # Levels 1-4 (mock server must be running)
+./verify.sh --testnet    # Levels 1-2 + 5 (testnet keys required)
+./verify.sh --all        # Levels 1-5 (starts/stops mock server, runs testnet)
+```
+
+Levels 3-5 categorize testnet failures against a known-failure list and only
+reports unexpected errors as test failures. Known testnet-side issues (see
+[demo_cli_all_apis.md](docs/binapi2/demo_cli_all_apis.md#known-testnet-issues))
+are counted separately.
+
 ### Verification checklist
 
-The library is verified at four levels. All levels must pass before release.
+The library is verified at five levels. All levels must pass before release.
 
 #### Level 1: Unit tests (378 tests, offline)
 
@@ -346,7 +424,21 @@ The library is verified at four levels. All levels must pass before release.
 | `stream_recorder_test` | 6 | Stream frame recording with callback and spdlog sinks |
 | `io_thread_test` | 4 | Dedicated I/O thread lifecycle, executor dispatch |
 
-#### Level 2: Integration tests (22 tests, requires Docker)
+#### Level 2: Offline benchmarks
+
+```bash
+./_build/tests/binapi2/fapi/benchmarks/stream_parse_benchmark
+./_build/tests/binapi2/fapi/benchmarks/stream_buffer_benchmark
+./_build/tests/binapi2/fapi/benchmarks/stream_recorder_benchmark
+```
+
+| Binary | What it measures |
+|--------|------------------|
+| `stream_parse_benchmark` | Stream JSON parsing throughput (book ticker, depth, kline, user events) |
+| `stream_buffer_benchmark` | `threadsafe_stream_buffer` SPSC throughput and latency |
+| `stream_recorder_benchmark` | Stream frame recording pipeline throughput |
+
+#### Level 3: Integration tests (22 tests, requires Docker)
 
 ```bash
 scripts/api/postman_mock/start.sh       # start mock server
@@ -363,26 +455,17 @@ collection with injected response examples.
 | `postman_mock_integration` | 18 | REST pipeline end-to-end: ping, time, exchange info, order book, recent trades, klines, tickers (price, book, mark), funding rate, account info, balances, position risk, query order, open orders, listen key lifecycle |
 | `sync_bridging_test` | 4 | Synchronous wrappers: `run_sync`, `future`, `callback`, `manual_io_context` |
 
-#### Level 3: Benchmarks
+#### Level 4: Online benchmark (requires Docker)
 
 ```bash
-# Offline (no server needed)
-./_build/tests/binapi2/fapi/benchmarks/stream_parse_benchmark
-./_build/tests/binapi2/fapi/benchmarks/stream_buffer_benchmark
-./_build/tests/binapi2/fapi/benchmarks/stream_recorder_benchmark
-
-# Online (requires mock server)
 scripts/api/postman_mock/run_benchmark.sh
 ```
 
-| Binary | Online | What it measures |
-|--------|--------|-----------------|
-| `stream_parse_benchmark` | no | Stream JSON parsing throughput (book ticker, depth, kline, user events) |
-| `stream_buffer_benchmark` | no | `threadsafe_stream_buffer` SPSC throughput and latency |
-| `stream_recorder_benchmark` | no | Stream frame recording pipeline throughput |
-| `rest_benchmark` | mock | REST request-to-response latency and throughput (16 endpoints, public + signed) |
+| Binary | What it measures |
+|--------|------------------|
+| `rest_benchmark` | REST request-to-response latency and throughput (16 endpoints, public + signed, against mock server) |
 
-#### Level 4: Testnet verification (135 commands, requires API keys)
+#### Level 5: Testnet verification (135 commands, requires API keys)
 
 ```bash
 scripts/testnet/market_data.sh      # 39 market data REST
@@ -422,33 +505,39 @@ limitations. The library types match the documented production API.
 | Service unavailable | `convert-quote`, `convert-order-status` | HTTP 500 — convert service not running on testnet |
 | Requires balance | `ws-order-place` | Needs testnet USDT balance to place orders |
 
-Infrastructure is in `compose/postman-mock/` (Dockerfile, docker-compose, response
-files, mapping config).
-
-Tested endpoints: ping, server time, exchange info, order book, recent trades,
-klines, price ticker, book ticker, mark price, funding rate history, account
-information, balances, position risk, query order, open orders, listen key
-(start/keepalive/close).
+Mock server infrastructure is in `compose/postman-mock/` (Dockerfile,
+docker-compose, response files, mapping config). It uses
+`@jordanwalsh23/postman-local-mock-server` with the official Binance Postman
+collection, enriched with response examples via
+`scripts/api/postman_mock/merge_responses.py`.
 
 ## Examples
 
-The demo CLI at `examples/binapi2/fapi/demo-cli/` demonstrates every library
-feature.  Each source file covers a different area:
+The demo CLI at `examples/binapi2/fapi/async-demo-cli/` demonstrates every
+library feature via 135 commands. See
+[docs/binapi2/demo_cli_all_apis.md](docs/binapi2/demo_cli_all_apis.md) for the
+full command reference. Source files cover different areas:
 
 | File | Area |
 |------|------|
-| `cmd_market_data.cpp` | Public REST endpoints (ping, time, depth, trades, klines, tickers) |
-| `cmd_account.cpp` | Account info, balances, positions, income history |
-| `cmd_trade.cpp` | Order placement, cancellation, queries |
-| `cmd_ws_api.cpp` | WebSocket API (authenticated RPC: logon, place/cancel orders) |
-| `cmd_stream.cpp` | Market data WebSocket streams (klines, depth, tickers, liquidations) |
-| `cmd_user_stream.cpp` | User data streams (listen key lifecycle, account updates) |
-| `cmd_order_book.cpp` | Live synchronized local order book |
+| `cmd_market_data.cpp` | 39 public REST endpoints (ping, time, depth, trades, klines, tickers, analytics) |
+| `cmd_account.cpp` | 21 account endpoints (info, balances, positions, income, config, downloads) |
+| `cmd_trade.cpp` | 29 trade endpoints (order lifecycle, margin, leverage, algo orders) |
+| `cmd_convert.cpp` | 3 convert endpoints |
+| `cmd_ws_api.cpp` | 16 WebSocket API methods (session logon, tickers, orders, positions) |
+| `cmd_stream.cpp` | 22 market data streams (per-symbol, all-symbol, meta) |
+| `cmd_user_stream.cpp` | 4 user data stream commands (listen key lifecycle + variant stream) |
+| `cmd_order_book.cpp` | Live synchronized local order book (single-thread) |
+| `cmd_pipeline_order_book.cpp` | 3-thread pipelined local order book |
+
+A second example, `examples/binapi2/fapi/sync-demo/`, shows four synchronous
+bridging patterns against the async-only library: blocking, future, callback,
+and manual `io_context`.
 
 ### Usage
 
 ```bash
-binapi2-fapi-demo-cli [flags] <command> [args...]
+binapi2-fapi-async-demo-cli [flags] <command> [args...]
 
 Flags:
   -v          Print JSON responses
@@ -462,16 +551,16 @@ Flags:
 
 ```bash
 # Server time
-./binapi2-fapi-demo-cli -v time
+./binapi2-fapi-async-demo-cli -v time
 
 # Order book (top 5 levels)
-./binapi2-fapi-demo-cli -v order-book BTCUSDT 5
+./binapi2-fapi-async-demo-cli -v order-book BTCUSDT 5
 
 # Klines (1-hour candles, last 10)
-./binapi2-fapi-demo-cli -v klines BTCUSDT 1h 10
+./binapi2-fapi-async-demo-cli -v klines BTCUSDT 1h 10
 
 # All mark prices
-./binapi2-fapi-demo-cli -v mark-prices
+./binapi2-fapi-async-demo-cli -v mark-prices
 ```
 
 ### HOWTO: place and manage orders (testnet)

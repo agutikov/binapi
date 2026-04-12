@@ -98,7 +98,7 @@ binapi2-fapi-async-demo-cli [flags] <command> [args...]
 | 33 | `composite-index-info` | `composite_index_info_request_t` | `[symbol]` | none |
 | 34 | `index-constituents` | `index_constituents_request_t` | `<symbol>` | none |
 | 35 | `asset-index` | `asset_index_request_t` | `[symbol]` | none |
-| 36 | `insurance-fund` | `insurance_fund_request_t` | `[symbol]` | none |
+| 36 | `insurance-fund` | `insurance_fund_request_t` / `insurance_funds_request_t` | `[symbol]` | none |
 | 37 | `adl-risk` | `adl_risk_request_t` | `[symbol]` | none |
 | 38 | `rpi-depth` | `rpi_depth_request_t` | `<symbol> [limit]` | none |
 | 39 | `trading-schedule` | `trading_schedule_request_t` | -- | none |
@@ -184,12 +184,12 @@ binapi2-fapi-async-demo-cli [flags] <command> [args...]
 | # | Command | Request type | Auth | Args |
 |---|---------|-------------|------|------|
 | 1 | `ws-logon` | (session logon) | signed | -- |
-| 2 | `ws-book-ticker` | `websocket_api_book_ticker_request_t` | none | `[symbol]` |
-| 3 | `ws-price-ticker` | `websocket_api_price_ticker_request_t` | none | `[symbol]` |
+| 2 | `ws-book-ticker` | `websocket_api_book_ticker_request_t` / `websocket_api_book_tickers_request_t` | none | `[symbol]` (empty = all) |
+| 3 | `ws-price-ticker` | `websocket_api_price_ticker_request_t` / `websocket_api_price_tickers_request_t` | none | `[symbol]` (empty = all) |
 | 4 | `ws-account-status` | `websocket_api_account_status_request_t` | signed | -- |
 | 5 | `ws-account-status-v2` | `ws_account_status_v2_request_t` | signed | -- |
 | 6 | `ws-account-balance` | `ws_account_balance_request_t` | signed | -- |
-| 7 | `ws-order-place` | `websocket_api_new_order_request_t` | signed | `<sym> <side> <type> [-q Q] [-p P]` |
+| 7 | `ws-order-place` | `websocket_api_new_order_request_t` | signed | `<sym> <side> <type> [-q Q] [-p P] [-t TIF]` |
 | 8 | `ws-order-query` | `websocket_api_order_query_request_t` | signed | `<symbol> <orderId>` |
 | 9 | `ws-order-modify` | `websocket_api_order_modify_request_t` | signed | `<sym> <side> <orderId> -q Q -p P` |
 | 10 | `ws-order-cancel` | `websocket_api_cancel_order_request_t` | signed | `<symbol> <orderId>` |

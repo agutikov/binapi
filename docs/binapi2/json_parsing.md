@@ -62,6 +62,26 @@ This is intentional: Binance regularly adds new response fields without prior
 notice. Rejecting unknown keys would cause the client to break on every such
 addition.
 
+## Decimal parsing
+
+`decimal_t` is a string-backed 128-bit fixed-point type. Its glaze deserializer
+accepts **both** JSON strings and JSON numbers, because Binance inconsistently
+uses both on the wire:
+
+```json
+{
+    "price": "70000.50",          // string-encoded (most common)
+    "maintMarginRatio": 0.004,    // number (leverage-bracket, commission)
+    "cum": 0.0                    // number
+}
+```
+
+When the token starts with `"`, glaze parses it as a string. Otherwise it
+extracts the raw digits of the JSON number verbatim to preserve exact
+precision (no intermediate `double` conversion). See
+`include/binapi2/fapi/types/detail/decimal.hpp` and `DecimalJson.*` tests in
+`tests/binapi2/fapi/decimal_test.cpp`.
+
 ## Enum parsing
 
 Enum values are deserialized from their wire-format strings via

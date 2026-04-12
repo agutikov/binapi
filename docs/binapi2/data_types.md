@@ -40,9 +40,11 @@ Source: `include/binapi2/fapi/types/detail/symbol.hpp`, `include/binapi2/fapi/ty
 
 | Type | Source | Notes |
 |---|---|---|
-| `symbol_t` | `types/detail/symbol.hpp` | Strong type for trading symbols (e.g., "BTCUSDT") |
-| `pair_t` | `types/detail/pair.hpp` | Strong type for trading pairs (e.g., "BTCUSD") |
-| `decimal_t` | `types/detail/decimal.hpp` | String-backed decimal. Has `fmt::formatter<decimal_t>` for spdlog/fmt integration. |
+| `symbol_t` | `types/detail/symbol.hpp` | Strong type for trading symbols (e.g., "BTCUSDT"). Constructors normalize input to uppercase — Binance REST accepts any case but streams require lowercase topics, handled by `stream_traits`. |
+| `pair_t` | `types/detail/pair.hpp` | Strong type for trading pairs (e.g., "BTCUSDT"). Same uppercase normalization as `symbol_t`. |
+| `decimal_t` | `types/detail/decimal.hpp` | String-backed 128-bit fixed-point decimal. JSON deserializer accepts both quoted strings and unquoted numbers. Has `fmt::formatter<decimal_t>` for spdlog/fmt integration. |
+| `timestamp_ms_t` | `types/detail/timestamp.hpp` | Millisecond Unix timestamp wrapper over `std::uint64_t`. |
+| `enum_set<E>` | `types/detail/enum_set.hpp` | Compact bitset for enum flag sets with JSON array serialization. |
 
 
 ## Request tags

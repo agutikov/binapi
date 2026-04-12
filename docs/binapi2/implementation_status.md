@@ -1,5 +1,16 @@
 # FAPI implementation status
 
+**Release status: binapi2 is feature-complete** for the Binance USD-M Futures
+public API. Every documented endpoint is implemented and verified against the
+Binance testnet via `scripts/testnet/*.sh` (135 demo CLI commands).
+
+Coverage summary:
+- **REST:** 39 market data + 21 account + 29 trade + 3 convert + 3 user data stream = **95 endpoints**
+- **WebSocket API:** **16 methods** (session logon, tickers, orders, positions, algo orders, listen key)
+- **Market streams:** **22 subscriptions** (per-symbol, all-symbol, meta)
+- **User data streams:** **10 event types** via `std::variant` dispatch
+- **Local order book:** 2 variants (single-thread + 3-thread pipelined)
+
 Status meanings used here:
 - implemented = direct current endpoint, method, or stream support exists in the FAPI codebase
 - partial = only a subset, adjacent variant, or general/reference coverage exists

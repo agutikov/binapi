@@ -476,9 +476,9 @@ user-provided bridging (e.g., `io_thread::run_sync()`).
 
 | Access Mode | Transport | Authentication | Latency | Use Case |
 |---|---|---|---|---|
-| REST Request | HTTPS | API key in header, HMAC-SHA256 signed query | Medium | Account queries, order placement, market data snapshots |
+| REST Request | HTTPS | API key header + signed query (Ed25519 or HMAC) | Medium | Account queries, order placement, market data snapshots |
 | WebSocket Stream | WSS | None (market) / Listen key (user) | Low | Real-time market data, account events |
-| WebSocket API | WSS | HMAC-SHA256 per message (4 auth modes) | Lowest | Low-latency trading without HTTP overhead |
+| WebSocket API | WSS | Session logon (Ed25519) or per-request sig (4 auth modes) | Lowest | Low-latency trading without HTTP overhead |
 | Local Order Book | WSS + REST | None | Low | Synchronized local depth book |
 
 ---
@@ -578,6 +578,11 @@ Async locally maintained order book:
 
 ```plantuml
 @startuml
+enum sign_method_t {
+  ed25519
+  hmac
+}
+
 class config {
   +rest_host : string = "fapi.binance.com"
   +rest_port : string = "443"
@@ -590,14 +595,29 @@ class config {
   +stream_base_target : string = "/ws"
   +api_key : string
   +secret_key : string
+  +ed25519_private_key_pem : string
+  +sign_method : sign_method_t = ed25519
   +recv_window : uint64 = 5000
   +user_agent : string = "binapi2-fapi/0.1.0"
   +testnet : bool = false
+  +logger : transport_logger
   --
   +{static} testnet_config() : config
 }
+
+config --> sign_method_t
 @enduml
 ```
+
+### Signing methods
+
+| Method | Config | Credentials | Binance status |
+|---|---|---|---|
+| **Ed25519** (default) | `sign_method_t::ed25519` | `api_key` + `ed25519_private_key_pem` | Recommended, required for WS API `session.logon` |
+| HMAC-SHA256 | `sign_method_t::hmac` | `api_key` + `secret_key` | Deprecated |
+
+The default is Ed25519. For WS API session logon (`session.logon`), Ed25519 is
+mandatory — HMAC is only accepted for REST signing.
 
 ---
 
@@ -647,11 +667,12 @@ error --> error_code
 | Boost.ASIO | Async I/O, event loop | Required |
 | Boost.Beast | HTTP/WebSocket protocol | Required |
 | Boost.Cobalt | C++20 coroutines (async transport) | Required |
-| OpenSSL | TLS (HTTPS/WSS) + HMAC-SHA256 signing | Required |
+| OpenSSL | TLS (HTTPS/WSS) + HMAC-SHA256 + Ed25519 signing | Required |
 | ZLIB | Response compression | Required |
-| Glaze | Compile-time JSON serialization + struct reflection | Bundled (header-only) |
-| DTF | Datetime formatting | Bundled (header-only) |
+| spdlog / fmt | Logging, formatting | Required |
+| Glaze | Compile-time JSON serialization + struct reflection | Submodule (header-only) |
+| Google Test | Unit tests | Test-only |
 
-**Build:** CMake 3.10+, C++23 compiler, Boost 1.84+.
+**Build:** CMake 3.20+, C++23 compiler (GCC 13+ / Clang 17+), Boost 1.84+.
 
 [implementation_status.md]: /docs/binapi2/implementation_status.md
