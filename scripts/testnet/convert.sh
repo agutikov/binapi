@@ -1,22 +1,20 @@
 #!/usr/bin/env bash
-# Run WebSocket API demo-cli commands against Binance testnet.
+# Run Convert REST demo-cli commands against Binance testnet.
 # Saves request, response, and log for each command.
 #
-# Usage: scripts/testnet_ws_api.sh [output_dir]
-#   output_dir defaults to testnet_output/ws_api
+# Note: Convert endpoints may not be available on testnet — FAIL is expected.
 #
-# Requires: BINAPI2_SECRET (e.g. BINAPI2_SECRET=libsecret:demo)
+# Usage: scripts/testnet/convert.sh [output_dir]
+#   output_dir defaults to testnet_output/convert
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 CLI="$ROOT_DIR/_build/examples/binapi2/fapi/async-demo-cli/binapi2-fapi-async-demo-cli"
 
-OUT="${1:-$ROOT_DIR/testnet_output/ws_api}"
+OUT="${1:-$ROOT_DIR/testnet_output/convert}"
 mkdir -p "$OUT"
-
-SYMBOL=BTCUSDT
 
 run() {
     local name="$1"
@@ -37,13 +35,10 @@ run() {
     fi
 }
 
-echo "=== WebSocket API endpoints ==="
+echo "=== Convert ==="
 
-run ws-logon           ws-logon
-run ws-account-status  ws-account-status
-
-# Place a test order (will likely be rejected on testnet without balance, but captures the flow)
-run ws-order-place     ws-order-place "$SYMBOL" BUY LIMIT -q 0.001 -p 10000 || true
+run convert-quote        convert-quote BTC USDT 0.001 || true
+run convert-order-status convert-order-status 0 || true
 
 echo "=== Done ==="
 echo "Output in: $OUT"

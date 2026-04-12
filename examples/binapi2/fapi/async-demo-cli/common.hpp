@@ -140,4 +140,171 @@ std::string_view find_flag(const args_t& args, std::string_view key, std::string
 // Uses libsecret by default, falls back to env vars if --secrets env.
 boost::cobalt::task<void> async_load_secrets(binapi2::fapi::config& cfg);
 
+// ---------------------------------------------------------------------------
+// REST service executors — one per service group
+// ---------------------------------------------------------------------------
+
+template<typename Request>
+boost::cobalt::task<int> exec_market_data(binapi2::futures_usdm_api& c, Request req)
+{
+    auto rest = co_await c.create_rest_client();
+    if (!rest) { spdlog::error("connect: {}", rest.err.message); co_return 1; }
+    auto r = co_await (*rest)->market_data.async_execute(req);
+    co_return handle_result(r);
+}
+
+template<typename Request>
+boost::cobalt::task<int> exec_account(binapi2::futures_usdm_api& c, Request req)
+{
+    auto rest = co_await c.create_rest_client();
+    if (!rest) { spdlog::error("connect: {}", rest.err.message); co_return 1; }
+    auto r = co_await (*rest)->account.async_execute(req);
+    co_return handle_result(r);
+}
+
+template<typename Request>
+boost::cobalt::task<int> exec_trade(binapi2::futures_usdm_api& c, Request req)
+{
+    auto rest = co_await c.create_rest_client();
+    if (!rest) { spdlog::error("connect: {}", rest.err.message); co_return 1; }
+    auto r = co_await (*rest)->trade.async_execute(req);
+    co_return handle_result(r);
+}
+
+// Note: convert_service has no generic async_execute (traits-dispatched via pipeline).
+// Each convert command calls the pipeline directly in cmd_convert.cpp.
+
+template<typename Request>
+boost::cobalt::task<int> exec_user_data_streams(binapi2::futures_usdm_api& c, Request req)
+{
+    auto rest = co_await c.create_rest_client();
+    if (!rest) { spdlog::error("connect: {}", rest.err.message); co_return 1; }
+    auto r = co_await (*rest)->user_data_streams.async_execute(req);
+    co_return handle_result(r);
+}
+
+// ---------------------------------------------------------------------------
+// WebSocket API executors
+// ---------------------------------------------------------------------------
+
+/// Public WS API call: connect → execute → print → close.
+template<typename Request>
+boost::cobalt::task<int> exec_ws_public(binapi2::futures_usdm_api& c, Request req)
+{
+    auto ws = co_await c.create_ws_api_client();
+    if (!ws) { spdlog::error("connect: {}", ws.err.message); co_return 1; }
+    if (auto conn = co_await (*ws)->async_connect(); !conn) { print_error(conn.err); co_return 1; }
+    auto r = co_await (*ws)->async_execute(req);
+    if (!r) { print_error(r.err); co_await (*ws)->async_close(); co_return 1; }
+    spdlog::info("status={}", r->status);
+    if (verbosity >= 1 && r->result) print_json(*r->result);
+    co_await (*ws)->async_close();
+    co_return 0;
+}
+
+/// Signed WS API call: connect → logon → execute → print → close.
+template<typename Request>
+boost::cobalt::task<int> exec_ws_signed(binapi2::futures_usdm_api& c, Request req)
+{
+    auto ws = co_await c.create_ws_api_client();
+    if (!ws) { spdlog::error("connect: {}", ws.err.message); co_return 1; }
+    if (auto conn = co_await (*ws)->async_connect(); !conn) { print_error(conn.err); co_return 1; }
+    if (auto l = co_await (*ws)->async_session_logon(); !l) {
+        print_error(l.err);
+        co_await (*ws)->async_close();
+        co_return 1;
+    }
+    auto r = co_await (*ws)->async_execute(req);
+    if (!r) { print_error(r.err); co_await (*ws)->async_close(); co_return 1; }
+    spdlog::info("status={}", r->status);
+    if (verbosity >= 1 && r->result) print_json(*r->result);
+    co_await (*ws)->async_close();
+    co_return 0;
+}
+
+// ---------------------------------------------------------------------------
+// Market stream executor
+// ---------------------------------------------------------------------------
+
+/// Subscribe to a market stream and print events in a loop.
+template<typename Subscription>
+boost::cobalt::task<int> exec_stream(binapi2::futures_usdm_api& c, Subscription sub)
+{
+    auto streams = c.create_market_stream();
+    if (record_buffer) streams->connection().attach_buffer(*record_buffer);
+    auto gen = streams->subscribe(sub);
+    while (gen) {
+        auto event = co_await gen;
+        if (!event) { print_error(event.err); co_return 1; }
+        print_json(*event);
+    }
+    co_return 0;
+}
+
+// ---------------------------------------------------------------------------
+// Argument-shape helpers for command families
+// ---------------------------------------------------------------------------
+
+/// Kline command: parse <symbol> <interval> [limit], execute via market_data.
+template<typename Request>
+boost::cobalt::task<int> cmd_kline(binapi2::futures_usdm_api& c, const args_t& args,
+                                   std::string_view usage)
+{
+    if (args.size() < 2) { spdlog::error("usage: {}", usage); co_return 1; }
+    Request req;
+    req.symbol = args[0];
+    req.interval = parse_enum<binapi2::fapi::types::kline_interval_t>(args[1]);
+    if (args.size() > 2) req.limit = std::stoi(args[2]);
+    co_return co_await exec_market_data(c, req);
+}
+
+/// Pair-kline command: parse <pair> <interval> [limit], execute via market_data.
+template<typename Request>
+boost::cobalt::task<int> cmd_pair_kline(binapi2::futures_usdm_api& c, const args_t& args,
+                                        std::string_view usage)
+{
+    if (args.size() < 2) { spdlog::error("usage: {}", usage); co_return 1; }
+    Request req;
+    req.pair = args[0];
+    req.interval = parse_enum<binapi2::fapi::types::kline_interval_t>(args[1]);
+    if (args.size() > 2) req.limit = std::stoi(args[2]);
+    co_return co_await exec_market_data(c, req);
+}
+
+/// Futures analytics command: parse <symbol> <period> [limit], execute via market_data.
+template<typename Request>
+boost::cobalt::task<int> cmd_futures_analytics(binapi2::futures_usdm_api& c, const args_t& args,
+                                               std::string_view usage)
+{
+    if (args.size() < 2) { spdlog::error("usage: {}", usage); co_return 1; }
+    Request req;
+    req.symbol = args[0];
+    req.period = parse_enum<binapi2::fapi::types::kline_interval_t>(args[1]);
+    if (args.size() > 2) req.limit = std::stoi(args[2]);
+    co_return co_await exec_market_data(c, req);
+}
+
+/// Download-id command: parse <startTime> <endTime> as epoch-ms, execute via account.
+template<typename Request>
+boost::cobalt::task<int> cmd_download_id(binapi2::futures_usdm_api& c, const args_t& args,
+                                         std::string_view usage)
+{
+    if (args.size() < 2) { spdlog::error("usage: {}", usage); co_return 1; }
+    Request req;
+    req.startTime = binapi2::fapi::types::timestamp_ms_t{ std::stoull(args[0]) };
+    req.endTime = binapi2::fapi::types::timestamp_ms_t{ std::stoull(args[1]) };
+    co_return co_await exec_account(c, req);
+}
+
+/// Download-link command: parse <downloadId>, execute via account.
+template<typename Request>
+boost::cobalt::task<int> cmd_download_link(binapi2::futures_usdm_api& c, const args_t& args,
+                                           std::string_view usage)
+{
+    if (args.empty()) { spdlog::error("usage: {}", usage); co_return 1; }
+    Request req;
+    req.downloadId = args[0];
+    co_return co_await exec_account(c, req);
+}
+
 } // namespace demo

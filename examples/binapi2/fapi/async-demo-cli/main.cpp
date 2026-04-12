@@ -24,6 +24,7 @@
 #include "cmd_market_data.hpp"
 #include "cmd_account.hpp"
 #include "cmd_trade.hpp"
+#include "cmd_convert.hpp"
 #include "cmd_ws_api.hpp"
 #include "cmd_stream.hpp"
 #include "cmd_user_stream.hpp"
@@ -52,62 +53,159 @@ struct command_entry
     std::string_view help;
 };
 
+// Group header: fn == nullptr, name is the group title.
+constexpr bool is_group(const command_entry& e) { return e.fn == nullptr; }
+
 // clang-format off
 constexpr command_entry commands[] = {
-    // Market data (public, async)
+    { "Market Data", nullptr, {} },
     { "ping",                    demo::cmd_ping,                    "Test API connectivity" },
     { "time",                    demo::cmd_time,                    "Get server time" },
     { "exchange-info",           demo::cmd_exchange_info,           "Exchange info [symbol]" },
     { "order-book",              demo::cmd_order_book,              "Order book <symbol> [limit]" },
     { "recent-trades",           demo::cmd_recent_trades,           "Recent trades <symbol> [limit]" },
+    { "aggregate-trades",        demo::cmd_aggregate_trades,        "Aggregate trades <symbol> [limit]" },
+    { "historical-trades",       demo::cmd_historical_trades,       "Historical trades <symbol> [limit]" },
     { "book-ticker",             demo::cmd_book_ticker,             "Book ticker <symbol>" },
     { "book-tickers",            demo::cmd_book_tickers,            "All book tickers" },
     { "price-ticker",            demo::cmd_price_ticker,            "Price ticker <symbol>" },
     { "price-tickers",           demo::cmd_price_tickers,           "All price tickers" },
+    { "price-ticker-v2",         demo::cmd_price_ticker_v2,         "Price ticker v2 <symbol>" },
+    { "price-tickers-v2",        demo::cmd_price_tickers_v2,        "All price tickers v2" },
     { "ticker-24hr",             demo::cmd_ticker_24hr,             "24hr ticker <symbol>" },
+    { "ticker-24hrs",            demo::cmd_ticker_24hrs,            "All 24hr tickers" },
     { "mark-price",              demo::cmd_mark_price,              "Mark price <symbol>" },
     { "mark-prices",             demo::cmd_mark_prices,             "All mark prices" },
     { "klines",                  demo::cmd_klines,                  "Klines <symbol> <interval> [limit]" },
+    { "continuous-kline",        demo::cmd_continuous_kline,        "Continuous kline <pair> <interval> [limit]" },
+    { "index-price-kline",       demo::cmd_index_price_kline,       "Index price kline <pair> <interval> [limit]" },
+    { "mark-price-klines",       demo::cmd_mark_price_klines,       "Mark price klines <symbol> <interval> [limit]" },
+    { "premium-index-klines",    demo::cmd_premium_index_klines,    "Premium index klines <symbol> <interval> [limit]" },
     { "funding-rate",            demo::cmd_funding_rate,            "Funding rate history <symbol> [limit]" },
+    { "funding-rate-info",       demo::cmd_funding_rate_info,       "Funding rate info (all)" },
     { "open-interest",           demo::cmd_open_interest,           "Open interest <symbol>" },
+    { "open-interest-stats",     demo::cmd_open_interest_stats,     "Open interest stats <symbol> <period> [limit]" },
+    { "top-ls-account-ratio",    demo::cmd_top_ls_account_ratio,    "Top L/S account ratio <symbol> <period> [limit]" },
+    { "top-ls-trader-ratio",     demo::cmd_top_ls_trader_ratio,     "Top L/S trader ratio <symbol> <period> [limit]" },
+    { "long-short-ratio",        demo::cmd_long_short_ratio,        "Global L/S ratio <symbol> <period> [limit]" },
+    { "taker-volume",            demo::cmd_taker_volume,            "Taker buy/sell volume <symbol> <period> [limit]" },
+    { "basis",                   demo::cmd_basis,                   "Basis <pair> <period> [limit]" },
+    { "delivery-price",          demo::cmd_delivery_price,          "Delivery price <pair>" },
+    { "composite-index-info",    demo::cmd_composite_index_info,    "Composite index info [symbol]" },
+    { "index-constituents",      demo::cmd_index_constituents,      "Index constituents <symbol>" },
+    { "asset-index",             demo::cmd_asset_index,             "Asset index [symbol]" },
+    { "insurance-fund",          demo::cmd_insurance_fund,          "Insurance fund [symbol]" },
+    { "adl-risk",                demo::cmd_adl_risk,                "ADL risk [symbol]" },
+    { "rpi-depth",               demo::cmd_rpi_depth,               "RPI depth <symbol> [limit]" },
+    { "trading-schedule",        demo::cmd_trading_schedule,        "Trading schedule" },
 
-    // Account (auth, async)
+    { "Account", nullptr, {} },
     { "account-info",            demo::cmd_account_info,            "Account information (auth)" },
     { "balances",                demo::cmd_balances,                "Account balances (auth)" },
     { "position-risk",           demo::cmd_position_risk,           "Position risk [symbol] (auth)" },
     { "income-history",          demo::cmd_income_history,          "Income history [symbol] [limit] (auth)" },
+    { "account-config",          demo::cmd_account_config,          "Account config (auth)" },
+    { "symbol-config",           demo::cmd_symbol_config,           "Symbol config [symbol] (auth)" },
+    { "multi-assets-mode",       demo::cmd_multi_assets_mode,       "Get multi-assets mode (auth)" },
+    { "position-mode",           demo::cmd_position_mode,           "Get position mode (auth)" },
+    { "rate-limit-order",        demo::cmd_rate_limit_order,        "Rate limit order count (auth)" },
+    { "leverage-bracket",        demo::cmd_leverage_bracket,        "Leverage brackets [symbol] (auth)" },
+    { "commission-rate",         demo::cmd_commission_rate,         "Commission rate <symbol> (auth)" },
+    { "bnb-burn",                demo::cmd_bnb_burn,                "Get BNB burn status (auth)" },
+    { "toggle-bnb-burn",         demo::cmd_toggle_bnb_burn,         "Toggle BNB burn <true|false> (auth)" },
+    { "quantitative-rules",      demo::cmd_quantitative_rules,      "Quantitative rules [symbol] (auth)" },
+    { "pm-account-info",         demo::cmd_pm_account_info,         "Portfolio margin info <asset> (auth)" },
+    { "download-id-transaction", demo::cmd_download_id_transaction, "Download ID transaction <start> <end> (auth)" },
+    { "download-link-transaction", demo::cmd_download_link_transaction, "Download link transaction <id> (auth)" },
+    { "download-id-order",       demo::cmd_download_id_order,       "Download ID order <start> <end> (auth)" },
+    { "download-link-order",     demo::cmd_download_link_order,     "Download link order <id> (auth)" },
+    { "download-id-trade",       demo::cmd_download_id_trade,       "Download ID trade <start> <end> (auth)" },
+    { "download-link-trade",     demo::cmd_download_link_trade,     "Download link trade <id> (auth)" },
 
-    // Trade (auth, async)
+    { "Trade", nullptr, {} },
     { "new-order",               demo::cmd_new_order,               "Place order <sym> <side> <type> [-q Q] [-p P] [-t TIF]" },
     { "test-order",              demo::cmd_test_order,              "Test order (validates, does not place)" },
+    { "modify-order",            demo::cmd_modify_order,            "Modify order <sym> <side> <orderId> -q Q -p P" },
     { "cancel-order",            demo::cmd_cancel_order,            "Cancel order <symbol> <orderId>" },
+    { "cancel-multiple-orders",  demo::cmd_cancel_multiple_orders,  "Cancel orders <symbol> <id1,id2,...>" },
+    { "cancel-all-orders",       demo::cmd_cancel_all_orders,       "Cancel all open orders <symbol>" },
+    { "auto-cancel",             demo::cmd_auto_cancel,             "Auto-cancel <symbol> <countdownMs>" },
     { "query-order",             demo::cmd_query_order,             "Query order <symbol> <orderId>" },
+    { "query-open-order",        demo::cmd_query_open_order,        "Query open order <symbol> <orderId>" },
     { "open-orders",             demo::cmd_open_orders,             "Open orders [symbol]" },
+    { "all-orders",              demo::cmd_all_orders,              "All orders <symbol> [limit]" },
+    { "position-info-v3",        demo::cmd_position_info_v3,        "Position info v3 [symbol]" },
+    { "adl-quantile",            demo::cmd_adl_quantile,            "ADL quantile [symbol]" },
+    { "force-orders",            demo::cmd_force_orders,            "Force orders [symbol] [limit]" },
+    { "account-trades",          demo::cmd_account_trades,          "Account trades <symbol> [limit]" },
+    { "change-position-mode",    demo::cmd_change_position_mode,    "Change position mode <true|false>" },
+    { "change-multi-assets-mode", demo::cmd_change_multi_assets_mode, "Change multi-assets mode <true|false>" },
+    { "change-leverage",         demo::cmd_change_leverage,         "Change leverage <symbol> <leverage>" },
+    { "change-margin-type",      demo::cmd_change_margin_type,      "Change margin type <symbol> <ISOLATED|CROSSED>" },
+    { "modify-isolated-margin",  demo::cmd_modify_isolated_margin,  "Modify isolated margin <sym> <amount> <1|2>" },
+    { "position-margin-history", demo::cmd_position_margin_history, "Position margin history <symbol> [limit]" },
+    { "order-modify-history",    demo::cmd_order_modify_history,    "Order modify history <symbol> [orderId]" },
+    { "new-algo-order",          demo::cmd_new_algo_order,          "Place algo order <sym> <side> <type> <algo> -q Q [-p P]" },
+    { "cancel-algo-order",       demo::cmd_cancel_algo_order,       "Cancel algo order <algoId>" },
+    { "query-algo-order",        demo::cmd_query_algo_order,        "Query algo order <algoId>" },
+    { "all-algo-orders",         demo::cmd_all_algo_orders,         "All algo orders <symbol> [limit]" },
+    { "open-algo-orders",        demo::cmd_open_algo_orders,        "Open algo orders" },
+    { "cancel-all-algo-orders",  demo::cmd_cancel_all_algo_orders,  "Cancel all algo orders" },
+    { "tradfi-perps",            demo::cmd_tradfi_perps,            "TradFi perps" },
 
-    // WebSocket API (auth, async)
+    { "Convert", nullptr, {} },
+    { "convert-quote",           demo::cmd_convert_quote,           "Convert quote <from> <to> <amount> (auth)" },
+    { "convert-accept",          demo::cmd_convert_accept,          "Accept convert quote <quoteId> (auth)" },
+    { "convert-order-status",    demo::cmd_convert_order_status,    "Convert order status <orderId> (auth)" },
+
+    { "WebSocket API", nullptr, {} },
     { "ws-logon",                demo::cmd_ws_logon,                "WebSocket API session logon (auth)" },
+    { "ws-book-ticker",          demo::cmd_ws_book_ticker,          "Book ticker via WS API [symbol]" },
+    { "ws-price-ticker",         demo::cmd_ws_price_ticker,         "Price ticker via WS API [symbol]" },
     { "ws-account-status",       demo::cmd_ws_account_status,       "Account status via WS API (auth)" },
+    { "ws-account-status-v2",    demo::cmd_ws_account_status_v2,    "Account status v2 via WS API (auth)" },
+    { "ws-account-balance",      demo::cmd_ws_account_balance,      "Account balance via WS API (auth)" },
     { "ws-order-place",          demo::cmd_ws_order_place,          "Place order via WS API <sym> <side> <type> [-q Q] [-p P]" },
+    { "ws-order-query",          demo::cmd_ws_order_query,          "Query order via WS API <symbol> <orderId>" },
+    { "ws-order-modify",         demo::cmd_ws_order_modify,         "Modify order via WS API <sym> <side> <orderId> -q Q -p P" },
     { "ws-order-cancel",         demo::cmd_ws_order_cancel,         "Cancel order via WS API <symbol> <orderId>" },
+    { "ws-position",             demo::cmd_ws_position,             "Position info via WS API [symbol]" },
+    { "ws-algo-order-place",     demo::cmd_ws_algo_order_place,     "Place algo order via WS API <sym> <side> <type> <algo> -q Q" },
+    { "ws-algo-order-cancel",    demo::cmd_ws_algo_order_cancel,    "Cancel algo order via WS API <algoId>" },
+    { "ws-user-stream-start",    demo::cmd_ws_user_stream_start,    "Start user stream via WS API" },
+    { "ws-user-stream-ping",     demo::cmd_ws_user_stream_ping,     "Ping user stream via WS API" },
+    { "ws-user-stream-stop",     demo::cmd_ws_user_stream_stop,     "Stop user stream via WS API" },
 
-    // Market data streams
+    { "Market Streams", nullptr, {} },
+    { "stream-aggregate-trade",  demo::cmd_stream_aggregate_trade,  "Aggregate trade stream <symbol>" },
     { "stream-book-ticker",      demo::cmd_stream_book_ticker,      "Book ticker stream <symbol>" },
     { "stream-mark-price",       demo::cmd_stream_mark_price,       "Mark price stream <symbol>" },
     { "stream-kline",            demo::cmd_stream_kline,            "Kline stream <symbol> <interval>" },
     { "stream-ticker",           demo::cmd_stream_ticker,           "24hr ticker stream <symbol>" },
+    { "stream-mini-ticker",      demo::cmd_stream_mini_ticker,      "Mini ticker stream <symbol>" },
     { "stream-depth",            demo::cmd_stream_depth,            "Partial depth stream <symbol> [levels]" },
+    { "stream-diff-depth",       demo::cmd_stream_diff_depth,       "Diff depth stream <symbol> [speed]" },
+    { "stream-liquidation",      demo::cmd_stream_liquidation,      "Liquidation orders stream <symbol>" },
+    { "stream-composite-index",  demo::cmd_stream_composite_index,  "Composite index stream <symbol>" },
+    { "stream-asset-index",      demo::cmd_stream_asset_index,      "Asset index stream <symbol>" },
+    { "stream-continuous-kline", demo::cmd_stream_continuous_kline,  "Continuous kline stream <pair> <interval>" },
+    { "stream-rpi-diff-depth",   demo::cmd_stream_rpi_diff_depth,   "RPI diff depth stream <symbol>" },
     { "stream-all-book-tickers", demo::cmd_stream_all_book_tickers, "All book tickers stream" },
     { "stream-all-tickers",      demo::cmd_stream_all_tickers,      "All 24hr tickers stream" },
     { "stream-all-mini-tickers", demo::cmd_stream_all_mini_tickers, "All mini tickers stream" },
-    { "stream-liquidation",      demo::cmd_stream_liquidation,      "Liquidation orders stream <symbol>" },
+    { "stream-all-liquidations", demo::cmd_stream_all_liquidations, "All liquidation orders stream" },
+    { "stream-all-mark-prices",  demo::cmd_stream_all_mark_prices,  "All mark prices stream" },
+    { "stream-all-asset-index",  demo::cmd_stream_all_asset_index,  "All asset index stream" },
+    { "stream-contract-info",    demo::cmd_stream_contract_info,    "Contract info stream" },
+    { "stream-trading-session",  demo::cmd_stream_trading_session,  "Trading session stream" },
 
-    // User data
+    { "User Data Streams", nullptr, {} },
     { "listen-key-start",        demo::cmd_listen_key_start,        "Start listen key (auth)" },
     { "listen-key-keepalive",    demo::cmd_listen_key_keepalive,    "Keepalive listen key (auth)" },
     { "listen-key-close",        demo::cmd_listen_key_close,        "Close listen key (auth)" },
     { "user-stream",             demo::cmd_user_stream,             "User data stream demo (auth)" },
 
-    // Local order book
+    { "Order Book", nullptr, {} },
     { "order-book-live",         demo::cmd_order_book_live,         "Live order book <symbol> [depth]" },
     { "pipeline-order-book-live", demo::cmd_pipeline_order_book_live, "Pipeline order book (3 threads) <symbol> [depth]" },
 };
@@ -131,9 +229,15 @@ void print_usage(const char* prog)
               << "  -O, --stdout-loglevel <lvl> Stdout log level (trace/debug/info/warn/error/off)\n"
               << "  -h, --help                  Print this help\n\n"
               << "Commands:\n";
-    for (const auto& cmd : commands)
-        std::cout << "  " << cmd.name << std::string(25 - std::min(cmd.name.size(), std::size_t{24}), ' ')
-                  << cmd.help << '\n';
+    for (const auto& cmd : commands) {
+        if (is_group(cmd)) {
+            std::cout << '\n' << "  " << cmd.name << ":\n";
+        } else {
+            std::cout << "    " << cmd.name
+                      << std::string(25 - std::min(cmd.name.size(), std::size_t{24}), ' ')
+                      << cmd.help << '\n';
+        }
+    }
 }
 
 } // namespace
@@ -202,14 +306,14 @@ boost::cobalt::main co_main(int argc, char* argv[])
 
     int rc = 1;
     for (const auto& cmd : commands) {
-        if (cmd.name == cmd_name) {
+        if (!is_group(cmd) && cmd.name == cmd_name) {
             rc = co_await cmd.fn(c, sub_args);
             break;
         }
     }
 
     if (rc == 1 && std::none_of(std::begin(commands), std::end(commands),
-                                [&](const auto& cmd) { return cmd.name == cmd_name; })) {
+                                [&](const auto& cmd) { return !is_group(cmd) && cmd.name == cmd_name; })) {
         spdlog::error("unknown command: {}", cmd_name);
         print_usage(prog);
     }

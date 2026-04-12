@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 // Market data stream commands — async WebSocket streams using cobalt generators.
-// Demonstrates: subscribe() returning typed async generators, subscription parameters,
-// single-symbol and all-market streams.
 
 #include "cmd_stream.hpp"
 
@@ -14,202 +12,160 @@ namespace demo {
 
 namespace types = binapi2::fapi::types;
 
+// ---------------------------------------------------------------------------
+// Existing commands (refactored to use exec_stream)
+// ---------------------------------------------------------------------------
+
 boost::cobalt::task<int> cmd_stream_book_ticker(binapi2::futures_usdm_api& c, const args_t& args)
 {
     if (args.empty()) { spdlog::error("usage: stream-book-ticker <symbol>"); co_return 1; }
-
-    auto streams = c.create_market_stream();
-    if (record_buffer) streams->connection().attach_buffer(*record_buffer);
-    spdlog::info("subscribing to book_ticker_t stream for {}", args[0]);
     types::book_ticker_subscription sub;
     sub.symbol = args[0];
-    auto gen = streams->subscribe(sub);
-
-    spdlog::info("connected, reading events...");
-    while (gen) {
-        auto event = co_await gen;
-        if (!event) { print_error(event.err); co_return 1; }
-        if (verbosity >= 1) { print_json(*event); }
-        else {
-            out("{}  bid: {} x {}  ask: {} x {}", event->symbol,
-                event->best_bid_price, event->best_bid_qty,
-                event->best_ask_price, event->best_ask_qty);
-        }
-    }
-    co_return 0;
+    co_return co_await exec_stream(c, sub);
 }
 
 boost::cobalt::task<int> cmd_stream_mark_price(binapi2::futures_usdm_api& c, const args_t& args)
 {
     if (args.empty()) { spdlog::error("usage: stream-mark-price <symbol>"); co_return 1; }
-
-    auto streams = c.create_market_stream();
-    if (record_buffer) streams->connection().attach_buffer(*record_buffer);
-    spdlog::info("subscribing to mark_price_t stream for {}", args[0]);
     types::mark_price_subscription sub;
     sub.symbol = args[0];
-    auto gen = streams->subscribe(sub);
-
-    while (gen) {
-        auto event = co_await gen;
-        if (!event) { print_error(event.err); co_return 1; }
-        if (verbosity >= 1) { print_json(*event); }
-        else {
-            out("{}  mark: {}  index: {}  funding: {}", event->symbol,
-                event->mark_price_t, event->index_price, event->funding_rate);
-        }
-    }
-    co_return 0;
+    co_return co_await exec_stream(c, sub);
 }
 
 boost::cobalt::task<int> cmd_stream_kline(binapi2::futures_usdm_api& c, const args_t& args)
 {
     if (args.size() < 2) { spdlog::error("usage: stream-kline <symbol> <interval>"); co_return 1; }
-
-    auto streams = c.create_market_stream();
-    if (record_buffer) streams->connection().attach_buffer(*record_buffer);
-    spdlog::info("subscribing to kline_t stream for {} {}", args[0], args[1]);
     types::kline_subscription sub;
     sub.symbol = args[0];
     sub.interval = parse_enum<types::kline_interval_t>(args[1]);
-    auto gen = streams->subscribe(sub);
-
-    while (gen) {
-        auto event = co_await gen;
-        if (!event) { print_error(event.err); co_return 1; }
-        if (verbosity >= 1) { print_json(*event); }
-        else {
-            out("{}  O:{} H:{} L:{} C:{}", event->symbol,
-                event->kline_t.open_price, event->kline_t.high_price,
-                event->kline_t.low_price, event->kline_t.close_price);
-        }
-    }
-    co_return 0;
+    co_return co_await exec_stream(c, sub);
 }
 
 boost::cobalt::task<int> cmd_stream_ticker(binapi2::futures_usdm_api& c, const args_t& args)
 {
     if (args.empty()) { spdlog::error("usage: stream-ticker <symbol>"); co_return 1; }
-
-    auto streams = c.create_market_stream();
-    if (record_buffer) streams->connection().attach_buffer(*record_buffer);
-    spdlog::info("subscribing to ticker stream for {}", args[0]);
     types::ticker_subscription sub;
     sub.symbol = args[0];
-    auto gen = streams->subscribe(sub);
-
-    while (gen) {
-        auto event = co_await gen;
-        if (!event) { print_error(event.err); co_return 1; }
-        if (verbosity >= 1) { print_json(*event); }
-        else {
-            out("{}  last: {}  change: {}%", event->symbol,
-                event->last_price, event->price_change_pct);
-        }
-    }
-    co_return 0;
+    co_return co_await exec_stream(c, sub);
 }
 
 boost::cobalt::task<int> cmd_stream_depth(binapi2::futures_usdm_api& c, const args_t& args)
 {
     if (args.empty()) { spdlog::error("usage: stream-depth <symbol> [levels]"); co_return 1; }
-
-    auto streams = c.create_market_stream();
-    if (record_buffer) streams->connection().attach_buffer(*record_buffer);
     types::partial_book_depth_subscription sub;
     sub.symbol = args[0];
     if (args.size() > 1) sub.levels = std::stoi(args[1]);
-
-    spdlog::info("subscribing to partial_book_depth stream for {} levels={}", sub.symbol, sub.levels);
-    auto gen = streams->subscribe(sub);
-
-    while (gen) {
-        auto event = co_await gen;
-        if (!event) { print_error(event.err); co_return 1; }
-        if (verbosity >= 1) { print_json(*event); }
-        else {
-            out("{}  bids: {}  asks: {}", event->symbol,
-                event->bids.size(), event->asks.size());
-        }
-    }
-    co_return 0;
+    co_return co_await exec_stream(c, sub);
 }
 
 boost::cobalt::task<int> cmd_stream_all_book_tickers(binapi2::futures_usdm_api& c, const args_t& /*args*/)
 {
-    auto streams = c.create_market_stream();
-    if (record_buffer) streams->connection().attach_buffer(*record_buffer);
-    spdlog::info("subscribing to all_book_tickers stream");
-    auto gen = streams->subscribe(types::all_book_ticker_subscription{});
-
-    while (gen) {
-        auto event = co_await gen;
-        if (!event) { print_error(event.err); co_return 1; }
-        if (verbosity >= 1) { print_json(*event); }
-        else {
-            out("{}  {} / {}", event->symbol, event->best_bid_price, event->best_ask_price);
-        }
-    }
-    co_return 0;
+    co_return co_await exec_stream(c, types::all_book_ticker_subscription{});
 }
 
 boost::cobalt::task<int> cmd_stream_all_tickers(binapi2::futures_usdm_api& c, const args_t& /*args*/)
 {
-    auto streams = c.create_market_stream();
-    if (record_buffer) streams->connection().attach_buffer(*record_buffer);
-    spdlog::info("subscribing to all_market_tickers stream");
-    auto gen = streams->subscribe(types::all_market_ticker_subscription{});
-
-    while (gen) {
-        auto event = co_await gen;
-        if (!event) { print_error(event.err); co_return 1; }
-        if (verbosity >= 1) { print_json(*event); }
-        else {
-            out("tickers: {}", event->size());
-        }
-    }
-    co_return 0;
+    co_return co_await exec_stream(c, types::all_market_ticker_subscription{});
 }
 
 boost::cobalt::task<int> cmd_stream_all_mini_tickers(binapi2::futures_usdm_api& c, const args_t& /*args*/)
 {
-    auto streams = c.create_market_stream();
-    if (record_buffer) streams->connection().attach_buffer(*record_buffer);
-    spdlog::info("subscribing to all_market_mini_tickers stream");
-    auto gen = streams->subscribe(types::all_market_mini_ticker_subscription{});
-
-    while (gen) {
-        auto event = co_await gen;
-        if (!event) { print_error(event.err); co_return 1; }
-        if (verbosity >= 1) { print_json(*event); }
-        else {
-            out("mini_tickers: {}", event->size());
-        }
-    }
-    co_return 0;
+    co_return co_await exec_stream(c, types::all_market_mini_ticker_subscription{});
 }
 
 boost::cobalt::task<int> cmd_stream_liquidation(binapi2::futures_usdm_api& c, const args_t& args)
 {
     if (args.empty()) { spdlog::error("usage: stream-liquidation <symbol>"); co_return 1; }
-
-    auto streams = c.create_market_stream();
-    if (record_buffer) streams->connection().attach_buffer(*record_buffer);
-    spdlog::info("subscribing to liquidation_order stream for {}", args[0]);
     types::liquidation_order_subscription sub;
     sub.symbol = args[0];
-    auto gen = streams->subscribe(sub);
+    co_return co_await exec_stream(c, sub);
+}
 
-    while (gen) {
-        auto event = co_await gen;
-        if (!event) { print_error(event.err); co_return 1; }
-        if (verbosity >= 1) { print_json(*event); }
-        else {
-            out("liquidation: {}  {}  {}", event->order.symbol,
-                to_string(event->order.side), event->order.price);
-        }
-    }
-    co_return 0;
+// ---------------------------------------------------------------------------
+// New stream commands
+// ---------------------------------------------------------------------------
+
+boost::cobalt::task<int> cmd_stream_aggregate_trade(binapi2::futures_usdm_api& c, const args_t& args)
+{
+    if (args.empty()) { spdlog::error("usage: stream-aggregate-trade <symbol>"); co_return 1; }
+    types::aggregate_trade_subscription sub;
+    sub.symbol = args[0];
+    co_return co_await exec_stream(c, sub);
+}
+
+boost::cobalt::task<int> cmd_stream_diff_depth(binapi2::futures_usdm_api& c, const args_t& args)
+{
+    if (args.empty()) { spdlog::error("usage: stream-diff-depth <symbol> [speed]"); co_return 1; }
+    types::diff_book_depth_subscription sub;
+    sub.symbol = args[0];
+    if (args.size() > 1) sub.speed = args[1];
+    co_return co_await exec_stream(c, sub);
+}
+
+boost::cobalt::task<int> cmd_stream_mini_ticker(binapi2::futures_usdm_api& c, const args_t& args)
+{
+    if (args.empty()) { spdlog::error("usage: stream-mini-ticker <symbol>"); co_return 1; }
+    types::mini_ticker_subscription sub;
+    sub.symbol = args[0];
+    co_return co_await exec_stream(c, sub);
+}
+
+boost::cobalt::task<int> cmd_stream_all_liquidations(binapi2::futures_usdm_api& c, const args_t& /*args*/)
+{
+    co_return co_await exec_stream(c, types::all_market_liquidation_order_subscription{});
+}
+
+boost::cobalt::task<int> cmd_stream_all_mark_prices(binapi2::futures_usdm_api& c, const args_t& /*args*/)
+{
+    co_return co_await exec_stream(c, types::all_market_mark_price_subscription{});
+}
+
+boost::cobalt::task<int> cmd_stream_continuous_kline(binapi2::futures_usdm_api& c, const args_t& args)
+{
+    if (args.size() < 2) { spdlog::error("usage: stream-continuous-kline <pair> <interval>"); co_return 1; }
+    types::continuous_contract_kline_subscription sub;
+    sub.pair = args[0];
+    sub.interval = parse_enum<types::kline_interval_t>(args[1]);
+    co_return co_await exec_stream(c, sub);
+}
+
+boost::cobalt::task<int> cmd_stream_composite_index(binapi2::futures_usdm_api& c, const args_t& args)
+{
+    if (args.empty()) { spdlog::error("usage: stream-composite-index <symbol>"); co_return 1; }
+    types::composite_index_subscription sub;
+    sub.symbol = args[0];
+    co_return co_await exec_stream(c, sub);
+}
+
+boost::cobalt::task<int> cmd_stream_contract_info(binapi2::futures_usdm_api& c, const args_t& /*args*/)
+{
+    co_return co_await exec_stream(c, types::contract_info_subscription{});
+}
+
+boost::cobalt::task<int> cmd_stream_asset_index(binapi2::futures_usdm_api& c, const args_t& args)
+{
+    if (args.empty()) { spdlog::error("usage: stream-asset-index <symbol>"); co_return 1; }
+    types::asset_index_subscription sub;
+    sub.symbol = args[0];
+    co_return co_await exec_stream(c, sub);
+}
+
+boost::cobalt::task<int> cmd_stream_all_asset_index(binapi2::futures_usdm_api& c, const args_t& /*args*/)
+{
+    co_return co_await exec_stream(c, types::all_asset_index_subscription{});
+}
+
+boost::cobalt::task<int> cmd_stream_trading_session(binapi2::futures_usdm_api& c, const args_t& /*args*/)
+{
+    co_return co_await exec_stream(c, types::trading_session_subscription{});
+}
+
+boost::cobalt::task<int> cmd_stream_rpi_diff_depth(binapi2::futures_usdm_api& c, const args_t& args)
+{
+    if (args.empty()) { spdlog::error("usage: stream-rpi-diff-depth <symbol>"); co_return 1; }
+    types::rpi_diff_book_depth_subscription sub;
+    sub.symbol = args[0];
+    co_return co_await exec_stream(c, sub);
 }
 
 } // namespace demo

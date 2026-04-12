@@ -11,6 +11,7 @@ add_executable(binapi2-fapi-async-demo-cli
     cmd_account.cpp
     cmd_trade.cpp
     cmd_ws_api.cpp
+    cmd_convert.cpp
     cmd_stream.cpp
     cmd_user_stream.cpp
     cmd_order_book.cpp

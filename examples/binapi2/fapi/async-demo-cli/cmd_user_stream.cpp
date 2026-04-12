@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 // User data stream commands — listen key management and real-time account events.
-// Demonstrates: async_execute() for listen key lifecycle, and user_stream
-// subscribe() returning a variant generator for all event types.
 
 #include "cmd_user_stream.hpp"
 
@@ -19,39 +17,17 @@ namespace types = binapi2::fapi::types;
 
 boost::cobalt::task<int> cmd_listen_key_start(binapi2::futures_usdm_api& c, const args_t& /*args*/)
 {
-    auto rest = co_await c.create_rest_client();
-    if (!rest) { spdlog::error("connect: {}", rest.err.message); co_return 1; }
-    spdlog::debug("requesting new listen key");
-    auto r = co_await (*rest)->user_data_streams.async_execute(types::start_listen_key_request_t{});
-    if (!r) { print_error(r.err); co_return 1; }
-
-    spdlog::info("listenKey: {}", r->listenKey);
-    if (verbosity >= 1) print_json(*r);
-    co_return 0;
+    co_return co_await exec_user_data_streams(c, types::start_listen_key_request_t{});
 }
 
 boost::cobalt::task<int> cmd_listen_key_keepalive(binapi2::futures_usdm_api& c, const args_t& /*args*/)
 {
-    auto rest = co_await c.create_rest_client();
-    if (!rest) { spdlog::error("connect: {}", rest.err.message); co_return 1; }
-    spdlog::debug("sending listen key keepalive");
-    auto r = co_await (*rest)->user_data_streams.async_execute(types::keepalive_listen_key_request_t{});
-    if (!r) { print_error(r.err); co_return 1; }
-
-    spdlog::info("keepalive ok");
-    co_return 0;
+    co_return co_await exec_user_data_streams(c, types::keepalive_listen_key_request_t{});
 }
 
 boost::cobalt::task<int> cmd_listen_key_close(binapi2::futures_usdm_api& c, const args_t& /*args*/)
 {
-    auto rest = co_await c.create_rest_client();
-    if (!rest) { spdlog::error("connect: {}", rest.err.message); co_return 1; }
-    spdlog::debug("closing listen key");
-    auto r = co_await (*rest)->user_data_streams.async_execute(types::close_listen_key_request_t{});
-    if (!r) { print_error(r.err); co_return 1; }
-
-    spdlog::info("listen key closed");
-    co_return 0;
+    co_return co_await exec_user_data_streams(c, types::close_listen_key_request_t{});
 }
 
 namespace {
@@ -77,7 +53,6 @@ boost::cobalt::task<int> cmd_user_stream(binapi2::futures_usdm_api& c, const arg
     spdlog::info("subscribing to user data stream...");
     auto gen = user_stream->subscribe(key->listenKey);
 
-    // Start keepalive after subscribe (stream is now on an active executor).
     user_stream->enable_keepalive((*rest)->user_data_streams,
                                   std::chrono::minutes(30));
     spdlog::info("keepalive enabled (every 30m)");

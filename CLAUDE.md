@@ -19,9 +19,14 @@ Run a single test binary directly:
 
 Demo CLI against testnet:
 ```bash
-scripts/testnet_rest.sh      # REST endpoints
-scripts/testnet_streams.sh   # Market data streams
-scripts/testnet_ws_api.sh    # WebSocket API
+scripts/testnet/market_data.sh   # Market data REST
+scripts/testnet/account.sh       # Account REST
+scripts/testnet/trade.sh         # Trade REST
+scripts/testnet/convert.sh       # Convert REST
+scripts/testnet/ws_api.sh        # WebSocket API
+scripts/testnet/streams.sh       # Market data streams
+scripts/testnet/user_streams.sh  # User data streams
+scripts/testnet/order_book.sh    # Live order book
 ```
 
 Integration tests require Docker (Postman mock server):
