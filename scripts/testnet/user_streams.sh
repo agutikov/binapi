@@ -12,6 +12,7 @@ ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 CLI="$ROOT_DIR/_build/examples/binapi2/fapi/async-demo-cli/binapi2-fapi-async-demo-cli"
 
 OUT="${1:-$ROOT_DIR/testnet_output/user_streams}"
+rm -rf "$OUT"
 mkdir -p "$OUT"
 
 TIMEOUT=5  # seconds for stream
@@ -23,12 +24,13 @@ run() {
     mkdir -p "$dir"
     echo -n "  $name ... "
     if "$CLI" \
+        -v \
         -S "$dir/request" \
         -R "$dir/response.json" \
         -L "$dir/log.txt" \
         -F trace \
         -K "${BINAPI2_SECRET:-libsecret:demo}" \
-        "$@" >/dev/null 2>&1; then
+        "$@" > "$dir/stdout.txt" 2>&1; then
         echo "OK"
     else
         echo "FAIL"

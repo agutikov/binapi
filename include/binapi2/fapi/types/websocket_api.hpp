@@ -91,15 +91,27 @@ struct websocket_api_order_cancel_request_t : websocket_api_signed_request_t
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/websocket-api/Symbol-Order-Book-Ticker.md
+// Single symbol: result is a single book_ticker_t object.
 struct websocket_api_book_ticker_request_t
 {
-    std::optional<symbol_t> symbol{};
+    symbol_t symbol{};
+};
+
+// All symbols: result is an array of book_ticker_t.
+struct websocket_api_book_tickers_request_t
+{
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/websocket-api/Symbol-Price-Ticker.md
+// Single symbol: result is a single price_ticker_t object.
 struct websocket_api_price_ticker_request_t
 {
-    std::optional<symbol_t> symbol{};
+    symbol_t symbol{};
+};
+
+// All symbols: result is an array of price_ticker_t.
+struct websocket_api_price_tickers_request_t
+{
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/trade/websocket-api/Modify-Order.md

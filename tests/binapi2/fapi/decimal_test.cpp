@@ -724,6 +724,45 @@ TEST(DecimalJson, Zero) {
     EXPECT_EQ(parsed, original);
 }
 
+} // namespace (close for decimal_json_wrapper)
+
+struct decimal_json_wrapper { binapi2::fapi::types::decimal_t value; };
+
+namespace {
+
+TEST(DecimalJson, UnquotedNumber) {
+    // Binance sends some decimal fields as unquoted JSON numbers.
+    std::string json = R"({"value":0.004})";
+    decimal_json_wrapper w;
+    auto err = glz::read_json(w, json);
+    EXPECT_FALSE(err) << "glaze parse error";
+    EXPECT_EQ(w.value, decimal_t("0.004"));
+}
+
+TEST(DecimalJson, UnquotedZero) {
+    std::string json = R"({"value":0.0})";
+    decimal_json_wrapper w;
+    auto err = glz::read_json(w, json);
+    EXPECT_FALSE(err) << "glaze parse error";
+    EXPECT_TRUE(w.value.is_zero());
+}
+
+TEST(DecimalJson, UnquotedInteger) {
+    std::string json = R"({"value":10000})";
+    decimal_json_wrapper w;
+    auto err = glz::read_json(w, json);
+    EXPECT_FALSE(err) << "glaze parse error";
+    EXPECT_EQ(w.value, decimal_t("10000"));
+}
+
+TEST(DecimalJson, QuotedStringStillWorks) {
+    std::string json = R"({"value":"123.456"})";
+    decimal_json_wrapper w;
+    auto err = glz::read_json(w, json);
+    EXPECT_FALSE(err) << "glaze parse error";
+    EXPECT_EQ(w.value, decimal_t("123.456"));
+}
+
 // ============================================================================
 // Edge cases
 // ============================================================================

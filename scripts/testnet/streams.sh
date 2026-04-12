@@ -13,6 +13,7 @@ ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 CLI="$ROOT_DIR/_build/examples/binapi2/fapi/async-demo-cli/binapi2-fapi-async-demo-cli"
 
 OUT="${1:-$ROOT_DIR/testnet_output/streams}"
+rm -rf "$OUT"
 mkdir -p "$OUT"
 
 SYMBOL=BTCUSDT

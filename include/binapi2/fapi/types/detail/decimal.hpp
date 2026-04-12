@@ -192,9 +192,21 @@ struct from<JSON, binapi2::fapi::types::decimal_t>
     template<auto Opts>
     static void op(binapi2::fapi::types::decimal_t& d, is_context auto&& ctx, auto&& it, auto&& end)
     {
-        std::string s;
-        parse<JSON>::op<Opts>(s, ctx, it, end);
-        d = binapi2::fapi::types::decimal_t(s);
+        // Binance sends decimals as both JSON strings ("0.004") and numbers (0.004).
+        skip_ws<Opts>(ctx, it, end);
+        if (it != end && *it == '"') {
+            std::string s;
+            parse<JSON>::op<Opts>(s, ctx, it, end);
+            d = binapi2::fapi::types::decimal_t(s);
+        } else {
+            // Unquoted JSON number — extract raw characters to preserve exact digits.
+            auto start = it;
+            while (it != end && *it != ',' && *it != '}' && *it != ']' && *it != ' '
+                   && *it != '\t' && *it != '\n' && *it != '\r') {
+                ++it;
+            }
+            d = binapi2::fapi::types::decimal_t(std::string(start, it));
+        }
     }
 };
 

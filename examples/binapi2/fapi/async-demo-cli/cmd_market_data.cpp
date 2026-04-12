@@ -297,9 +297,12 @@ boost::cobalt::task<int> cmd_asset_index(binapi2::futures_usdm_api& c, const arg
 
 boost::cobalt::task<int> cmd_insurance_fund(binapi2::futures_usdm_api& c, const args_t& args)
 {
-    types::insurance_fund_request_t req;
-    if (!args.empty()) req.symbol = args[0];
-    co_return co_await exec_market_data(c, req);
+    if (!args.empty()) {
+        types::insurance_fund_request_t req;
+        req.symbol = args[0];
+        co_return co_await exec_market_data(c, req);
+    }
+    co_return co_await exec_market_data(c, types::insurance_funds_request_t{});
 }
 
 boost::cobalt::task<int> cmd_adl_risk(binapi2::futures_usdm_api& c, const args_t& args)

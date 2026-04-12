@@ -225,8 +225,12 @@ client::async_execute(const Request& request)
 // Explicit instantiations — existing types.
 template auto client::async_execute(const types::websocket_api_book_ticker_request_t&)
     -> boost::cobalt::task<result<types::websocket_api_response_t<types::book_ticker_t>>>;
+template auto client::async_execute(const types::websocket_api_book_tickers_request_t&)
+    -> boost::cobalt::task<result<types::websocket_api_response_t<std::vector<types::book_ticker_t>>>>;
 template auto client::async_execute(const types::websocket_api_price_ticker_request_t&)
     -> boost::cobalt::task<result<types::websocket_api_response_t<types::price_ticker_t>>>;
+template auto client::async_execute(const types::websocket_api_price_tickers_request_t&)
+    -> boost::cobalt::task<result<types::websocket_api_response_t<std::vector<types::price_ticker_t>>>>;
 template auto client::async_execute(const types::websocket_api_order_place_request_t&)
     -> boost::cobalt::task<result<types::websocket_api_response_t<types::order_response_t>>>;
 template auto client::async_execute(const types::websocket_api_order_query_request_t&)

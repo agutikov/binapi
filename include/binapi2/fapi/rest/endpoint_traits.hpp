@@ -218,6 +218,13 @@ struct endpoint_traits<types::insurance_fund_request_t>
     using service_tag = types::rest_market_data_tag;
     static constexpr auto& endpoint = insurance_fund_endpoint;
 };
+template<>
+struct endpoint_traits<types::insurance_funds_request_t>
+{
+    using response_type_t = std::vector<types::insurance_fund_response_t>;
+    using service_tag = types::rest_market_data_tag;
+    static constexpr auto& endpoint = insurance_fund_endpoint;
+};
 
 template<>
 struct endpoint_traits<types::adl_risk_request_t>

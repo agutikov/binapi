@@ -1,25 +1,35 @@
 
 
 
+All signed REST, WS API, and convert commands lack the request file. The market data ones (which ran
+  after the fix) have it, but account/trade/ws_api/convert/user_streams ran from the earlier run before
+  the fix was built. The WS API commands also lack request files because the transport logger path is
+  different for WebSocket — it doesn't go through the same HTTP logging path.
 
 
+---
 
-finish testing secure endpoints, streams and ws api with testnet
+document known issues discovered by testnet scripts
 
+---
 
-all tests from demo-cli, including local order book
-
-
-
---------------------------------------------------------------------------------
-
+write a library correctness verification checklist in README.md
+from run_tests.sh to testnet scripts
 
 
-binapi2 connect to real account
+add top level script that runs all existing tests and benchmarks and verifies output
+
+---
 
 
+update documents
+this is final version of binapi2 library
+prepare for release - review and update all documentation
+docs/binapi2
+README.md
 
---------------------------------------------------------------------------------
+
+---
 
 
 document overview of data types - rest, wsapi and streams:
@@ -31,6 +41,8 @@ document overview of data types - rest, wsapi and streams:
     - between streams and 2 other
 - detailed explanation of the fields meaning
 
+this should be an crypto exchange client library user guide in docs/binapi2/guide/
+combining information from binance api docs, library docs and generic crypto trading info
 
 
 --------------------------------------------------------------------------------

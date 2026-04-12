@@ -12,6 +12,7 @@ ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 CLI="$ROOT_DIR/_build/examples/binapi2/fapi/async-demo-cli/binapi2-fapi-async-demo-cli"
 
 OUT="${1:-$ROOT_DIR/testnet_output/market_data}"
+rm -rf "$OUT"
 mkdir -p "$OUT"
 
 SYMBOL=BTCUSDT
@@ -24,12 +25,13 @@ run() {
     mkdir -p "$dir"
     echo -n "  $name ... "
     if "$CLI" \
+        -v \
         -S "$dir/request" \
         -R "$dir/response.json" \
         -L "$dir/log.txt" \
         -F trace \
         -K "${BINAPI2_SECRET:-libsecret:demo}" \
-        "$@" >/dev/null 2>&1; then
+        "$@" > "$dir/stdout.txt" 2>&1; then
         echo "OK"
     else
         echo "FAIL"
@@ -97,7 +99,7 @@ run index-constituents   index-constituents "$SYMBOL"
 run asset-index          asset-index
 run insurance-fund       insurance-fund
 run adl-risk             adl-risk
-run rpi-depth            rpi-depth "$SYMBOL" 5
+run rpi-depth            rpi-depth "$SYMBOL"
 run trading-schedule     trading-schedule
 
 echo "=== Done ==="

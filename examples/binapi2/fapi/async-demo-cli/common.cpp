@@ -12,6 +12,7 @@
 #include <spdlog/sinks/basic_file_sink.h>
 
 #include <cstdlib>
+#include <fstream>
 
 namespace demo {
 
@@ -121,14 +122,24 @@ binapi2::fapi::config make_config()
             if (!e.raw.empty()) spdlog::trace(">> raw:\n{}", truncate(e.raw));
 
             if (!save_request_file.empty()) {
-                // Save request — one-shot file write, acceptable sync.
-                if (auto rec = spdlog::get("out"))
-                    rec->info("request saved to {}", save_request_file);
+                std::string content = e.raw.empty() ? e.body : e.raw;
+                if (std::ofstream f(save_request_file); f) {
+                    f << content;
+                    spdlog::info("request saved to {}", save_request_file);
+                }
             }
         } else {
             spdlog::debug("<< {} {} {} status={}", e.protocol, e.method, e.target, e.status);
             if (!e.body.empty()) spdlog::debug("<< body: {}", truncate(e.body));
             if (!e.raw.empty()) spdlog::trace("<< raw:\n{}", truncate(e.raw));
+
+            if (!save_response_file.empty()) {
+                std::string content = e.body;
+                if (std::ofstream f(save_response_file); f) {
+                    f << content;
+                    spdlog::info("response saved to {}", save_response_file);
+                }
+            }
         }
     };
 

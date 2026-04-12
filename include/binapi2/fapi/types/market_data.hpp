@@ -472,9 +472,16 @@ struct asset_index_t
 // ---------------------------------------------------------------------------
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Insurance-Fund-Balance.md
+// With symbol: returns single object {symbols:[], assets:[]}.
 struct insurance_fund_request_t
 {
-    std::optional<symbol_t> symbol{};
+    symbol_t symbol{};
+};
+
+// doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Insurance-Fund-Balance.md
+// Without symbol: returns array [{symbols:[], assets:[]}, ...].
+struct insurance_funds_request_t
+{
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api/Insurance-Fund-Balance.md

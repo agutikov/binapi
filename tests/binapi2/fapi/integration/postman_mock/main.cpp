@@ -76,6 +76,7 @@ co_main(int, char*[])
     cfg.rest_port = port;
     cfg.api_key = "test-api-key";
     cfg.secret_key = "test-secret-key";
+    cfg.sign_method = sign_method_t::hmac;
     cfg.ca_cert_file = env_or("SSL_CERT_FILE", "");
 
     binapi2::futures_usdm_api c(cfg);

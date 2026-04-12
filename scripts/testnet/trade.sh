@@ -16,6 +16,7 @@ ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 CLI="$ROOT_DIR/_build/examples/binapi2/fapi/async-demo-cli/binapi2-fapi-async-demo-cli"
 
 OUT="${1:-$ROOT_DIR/testnet_output/trade}"
+rm -rf "$OUT"
 mkdir -p "$OUT"
 
 SYMBOL=BTCUSDT
@@ -27,12 +28,13 @@ run() {
     mkdir -p "$dir"
     echo -n "  $name ... "
     if "$CLI" \
+        -v \
         -S "$dir/request" \
         -R "$dir/response.json" \
         -L "$dir/log.txt" \
         -F trace \
         -K "${BINAPI2_SECRET:-libsecret:demo}" \
-        "$@" >/dev/null 2>&1; then
+        "$@" > "$dir/stdout.txt" 2>&1; then
         echo "OK"
     else
         echo "FAIL"
@@ -49,7 +51,7 @@ run account-trades    account-trades "$SYMBOL" 5
 
 echo "=== Trade — Test Order ==="
 
-run test-order        test-order "$SYMBOL" BUY LIMIT -q 0.001 -p 10000 -t GTC
+run test-order        test-order "$SYMBOL" BUY LIMIT -q 0.002 -p 60000 -t GTC
 
 echo "=== Trade — Position Queries (read-only) ==="
 
@@ -57,7 +59,7 @@ run position-info-v3  position-info-v3
 run position-info-v3-sym position-info-v3 "$SYMBOL"
 run adl-quantile      adl-quantile
 run position-margin-history position-margin-history "$SYMBOL" 5
-run order-modify-history order-modify-history "$SYMBOL"
+run order-modify-history order-modify-history "$SYMBOL" 1
 
 echo "=== Trade — Algo Order Queries (read-only) ==="
 

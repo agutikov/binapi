@@ -12,6 +12,7 @@ ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 CLI="$ROOT_DIR/_build/examples/binapi2/fapi/async-demo-cli/binapi2-fapi-async-demo-cli"
 
 OUT="${1:-$ROOT_DIR/testnet_output/ws_api}"
+rm -rf "$OUT"
 mkdir -p "$OUT"
 
 SYMBOL=BTCUSDT
@@ -23,12 +24,13 @@ run() {
     mkdir -p "$dir"
     echo -n "  $name ... "
     if "$CLI" \
+        -v \
         -S "$dir/request" \
         -R "$dir/response.json" \
         -L "$dir/log.txt" \
         -F trace \
         -K "${BINAPI2_SECRET:-libsecret:demo}" \
-        "$@" >/dev/null 2>&1; then
+        "$@" > "$dir/stdout.txt" 2>&1; then
         echo "OK"
     else
         echo "FAIL"
@@ -56,7 +58,7 @@ run ws-position-sym       ws-position "$SYMBOL"
 
 echo "=== WebSocket API — Orders (may fail without balance) ==="
 
-run ws-order-place        ws-order-place "$SYMBOL" BUY LIMIT -q 0.001 -p 10000 || true
+run ws-order-place        ws-order-place "$SYMBOL" BUY LIMIT -q 0.002 -p 60000 -t GTC || true
 
 echo "=== WebSocket API — User Data Stream ==="
 

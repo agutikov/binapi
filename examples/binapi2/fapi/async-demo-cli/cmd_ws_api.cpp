@@ -70,15 +70,21 @@ boost::cobalt::task<int> cmd_ws_order_cancel(binapi2::futures_usdm_api& c, const
 
 boost::cobalt::task<int> cmd_ws_book_ticker(binapi2::futures_usdm_api& c, const args_t& args)
 {
+    if (args.empty()) {
+        co_return co_await exec_ws_public(c, types::websocket_api_book_tickers_request_t{});
+    }
     types::websocket_api_book_ticker_request_t req;
-    if (!args.empty()) req.symbol = args[0];
+    req.symbol = args[0];
     co_return co_await exec_ws_public(c, req);
 }
 
 boost::cobalt::task<int> cmd_ws_price_ticker(binapi2::futures_usdm_api& c, const args_t& args)
 {
+    if (args.empty()) {
+        co_return co_await exec_ws_public(c, types::websocket_api_price_tickers_request_t{});
+    }
     types::websocket_api_price_ticker_request_t req;
-    if (!args.empty()) req.symbol = args[0];
+    req.symbol = args[0];
     co_return co_await exec_ws_public(c, req);
 }
 

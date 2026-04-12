@@ -58,8 +58,16 @@ template<> struct endpoint_traits<types::websocket_api_book_ticker_request_t> {
     using response_type_t = types::book_ticker_t;
     static constexpr auto& method = ticker_book_method;
 };
+template<> struct endpoint_traits<types::websocket_api_book_tickers_request_t> {
+    using response_type_t = std::vector<types::book_ticker_t>;
+    static constexpr auto& method = ticker_book_method;
+};
 template<> struct endpoint_traits<types::websocket_api_price_ticker_request_t> {
     using response_type_t = types::price_ticker_t;
+    static constexpr auto& method = ticker_price_method;
+};
+template<> struct endpoint_traits<types::websocket_api_price_tickers_request_t> {
+    using response_type_t = std::vector<types::price_ticker_t>;
     static constexpr auto& method = ticker_price_method;
 };
 

@@ -60,6 +60,7 @@ public:
     using index_constituents_request = types::index_constituents_request_t;
     using asset_index_request = types::asset_index_request_t;
     using insurance_fund_request = types::insurance_fund_request_t;
+    using insurance_funds_request = types::insurance_funds_request_t;
     using adl_risk_request = types::adl_risk_request_t;
     using rpi_depth_request = types::rpi_depth_request_t;
     using trading_schedule_request = types::trading_schedule_request_t;
