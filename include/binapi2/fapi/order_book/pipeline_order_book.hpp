@@ -68,6 +68,10 @@ public:
 
     void set_snapshot_callback(snapshot_callback cb);
 
+    /// @brief Attach a record buffer to capture raw WebSocket frames.
+    /// Must be called before async_run().
+    void set_record_buffer(detail::threadsafe_stream_buffer<std::string>& buffer);
+
 private:
     void apply_event(const types::depth_stream_event_t& event);
 
@@ -83,6 +87,7 @@ private:
     order_book_snapshot book_;
     snapshot_callback on_snapshot_;
     std::atomic<bool> running_{false};
+    detail::threadsafe_stream_buffer<std::string>* record_buffer_{nullptr};
 };
 
 } // namespace binapi2::fapi::order_book

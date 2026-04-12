@@ -20,6 +20,7 @@ boost::cobalt::task<int> cmd_order_book_live(binapi2::futures_usdm_api& c, const
     if (args.empty()) { spdlog::error("usage: order-book-live <symbol> [depth]"); co_return 1; }
 
     auto streams = c.create_market_stream();
+    if (record_buffer) streams->connection().attach_buffer(*record_buffer);
     auto rest = co_await c.create_rest_client();
     if (!rest) { spdlog::error("connect: {}", rest.err.message); co_return 1; }
     const std::string symbol = args[0];

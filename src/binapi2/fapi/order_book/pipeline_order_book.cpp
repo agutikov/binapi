@@ -36,6 +36,11 @@ void pipeline_order_book::set_snapshot_callback(snapshot_callback cb)
     on_snapshot_ = std::move(cb);
 }
 
+void pipeline_order_book::set_record_buffer(detail::threadsafe_stream_buffer<std::string>& buffer)
+{
+    record_buffer_ = &buffer;
+}
+
 void pipeline_order_book::apply_event(const types::depth_stream_event_t& event)
 {
     apply_levels(event.bids, book_.bids);
@@ -91,6 +96,7 @@ pipeline_order_book::async_run(types::symbol_t symbol, int depth_limit)
     auto network_task = [&]() -> boost::cobalt::task<void> {
         streams::basic_stream_connection<transport::websocket_client, consumer_type> conn(
             cfg_, consumer_type(raw_buf));
+        if (record_buffer_) conn.attach_buffer(*record_buffer_);
 
         types::diff_book_depth_subscription sub;
         sub.symbol = symbol;
