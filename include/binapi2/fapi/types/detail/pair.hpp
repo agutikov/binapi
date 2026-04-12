@@ -12,6 +12,8 @@
 
 #pragma once
 
+#include <algorithm>
+#include <cctype>
 #include <iosfwd>
 #include <string>
 #include <string_view>
@@ -28,11 +30,17 @@ class pair_t
 {
     std::string value_{};
 
+    static std::string to_upper(std::string s)
+    {
+        std::ranges::transform(s, s.begin(), [](unsigned char c) { return std::toupper(c); });
+        return s;
+    }
+
 public:
     pair_t() = default;
-    pair_t(const char* s) : value_(s) {}                           // NOLINT(google-explicit-constructor)
-    pair_t(std::string s) : value_(std::move(s)) {}                // NOLINT(google-explicit-constructor)
-    pair_t(std::string_view s) : value_(s) {}                      // NOLINT(google-explicit-constructor)
+    pair_t(const char* s) : value_(to_upper(s)) {}                 // NOLINT(google-explicit-constructor)
+    pair_t(std::string s) : value_(to_upper(std::move(s))) {}      // NOLINT(google-explicit-constructor)
+    pair_t(std::string_view s) : value_(to_upper(std::string(s))) {} // NOLINT(google-explicit-constructor)
 
     [[nodiscard]] const std::string& str() const noexcept { return value_; }
     [[nodiscard]] operator const std::string&() const noexcept { return value_; }  // NOLINT(google-explicit-constructor)

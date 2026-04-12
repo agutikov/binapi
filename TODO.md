@@ -3,9 +3,6 @@
 
 
 
-convert plans into demo api coverage document
-
-
 
 finish testing secure endpoints, streams and ws api with testnet
 
