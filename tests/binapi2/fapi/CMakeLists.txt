@@ -79,6 +79,11 @@ target_link_libraries(stream_recorder_test PRIVATE binapi2_fapi spdlog::spdlog G
 target_compile_options(stream_recorder_test PRIVATE)
 gtest_discover_tests(stream_recorder_test DISCOVERY_MODE PRE_TEST)
 
+add_executable(rotating_file_sink_test rotating_file_sink_test.cpp)
+target_link_libraries(rotating_file_sink_test PRIVATE binapi2_fapi uring GTest::gtest_main)
+target_compile_definitions(rotating_file_sink_test PRIVATE BOOST_ASIO_HAS_IO_URING)
+gtest_discover_tests(rotating_file_sink_test DISCOVERY_MODE PRE_TEST)
+
 add_subdirectory(integration/postman_mock)
 add_subdirectory(integration/sync_bridging)
 add_subdirectory(benchmarks)
