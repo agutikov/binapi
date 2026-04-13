@@ -6,24 +6,6 @@
 
 
 
-async_recorder.md
-
-Concurrency model - single thread async cobalt::main
-
-use async stream recorder
-
-use buffering for all recorded streams
-
-log buffers status periodically
-
-fsync rotated file before compression (is it done on close?)
-
-
-
-
-
-
-
 
 ================================================================================
 

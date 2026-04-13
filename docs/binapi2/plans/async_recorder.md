@@ -193,18 +193,125 @@ indicator, no derived field is ever persisted to disk.
 
 ## 4. Concurrency model
 
-- One `cobalt::thread` / `io_thread` for all WebSocket traffic + file sinks,
-  matching the existing `stream_recorder` model.
-- Coroutines running on that executor:
-  - `screener_run()` — owns the all-* dynamic stream + rotating sinks + the
-    aggregates map.
-  - `selector_run()` — 1s timer, reads aggregates, writes signals, emits
-    add/remove through a channel.
-  - `detail_run()` — owns the per-symbol dynamic stream + per-symbol sinks;
-    consumes the channel.
-  - `rest_sync_run()` — staggered timers, one REST service call each tick.
-- Clean shutdown via a single `cobalt::cancellation_signal` racing the main
-  read loops (same pattern already used in `stream_recorder`).
+**Single thread, single executor.** The whole recorder is a `cobalt::main`
+on one OS thread. Everything — WebSocket reads, REST calls, stream parsing,
+aggregates, selector, sinks, file I/O, timers — runs as cooperating
+coroutines on that thread. No `io_thread`, no cross-thread buffers, no
+locks on the aggregates map. This is the cheapest model that still scales
+to full-market tier-0 recording because:
+
+- every sink is bound by disk / io_uring, not CPU;
+- the producer (websocket framing) and the consumer (file write) share a
+  page cache and a context, so there is no thread hand-off cost;
+- the selector is 1 Hz and scans O(number of symbols) — trivially cheap.
+
+**Recorder type.** Uses `basic_async_stream_recorder<Sink>` (single-
+executor, `stream_buffer` backend). `basic_threaded_stream_recorder` is
+*not* used anywhere in this pipeline — we do not want an extra thread.
+All producers push via `co_await buf.async_push(frame)`, which provides
+natural backpressure: if a sink can't keep up, the websocket read loop
+suspends, the TCP window closes, and Binance slows the stream.
+
+### Coroutines on the single executor
+
+- `screener_run()` — owns the all-* dynamic stream, its
+  `async_stream_recorder`, the rotating sinks, and the rolling aggregates
+  map.
+- `selector_run()` — 1 Hz timer, reads aggregates, writes `signals.jsonl`,
+  emits add/remove through an in-process `cobalt::channel`.
+- `detail_run()` — owns the per-symbol dynamic stream and its
+  `async_stream_recorder`; consumes the channel and mutates
+  subscriptions.
+- `rest_sync_run()` — staggered timers, one REST call per tick, writes
+  into a dedicated `async_stream_recorder` with one buffer per endpoint.
+- `stats_run()` — periodic buffer/sink stats logger (see §4.2).
+
+### 4.1 Buffered recording for every stream
+
+Every recorded stream goes through a `stream_buffer<string>` attached to
+an `async_stream_recorder`, never directly into a sink. The buffer serves
+three purposes:
+
+1. **Decoupling** — the websocket read loop returns to reading the next
+   frame as soon as the push completes, which under normal load is
+   immediate (buffer not full); the drain coroutine handles the sink
+   I/O asynchronously.
+2. **Absorbing bursts** — Binance depth streams can burst well above
+   average rate; a per-stream buffer smooths those bursts into steady
+   disk writes.
+3. **Backpressure** — when the sink falls behind and the buffer fills,
+   `async_push` suspends; the websocket read loop stops consuming from
+   the socket, which is the correct failure mode (drop nothing, slow
+   down the source).
+
+Buffer sizing (defaults, overridable per stream in config):
+
+| Stream class                        | Size  | Rationale                   |
+|-------------------------------------|-------|-----------------------------|
+| `!bookTicker`                       | 16384 | high rate, market-wide      |
+| `!markPrice@arr@1s`, `!ticker@arr`  |  4096 | 1 Hz array events           |
+| per-symbol `aggTrade`, `bookTicker` |  4096 | moderate                    |
+| per-symbol `depth@100ms`            | 32768 | bursty, large payload       |
+| per-symbol `forceOrder`, `kline_1m` |  1024 | low rate                    |
+| REST endpoints                      |   256 | periodic, low volume        |
+
+### 4.2 Buffer / sink observability
+
+A `stats_run()` coroutine wakes on a 10 s timer and logs a single JSON
+line per tick to `stats.jsonl` (and, at a lower frequency, to spdlog at
+info) describing each buffer's state. Per buffer it records:
+
+- name (stream key or endpoint),
+- current occupancy and capacity,
+- a high-water mark since last tick (reset after logging),
+- total frames pushed and total frames drained since start,
+- total push-suspensions since start (number of times `async_push`
+  had to wait — a direct backpressure signal),
+- current rotating sink filename and bytes written.
+
+To support this, `stream_buffer<T>` gets two cheap counters
+(`pushed_total_`, `drained_total_`, `push_suspends_total_`) and an
+`occupancy()`/`capacity()`/`high_water()` accessor set. Reads are
+unsynchronised because everything lives on one executor.
+
+### 4.3 fsync on rotation
+
+`asio::stream_file::close()` only issues the `close(2)` syscall — it
+does **not** imply `fsync(2)`, and on Linux a closed file may still have
+dirty pages in the page cache. That means a crash immediately after
+rotation can leave the just-rotated segment corrupt, and compressing it
+afterwards would bake the corruption into the `.zst`.
+
+Rotation sequence in `rotating_file_sink`:
+
+1. Stop writing new frames to the current `stream_file` (atomically
+   swap in a new one so the next push goes to the new segment).
+2. On the old handle: `co_await async_write` any queued bytes, then
+   call `fsync(fd)` — via a small helper that posts a blocking `::fsync`
+   onto a short-lived worker. (There is no async `fsync` in Boost.Asio
+   for `stream_file`; the syscall is cheap enough at rotation cadence
+   that doing it inline is acceptable, but posting it keeps the main
+   thread responsive if the underlying disk is slow. The compression
+   step already happens via `posix_spawn`, so reusing the same
+   out-of-thread pattern is natural.)
+3. `close()` the old `stream_file`.
+4. Enqueue the closed path for compression: `posix_spawn zstd --rm
+   <path>`. `zstd --rm` only deletes the input after a successful write;
+   the `.zst` atomically replaces the segment.
+5. Log the rotation to `stats.jsonl`.
+
+Only step 2 is new relative to today's `file_sink`; the rest mirrors
+what the design already had.
+
+### 4.4 Shutdown
+
+On SIGINT/SIGTERM, a single `cobalt::cancellation_signal` is raced
+against every read loop. Each stage, on cancellation, closes its
+recorder (`recorder.close()`), awaits the drain via `co_await
+recorder.run()`'s completion, forces an fsync+rotation on every open
+segment, and lets its `stats.jsonl` tick fire one last time to capture
+final counters. `cobalt::main` returns 0 only after all four stages
+have drained.
 
 ## 5. Implementation plan
 
@@ -287,16 +394,41 @@ Build incrementally — each step is independently runnable and testable.
 - Add a short `examples/binapi2/fapi/async-recorder/README.md` describing
   CLI flags and the output directory layout.
 
-## 6. Open questions
+## 6. Resolved decisions
 
-1. `aggTrade` vs raw `trade` — brief recommends aggTrade; confirm aggTrade
-   is sufficient before committing to it permanently (design keeps raw
-   trades as an easy add since the sink layer is stream-agnostic).
-2. Depth compression: 20–80 GB/day for BTC `@depth@100ms` is expensive even
-   after zstd. Consider a downsampling sink that keeps only top-20 levels
-   for the default build and gate full raw depth behind `--full-depth`.
-3. Where does the aggregates map live long-term — purely in memory, or
-   periodically checkpointed for crash recovery? Start in memory; add
-   checkpointing only if restart frequency becomes painful.
-4. Selector config format — TOML (new dep) vs JSON via Glaze (already in
-   the tree). Default to Glaze/JSON.
+1. **Trades stream.** Use `@aggTrade` only. USD-M Futures does not expose
+   a per-trade (non-aggregated) stream — `@aggTrade` is the authoritative
+   tape for this venue, so there is nothing to compare against. No flag,
+   no alternative.
+2. **Depth stream selection.**
+   - **Default:** `<sym>@depth20@100ms` — ready-made top-20 bid+ask
+     snapshots, cheap on the wire and on disk, sufficient for
+     imbalance / microprice / queue research.
+   - **Cutoff option:** `--depth-levels {5,10,20}` to pick the partial
+     book stream. Binance does not offer 50/100 as streams, so the
+     option is bounded to the set it actually supports.
+   - **Full research mode:** `--full-depth` switches to
+     `<sym>@depth@100ms` (diff stream) + local order book
+     reconstruction. Price-band filtering (e.g. ±2%) is **not** a native
+     Binance stream; it only exists as a post-reconstruction filter on
+     top of full diff depth. Implement this later only if a concrete
+     research need appears — v1 records the raw diff stream and leaves
+     band filtering to the replay/analysis side.
+3. **Aggregates durability.** In-memory only. No disk checkpoint, no
+   recovery path. A restart loses at most ~1 day of warm-up; the short
+   TFs are rebuilt from the live stream within minutes.
+4. **Selector config format.** YAML via Glaze (`glz::read_yaml` /
+   `glz::write_yaml`). Glaze is already a dependency and supports YAML
+   directly. Single config file
+   `examples/binapi2/fapi/async-recorder/selector.yaml` with the
+   selector weights, thresholds, hold/cooloff durations, bounds, and
+   mandatory set.
+5. **Segment retention.** K = 0 — compress every segment immediately on
+   rotation, keep no uncompressed tail. Live data is always readable
+   from the ongoing segment; hot replay use cases, if they appear, can
+   stream-decompress on demand.
+6. **Stats destination.** File + spdlog only. `stats.jsonl` is the
+   primary sink (one JSON line per 10 s tick); the same record is also
+   emitted at spdlog `info` level. No HTTP endpoint, no Prometheus
+   exporter. Grafana / external dashboards, if they appear later, can
+   tail `stats.jsonl`.

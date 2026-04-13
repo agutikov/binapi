@@ -1,0 +1,20 @@
+# async-recorder selector configuration — example/defaults.
+# See docs/binapi2/plans/async_recorder.md §2 (Stage 2) for semantics.
+
+w_volume: 1.0
+w_trades: 1.0
+w_range: 1.0
+w_natr: 1.5
+
+add_score: 2.0
+remove_score: 1.0
+
+min_hold_seconds: 1800    # 30 min
+cooloff_seconds: 600      # 10 min
+
+min_active: 5
+max_active: 25
+
+mandatory:
+  - BTCUSDT
+  - ETHUSDT
