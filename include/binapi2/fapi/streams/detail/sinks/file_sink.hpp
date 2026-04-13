@@ -15,7 +15,8 @@
 #error "file_sink requires BOOST_ASIO_HAS_FILE (define BOOST_ASIO_HAS_IO_URING and link liburing)"
 #endif
 
-#include <binapi2/fapi/streams/stream_recorder.hpp>
+#include <binapi2/fapi/streams/detail/async_stream_recorder.hpp>
+#include <binapi2/fapi/streams/detail/threaded_stream_recorder.hpp>
 
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/stream_file.hpp>
@@ -61,7 +62,10 @@ private:
 
 namespace binapi2::fapi::streams {
 
-/// @brief Stream recorder with async file sink.
-using file_stream_recorder = basic_stream_recorder<sinks::file_sink>;
+/// @brief Threaded recorder with async file sink.
+using threaded_file_stream_recorder = basic_threaded_stream_recorder<sinks::file_sink>;
+
+/// @brief Async (single-executor) recorder with async file sink.
+using async_file_stream_recorder = basic_async_stream_recorder<sinks::file_sink>;
 
 } // namespace binapi2::fapi::streams

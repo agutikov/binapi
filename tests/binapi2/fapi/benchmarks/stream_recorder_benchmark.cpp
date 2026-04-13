@@ -3,10 +3,18 @@
 // binapi2 stream_recorder benchmarks — callback_sink and spdlog_sink.
 // file_sink requires BOOST_ASIO_HAS_IO_URING and is not benchmarked here.
 
-#include <binapi2/fapi/streams/sinks/callback_sink.hpp>
-#include <binapi2/fapi/streams/sinks/file_sink.hpp>
-#include <binapi2/fapi/streams/sinks/spdlog_sink.hpp>
-#include <binapi2/fapi/streams/stream_recorder.hpp>
+#include <binapi2/fapi/streams/detail/sinks/callback_sink.hpp>
+#include <binapi2/fapi/streams/detail/sinks/file_sink.hpp>
+#include <binapi2/fapi/streams/detail/sinks/spdlog_sink.hpp>
+#include <binapi2/fapi/streams/detail/async_stream_recorder.hpp>
+#include <binapi2/fapi/streams/detail/threaded_stream_recorder.hpp>
+
+#include <boost/asio/detached.hpp>
+#include <boost/asio/io_context.hpp>
+#include <boost/cobalt/join.hpp>
+#include <boost/cobalt/run.hpp>
+#include <boost/cobalt/spawn.hpp>
+#include <boost/cobalt/task.hpp>
 
 #include <spdlog/spdlog.h>
 #include <spdlog/async.h>
@@ -65,7 +73,7 @@ bench_result bench_callback_sink()
 {
     // Warmup
     {
-        streams::stream_recorder recorder(1024);
+        streams::threaded_stream_recorder recorder(1024);
         auto& buf = recorder.add_stream(
             streams::sinks::callback_sink([](const std::string&) {}));
         recorder.start();
@@ -77,7 +85,7 @@ bench_result bench_callback_sink()
     // Measure
     auto t0 = clock_t::now();
     {
-        streams::stream_recorder recorder(1024);
+        streams::threaded_stream_recorder recorder(1024);
         auto& buf = recorder.add_stream(
             streams::sinks::callback_sink([](const std::string&) {}));
         recorder.start();
@@ -86,7 +94,7 @@ bench_result bench_callback_sink()
         recorder.stop();
     }
     auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(clock_t::now() - t0).count();
-    return compute("recorder/callback_sink", N, elapsed);
+    return compute("threaded/callback_sink", N, elapsed);
 }
 
 // ===================================================================
@@ -97,7 +105,7 @@ bench_result bench_callback_sink_multi()
 {
     auto t0 = clock_t::now();
     {
-        streams::stream_recorder recorder(1024);
+        streams::threaded_stream_recorder recorder(1024);
         auto& buf_a = recorder.add_stream(
             streams::sinks::callback_sink([](const std::string&) {}));
         auto& buf_b = recorder.add_stream(
@@ -110,7 +118,7 @@ bench_result bench_callback_sink_multi()
         recorder.stop();
     }
     auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(clock_t::now() - t0).count();
-    return compute("recorder/callback_sink_multi(2)", N, elapsed);
+    return compute("threaded/callback_sink_multi(2)", N, elapsed);
 }
 
 // ===================================================================
@@ -128,7 +136,7 @@ bench_result bench_spdlog_sink()
 
     // Warmup
     {
-        streams::spdlog_stream_recorder recorder(1024);
+        streams::threaded_spdlog_stream_recorder recorder(1024);
         auto& buf = recorder.add_stream(streams::sinks::spdlog_sink(logger));
         recorder.start();
         for (std::size_t i = 0; i < 1000; ++i)
@@ -139,7 +147,7 @@ bench_result bench_spdlog_sink()
     // Measure
     auto t0 = clock_t::now();
     {
-        streams::spdlog_stream_recorder recorder(1024);
+        streams::threaded_spdlog_stream_recorder recorder(1024);
         auto& buf = recorder.add_stream(streams::sinks::spdlog_sink(logger));
         recorder.start();
         for (std::size_t i = 0; i < N; ++i)
@@ -149,7 +157,7 @@ bench_result bench_spdlog_sink()
     auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(clock_t::now() - t0).count();
 
     spdlog::drop("bench_rec");
-    return compute("recorder/spdlog_sink", N, elapsed);
+    return compute("threaded/spdlog_sink", N, elapsed);
 }
 
 // ===================================================================
@@ -162,7 +170,7 @@ bench_result bench_async_file_sink()
 
     // Warmup
     {
-        streams::file_stream_recorder recorder(4096);
+        streams::threaded_file_stream_recorder recorder(4096);
         auto& buf = recorder.add_stream(
             streams::sinks::file_sink(recorder.io_context(), path));
         recorder.start();
@@ -174,7 +182,7 @@ bench_result bench_async_file_sink()
     // Measure
     auto t0 = clock_t::now();
     {
-        streams::file_stream_recorder recorder(4096);
+        streams::threaded_file_stream_recorder recorder(4096);
         auto& buf = recorder.add_stream(
             streams::sinks::file_sink(recorder.io_context(), path));
         recorder.start();
@@ -185,7 +193,7 @@ bench_result bench_async_file_sink()
     auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(clock_t::now() - t0).count();
 
     std::filesystem::remove(path);
-    return compute("recorder/file_sink(io_uring)", N, elapsed);
+    return compute("threaded/file_sink(io_uring)", N, elapsed);
 }
 
 // ===================================================================
@@ -206,7 +214,7 @@ bench_result bench_spdlog_file_sink()
 
     // Warmup
     {
-        streams::spdlog_stream_recorder recorder(4096);
+        streams::threaded_spdlog_stream_recorder recorder(4096);
         auto& buf = recorder.add_stream(streams::sinks::spdlog_sink(logger));
         recorder.start();
         for (std::size_t i = 0; i < 1000; ++i)
@@ -217,7 +225,7 @@ bench_result bench_spdlog_file_sink()
     // Measure
     auto t0 = clock_t::now();
     {
-        streams::spdlog_stream_recorder recorder(4096);
+        streams::threaded_spdlog_stream_recorder recorder(4096);
         auto& buf = recorder.add_stream(streams::sinks::spdlog_sink(logger));
         recorder.start();
         for (std::size_t i = 0; i < N; ++i)
@@ -229,7 +237,114 @@ bench_result bench_spdlog_file_sink()
 
     spdlog::drop("bench_rec_file");
     std::filesystem::remove(path);
-    return compute("recorder/spdlog_sink(file)", N, elapsed);
+    return compute("threaded/spdlog_sink(file)", N, elapsed);
+}
+
+// ===================================================================
+// async_stream_recorder — single-executor variant
+// ===================================================================
+
+boost::cobalt::task<void>
+run_async_callback(std::size_t n)
+{
+    streams::async_stream_recorder recorder(1024);
+    auto& buf = recorder.add_stream(
+        streams::sinks::callback_sink([](const std::string&) {}));
+
+    auto producer = [&]() -> boost::cobalt::task<void> {
+        for (std::size_t i = 0; i < n; ++i)
+            co_await buf.async_push(std::string(payload));
+        recorder.close();
+    };
+
+    co_await boost::cobalt::join(producer(), recorder.run());
+}
+
+bench_result bench_async_callback_sink()
+{
+    // Warmup
+    boost::cobalt::run(run_async_callback(1000));
+
+    auto t0 = clock_t::now();
+    boost::cobalt::run(run_async_callback(N));
+    auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(
+                       clock_t::now() - t0).count();
+    return compute("async/callback_sink", N, elapsed);
+}
+
+boost::cobalt::task<void>
+run_async_spdlog(std::shared_ptr<spdlog::logger> logger, std::size_t n)
+{
+    streams::async_spdlog_stream_recorder recorder(1024);
+    auto& buf = recorder.add_stream(streams::sinks::spdlog_sink(logger));
+
+    auto producer = [&]() -> boost::cobalt::task<void> {
+        for (std::size_t i = 0; i < n; ++i)
+            co_await buf.async_push(std::string(payload));
+        recorder.close();
+    };
+
+    co_await boost::cobalt::join(producer(), recorder.run());
+}
+
+bench_result bench_async_spdlog_sink()
+{
+    spdlog::init_thread_pool(8192, 1);
+    auto null_sink = std::make_shared<spdlog::sinks::null_sink_mt>();
+    auto logger = std::make_shared<spdlog::async_logger>(
+        "bench_async_rec", null_sink, spdlog::thread_pool(),
+        spdlog::async_overflow_policy::block);
+    logger->set_level(spdlog::level::info);
+
+    boost::cobalt::run(run_async_spdlog(logger, 1000));
+
+    auto t0 = clock_t::now();
+    boost::cobalt::run(run_async_spdlog(logger, N));
+    auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(
+                       clock_t::now() - t0).count();
+
+    spdlog::drop("bench_async_rec");
+    return compute("async/spdlog_sink", N, elapsed);
+}
+
+boost::cobalt::task<void>
+run_async_file(const std::string& path, std::size_t n)
+{
+    auto exec = co_await boost::cobalt::this_coro::executor;
+    auto& ctx = static_cast<boost::asio::io_context&>(
+        boost::asio::query(exec, boost::asio::execution::context));
+
+    streams::async_file_stream_recorder recorder(4096);
+    auto& buf = recorder.add_stream(streams::sinks::file_sink(ctx, path));
+
+    auto producer = [&]() -> boost::cobalt::task<void> {
+        for (std::size_t i = 0; i < n; ++i)
+            co_await buf.async_push(std::string(payload));
+        recorder.close();
+    };
+
+    co_await boost::cobalt::join(producer(), recorder.run());
+}
+
+bench_result bench_async_file_sink_colocated()
+{
+    const std::string path = "/tmp/binapi2_bench_async_file_colo.jsonl";
+
+    boost::cobalt::run(run_async_file(path, 1000)); // warmup
+
+    auto t0 = clock_t::now();
+    boost::cobalt::run(run_async_file(path, N));
+    auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(
+                       clock_t::now() - t0).count();
+
+    auto sz = std::filesystem::file_size(path);
+    std::filesystem::remove(path);
+    if (sz < N) {
+        std::fprintf(stderr,
+                     "async/file_sink bench wrote only %zu bytes (expected >= %zu)\n",
+                     static_cast<std::size_t>(sz), N);
+    }
+    return compute("async/file_sink(io_uring)", N, elapsed);
 }
 
 } // namespace
@@ -246,6 +361,9 @@ int main()
     r = bench_spdlog_sink();              results.push_back(r); print_result(r);
     r = bench_async_file_sink();          results.push_back(r); print_result(r);
     r = bench_spdlog_file_sink();         results.push_back(r); print_result(r);
+    r = bench_async_callback_sink();      results.push_back(r); print_result(r);
+    r = bench_async_spdlog_sink();        results.push_back(r); print_result(r);
+    r = bench_async_file_sink_colocated(); results.push_back(r); print_result(r);
 
     std::printf("\n== Summary ==\n\n");
     double min_ns = results[0].ns_per_op;

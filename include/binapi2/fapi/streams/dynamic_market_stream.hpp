@@ -15,8 +15,8 @@
 #include <binapi2/fapi/detail/json_opts.hpp>
 #include <binapi2/fapi/detail/variant_parse.hpp>
 #include <binapi2/fapi/result.hpp>
-#include <binapi2/fapi/streams/stream_connection.hpp>
-#include <binapi2/fapi/streams/stream_consumer.hpp>
+#include <binapi2/fapi/streams/detail/stream_connection.hpp>
+#include <binapi2/fapi/streams/detail/stream_consumer.hpp>
 #include <binapi2/fapi/streams/stream_traits.hpp>
 #include <binapi2/fapi/transport/websocket_client.hpp>
 #include <binapi2/fapi/transport/websocket_transport.hpp>

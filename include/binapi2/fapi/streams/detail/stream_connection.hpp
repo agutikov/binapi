@@ -13,7 +13,7 @@
 #include <binapi2/fapi/detail/stream_buffer.hpp>
 #include <binapi2/fapi/detail/threadsafe_stream_buffer.hpp>
 #include <binapi2/fapi/result.hpp>
-#include <binapi2/fapi/streams/stream_consumer.hpp>
+#include <binapi2/fapi/streams/detail/stream_consumer.hpp>
 #include <binapi2/fapi/transport/websocket_client.hpp>
 #include <binapi2/fapi/transport/websocket_transport.hpp>
 

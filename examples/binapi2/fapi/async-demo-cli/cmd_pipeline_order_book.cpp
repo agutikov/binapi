@@ -31,7 +31,9 @@ boost::cobalt::task<int> cmd_pipeline_order_book_live(binapi2::futures_usdm_api&
 
     binapi2::fapi::order_book::pipeline_order_book book(
         c.configuration(), (*rest)->market_data, buffer_size);
-    if (record_buffer) book.set_record_buffer(*record_buffer);
+    // Note: the pipeline order book runs across multiple threads and needs a
+    // cross-thread buffer, so it can't reuse the demo CLI's async (single-
+    // executor) record_buffer. Recording for this command is not wired up.
 
     spdlog::info("starting pipeline order book for {} depth={} (3 threads)", symbol, depth);
 

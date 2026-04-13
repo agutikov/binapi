@@ -23,7 +23,7 @@
 #include <vector>
 
 namespace binapi2::fapi { class client; }
-namespace binapi2::fapi::detail { template<typename T> class threadsafe_stream_buffer; }
+namespace binapi2::fapi::detail { template<typename T> class stream_buffer; }
 
 namespace demo {
 
@@ -42,7 +42,7 @@ inline std::string record_file;
 
 // Recording buffer — set by main if --record is used.
 // Stream commands attach this to their connection if non-null.
-inline ::binapi2::fapi::detail::threadsafe_stream_buffer<std::string>* record_buffer = nullptr;
+inline ::binapi2::fapi::detail::stream_buffer<std::string>* record_buffer = nullptr;
 
 // Secret provider: "libsecret" (default), "env" (deprecated), "systemd-creds:<dir>"
 inline std::string secrets_source;

@@ -7,7 +7,8 @@
 
 #pragma once
 
-#include <binapi2/fapi/streams/stream_recorder.hpp>
+#include <binapi2/fapi/streams/detail/async_stream_recorder.hpp>
+#include <binapi2/fapi/streams/detail/threaded_stream_recorder.hpp>
 
 #include <functional>
 #include <string>
@@ -32,7 +33,10 @@ private:
 
 namespace binapi2::fapi::streams {
 
-/// @brief Stream recorder with a generic callback sink.
-using stream_recorder = basic_stream_recorder<sinks::callback_sink>;
+/// @brief Threaded recorder with a generic callback sink.
+using threaded_stream_recorder = basic_threaded_stream_recorder<sinks::callback_sink>;
+
+/// @brief Async (single-executor) recorder with a generic callback sink.
+using async_stream_recorder = basic_async_stream_recorder<sinks::callback_sink>;
 
 } // namespace binapi2::fapi::streams

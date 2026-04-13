@@ -8,7 +8,7 @@
 #include <binapi2/fapi/order_book/pipeline_order_book.hpp>
 
 #include <binapi2/fapi/detail/json_opts.hpp>
-#include <binapi2/fapi/streams/stream_connection.hpp>
+#include <binapi2/fapi/streams/detail/stream_connection.hpp>
 
 #include <glaze/glaze.hpp>
 

@@ -32,14 +32,17 @@
 #include "cmd_pipeline_order_book.hpp"
 
 #include <binapi2/futures_usdm_api.hpp>
-#include <binapi2/fapi/streams/sinks/spdlog_sink.hpp>
+#include <binapi2/fapi/streams/detail/sinks/spdlog_sink.hpp>
 
 #include <boost/asio/signal_set.hpp>
+#include <boost/asio/use_future.hpp>
 #include <boost/cobalt/main.hpp>
+#include <boost/cobalt/spawn.hpp>
 #include <boost/cobalt/this_coro.hpp>
 #include <spdlog/spdlog.h>
 
 #include <algorithm>
+#include <future>
 #include <iostream>
 #include <iterator>
 #include <string_view>
@@ -273,12 +276,18 @@ boost::cobalt::main co_main(int argc, char* argv[])
     demo::init_logging();
 
     // Set up stream recording if --record was specified.
-    std::unique_ptr<binapi2::fapi::streams::spdlog_stream_recorder> recorder;
+    //
+    // Uses the single-executor async recorder: the WebSocket stream runs on
+    // this coroutine's executor, so push/drain are colocated and cheap.
+    std::unique_ptr<binapi2::fapi::streams::async_spdlog_stream_recorder> recorder;
+    std::future<void> recorder_future;
     if (auto rec_logger = spdlog::get("rec")) {
-        recorder = std::make_unique<binapi2::fapi::streams::spdlog_stream_recorder>(4096);
+        recorder = std::make_unique<binapi2::fapi::streams::async_spdlog_stream_recorder>(4096);
         demo::record_buffer = &recorder->add_stream(
             binapi2::fapi::streams::sinks::spdlog_sink(rec_logger));
-        recorder->start();
+        auto rec_exec = co_await boost::cobalt::this_coro::executor;
+        recorder_future = boost::cobalt::spawn(
+            rec_exec, recorder->run(), boost::asio::use_future);
         spdlog::info("recording stream frames to {}", demo::record_file);
     }
 
@@ -319,7 +328,10 @@ boost::cobalt::main co_main(int argc, char* argv[])
     }
 
     signals.cancel();
-    if (recorder) recorder->stop();
+    if (recorder) {
+        recorder->close();
+        if (recorder_future.valid()) recorder_future.get();
+    }
     demo::shutdown_logging();
     co_return rc;
 }

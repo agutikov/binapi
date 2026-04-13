@@ -16,10 +16,17 @@ set(BINAPI2_FAPI_HEADERS
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/rest/services/market_data.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/rest/services/trade.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/rest/services/user_data_streams.hpp
-    ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/streams/stream_connection.hpp
+    ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/streams/detail/stream_connection.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/streams/combined_market_stream.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/streams/dynamic_market_stream.hpp
-    ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/streams/stream_recorder.hpp
+    ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/streams/detail/threaded_stream_recorder.hpp
+    ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/streams/detail/async_stream_recorder.hpp
+    ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/streams/detail/recorder_sink_traits.hpp
+    ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/streams/detail/stream_consumer.hpp
+    ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/streams/detail/stream_parser.hpp
+    ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/streams/detail/sinks/callback_sink.hpp
+    ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/streams/detail/sinks/spdlog_sink.hpp
+    ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/streams/detail/sinks/file_sink.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/streams/market_stream.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/order_book/local_order_book.hpp
     ${CMAKE_SOURCE_DIR}/include/binapi2/fapi/streams/user_stream.hpp

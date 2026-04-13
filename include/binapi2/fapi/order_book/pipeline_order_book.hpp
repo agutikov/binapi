@@ -20,8 +20,8 @@
 #include <binapi2/fapi/order_book/local_order_book.hpp>
 #include <binapi2/fapi/rest/services/market_data.hpp>
 #include <binapi2/fapi/result.hpp>
-#include <binapi2/fapi/streams/stream_consumer.hpp>
-#include <binapi2/fapi/streams/stream_parser.hpp>
+#include <binapi2/fapi/streams/detail/stream_consumer.hpp>
+#include <binapi2/fapi/streams/detail/stream_parser.hpp>
 #include <binapi2/fapi/transport/websocket_client.hpp>
 #include <binapi2/fapi/types/market_stream_events.hpp>
 #include <binapi2/fapi/types/subscriptions.hpp>

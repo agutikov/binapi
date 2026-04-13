@@ -4,7 +4,7 @@
 
 /// @file Explicit template instantiation for the default stream_connection transport.
 
-#include <binapi2/fapi/streams/stream_connection.hpp>
+#include <binapi2/fapi/streams/detail/stream_connection.hpp>
 
 namespace binapi2::fapi::streams {
 

@@ -7,7 +7,8 @@
 
 #pragma once
 
-#include <binapi2/fapi/streams/stream_recorder.hpp>
+#include <binapi2/fapi/streams/detail/async_stream_recorder.hpp>
+#include <binapi2/fapi/streams/detail/threaded_stream_recorder.hpp>
 
 #include <spdlog/spdlog.h>
 
@@ -39,7 +40,10 @@ private:
 
 namespace binapi2::fapi::streams {
 
-/// @brief Stream recorder with spdlog sink.
-using spdlog_stream_recorder = basic_stream_recorder<sinks::spdlog_sink>;
+/// @brief Threaded recorder with spdlog sink.
+using threaded_spdlog_stream_recorder = basic_threaded_stream_recorder<sinks::spdlog_sink>;
+
+/// @brief Async (single-executor) recorder with spdlog sink.
+using async_spdlog_stream_recorder = basic_async_stream_recorder<sinks::spdlog_sink>;
 
 } // namespace binapi2::fapi::streams

@@ -8,8 +8,8 @@
 #include <binapi2/fapi/detail/stream_buffer.hpp>
 #include <binapi2/fapi/detail/threadsafe_stream_buffer.hpp>
 #include <binapi2/fapi/streams/market_stream.hpp>
-#include <binapi2/fapi/streams/stream_consumer.hpp>
-#include <binapi2/fapi/streams/stream_parser.hpp>
+#include <binapi2/fapi/streams/detail/stream_consumer.hpp>
+#include <binapi2/fapi/streams/detail/stream_parser.hpp>
 #include <binapi2/fapi/types/subscriptions.hpp>
 
 #include <boost/cobalt/join.hpp>

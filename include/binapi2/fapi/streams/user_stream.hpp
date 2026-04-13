@@ -11,8 +11,8 @@
 #include <binapi2/fapi/detail/variant_parse.hpp>
 #include <binapi2/fapi/rest/services/user_data_streams.hpp>
 #include <binapi2/fapi/result.hpp>
-#include <binapi2/fapi/streams/stream_connection.hpp>
-#include <binapi2/fapi/streams/stream_consumer.hpp>
+#include <binapi2/fapi/streams/detail/stream_connection.hpp>
+#include <binapi2/fapi/streams/detail/stream_consumer.hpp>
 #include <binapi2/fapi/transport/websocket_client.hpp>
 #include <binapi2/fapi/transport/websocket_transport.hpp>
 #include <binapi2/fapi/types/event_traits.hpp>
