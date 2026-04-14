@@ -7,8 +7,10 @@
 // Subsequent steps will add the screener, selector, detail monitor, REST
 // sync, and stats runner. See docs/binapi2/plans/async_recorder.md.
 
+#include "aggregates.hpp"
 #include "config.hpp"
 #include "screener.hpp"
+#include "selector.hpp"
 #include "status_reporter.hpp"
 
 #include <boost/asio/io_context.hpp>
@@ -32,24 +34,38 @@ namespace ar = binapi2::examples::async_recorder;
 
 namespace {
 
-/// @brief Run the selected screener (real or debug) and, on return, close
-///        the status_reporter so its `run()` can exit cleanly. Named
-///        rather than a lambda because capturing coroutine lambdas crash
-///        GCC 15 on this codebase.
-boost::cobalt::task<int>
-screener_and_close_status(const ar::recorder_config& cfg,
-                          ar::status_reporter& status)
+/// @brief Drive the selected screener (real or debug) and, on return,
+///        close the status_reporter so the selector's periodic wait
+///        bails out and the outer join can unwind.
+boost::cobalt::task<void>
+screener_then_close_status(const ar::recorder_config& cfg,
+                           ar::aggregates_map& aggs,
+                           ar::status_reporter& status)
 {
     int rc = 0;
     if (!cfg.debug_stream.empty()) {
         spdlog::info("mode: debug_screener (single stream: {})", cfg.debug_stream);
-        rc = co_await ar::debug_screener_run(cfg, status);
+        rc = co_await ar::debug_screener_run(cfg, aggs, status);
     } else {
         spdlog::info("mode: screener (three all-market feeds)");
-        rc = co_await ar::screener_run(cfg, status);
+        rc = co_await ar::screener_run(cfg, aggs, status);
     }
+    (void)rc;
     status.close();
-    co_return rc;
+}
+
+/// @brief Run screener + selector as a 2-task cobalt::join. The status
+///        reporter runs in the *outer* join in co_main.
+boost::cobalt::task<void>
+screener_and_selector(const ar::recorder_config& cfg,
+                      ar::aggregates_map& aggs,
+                      ar::selector& sel,
+                      ar::signals_writer& signals_file,
+                      ar::status_reporter& status)
+{
+    co_await boost::cobalt::join(
+        screener_then_close_status(cfg, aggs, status),
+        ar::selector_run(cfg, aggs, sel, signals_file, status));
 }
 
 } // namespace
@@ -111,11 +127,18 @@ boost::cobalt::main co_main(int argc, char* argv[])
     // interval (default 10 s, configurable via --stats-seconds).
     ar::status_reporter status(ioc, std::chrono::seconds(cfg.stats_interval_seconds));
 
-    // Run the selected screener concurrently with the status reporter;
-    // the helper closes the reporter after the screener returns so the
-    // join below unwinds cleanly.
+    // Shared aggregates map: screener writes, selector reads.
+    ar::aggregates_map aggs;
+
+    // Selector stage.
+    ar::selector sel(cfg.selector);
+    ar::signals_writer signals_file(cfg.root_dir / "selector" / "signals.jsonl");
+
+    // Run screener + selector concurrently with the status reporter.
+    // cobalt::join with >2 tasks ICE's GCC 15, so nest: two 2-task joins.
+    // The outer join waits on screener+selector (one helper) and status.run.
     co_await boost::cobalt::join(
-        screener_and_close_status(cfg, status),
+        screener_and_selector(cfg, aggs, sel, signals_file, status),
         status.run());
 
     signals.cancel();

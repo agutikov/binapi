@@ -14,6 +14,7 @@
 #include <binapi2/fapi/config.hpp>
 #include <binapi2/fapi/streams/detail/sinks/rotating_file_sink.hpp>
 #include <binapi2/fapi/streams/market_stream.hpp>
+#include <binapi2/fapi/types/market_stream_events.hpp>
 #include <binapi2/fapi/types/subscriptions.hpp>
 
 #include <boost/asio/io_context.hpp>
@@ -77,16 +78,32 @@ make_rfs_cfg(const recorder_config& cfg, const std::string& subdir)
     return rfs;
 }
 
+/// @brief Per-event aggregate update. Only specialised for bookTicker
+///        in Step 5 — other event types are a no-op until the full TF
+///        windows are plumbed through.
+inline void update_aggregates(aggregates_map& aggs,
+                              const types::book_ticker_stream_event_t& ev)
+{
+    ++aggs[ev.symbol].events_total;
+}
+
+template<class T>
+inline void update_aggregates(aggregates_map&, const T&)
+{
+    // Array / other events contribute nothing to the aggregates yet.
+}
+
 /// @brief Drive a market_stream generator for one fixed subscription,
-///        pushing raw frames into the recorder's buffer via attach_buffer.
-///        Frame counts are tracked by the buffer's own observability
-///        counters. Closes the recorder on exit so the drain coroutine
-///        can finish (used by the single-stream debug path).
+///        pushing raw frames into the recorder's buffer via attach_buffer
+///        and threading every parsed event through `update_aggregates`.
+///        Closes the recorder on exit so the drain coroutine can finish
+///        (used by the single-stream debug path).
 template<class Subscription>
 boost::cobalt::task<void>
 run_one(streams::market_stream& ms,
         fapi::detail::stream_buffer<std::string>& rec_buf,
         streams::async_rotating_file_stream_recorder& recorder,
+        aggregates_map& aggs,
         Subscription sub,
         const char* label)
 {
@@ -100,6 +117,7 @@ run_one(streams::market_stream& ms,
             spdlog::warn("screener[{}]: stream ended: {}", label, ev.err.message);
             break;
         }
+        update_aggregates(aggs, *ev);
     }
 
     spdlog::info("screener[{}]: closing recorder (pushed={})",
@@ -114,6 +132,7 @@ template<class Subscription>
 boost::cobalt::task<void>
 run_feed(streams::market_stream& ms,
          fapi::detail::stream_buffer<std::string>& rec_buf,
+         aggregates_map& aggs,
          Subscription sub,
          const char* label)
 {
@@ -127,6 +146,7 @@ run_feed(streams::market_stream& ms,
             spdlog::warn("screener[{}]: stream ended: {}", label, ev.err.message);
             break;
         }
+        update_aggregates(aggs, *ev);
     }
     spdlog::info("screener[{}]: done (pushed={})", label, rec_buf.pushed_total());
 }
@@ -163,7 +183,9 @@ watch_then_close(std::future<void>& f1,
 // ---------------------------------------------------------------------------
 
 boost::cobalt::task<int>
-debug_screener_run(const recorder_config& cfg, status_reporter& status)
+debug_screener_run(const recorder_config& cfg,
+                   aggregates_map& aggs,
+                   status_reporter& status)
 {
     auto exec = co_await boost::cobalt::this_coro::executor;
     auto& ioc = static_cast<boost::asio::io_context&>(
@@ -192,20 +214,20 @@ debug_screener_run(const recorder_config& cfg, status_reporter& status)
     // its own run_one template and then co_awaits a 2-task cobalt::join.
     if (subdir == "markPriceArr") {
         co_await boost::cobalt::join(
-            run_one(ms, buf, recorder,
+            run_one(ms, buf, recorder, aggs,
                     types::all_market_mark_price_subscription{ .every_1s = true },
                     "markPriceArr"),
             recorder.run());
     }
     else if (subdir == "tickerArr") {
         co_await boost::cobalt::join(
-            run_one(ms, buf, recorder,
+            run_one(ms, buf, recorder, aggs,
                     types::all_market_ticker_subscription{}, "tickerArr"),
             recorder.run());
     }
     else /* bookTicker / default */ {
         co_await boost::cobalt::join(
-            run_one(ms, buf, recorder,
+            run_one(ms, buf, recorder, aggs,
                     types::all_book_ticker_subscription{}, "bookTicker"),
             recorder.run());
     }
@@ -219,7 +241,9 @@ debug_screener_run(const recorder_config& cfg, status_reporter& status)
 // ---------------------------------------------------------------------------
 
 boost::cobalt::task<int>
-screener_run(const recorder_config& cfg, status_reporter& status)
+screener_run(const recorder_config& cfg,
+             aggregates_map& aggs,
+             status_reporter& status)
 {
     auto exec = co_await boost::cobalt::this_coro::executor;
     auto& ioc = static_cast<boost::asio::io_context&>(
@@ -252,18 +276,18 @@ screener_run(const recorder_config& cfg, status_reporter& status)
     // then join the watcher + drain (2-task cobalt::join, which is stable).
     auto f_bt = boost::cobalt::spawn(
         exec,
-        run_feed(ms_bt, buf_bt,
+        run_feed(ms_bt, buf_bt, aggs,
                  types::all_book_ticker_subscription{}, "bookTicker"),
         boost::asio::use_future);
     auto f_mp = boost::cobalt::spawn(
         exec,
-        run_feed(ms_mp, buf_mp,
+        run_feed(ms_mp, buf_mp, aggs,
                  types::all_market_mark_price_subscription{ .every_1s = true },
                  "markPriceArr"),
         boost::asio::use_future);
     auto f_tk = boost::cobalt::spawn(
         exec,
-        run_feed(ms_tk, buf_tk,
+        run_feed(ms_tk, buf_tk, aggs,
                  types::all_market_ticker_subscription{}, "tickerArr"),
         boost::asio::use_future);
 

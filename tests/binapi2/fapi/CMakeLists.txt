@@ -83,6 +83,20 @@ add_executable(rotating_file_sink_test rotating_file_sink_test.cpp)
 target_link_libraries(rotating_file_sink_test PRIVATE binapi2_fapi GTest::gtest_main)
 gtest_discover_tests(rotating_file_sink_test DISCOVERY_MODE PRE_TEST)
 
+# async-recorder example: selector unit tests. Registered here (not in
+# the example's own CMakeLists) because the example subdir is added
+# before enable_testing(), so gtest_discover_tests would not enrol them
+# under ctest from there.
+set(_ar_dir ${CMAKE_SOURCE_DIR}/examples/binapi2/fapi/async-recorder)
+add_executable(async_recorder_selector_test
+    ${_ar_dir}/selector.cpp
+    ${_ar_dir}/selector_test.cpp
+)
+target_include_directories(async_recorder_selector_test PRIVATE ${_ar_dir})
+target_link_libraries(async_recorder_selector_test
+    PRIVATE binapi2_fapi spdlog::spdlog GTest::gtest_main)
+gtest_discover_tests(async_recorder_selector_test DISCOVERY_MODE PRE_TEST)
+
 add_subdirectory(integration/postman_mock)
 add_subdirectory(integration/sync_bridging)
 add_subdirectory(benchmarks)

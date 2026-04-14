@@ -9,6 +9,8 @@ add_executable(binapi2-fapi-async-recorder
     main.cpp
     config.cpp
     screener.cpp
+    selector.cpp
+    selector_run.cpp
     status_reporter.cpp
 )
 target_link_libraries(binapi2-fapi-async-recorder
@@ -16,5 +18,9 @@ target_link_libraries(binapi2-fapi-async-recorder
         binapi2_fapi
         spdlog::spdlog
 )
-# BOOST_ASIO_HAS_IO_URING / BOOST_ASIO_DISABLE_EPOLL and -luring propagate
-# publicly from binapi2_fapi (see src/binapi2/fapi/CMakeLists.txt).
+# BOOST_ASIO_HAS_IO_URING propagates publicly from binapi2_fapi
+# (see src/binapi2/fapi/CMakeLists.txt).
+
+# The selector unit test executable is built and registered from
+# tests/binapi2/fapi/CMakeLists.txt (which runs after enable_testing())
+# so `gtest_discover_tests` picks it up under ctest.
