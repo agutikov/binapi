@@ -10,6 +10,7 @@
 #include "aggregates.hpp"
 #include "config.hpp"
 #include "detail.hpp"
+#include "rest_sync.hpp"
 #include "screener.hpp"
 #include "selector.hpp"
 #include "status_reporter.hpp"
@@ -55,10 +56,18 @@ screener_then_close_status(const ar::recorder_config& cfg,
     status.close();
 }
 
-/// @brief Selector + detail monitor as a 2-task cobalt::join. Kept
-///        separate from the screener+this pair so the overall shape is
-///        two nested 2-task joins (the only arity that's stable on
-///        GCC 15 with this codebase).
+/// @brief Detail monitor + REST sync as a 2-task cobalt::join.
+boost::cobalt::task<void>
+detail_and_rest(const ar::recorder_config& cfg,
+                ar::selector& sel,
+                ar::status_reporter& status)
+{
+    co_await boost::cobalt::join(
+        ar::detail_monitor_run(cfg, sel, status),
+        ar::rest_sync_run(cfg, sel, status));
+}
+
+/// @brief Selector + (detail+rest) as a 2-task cobalt::join.
 boost::cobalt::task<void>
 selector_and_detail(const ar::recorder_config& cfg,
                     ar::aggregates_map& aggs,
@@ -68,7 +77,7 @@ selector_and_detail(const ar::recorder_config& cfg,
 {
     co_await boost::cobalt::join(
         ar::selector_run(cfg, aggs, sel, signals_file, status),
-        ar::detail_monitor_run(cfg, sel, status));
+        detail_and_rest(cfg, sel, status));
 }
 
 /// @brief Run screener + (selector+detail) as a 2-task cobalt::join.

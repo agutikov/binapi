@@ -9,6 +9,7 @@ add_executable(binapi2-fapi-async-recorder
     main.cpp
     config.cpp
     detail.cpp
+    rest_sync.cpp
     screener.cpp
     selector.cpp
     selector_run.cpp
