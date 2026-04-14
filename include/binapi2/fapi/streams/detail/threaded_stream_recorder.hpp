@@ -114,8 +114,10 @@ private:
 
     boost::cobalt::task<void> async_drain_one(stream_entry& entry)
     {
+        // Use the counted async_read() path so the buffer's drained_total
+        // observability counter stays in sync with the actual work done.
         while (true) {
-            auto rv = co_await boost::cobalt::as_result(entry.buffer->reader());
+            auto rv = co_await entry.buffer->async_read();
             if (!rv) break;
 
             if constexpr (detail::is_async_sink<Sink>::value) {

@@ -44,21 +44,22 @@ namespace binapi2::examples::async_recorder {
 
 namespace {
 
-/// @brief Frame counters exposed to the status_reporter. All writes and
-///        reads happen on the same executor, so plain size_t is safe.
-struct screener_state
+/// @brief Format a single buffer's observability counters for the status
+///        reporter. Runs on the reporter's coroutine (same executor).
+std::string
+format_buffer(const char* name,
+              const fapi::detail::stream_buffer<std::string>& buf)
 {
-    std::size_t bookTicker_frames{ 0 };
-    std::size_t markPriceArr_frames{ 0 };
-    std::size_t tickerArr_frames{ 0 };
-
-    [[nodiscard]] std::string format() const
-    {
-        return "bookTicker=" + std::to_string(bookTicker_frames) +
-               " markPriceArr=" + std::to_string(markPriceArr_frames) +
-               " tickerArr=" + std::to_string(tickerArr_frames);
-    }
-};
+    std::string s = name;
+    s += "[push=" + std::to_string(buf.pushed_total());
+    s += " drn=" + std::to_string(buf.drained_total());
+    s += " occ=" + std::to_string(buf.occupancy());
+    s += "/" + std::to_string(buf.capacity());
+    s += " hw=" + std::to_string(buf.high_water());
+    s += " susp=" + std::to_string(buf.push_suspends_total());
+    s += "]";
+    return s;
+}
 
 streams::sinks::rotating_file_sink_config
 make_rfs_cfg(const recorder_config& cfg, const std::string& subdir)
@@ -77,18 +78,17 @@ make_rfs_cfg(const recorder_config& cfg, const std::string& subdir)
 }
 
 /// @brief Drive a market_stream generator for one fixed subscription,
-///        pushing raw frames into the recorder's buffer via attach_buffer
-///        and tallying frame counts into `counter` so the status_reporter
-///        can read them. Closes the recorder on exit so the drain
-///        coroutine can finish (used by the single-stream debug path).
+///        pushing raw frames into the recorder's buffer via attach_buffer.
+///        Frame counts are tracked by the buffer's own observability
+///        counters. Closes the recorder on exit so the drain coroutine
+///        can finish (used by the single-stream debug path).
 template<class Subscription>
 boost::cobalt::task<void>
 run_one(streams::market_stream& ms,
         fapi::detail::stream_buffer<std::string>& rec_buf,
         streams::async_rotating_file_stream_recorder& recorder,
         Subscription sub,
-        const char* label,
-        std::size_t& counter)
+        const char* label)
 {
     ms.connection().attach_buffer(rec_buf);
     spdlog::info("screener[{}]: subscribing", label);
@@ -100,10 +100,10 @@ run_one(streams::market_stream& ms,
             spdlog::warn("screener[{}]: stream ended: {}", label, ev.err.message);
             break;
         }
-        ++counter;
     }
 
-    spdlog::info("screener[{}]: {} frames total, closing recorder", label, counter);
+    spdlog::info("screener[{}]: closing recorder (pushed={})",
+                 label, rec_buf.pushed_total());
     recorder.close();
 }
 
@@ -115,8 +115,7 @@ boost::cobalt::task<void>
 run_feed(streams::market_stream& ms,
          fapi::detail::stream_buffer<std::string>& rec_buf,
          Subscription sub,
-         const char* label,
-         std::size_t& counter)
+         const char* label)
 {
     ms.connection().attach_buffer(rec_buf);
     spdlog::info("screener[{}]: subscribing", label);
@@ -128,9 +127,8 @@ run_feed(streams::market_stream& ms,
             spdlog::warn("screener[{}]: stream ended: {}", label, ev.err.message);
             break;
         }
-        ++counter;
     }
-    spdlog::info("screener[{}]: {} frames total", label, counter);
+    spdlog::info("screener[{}]: done (pushed={})", label, rec_buf.pushed_total());
 }
 
 /// @brief Poll up to three spawned read-loop futures; when all that were
@@ -183,8 +181,12 @@ debug_screener_run(const recorder_config& cfg, status_reporter& status)
 
     streams::market_stream ms(net_cfg);
 
-    screener_state state;
-    status.add_source("screener", [&state]() { return state.format(); });
+    // The status source reads straight off the buffer's counters so the
+    // screener doesn't need to maintain any parallel frame counts.
+    const std::string label_copy = subdir;
+    status.add_source("screener", [&buf, label_copy]() {
+        return format_buffer(label_copy.c_str(), buf);
+    });
 
     // Branching is on the subscription *type*, so each arm instantiates
     // its own run_one template and then co_awaits a 2-task cobalt::join.
@@ -192,21 +194,19 @@ debug_screener_run(const recorder_config& cfg, status_reporter& status)
         co_await boost::cobalt::join(
             run_one(ms, buf, recorder,
                     types::all_market_mark_price_subscription{ .every_1s = true },
-                    "markPriceArr", state.markPriceArr_frames),
+                    "markPriceArr"),
             recorder.run());
     }
     else if (subdir == "tickerArr") {
         co_await boost::cobalt::join(
             run_one(ms, buf, recorder,
-                    types::all_market_ticker_subscription{}, "tickerArr",
-                    state.tickerArr_frames),
+                    types::all_market_ticker_subscription{}, "tickerArr"),
             recorder.run());
     }
     else /* bookTicker / default */ {
         co_await boost::cobalt::join(
             run_one(ms, buf, recorder,
-                    types::all_book_ticker_subscription{}, "bookTicker",
-                    state.bookTicker_frames),
+                    types::all_book_ticker_subscription{}, "bookTicker"),
             recorder.run());
     }
 
@@ -240,28 +240,31 @@ screener_run(const recorder_config& cfg, status_reporter& status)
     streams::market_stream ms_mp(net_cfg);
     streams::market_stream ms_tk(net_cfg);
 
-    screener_state state;
-    status.add_source("screener", [&state]() { return state.format(); });
+    // Single source for the whole stage — concatenates the three buffers'
+    // counters into one line.
+    status.add_source("screener", [&buf_bt, &buf_mp, &buf_tk]() {
+        return format_buffer("bt", buf_bt) + " " +
+               format_buffer("mp", buf_mp) + " " +
+               format_buffer("tk", buf_tk);
+    });
 
     // Spawn each read loop as an independent future on the same executor,
     // then join the watcher + drain (2-task cobalt::join, which is stable).
     auto f_bt = boost::cobalt::spawn(
         exec,
         run_feed(ms_bt, buf_bt,
-                 types::all_book_ticker_subscription{}, "bookTicker",
-                 state.bookTicker_frames),
+                 types::all_book_ticker_subscription{}, "bookTicker"),
         boost::asio::use_future);
     auto f_mp = boost::cobalt::spawn(
         exec,
         run_feed(ms_mp, buf_mp,
                  types::all_market_mark_price_subscription{ .every_1s = true },
-                 "markPriceArr", state.markPriceArr_frames),
+                 "markPriceArr"),
         boost::asio::use_future);
     auto f_tk = boost::cobalt::spawn(
         exec,
         run_feed(ms_tk, buf_tk,
-                 types::all_market_ticker_subscription{}, "tickerArr",
-                 state.tickerArr_frames),
+                 types::all_market_ticker_subscription{}, "tickerArr"),
         boost::asio::use_future);
 
     co_await boost::cobalt::join(

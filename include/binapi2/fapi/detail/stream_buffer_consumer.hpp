@@ -34,6 +34,7 @@ public:
         auto rv = co_await boost::cobalt::as_result(chan().read());
         if (!rv)
             co_return result<T>::failure({error_code::websocket, 0, 0, "channel closed", {}});
+        ++drained_total_;
         co_return result<T>::success(std::move(*rv));
     }
 
@@ -49,6 +50,7 @@ public:
         std::vector<T> batch;
         batch.reserve(max_count);
         batch.push_back(std::move(*first));
+        ++drained_total_;
 
         while (batch.size() < max_count && chan().is_open()) {
             auto op = chan().read();
@@ -56,6 +58,7 @@ public:
             auto rv = op.await_resume(boost::cobalt::as_result_tag{});
             if (!rv) break;
             batch.push_back(std::move(*rv));
+            ++drained_total_;
         }
 
         co_return result<std::vector<T>>::success(std::move(batch));
@@ -69,8 +72,17 @@ public:
         while (true) {
             auto rv = co_await boost::cobalt::as_result(chan().read());
             if (!rv) break;
+            ++drained_total_;
             sink(*rv);
         }
+    }
+
+    /// @brief Cumulative number of items drained through the consumer
+    /// interface. Incremented by `async_read`, `async_read_batch`, and
+    /// `async_drain`; the raw `reader()` path bypasses this counter.
+    [[nodiscard]] std::size_t drained_total() const noexcept
+    {
+        return drained_total_;
     }
 
     /// @brief Return a channel_reader for use with cobalt::race.
@@ -87,6 +99,8 @@ private:
     {
         return static_cast<const Derived*>(this)->channel();
     }
+
+    std::size_t drained_total_{ 0 };
 };
 
 } // namespace binapi2::fapi::detail
