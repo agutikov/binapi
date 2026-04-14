@@ -9,11 +9,11 @@ w_natr: 1.5
 add_score: 2.0
 remove_score: 1.0
 
-min_hold_seconds: 1800    # 30 min
-cooloff_seconds: 600      # 10 min
+min_hold_seconds: 600
+cooloff_seconds: 180
 
-min_active: 5
-max_active: 25
+min_active: 2
+max_active: 5
 
 mandatory:
   - BTCUSDT

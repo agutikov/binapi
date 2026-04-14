@@ -294,11 +294,12 @@ and compresses its final segment, and `cobalt::main` returns 0.
     BTCUSDT/
       aggTrade/        aggTrade.<ts>.<nnnn>.jsonl[.zst]
       bookTicker/      bookTicker.<ts>.<nnnn>.jsonl[.zst]
-      markPrice/       markPrice.<ts>.<nnnn>.jsonl[.zst]        (F1)
-      forceOrder/      forceOrder.<ts>.<nnnn>.jsonl[.zst]       (F1)
-      depth_snapshot/  startup.<ts>.json,  resnap.<ts>.json     (F2, F4)
-      depth20/         depth20.<ts>.<nnnn>.jsonl[.zst]          (F3)
-      depth_diff/      depth_diff.<ts>.<nnnn>.jsonl[.zst]       (F4)
+      markPrice/       markPrice.<ts>.<nnnn>.jsonl[.zst]
+      forceOrder/      forceOrder.<ts>.<nnnn>.jsonl[.zst]
+      depth_snapshot/  startup.<ts>.json        (on admission)
+                       resnap.<ts>.json         (periodic, full-depth mode)
+      depth20/         depth20.<ts>.<nnnn>.jsonl[.zst]         (--with-depth --depth-levels 20)
+      depth_diff/      depth_diff.<ts>.<nnnn>.jsonl[.zst]      (--with-depth --full-depth)
     ETHUSDT/
       …
     …one directory per currently-active symbol…
@@ -312,10 +313,6 @@ and compresses its final segment, and `cobalt::main` returns 0.
 Every JSONL line is the **raw frame** as received, unparsed. REST
 fetches are wrapped as `{"t":"<ISO8601>","d":<raw response>}` so the
 ingest time is captured inline per line.
-
-Lines marked `(F1)` / `(F2)` / `(F3)` / `(F4)` are the gaps still open
-against the design — see §8 (implementation status) and
-[`async_recorder_followups.md`](../../../docs/binapi2/plans/async_recorder_followups.md).
 
 ## 6. CLI flags
 
@@ -349,12 +346,36 @@ The example is built by the project's top-level CMake.
     --selector examples/binapi2/fapi/async-recorder/selector.yaml
 ```
 
-Ctrl-C or SIGTERM triggers graceful shutdown.
-
-Unit tests for the selector are registered under ctest:
+For a **production run with every supported feed enabled** (live
+endpoints, Tier-0 + full diff depth + periodic REST snapshots +
+REST sync), use the wrapper script at the repo root:
 
 ```sh
-./run_tests.sh -R Selector
+./run_recorder.sh
+```
+
+It creates a timestamped data directory `./data/run-<UTCts>/`, drops
+a `recorder.log` alongside it, sets `--live --with-depth --full-depth
+--depth-resnap-seconds 600`, and `exec`s the binary so Ctrl-C stops
+it cleanly. Anything you pass after the script name is forwarded to
+the binary, e.g.:
+
+```sh
+./run_recorder.sh --depth-levels 10 --stats-seconds 5
+```
+
+Override the root dir with `ASYNC_RECORDER_ROOT=/mnt/fast ./run_recorder.sh`.
+
+**Storage warning**: `--full-depth` can emit 20–80 GB/day per major
+symbol. Drop `--full-depth` (partial mode writes ~2 orders of magnitude
+less) or drop `--with-depth` entirely for a lighter run.
+
+Ctrl-C or SIGTERM triggers graceful shutdown.
+
+Unit tests for the selector and TF windows are registered under ctest:
+
+```sh
+./run_tests.sh -R 'Selector|TfWindow'
 ```
 
 ## 8. Implementation status
@@ -366,17 +387,17 @@ Unit tests for the selector are registered under ctest:
 | **`stream_buffer` counters**       | ✅     | push/drain/occupancy/high-water/suspends; used by status reporter     |
 | **`status_reporter`**              | ✅     | single periodic logger, multi-source aggregation                      |
 | **Screener — all-market streams**  | ✅     | `!bookTicker` + `!markPrice@arr@1s` + `!ticker@arr`, rotating JSONL   |
-| **Screener — aggregates**          | 🟡     | Only `events_total` from `!bookTicker` is populated (see F5)          |
+| **Screener — aggregates**          | ✅     | `events_total` (bookTicker) + 1m/5m/1h volume+trades windows (`!ticker@arr`) |
 | **Selector — logic**               | ✅     | Scoring, hysteresis, min-hold, cooloff, bounds, mandatory             |
 | **Selector — unit tests**          | ✅     | 6 gtests registered under ctest                                       |
 | **Selector — `signals.jsonl`**     | ✅     | Append-only ISO-8601 JSONL                                            |
 | **Detail — `aggTrade`**            | ✅     | Per-symbol WS, rotating sink                                          |
 | **Detail — `bookTicker`**          | ✅     | Per-symbol WS, rotating sink                                          |
-| **Detail — `markPrice@1s`**        | ❌     | Not subscribed — **F1**                                               |
-| **Detail — `forceOrder`**          | ❌     | Not subscribed — **F1**                                               |
-| **Detail — REST depth snapshot**   | ❌     | Not fired on admission — **F2**                                       |
-| **Detail — partial depth WS**      | ❌     | CLI flag present, subscription not wired — **F3**                     |
-| **Detail — full diff depth + book**| ❌     | No local book reconstruction — **F4**                                 |
+| **Detail — `markPrice@1s`**        | ✅     | 1 Hz per-symbol via `mark_price_subscription{every_1s=true}`          |
+| **Detail — `forceOrder`**          | ✅     | Per-symbol liquidation stream (often empty on testnet)                |
+| **Detail — REST depth snapshot**   | ✅     | Fires on each admission → `depth_snapshot/startup.<ts>.json`          |
+| **Detail — partial depth WS**      | ✅     | `--with-depth --depth-levels {5,10,20}` → `detail/<SYM>/depth<N>/`    |
+| **Detail — full diff depth + book**| ✅ (partial) | `--full-depth` subscribes `@depth@100ms` + periodic REST resnaps; in-memory `local_order_book` deferred |
 | **REST — fundingRate**             | ✅     | Hourly, market-wide                                                   |
 | **REST — klines_1m**               | ✅     | 1 min, per-active-symbol                                              |
 | **REST — openInterestHist**        | ✅     | 5 min, per-active-symbol (testnet rejects — works on `--live`)        |
@@ -386,25 +407,191 @@ Unit tests for the selector are registered under ctest:
 | **Observability — `stats.jsonl`**  | ❌     | Status only in spdlog; no separate file sink                          |
 | **Concurrency**                    | ✅     | Single `cobalt::main`, nested 2-task joins, graceful SIGINT shutdown  |
 | **Docs — design plan**             | ✅     | `docs/binapi2/plans/async_recorder.md`                                |
-| **Docs — follow-up plan**          | ✅     | `docs/binapi2/plans/async_recorder_followups.md` (F1–F5)              |
 | **Integration test (postman-mock)**| ❌     | Testnet smoke-tested end-to-end instead                               |
 
-### Open follow-ups
+### Follow-up history (F1–F5)
 
-See [`docs/binapi2/plans/async_recorder_followups.md`](../../../docs/binapi2/plans/async_recorder_followups.md)
-for the full plan. Summary:
+After the initial 8-step build, the recorder only had **2 of 4**
+Tier-0 WS streams per admitted symbol (`aggTrade`, `bookTicker`) and a
+placeholder scoring function that used `!bookTicker` event count as a
+proxy for volume. Five follow-up steps closed the detail-recording
+gap and the selector-quality gap. All five have landed; below is a
+condensed record of what each one did.
 
-| Step   | Scope                                                                 | Effort    | Depends on |
-|--------|-----------------------------------------------------------------------|-----------|------------|
-| **F1** | Finish Tier-0: `markPrice@1s` + `forceOrder` per-symbol              | 1–2 h     | —          |
-| **F2** | REST depth snapshot on symbol admission                               | ~2 h      | —          |
-| **F3** | Partial-book depth WS (`@depth{5,10,20}@100ms`)                      | 1–2 h     | —          |
-| **F4** | Full diff depth + `local_order_book` reconstruction + periodic re-anchor | 0.5–1 d   | F2, F3     |
-| **F5** | Real TF aggregates for the selector (1m/5m/1h volume + trades)       | 1–2 d     | —          |
+| Step | Scope                                               | Status                |
+|------|-----------------------------------------------------|-----------------------|
+| F1   | Tier-0 completion (`markPrice@1s` + `forceOrder`)   | ✅                     |
+| F2   | REST depth snapshot on admission                    | ✅                     |
+| F3   | Partial-book depth WS                               | ✅                     |
+| F4   | Full diff depth + periodic re-anchor                | ✅ (in-memory book deferred) |
+| F5   | TF windows for selector aggregates                  | ✅                     |
 
-F1 + F2 form a single natural commit (both touch `detail.cpp`). F3 is
-independent. F4 is the heaviest of the WS additions. F5 is orthogonal —
-it changes which symbols get detailed, not what gets recorded.
+#### F1 — Finish Tier-0: `markPrice@1s` + `forceOrder`
+
+Per-symbol subscriptions for the mark-price / index / funding feed
+(`<sym>@markPrice@1s`, 1 Hz) and the liquidation feed
+(`<sym>@forceOrder`, bursty) so every admitted symbol has the
+complete Tier-0 quadruple on disk. Implementation (`detail/subs.cpp`
++ `detail/drain.cpp`):
+
+- `per_symbol_sinks` grew `mark_price` / `force_order` slots.
+- `async_subscribe(...)` admission pack widened to four subscription
+  types (`aggregate_trade_subscription`, `book_ticker_subscription`,
+  `mark_price_subscription{.every_1s=true}`,
+  `liquidation_order_subscription`). Symmetric `async_unsubscribe`.
+- `drain_loop` routing gained two branches:
+  `type.starts_with("markPrice")` (prefix — the combined endpoint
+  emits `<sym>@markPrice` or `<sym>@markPrice@1s` depending on
+  cadence) and exact `type == "forceOrder"`.
+- Topic parsing by `parse_stream_header` is deliberately a cheap
+  substring scan, not a JSON parse, so routing is trivial.
+
+**Testnet note**: `forceOrder` rarely fires on testnet — empty
+segments for most symbols are expected, not a bug.
+
+#### F2 — REST depth snapshot on admission
+
+When the detail monitor admits a symbol, immediately pull
+`/fapi/v1/depth?limit=1000` via REST and persist the response as a
+one-shot JSON file. This is the anchor F4's diff stream needs for
+offline reconstruction, and it's useful on its own for any per-symbol
+replay work. Implementation (`detail/snapshot.{hpp,cpp}` +
+`detail/subs.cpp`):
+
+- `detail_monitor_run` now creates its own
+  `futures_usdm_api` + `rest::client` — an independent HTTP connection
+  for the detail stage, same pattern as `rest_sync_run`. Two clients
+  doubles the TLS setup cost but keeps the stage lifetimes clean.
+- New `fetch_depth_snapshot(client, root, symbol, tag)` runs
+  `order_book_request_t{.symbol, .limit=1000}`, serialises via glaze,
+  wraps as `{"t":"<iso>","d":<response>}`, writes to
+  `detail/<SYM>/depth_snapshot/<tag>.<UTCts>.json`.
+- Admission fires the snapshot (`tag = "startup"`) **before** the WS
+  subscribe. On failure it logs warn and the symbol still gets its
+  non-depth streams.
+- `detail_state` gained `snaps_ok` / `snaps_err` counters, surfaced
+  in the status line as `detail{… snaps=N/E …}`.
+
+**Known trade-off**: a stalled REST call blocks admission for that
+tick. Acceptable at 10 s detail cadence; can be moved to a
+`cobalt::spawn`-and-forget future later if it starts mattering.
+
+#### F3 — Partial-book depth WS
+
+Wired the existing `--with-depth` + `--depth-levels {5,10,20}` flags
+to `partial_book_depth_subscription{.symbol, .levels, .speed="100ms"}`.
+Implementation (`detail/subs.cpp`, `detail/types.hpp`,
+`detail/drain.cpp`):
+
+- `per_symbol_sinks` gained a `depth` slot, opened as
+  `detail/<SYM>/depth<N>/` when `cfg.with_depth &&
+  cfg.depth_mode == partial`.
+- `drain_loop` routes any `type.starts_with("depth")` → `psink.depth`.
+  The same slot is reused by F4's full diff mode (different sink dir).
+
+**Rate-limit gotcha**: a first attempt issued a **separate** SUBSCRIBE
+message for depth on top of the 4-way Tier-0 pack. That doubled the
+control-message rate to the broker and tripped Binance's 5
+messages-per-second cap — Beast answered with `Operation canceled`
+and dropped the connection. The fix: **combine** depth into the same
+single `async_subscribe(...)` call as the four Tier-0 topics
+(variadic pack handles different arities cleanly). One control
+message per admission → 25 symbols admitted in the first tick still
+stays under the cap.
+
+#### F4 — Full diff depth + periodic re-anchor
+
+The heavy-storage, research-grade mode. `--full-depth` switches from
+the partial stream to the full diff stream
+(`<sym>@depth@100ms`) and periodically re-fires the REST snapshot
+so offline reconstruction has multiple anchor points inside a long
+run. Implementation (`config.{hpp,cpp}`, `detail/types.hpp`,
+`detail/subs.cpp`):
+
+- New config: `depth_resnap_seconds{600}` + CLI flag
+  `--depth-resnap-seconds`.
+- `per_symbol_sinks::next_resnap_at` (`steady_clock::time_point`)
+  tracks each symbol's next-due re-anchor deadline. `time_point::max()`
+  for symbols not in full-depth mode.
+- Admission branches three ways on depth mode:
+  - **partial**: existing F3 path, `depth<N>` sink.
+  - **full**: opens `detail/<SYM>/depth_diff/`, subscribes
+    `diff_book_depth_subscription{.speed="100ms"}`, sets
+    `next_resnap_at = now + depth_resnap_seconds`.
+  - **off**: no depth slot, no subscription.
+- All three modes combine the depth subscription into the single
+  admission-call pack (same 5-per-second avoidance as F3).
+- New housekeeping pass at the end of each `manage_subs_loop` tick
+  (full mode only): walks `st.sinks`, fires
+  `fetch_depth_snapshot(..., "resnap")` for any symbol whose deadline
+  has passed, advances the deadline. Re-snaps are staggered naturally
+  by admission time.
+- Eviction symmetric.
+
+**Deferred — in-memory `local_order_book`**: the library already
+ships a `binapi2::fapi::order_book::local_order_book` class that
+does the full buffer-diffs-until-snapshot-arrives protocol, but it
+owns its own `market_stream` per symbol — which would create one WS
+connection per active symbol and undermine the "single shared
+`dynamic_market_stream`" architecture the detail monitor is built
+around. A hand-rolled per-symbol book fed out of the shared drain is
+straightforward but only justified when there's a concrete use case
+(live trading, live verification). The recorder already captures the
+raw diff stream + all snapshots, which is everything an offline
+rebuild needs — live reconstruction is replay-side scope.
+
+**Storage reminder**: `--full-depth` on BTCUSDT alone is 20–80 GB/day
+raw. The zstd rotating sink cuts that substantially but it's still
+the heaviest data source the recorder emits. Drop `--full-depth` to
+get partial mode (~1–2 orders of magnitude less), or drop
+`--with-depth` entirely for a light run.
+
+#### F5 — Real aggregates: TF windows for the selector
+
+Orthogonal to F1–F4 — this step changes **which** symbols get the
+detail treatment, not what gets recorded. Before F5 the selector
+scored symbols on total `!bookTicker` event count since startup,
+which is monotonic and reduces to "alphabetical-ish noise" after the
+first minute. F5 replaces that with bucketed rolling TF windows fed
+by the 1 Hz `!ticker@arr` stream. Implementation
+(`aggregates.hpp`, `screener.cpp`, `selector.cpp`,
+`selector_test.cpp`):
+
+- **`tf_window`** class: fixed-size ring buffer of `{vol, trades}`
+  buckets, `update(now, dv, dt)` slides the head forward (zero-
+  filling skipped buckets), `vol_sum()` / `trades_sum()` return the
+  rolling totals. A gap bigger than the window wipes all buckets
+  (the next sample is the only one that counts).
+- **`symbol_agg`** now carries `win_1m` (60 × 1 s), `win_5m` (60 × 5 s),
+  and `win_1h` (60 × 60 s), plus `last_quote_volume` /
+  `last_trade_count` / `primed` for delta accounting.
+- **`update_aggregates`** gained an overload for
+  `std::vector<ticker_stream_event_t>` (the all-market 1 Hz array):
+  for each entry, reads `quote_volume.to_double()` and `trade_count`,
+  computes the delta against the cached 24 h totals, feeds all three
+  windows. First sample for a symbol is a **warm-up tick** — cached
+  but not credited to the windows.
+- **Midnight rollover**: Binance's 24 h totals wrap around 00:00 UTC.
+  When the new total is *lower* than the cached one, the delta is
+  the new total itself (treat the post-wrap value as "this tick's
+  contribution"), not a negative number.
+- **`selector::score_symbol`** became a weighted sum:
+  `w_volume * (vol_1m + vol_5m + vol_1h) +`
+  `w_trades * (trades_1m + trades_5m + trades_1h) +`
+  `w_volume * events_total` (last term retained as a warm-up
+  liveness fallback before `!ticker@arr` has primed the windows).
+  `w_range` and `w_natr` are still placeholders — neither
+  component has a populated data source on the live feed yet.
+- **Four new gtests** under
+  [`selector_test.cpp`](selector_test.cpp):
+  `TfWindow.AccumulatesAcrossBuckets`, `TfWindow.SlidesOutOldBuckets`,
+  `TfWindow.BigGapWipesWindow`, `Selector.ScoresFromTfWindows`.
+
+**Live smoke result**: testnet top-5 went from alphabetical-ish
+filler to plausible majors — `BNBUSDC` at score 721, `BNBUSDT` at
+242, `DOGEUSDT` at 152, `JTOUSDT` at 112 — after ~30 s of warm-up.
+The score spread (95 → 721) is an order of magnitude compared to
+the pre-F5 uniform score of 2.00.
 
 ## 9. Resolved design decisions
 
@@ -428,6 +615,10 @@ come with a design note.
 ## 10. References
 
 - Design plan: [`docs/binapi2/plans/async_recorder.md`](../../../docs/binapi2/plans/async_recorder.md)
-- Follow-ups plan: [`docs/binapi2/plans/async_recorder_followups.md`](../../../docs/binapi2/plans/async_recorder_followups.md)
 - Market-data guide: [`docs/binapi2/guide/02-market-data.md`](../../../docs/binapi2/guide/02-market-data.md)
 - Library streams overview: [`docs/binapi2/streams.md`](../../../docs/binapi2/streams.md)
+
+The follow-up plan that tracked F1–F5 lived at
+`docs/binapi2/plans/async_recorder_followups.md` while the work was
+in-flight; it has since been folded into §8 of this README and
+removed.
