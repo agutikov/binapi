@@ -101,11 +101,23 @@ selector::selector(selector_config cfg) : cfg_(std::move(cfg))
 
 double selector::score_symbol(const symbol_agg& agg) const
 {
-    // Step 5 scope: the only populated signal is `events_total`, a
-    // proxy for volume. The "score" therefore collapses to a weighted
-    // version of that one number. Future steps will add the other TFs
-    // / range / NATR components.
-    return cfg_.w_volume * static_cast<double>(agg.events_total);
+    // F5 scoring: weighted blend of rolling-window volume + trades on
+    // 1m/5m/1h, with `events_total` retained as a low-cost liveness
+    // fallback (matters during the warm-up window before the first
+    // !ticker@arr tick has filled the windows).
+    //
+    // The two configured weights — `w_volume` and `w_trades` — are
+    // multiplied across all three windows. `w_range` and `w_natr`
+    // are not yet populated (no OHLC source on the live feed); they
+    // contribute nothing until a future step plumbs them through.
+    const double vol_score =
+        cfg_.w_volume * (agg.vol_1m() + agg.vol_5m() + agg.vol_1h());
+    const double trade_score =
+        cfg_.w_trades * (agg.trades_1m() + agg.trades_5m() + agg.trades_1h());
+    const double liveness =
+        cfg_.w_volume * static_cast<double>(agg.events_total);
+
+    return vol_score + trade_score + liveness;
 }
 
 std::vector<selector_event>

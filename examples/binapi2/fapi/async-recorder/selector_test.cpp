@@ -164,3 +164,85 @@ TEST(Selector, MinActiveFloorPromotesWeakCandidates)
     EXPECT_TRUE(s.active().count("DDD"));
     EXPECT_FALSE(s.active().count("EEE"));
 }
+
+// =====================================================================
+// F5 — tf_window mechanics + delta-based scoring
+// =====================================================================
+
+TEST(TfWindow, AccumulatesAcrossBuckets)
+{
+    tf_window w(60, std::chrono::seconds(1));    // 60 × 1 s = 1 min
+
+    auto t0 = clk::time_point(std::chrono::seconds(1000));
+    w.update(t0,                                10.0, 5.0);
+    w.update(t0 + std::chrono::seconds(1),      20.0, 7.0);
+    w.update(t0 + std::chrono::seconds(2),      30.0, 9.0);
+
+    // All three buckets are inside the 1-minute window; all contribute.
+    EXPECT_DOUBLE_EQ(w.vol_sum(), 60.0);
+    EXPECT_DOUBLE_EQ(w.trades_sum(), 21.0);
+}
+
+TEST(TfWindow, SlidesOutOldBuckets)
+{
+    tf_window w(5, std::chrono::seconds(1));     // 5 × 1 s = 5 s window
+
+    auto t0 = clk::time_point(std::chrono::seconds(1000));
+    w.update(t0 + std::chrono::seconds(0), 10.0, 0.0);
+    w.update(t0 + std::chrono::seconds(1), 10.0, 0.0);
+    w.update(t0 + std::chrono::seconds(2), 10.0, 0.0);
+    w.update(t0 + std::chrono::seconds(3), 10.0, 0.0);
+    w.update(t0 + std::chrono::seconds(4), 10.0, 0.0);
+    EXPECT_DOUBLE_EQ(w.vol_sum(), 50.0);
+
+    // 6 seconds later — every original bucket has slid out.
+    w.update(t0 + std::chrono::seconds(11), 1.0, 0.0);
+    EXPECT_DOUBLE_EQ(w.vol_sum(), 1.0);
+}
+
+TEST(TfWindow, BigGapWipesWindow)
+{
+    tf_window w(60, std::chrono::seconds(1));
+    auto t0 = clk::time_point(std::chrono::seconds(1000));
+
+    w.update(t0,                                  100.0, 0.0);
+    w.update(t0 + std::chrono::seconds(1),         50.0, 0.0);
+    EXPECT_DOUBLE_EQ(w.vol_sum(), 150.0);
+
+    // Skip ahead by far more than n_buckets * bucket_seconds — every
+    // old bucket should be gone, leaving only the new sample.
+    w.update(t0 + std::chrono::hours(1), 7.0, 0.0);
+    EXPECT_DOUBLE_EQ(w.vol_sum(), 7.0);
+}
+
+TEST(Selector, ScoresFromTfWindows)
+{
+    auto cfg = make_cfg();
+    cfg.mandatory = {};
+    cfg.w_volume = 1.0;
+    cfg.w_trades = 0.0;
+    cfg.add_score = 50.0;
+    cfg.remove_score = 25.0;
+    cfg.max_active = 5;
+    cfg.min_active = 0;
+    selector s(cfg);
+
+    aggregates_map m;
+    auto t0 = clk::time_point(std::chrono::seconds(1000));
+
+    // SOLUSDT — drip 100 units of volume per second for 5 seconds.
+    // After 5 ticks, vol_1m = 500, vol_5m = 500, vol_1h = 500 → total
+    // 1500. With w_volume=1 the score is 1500 → above add_score.
+    auto& sol = m["SOLUSDT"];
+    for (int i = 0; i < 5; ++i)
+        sol.win_1m.update(t0 + std::chrono::seconds(i), 100.0, 0.0),
+        sol.win_5m.update(t0 + std::chrono::seconds(i), 100.0, 0.0),
+        sol.win_1h.update(t0 + std::chrono::seconds(i), 100.0, 0.0);
+
+    // QUIETUSDT — no volume, no events, no admission.
+    m["QUIETUSDT"];
+
+    s.tick(m, t0 + std::chrono::seconds(5));
+    EXPECT_TRUE(s.active().count("SOLUSDT"));
+    EXPECT_FALSE(s.active().count("QUIETUSDT"));
+}

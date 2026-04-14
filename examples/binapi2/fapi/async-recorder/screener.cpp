@@ -28,7 +28,9 @@
 #include <boost/cobalt/this_coro.hpp>
 
 #include <chrono>
+#include <cstdint>
 #include <future>
+#include <vector>
 
 #include <spdlog/spdlog.h>
 
@@ -78,19 +80,69 @@ make_rfs_cfg(const recorder_config& cfg, const std::string& subdir)
     return rfs;
 }
 
-/// @brief Per-event aggregate update. Only specialised for bookTicker
-///        in Step 5 — other event types are a no-op until the full TF
-///        windows are plumbed through.
+/// @brief Per-event aggregate update. Two real producers:
+///
+///   - `book_ticker_stream_event_t`: increments a cheap `events_total`
+///     counter (the "is the symbol live" proxy used as a fallback).
+///   - `std::vector<ticker_stream_event_t>` (the all-market 1 Hz array
+///     stream): for every entry, computes the per-tick delta in 24h
+///     `quote_volume` and `trade_count` versus the cached previous
+///     totals, and feeds those deltas into the per-symbol 1m / 5m / 1h
+///     bucketed windows.
+///
+/// Other event types fall through to the catch-all template (no-op).
 inline void update_aggregates(aggregates_map& aggs,
                               const types::book_ticker_stream_event_t& ev)
 {
     ++aggs[ev.symbol].events_total;
 }
 
+inline void update_aggregates(aggregates_map& aggs,
+                              const std::vector<types::ticker_stream_event_t>& arr)
+{
+    const auto now = std::chrono::steady_clock::now();
+    for (const auto& ev : arr) {
+        auto& agg = aggs[ev.symbol];
+
+        const auto [vol_d, vol_fits] = ev.quote_volume.to_double();
+        const double new_vol = vol_fits ? vol_d : 0.0;
+        const std::uint64_t new_trades = ev.trade_count;
+
+        if (!agg.primed) {
+            // First sample: just snapshot the totals so the next tick
+            // can take a delta against them. Don't credit the warm-up
+            // tick to the windows.
+            agg.last_quote_volume = new_vol;
+            agg.last_trade_count = new_trades;
+            agg.primed = true;
+            continue;
+        }
+
+        // Both totals are 24h rolling — they wrap (drop) at midnight
+        // UTC. Detect the wrap by spotting a smaller-than-cached value
+        // and treat the new total itself as the delta for that tick.
+        const double dv =
+            (new_vol < agg.last_quote_volume)
+                ? new_vol
+                : (new_vol - agg.last_quote_volume);
+        const double dt =
+            (new_trades < agg.last_trade_count)
+                ? static_cast<double>(new_trades)
+                : static_cast<double>(new_trades - agg.last_trade_count);
+
+        agg.last_quote_volume = new_vol;
+        agg.last_trade_count = new_trades;
+
+        agg.win_1m.update(now, dv, dt);
+        agg.win_5m.update(now, dv, dt);
+        agg.win_1h.update(now, dv, dt);
+    }
+}
+
 template<class T>
 inline void update_aggregates(aggregates_map&, const T&)
 {
-    // Array / other events contribute nothing to the aggregates yet.
+    // Other / array events not yet plumbed through.
 }
 
 /// @brief Drive a market_stream generator for one fixed subscription,
