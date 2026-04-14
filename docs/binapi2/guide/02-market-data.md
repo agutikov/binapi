@@ -6,6 +6,14 @@ analytics**, and **exchange metadata**. Each is available via one or more of
 the three API surfaces (REST, WebSocket API, streams). This document covers
 every market data type and explains when each surface is the right choice.
 
+> **End-to-end example.** For a full, runnable recorder that composes
+> all-market streams, a scoring-based symbol selector, per-symbol Tier-0
+> feed recording with rotating zstd sinks, and periodic REST sync — all
+> on a single `cobalt::main` — see
+> [`examples/binapi2/fapi/async-recorder/`](../../../examples/binapi2/fapi/async-recorder/README.md)
+> and the design doc
+> [`docs/binapi2/plans/async_recorder.md`](../plans/async_recorder.md).
+
 ## Order book
 
 The order book is the central limit order book for a symbol: all resting
