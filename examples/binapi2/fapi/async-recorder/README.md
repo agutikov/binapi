@@ -372,10 +372,11 @@ less) or drop `--with-depth` entirely for a lighter run.
 
 Ctrl-C or SIGTERM triggers graceful shutdown.
 
-Unit tests for the selector and TF windows are registered under ctest:
+Unit tests for the selector, TF windows, and synthetic klines are
+registered under ctest:
 
 ```sh
-./run_tests.sh -R 'Selector|TfWindow'
+./run_tests.sh -R 'Selector|TfWindow|Bar1m|TrWindow|SymbolAgg'
 ```
 
 ## 8. Implementation status
@@ -387,9 +388,9 @@ Unit tests for the selector and TF windows are registered under ctest:
 | **`stream_buffer` counters**       | ✅     | push/drain/occupancy/high-water/suspends; used by status reporter     |
 | **`status_reporter`**              | ✅     | single periodic logger, multi-source aggregation                      |
 | **Screener — all-market streams**  | ✅     | `!bookTicker` + `!markPrice@arr@1s` + `!ticker@arr`, rotating JSONL   |
-| **Screener — aggregates**          | ✅     | `events_total` (bookTicker) + 1m/5m/1h volume+trades windows (`!ticker@arr`) |
+| **Screener — aggregates**          | ✅     | `events_total` (bookTicker) + 1m/5m/1h vol+trades windows + synthetic 1m bars → ATR(14) → NATR (`!ticker@arr` + `!bookTicker` mid) |
 | **Selector — logic**               | ✅     | Scoring, hysteresis, min-hold, cooloff, bounds, mandatory             |
-| **Selector — unit tests**          | ✅     | 6 gtests registered under ctest                                       |
+| **Selector — unit tests**          | ✅     | 14 gtests under ctest (selector rules + tf_window + bar_1m + tr_window + NATR) |
 | **Selector — `signals.jsonl`**     | ✅     | Append-only ISO-8601 JSONL                                            |
 | **Detail — `aggTrade`**            | ✅     | Per-symbol WS, rotating sink                                          |
 | **Detail — `bookTicker`**          | ✅     | Per-symbol WS, rotating sink                                          |
@@ -425,6 +426,7 @@ condensed record of what each one did.
 | F3   | Partial-book depth WS                               | ✅                     |
 | F4   | Full diff depth + periodic re-anchor                | ✅ (in-memory book deferred) |
 | F5   | TF windows for selector aggregates                  | ✅                     |
+| F6   | Synthetic 1m klines + NATR (hybrid `ticker@arr` / `bookTicker`) | ✅        |
 
 #### F1 — Finish Tier-0: `markPrice@1s` + `forceOrder`
 
@@ -580,8 +582,7 @@ by the 1 Hz `!ticker@arr` stream. Implementation
   `w_trades * (trades_1m + trades_5m + trades_1h) +`
   `w_volume * events_total` (last term retained as a warm-up
   liveness fallback before `!ticker@arr` has primed the windows).
-  `w_range` and `w_natr` are still placeholders — neither
-  component has a populated data source on the live feed yet.
+  F5 still left `w_range` and `w_natr` unused; F6 plugs `w_natr` in.
 - **Four new gtests** under
   [`selector_test.cpp`](selector_test.cpp):
   `TfWindow.AccumulatesAcrossBuckets`, `TfWindow.SlidesOutOldBuckets`,
@@ -592,6 +593,141 @@ filler to plausible majors — `BNBUSDC` at score 721, `BNBUSDT` at
 242, `DOGEUSDT` at 152, `JTOUSDT` at 112 — after ~30 s of warm-up.
 The score spread (95 → 721) is an order of magnitude compared to
 the pre-F5 uniform score of 2.00.
+
+#### F6 — Synthetic 1m klines + NATR (hybrid `ticker@arr` / `bookTicker`)
+
+F5 landed volume/trades TF windows but left `w_natr` as a placeholder
+because no OHLC source was plumbed through. F6 closes that by
+**synthesising** per-symbol 1m bars from the streams the screener
+already consumes. No new subscriptions, no per-symbol klines
+streams, no chicken-and-egg.
+
+**Why synthesis, not real klines.** Binance USD-M Futures has **no
+all-market klines stream** and **no all-market aggTrade stream**.
+Subscribing `<sym>@kline_1m` or `<sym>@aggTrade` per symbol would
+require ~400 subscriptions — untenable at the screener level. The
+only market-wide trade-price signal is `ticker_stream_event_t::last_price`
+on `!ticker@arr`, which arrives at **1 Hz per symbol** already and
+carries the last executed trade price as reported by Binance.
+
+**Hybrid source model**. The synthesiser consumes two streams:
+1. **`!ticker@arr.last_price`** — the *authoritative* trade-price
+   sample. Drives `open` (on reopen), `close` (every sample), and
+   bar closure on minute-boundary crossing (the 1m alignment comes
+   from `event_time.value / 60000`).
+2. **`!bookTicker` mid** (`(best_bid + best_ask) / 2`) — extends the
+   in-progress bar's `high` / `low` **only**, and only once the
+   ticker path has primed the bar. Catches intra-second spikes that
+   fall between two ticker samples on liquid symbols. Never opens a
+   bar (bookTicker is quotes, not trades).
+
+**Data model** (`aggregates.hpp`):
+
+```cpp
+struct bar_1m {
+    std::uint64_t minute_index;        // event_time_ms / 60000
+    double open, high, low, close;
+    bool primed;
+    void reopen(std::uint64_t m, double p);
+    void extend_range(double p);       // bookTicker mid path
+    void update_from_trade(double p);  // ticker last_price path
+};
+
+class tr_window {                      // ring of last N TR values
+    void push(double tr);
+    bool primed() const;               // count_ == size()
+    double atr() const;                // mean over count_
+};
+
+struct symbol_agg {
+    // ... existing F5 fields ...
+    bar_1m    current_bar;
+    double    prev_close;              // feeds TR gap terms
+    tr_window trw{14};                 // ATR(14)
+    double    natr;                    // (atr / close) * 100
+    void close_bar_and_open_next(std::uint64_t next_min, double next_price);
+};
+```
+
+**Bar close → TR → ATR → NATR**. When the ticker crosses a minute
+boundary, `close_bar_and_open_next` computes:
+
+```
+TR = max(high − low,
+         |high − prev_close|,
+         |low  − prev_close|)      // prev_close==0 on first bar → gap terms 0
+```
+
+pushes `TR` into `trw`, updates `prev_close = close`, then recomputes
+`natr = (trw.atr() / close) * 100`. Until `trw` has 14 samples the
+ATR is the mean of however many bars have closed (smoothly warms up).
+
+**Selector scoring** now uses `w_natr`:
+
+```cpp
+return vol_score + trade_score
+     + cfg_.w_natr * agg.natr
+     + liveness_fallback;
+```
+
+Before any bar closes, `natr == 0` and the NATR term contributes
+nothing — it kicks in on the 2nd minute (the bar needs a
+`prev_close` to compute a meaningful TR).
+
+**Four new gtests** in [`selector_test.cpp`](selector_test.cpp):
+
+- `Bar1m.ReopenExtendRange` — verifies that `extend_range` (bookTicker
+  path) moves only high/low while `update_from_trade` (ticker path)
+  moves close and extends range.
+- `TrWindow.PrimesAfterNSamples` — asserts the ring buffer's prime
+  semantics and mean behaviour across a wrap.
+- `SymbolAgg.NatrFromSyntheticBars` — feeds 4 hand-shaped bars
+  through the full pipeline and checks the computed ATR and NATR
+  against the formula.
+- `Selector.ScoresFromNatr` — with `w_volume=0, w_trades=0, w_natr=10`,
+  a symbol with `natr=3.5` is admitted while a zero-NATR sibling is not.
+
+**What F6 does NOT do**
+
+- It does not overwrite synthesised NATR with REST-sourced NATR for
+  the active set. `rest_sync` already fetches `klines_1m` with
+  `limit=2`; bumping that to `limit=14` and computing a
+  "ground-truth" NATR for admitted symbols would be a trivial follow-up
+  if the sampling error on the synth ever becomes measurable. The
+  existing synthesis is adequate for the 1m-NATR factor in
+  `score_symbol` because a 14-bar moving average smooths out
+  per-bar sampling noise anyway.
+- `w_range` is still a placeholder. The live in-progress bar already
+  tracks `current_bar.high - current_bar.low` so plugging a "live
+  range normalised by close" contribution in is a ~5-line addition,
+  but it's not wired yet.
+
+### Status report timing (post-F6)
+
+The selector, detail subscription manager, REST sync scheduler and
+status reporter all tick on `cfg.stats_interval_seconds`. Before
+F6's accompanying tweak, the four timers were independent, so within
+a tick window the status line could fire *before* the selector or
+detail stages had committed their changes — the printed snapshot
+was sometimes "previous-tick" state.
+
+The status reporter now fires its first emission with a **phase
+offset** of `clamp(interval / 5, 500 ms, 2 s)`. Subsequent emissions
+are spaced exactly `interval` apart, so each status line lands
+`phase_offset` seconds after the tick at the top of its interval.
+The offset is comfortably past typical stage-tick durations (a few
+ms steady-state, up to 1–2 s during the initial admission storm),
+so the printed state reflects the **just-committed** selector and
+REST changes. Detail's subscription manager runs on its own timer
+and may lag by one tick after a flurry of admissions; that's a
+natural consumer-producer lag and converges on the next status
+emission.
+
+This is a deliberate minimal change — architecturally the right fix
+would be to move every stage's tick onto a single driven scheduler
+inside the status reporter, but that requires refactoring all four
+run loops and the current phase-offset approach meets the ordering
+requirement under all realistic loads.
 
 ## 9. Resolved design decisions
 

@@ -10,6 +10,7 @@
 
 #include <spdlog/spdlog.h>
 
+#include <algorithm>
 #include <exception>
 
 namespace binapi2::examples::async_recorder {
@@ -34,8 +35,28 @@ void status_reporter::close()
 
 boost::cobalt::task<void> status_reporter::run()
 {
+    // Phase offset: the selector, detail monitor and rest-sync all
+    // tick on the same `interval_`. If our timer happened to fire
+    // before theirs inside the same tick window, the status line
+    // would be a snapshot of pre-change state. We deliberately delay
+    // the first emission by a fraction of the interval so every tick
+    // lands AFTER those stages have committed their changes. 20% of
+    // the interval with a 500 ms floor / 2 s ceiling is comfortably
+    // past typical stage tick duration (a few ms steady-state, up to
+    // 1–2 s during the initial admission storm).
+    const auto phase = std::clamp(
+        std::chrono::duration_cast<std::chrono::milliseconds>(interval_ / 5),
+        std::chrono::milliseconds(500),
+        std::chrono::milliseconds(2000));
+
+    bool first = true;
     while (!closed_) {
-        timer_.expires_after(interval_);
+        timer_.expires_after(first ? std::chrono::duration_cast<
+                                         std::chrono::steady_clock::duration>(phase)
+                                   : std::chrono::duration_cast<
+                                         std::chrono::steady_clock::duration>(interval_));
+        first = false;
+
         // async_wait throws system_error on cancel; catch and loop.
         try {
             co_await timer_.async_wait(boost::cobalt::use_op);

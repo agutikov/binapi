@@ -17,7 +17,9 @@
 
 #pragma once
 
+#include <algorithm>
 #include <chrono>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <string>
@@ -108,6 +110,90 @@ private:
     clock::time_point head_time_;
 };
 
+/// @brief In-progress synthetic 1-minute kline. Populated from
+///        per-symbol `last_price` samples (ticker@arr) and optionally
+///        extended on intra-sample high/low by bookTicker mid prices.
+///
+/// `minute_index` is the integer minute since Unix epoch
+/// (`event_time_ms / 60000`). A new sample whose minute index differs
+/// from the current bar's means the bar should be closed.
+struct bar_1m
+{
+    std::uint64_t minute_index{ 0 };
+    double open{ 0.0 };
+    double high{ 0.0 };
+    double low{ 0.0 };
+    double close{ 0.0 };
+    bool primed{ false };
+
+    /// @brief Reset to a freshly-opened bar at `price`.
+    void reopen(std::uint64_t minute, double price)
+    {
+        minute_index = minute;
+        open = price;
+        high = price;
+        low = price;
+        close = price;
+        primed = true;
+    }
+
+    /// @brief Extend high/low on an intra-bar observation (any source).
+    void extend_range(double price)
+    {
+        if (price > high) high = price;
+        if (price < low)  low  = price;
+    }
+
+    /// @brief Update open/close semantics from the authoritative trade
+    ///        price source (ticker's `last_price`). The first sample
+    ///        after reopen/prime carries open; every sample carries
+    ///        close; high/low are extended.
+    void update_from_trade(double price)
+    {
+        close = price;
+        extend_range(price);
+    }
+};
+
+/// @brief Ring buffer of the last N true-range values. Mean across the
+///        primed window is the ATR(N) estimate.
+class tr_window
+{
+public:
+    explicit tr_window(std::size_t n) :
+        slots_(n, 0.0), head_(0), count_(0)
+    {
+    }
+
+    void push(double tr)
+    {
+        slots_[head_] = tr;
+        head_ = (head_ + 1) % slots_.size();
+        if (count_ < slots_.size()) ++count_;
+    }
+
+    [[nodiscard]] bool primed() const noexcept
+    {
+        return count_ == slots_.size();
+    }
+
+    [[nodiscard]] double atr() const
+    {
+        if (count_ == 0) return 0.0;
+        double s = 0.0;
+        for (std::size_t i = 0; i < count_; ++i) s += slots_[i];
+        return s / static_cast<double>(count_);
+    }
+
+    [[nodiscard]] std::size_t size() const noexcept { return slots_.size(); }
+    [[nodiscard]] std::size_t count() const noexcept { return count_; }
+
+private:
+    std::vector<double> slots_;
+    std::size_t head_;
+    std::size_t count_;
+};
+
 /// @brief Per-symbol rolling stats. Read by the selector, written by
 ///        the screener. Same-executor-only — no synchronisation.
 struct symbol_agg
@@ -135,6 +221,43 @@ struct symbol_agg
     [[nodiscard]] double trades_1m() const { return win_1m.trades_sum(); }
     [[nodiscard]] double trades_5m() const { return win_5m.trades_sum(); }
     [[nodiscard]] double trades_1h() const { return win_1h.trades_sum(); }
+
+    // -- Synthetic 1-minute klines + NATR (F6) ------------------------------
+    /// @brief In-progress 1m bar. Open/close come from ticker@arr
+    ///        last_price; high/low may be extended by bookTicker mid.
+    bar_1m current_bar{};
+    /// @brief Close of the previously-closed bar. Used by the TR term
+    ///        `|high - prev_close|` / `|low - prev_close|`.
+    double prev_close{ 0.0 };
+    /// @brief Rolling True Range window. 14 slots gives an ATR(14).
+    tr_window trw{ 14 };
+    /// @brief Latest NATR percentage (`atr / close * 100`). Zero until
+    ///        the first bar has closed. Not primed until `trw.primed()`.
+    double natr{ 0.0 };
+
+    /// @brief Compute and record the bar's True Range, then roll the
+    ///        ATR/NATR and reset `current_bar` to a new one starting
+    ///        at `next_minute_index` and `next_price`.
+    void close_bar_and_open_next(std::uint64_t next_minute_index,
+                                 double next_price)
+    {
+        if (current_bar.primed) {
+            const double range = current_bar.high - current_bar.low;
+            const double hi_gap = (prev_close > 0.0)
+                ? std::fabs(current_bar.high - prev_close) : 0.0;
+            const double lo_gap = (prev_close > 0.0)
+                ? std::fabs(current_bar.low - prev_close) : 0.0;
+            const double tr = std::max({ range, hi_gap, lo_gap });
+            trw.push(tr);
+            prev_close = current_bar.close;
+
+            const double atr = trw.atr();
+            natr = (current_bar.close > 0.0 && atr > 0.0)
+                ? (atr / current_bar.close) * 100.0
+                : 0.0;
+        }
+        current_bar.reopen(next_minute_index, next_price);
+    }
 };
 
 /// @brief Map from uppercase symbol string to its aggregate slot.

@@ -246,3 +246,132 @@ TEST(Selector, ScoresFromTfWindows)
     EXPECT_TRUE(s.active().count("SOLUSDT"));
     EXPECT_FALSE(s.active().count("QUIETUSDT"));
 }
+
+// =====================================================================
+// F6 — synthetic 1m klines + NATR
+// =====================================================================
+
+TEST(Bar1m, ReopenExtendRange)
+{
+    bar_1m bar;
+    bar.reopen(1000, 100.0);
+    EXPECT_TRUE(bar.primed);
+    EXPECT_DOUBLE_EQ(bar.open, 100.0);
+    EXPECT_DOUBLE_EQ(bar.close, 100.0);
+
+    // Intra-bar observations via extend_range (bookTicker mid path):
+    // should move high/low but not open/close.
+    bar.extend_range(105.0);
+    bar.extend_range(95.0);
+    EXPECT_DOUBLE_EQ(bar.high, 105.0);
+    EXPECT_DOUBLE_EQ(bar.low, 95.0);
+    EXPECT_DOUBLE_EQ(bar.open, 100.0);
+    EXPECT_DOUBLE_EQ(bar.close, 100.0);
+
+    // Intra-bar trade print (ticker last_price path): must move close
+    // and may extend high/low.
+    bar.update_from_trade(108.0);
+    EXPECT_DOUBLE_EQ(bar.close, 108.0);
+    EXPECT_DOUBLE_EQ(bar.high, 108.0);
+    EXPECT_DOUBLE_EQ(bar.low, 95.0);
+    EXPECT_DOUBLE_EQ(bar.open, 100.0);
+}
+
+TEST(TrWindow, PrimesAfterNSamples)
+{
+    tr_window trw(3);
+    EXPECT_FALSE(trw.primed());
+    EXPECT_DOUBLE_EQ(trw.atr(), 0.0);
+
+    trw.push(1.0);
+    EXPECT_FALSE(trw.primed());
+    EXPECT_DOUBLE_EQ(trw.atr(), 1.0);   // mean so far
+
+    trw.push(2.0);
+    EXPECT_FALSE(trw.primed());
+    EXPECT_DOUBLE_EQ(trw.atr(), 1.5);
+
+    trw.push(3.0);
+    EXPECT_TRUE(trw.primed());
+    EXPECT_DOUBLE_EQ(trw.atr(), 2.0);
+
+    // Ring wrap: oldest (1.0) gets replaced by 4.0 → mean(2,3,4) = 3.
+    trw.push(4.0);
+    EXPECT_TRUE(trw.primed());
+    EXPECT_DOUBLE_EQ(trw.atr(), 3.0);
+}
+
+TEST(SymbolAgg, NatrFromSyntheticBars)
+{
+    // Drive 4 closed bars with deterministic OHLC into a fresh
+    // symbol_agg's bar pipeline, then assert the computed NATR matches
+    // the hand-calculated value from the bar history.
+    symbol_agg agg;
+
+    // Minute 0 bar: open/high/low/close = 100 / 102 / 98 / 101
+    agg.current_bar.reopen(0, 100.0);
+    agg.current_bar.extend_range(102.0);
+    agg.current_bar.extend_range(98.0);
+    agg.current_bar.update_from_trade(101.0);
+
+    // Close bar 0 → open bar 1 at 101.
+    agg.close_bar_and_open_next(1, 101.0);
+    // Shape bar 1: O/H/L/C = 101 / 104 / 100 / 103
+    agg.current_bar.extend_range(104.0);
+    agg.current_bar.extend_range(100.0);
+    agg.current_bar.update_from_trade(103.0);
+
+    // Close bar 1 → bar 2 at 103.
+    agg.close_bar_and_open_next(2, 103.0);
+    // Bar 2: O/H/L/C = 103 / 105 / 102 / 104
+    agg.current_bar.extend_range(105.0);
+    agg.current_bar.extend_range(102.0);
+    agg.current_bar.update_from_trade(104.0);
+
+    // Close bar 2 → bar 3 at 104.
+    agg.close_bar_and_open_next(3, 104.0);
+    // Bar 3: O/H/L/C = 104 / 107 / 103 / 106
+    agg.current_bar.extend_range(107.0);
+    agg.current_bar.extend_range(103.0);
+    agg.current_bar.update_from_trade(106.0);
+
+    // Close bar 3 → bar 4 at 106. This is the moment NATR reflects
+    // the true-range history of bars 0..3.
+    agg.close_bar_and_open_next(4, 106.0);
+
+    // Hand-calculated TRs:
+    //   bar 0 has no prev_close, so TR = high-low = 4.0
+    //   bar 1: range = 4.0;  |104-101|=3; |100-101|=1  → TR = 4.0
+    //   bar 2: range = 3.0;  |105-103|=2; |102-103|=1  → TR = 3.0
+    //   bar 3: range = 4.0;  |107-104|=3; |103-104|=1  → TR = 4.0
+    // ATR(14) over the 4 values we have so far = (4+4+3+4)/4 = 3.75
+    // NATR = atr / close_of_last_closed_bar * 100
+    //      = 3.75 / 106 * 100 = ~3.537735...
+    EXPECT_NEAR(agg.trw.atr(), 3.75, 1e-9);
+    EXPECT_NEAR(agg.natr, 3.75 / 106.0 * 100.0, 1e-9);
+}
+
+TEST(Selector, ScoresFromNatr)
+{
+    auto cfg = make_cfg();
+    cfg.mandatory = {};
+    cfg.w_volume = 0.0;       // isolate NATR contribution
+    cfg.w_trades = 0.0;
+    cfg.w_natr   = 10.0;
+    cfg.add_score = 5.0;      // score = w_natr * natr, NATR ~3.5 → 35
+    cfg.remove_score = 2.0;
+    cfg.max_active = 5;
+    cfg.min_active = 0;
+    selector s(cfg);
+
+    aggregates_map m;
+    auto& sym = m["VOLATILEUSDT"];
+    sym.natr = 3.5;            // synthetic — bypass the bar pipeline
+
+    // Low-volatility competitor: NATR = 0, everything else zero.
+    m["QUIETUSDT"];
+
+    s.tick(m, clk::now());
+    EXPECT_TRUE(s.active().count("VOLATILEUSDT"));
+    EXPECT_FALSE(s.active().count("QUIETUSDT"));
+}

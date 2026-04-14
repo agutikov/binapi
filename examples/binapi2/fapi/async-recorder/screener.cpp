@@ -80,27 +80,47 @@ make_rfs_cfg(const recorder_config& cfg, const std::string& subdir)
     return rfs;
 }
 
-/// @brief Per-event aggregate update. Two real producers:
+/// @brief Per-event aggregate update. Three real producers:
 ///
 ///   - `book_ticker_stream_event_t`: increments a cheap `events_total`
-///     counter (the "is the symbol live" proxy used as a fallback).
+///     counter (the "is the symbol live" fallback), and if the symbol
+///     already has a primed synthetic 1 m bar from the ticker stream,
+///     extends the bar's `high` / `low` using the mid price. This
+///     catches intra-second spikes that fall between two ticker@arr
+///     samples on liquid symbols.
 ///   - `std::vector<ticker_stream_event_t>` (the all-market 1 Hz array
-///     stream): for every entry, computes the per-tick delta in 24h
-///     `quote_volume` and `trade_count` versus the cached previous
-///     totals, and feeds those deltas into the per-symbol 1m / 5m / 1h
-///     bucketed windows.
+///     stream): for every entry, computes the 24 h `quote_volume` /
+///     `trade_count` deltas against the cached previous totals and
+///     feeds them into the 1m/5m/1h rolling windows, AND samples
+///     `last_price` into the per-symbol synthetic 1 m bar. When the
+///     sample crosses a minute boundary, the current bar is closed,
+///     its True Range pushed into the ATR(14) ring, and the symbol's
+///     NATR is recomputed.
 ///
 /// Other event types fall through to the catch-all template (no-op).
 inline void update_aggregates(aggregates_map& aggs,
                               const types::book_ticker_stream_event_t& ev)
 {
-    ++aggs[ev.symbol].events_total;
+    auto& agg = aggs[ev.symbol];
+    ++agg.events_total;
+
+    // F6 hybrid: extend the in-progress bar's high/low with a
+    // mid-price observation. Only meaningful once the ticker stream
+    // has primed the bar — we never open a bar from a bookTicker
+    // event alone, since bookTicker is quotes, not trade prices.
+    if (!agg.current_bar.primed) return;
+
+    const auto [bid, bid_ok] = ev.best_bid_price.to_double();
+    const auto [ask, ask_ok] = ev.best_ask_price.to_double();
+    if (!bid_ok || !ask_ok || bid <= 0.0 || ask <= 0.0) return;
+    const double mid = 0.5 * (bid + ask);
+    agg.current_bar.extend_range(mid);
 }
 
 inline void update_aggregates(aggregates_map& aggs,
                               const std::vector<types::ticker_stream_event_t>& arr)
 {
-    const auto now = std::chrono::steady_clock::now();
+    const auto steady_now = std::chrono::steady_clock::now();
     for (const auto& ev : arr) {
         auto& agg = aggs[ev.symbol];
 
@@ -115,27 +135,50 @@ inline void update_aggregates(aggregates_map& aggs,
             agg.last_quote_volume = new_vol;
             agg.last_trade_count = new_trades;
             agg.primed = true;
-            continue;
+            // Do not open the synthetic bar here: we still need the
+            // `last_price` field to drive open/close semantics. Fall
+            // through to the bar-sampling block below.
+        } else {
+            // Both totals are 24h rolling — they wrap (drop) at midnight
+            // UTC. Detect the wrap by spotting a smaller-than-cached value
+            // and treat the new total itself as the delta for that tick.
+            const double dv =
+                (new_vol < agg.last_quote_volume)
+                    ? new_vol
+                    : (new_vol - agg.last_quote_volume);
+            const double dt =
+                (new_trades < agg.last_trade_count)
+                    ? static_cast<double>(new_trades)
+                    : static_cast<double>(new_trades - agg.last_trade_count);
+
+            agg.last_quote_volume = new_vol;
+            agg.last_trade_count = new_trades;
+
+            agg.win_1m.update(steady_now, dv, dt);
+            agg.win_5m.update(steady_now, dv, dt);
+            agg.win_1h.update(steady_now, dv, dt);
         }
 
-        // Both totals are 24h rolling — they wrap (drop) at midnight
-        // UTC. Detect the wrap by spotting a smaller-than-cached value
-        // and treat the new total itself as the delta for that tick.
-        const double dv =
-            (new_vol < agg.last_quote_volume)
-                ? new_vol
-                : (new_vol - agg.last_quote_volume);
-        const double dt =
-            (new_trades < agg.last_trade_count)
-                ? static_cast<double>(new_trades)
-                : static_cast<double>(new_trades - agg.last_trade_count);
+        // -- Synthetic 1 m bar sampling (F6) --------------------------------
+        // `last_price` is the last executed trade price for the symbol;
+        // `event_time.value` is ms since epoch, used to compute the
+        // bar's minute index in a wall-clock-aligned way (no drift
+        // relative to Binance's own 1m boundaries).
+        const auto [lp, lp_fits] = ev.last_price.to_double();
+        if (!lp_fits || lp <= 0.0) continue;
+        const auto event_ms = ev.event_time.value;
+        if (event_ms == 0) continue;
+        const std::uint64_t minute_idx = event_ms / 60'000ULL;
 
-        agg.last_quote_volume = new_vol;
-        agg.last_trade_count = new_trades;
-
-        agg.win_1m.update(now, dv, dt);
-        agg.win_5m.update(now, dv, dt);
-        agg.win_1h.update(now, dv, dt);
+        if (!agg.current_bar.primed) {
+            agg.current_bar.reopen(minute_idx, lp);
+        } else if (minute_idx != agg.current_bar.minute_index) {
+            // Minute boundary crossed → close the previous bar (rolls
+            // TR/ATR/NATR inside symbol_agg) and open a new one.
+            agg.close_bar_and_open_next(minute_idx, lp);
+        } else {
+            agg.current_bar.update_from_trade(lp);
+        }
     }
 }
 

@@ -101,23 +101,27 @@ selector::selector(selector_config cfg) : cfg_(std::move(cfg))
 
 double selector::score_symbol(const symbol_agg& agg) const
 {
-    // F5 scoring: weighted blend of rolling-window volume + trades on
-    // 1m/5m/1h, with `events_total` retained as a low-cost liveness
-    // fallback (matters during the warm-up window before the first
-    // !ticker@arr tick has filled the windows).
+    // Scoring blend:
     //
-    // The two configured weights — `w_volume` and `w_trades` — are
-    // multiplied across all three windows. `w_range` and `w_natr`
-    // are not yet populated (no OHLC source on the live feed); they
-    // contribute nothing until a future step plumbs them through.
+    //   w_volume * (vol_1m + vol_5m + vol_1h)     F5 — rolling volume
+    //   w_trades * (trades_1m + trades_5m + trades_1h)  F5 — trade count
+    //   w_natr   * natr                           F6 — synthetic NATR
+    //   w_volume * events_total                   liveness fallback
+    //
+    // The NATR term only contributes once the ATR(14) ring is primed
+    // (14 closed 1m bars); before that `agg.natr == 0` and the term
+    // drops out naturally. `w_range` is still a placeholder — no
+    // data source on the live feed for it yet.
     const double vol_score =
         cfg_.w_volume * (agg.vol_1m() + agg.vol_5m() + agg.vol_1h());
     const double trade_score =
         cfg_.w_trades * (agg.trades_1m() + agg.trades_5m() + agg.trades_1h());
+    const double natr_score =
+        cfg_.w_natr * agg.natr;
     const double liveness =
         cfg_.w_volume * static_cast<double>(agg.events_total);
 
-    return vol_score + trade_score + liveness;
+    return vol_score + trade_score + natr_score + liveness;
 }
 
 std::vector<selector_event>
