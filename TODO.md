@@ -2,6 +2,19 @@
 
 
 
+run_recorder.sh script
+
+
+add CLI11 and FTXUI submodules
+
+rewrite cmdline demo apps to CLI11
+
+add FTXUI-based async-demo-ui
+wrap already existing commands into FTXUI
+with all the same commands
+
+
+
 ================================================================================
 
 

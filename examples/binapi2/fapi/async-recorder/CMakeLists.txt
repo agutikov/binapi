@@ -8,7 +8,11 @@ find_package(spdlog REQUIRED)
 add_executable(binapi2-fapi-async-recorder
     main.cpp
     config.cpp
-    detail.cpp
+    detail/drain.cpp
+    detail/helpers.cpp
+    detail/run.cpp
+    detail/snapshot.cpp
+    detail/subs.cpp
     rest_sync.cpp
     screener.cpp
     selector.cpp
