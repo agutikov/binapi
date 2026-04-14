@@ -9,6 +9,7 @@
 
 #include "aggregates.hpp"
 #include "config.hpp"
+#include "detail.hpp"
 #include "screener.hpp"
 #include "selector.hpp"
 #include "status_reporter.hpp"
@@ -54,8 +55,24 @@ screener_then_close_status(const ar::recorder_config& cfg,
     status.close();
 }
 
-/// @brief Run screener + selector as a 2-task cobalt::join. The status
-///        reporter runs in the *outer* join in co_main.
+/// @brief Selector + detail monitor as a 2-task cobalt::join. Kept
+///        separate from the screener+this pair so the overall shape is
+///        two nested 2-task joins (the only arity that's stable on
+///        GCC 15 with this codebase).
+boost::cobalt::task<void>
+selector_and_detail(const ar::recorder_config& cfg,
+                    ar::aggregates_map& aggs,
+                    ar::selector& sel,
+                    ar::signals_writer& signals_file,
+                    ar::status_reporter& status)
+{
+    co_await boost::cobalt::join(
+        ar::selector_run(cfg, aggs, sel, signals_file, status),
+        ar::detail_monitor_run(cfg, sel, status));
+}
+
+/// @brief Run screener + (selector+detail) as a 2-task cobalt::join.
+///        The status reporter runs in the *outer* join in co_main.
 boost::cobalt::task<void>
 screener_and_selector(const ar::recorder_config& cfg,
                       ar::aggregates_map& aggs,
@@ -65,7 +82,7 @@ screener_and_selector(const ar::recorder_config& cfg,
 {
     co_await boost::cobalt::join(
         screener_then_close_status(cfg, aggs, status),
-        ar::selector_run(cfg, aggs, sel, signals_file, status));
+        selector_and_detail(cfg, aggs, sel, signals_file, status));
 }
 
 } // namespace

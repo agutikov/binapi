@@ -8,6 +8,7 @@ find_package(spdlog REQUIRED)
 add_executable(binapi2-fapi-async-recorder
     main.cpp
     config.cpp
+    detail.cpp
     screener.cpp
     selector.cpp
     selector_run.cpp
