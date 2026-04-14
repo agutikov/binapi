@@ -17,5 +17,4 @@ target_link_libraries(stream_buffer_benchmark PRIVATE binapi2_fapi)
 find_package(spdlog REQUIRED)
 
 add_executable(stream_recorder_benchmark stream_recorder_benchmark.cpp)
-target_link_libraries(stream_recorder_benchmark PRIVATE binapi2_fapi spdlog::spdlog uring)
-target_compile_definitions(stream_recorder_benchmark PRIVATE BOOST_ASIO_HAS_IO_URING)
+target_link_libraries(stream_recorder_benchmark PRIVATE binapi2_fapi spdlog::spdlog)

@@ -6,3 +6,4 @@ compose/postman-mock/certs/
 compose/postman-mock/workdir/
 *.log
 testnet_output
+data

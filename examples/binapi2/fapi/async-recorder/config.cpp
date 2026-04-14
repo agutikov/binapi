@@ -65,6 +65,10 @@ void print_usage(const char* prog)
         "  --with-depth              Record depth at all (default: off)\n"
         "  --no-klines               Disable per-symbol 1m kline recording\n"
         "  --stats-seconds <s>       Stats tick interval (default: 10)\n"
+        "  --loglevel <lvl>          trace/debug/info/warn/error/critical/off (default: trace)\n"
+        "  --logfile <path>          Also write logs to this file (truncated on start)\n"
+        "  --debug-stream <name>     Run single-stream debug screener against one of\n"
+        "                            bookTicker|markPriceArr|tickerArr (default: off — real screener)\n"
         "  --live                    Use production endpoints (default: testnet)\n"
         "  --testnet                 Use testnet endpoints (default)\n"
         "  --print-config            Parse flags and YAML, dump config, exit\n"
@@ -124,6 +128,27 @@ std::optional<recorder_config> parse_args(int argc, char** argv)
                 std::fprintf(stderr, "error: --stats-seconds needs an integer\n");
                 std::exit(2);
             }
+        }
+        else if (a == "--loglevel") {
+            std::string_view lvl = need_arg("--loglevel");
+            if (lvl != "trace" && lvl != "debug" && lvl != "info" &&
+                lvl != "warn" && lvl != "error" && lvl != "critical" &&
+                lvl != "off") {
+                std::fprintf(stderr, "error: --loglevel must be one of "
+                                     "trace/debug/info/warn/error/critical/off\n");
+                std::exit(2);
+            }
+            cfg.loglevel = std::string(lvl);
+        }
+        else if (a == "--logfile") { cfg.logfile = need_arg("--logfile"); }
+        else if (a == "--debug-stream") {
+            std::string_view s = need_arg("--debug-stream");
+            if (s != "bookTicker" && s != "markPriceArr" && s != "tickerArr") {
+                std::fprintf(stderr,
+                    "error: --debug-stream must be one of bookTicker|markPriceArr|tickerArr\n");
+                std::exit(2);
+            }
+            cfg.debug_stream = std::string(s);
         }
         else if (a == "--live") { cfg.testnet = false; }
         else if (a == "--testnet") { cfg.testnet = true; }
@@ -193,6 +218,9 @@ std::string dump_config(const recorder_config& cfg)
       << "  with_depth         = " << (cfg.with_depth ? "yes" : "no") << "\n"
       << "  with_klines        = " << (cfg.with_klines ? "yes" : "no") << "\n"
       << "  stats_seconds      = " << cfg.stats_interval_seconds << " s\n"
+      << "  loglevel           = " << cfg.loglevel << "\n"
+      << "  logfile            = " << (cfg.logfile.empty() ? "<stdout only>" : cfg.logfile.string()) << "\n"
+      << "  debug_stream       = " << (cfg.debug_stream.empty() ? "<off>" : cfg.debug_stream) << "\n"
       << "  network            = " << (cfg.testnet ? "testnet" : "live") << "\n"
       << "  selector:\n"
       << "    w_volume         = " << cfg.selector.w_volume << "\n"

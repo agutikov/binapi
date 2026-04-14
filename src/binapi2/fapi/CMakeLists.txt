@@ -85,6 +85,17 @@ target_include_directories(binapi2_fapi
 cmake_policy(SET CMP0167 NEW)
 find_package(Boost REQUIRED COMPONENTS cobalt)
 
+# Boost.Asio reactor defines must be propagated to every translation unit
+# that includes <boost/asio/*.hpp> — otherwise different TUs pick
+# different reactor impls and mixing them in one io_context is UB.
+# We enable io_uring (needed for asio::stream_file used by file_sink) and
+# leave epoll for sockets/timers; flipping BOOST_ASIO_DISABLE_EPOLL on top
+# breaks websocket reads on this host.
+target_compile_definitions(binapi2_fapi
+    PUBLIC
+        BOOST_ASIO_HAS_IO_URING
+)
+
 target_link_libraries(
     binapi2_fapi
     PUBLIC
@@ -94,4 +105,5 @@ target_link_libraries(
         OpenSSL::Crypto
         OpenSSL::SSL
         Threads::Threads
+        uring
 )

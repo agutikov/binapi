@@ -56,8 +56,8 @@ struct recorder_config
     std::filesystem::path selector_yaml{};  ///< path to selector YAML, empty = defaults
 
     // -- rotation ------------------------------------------------------------
-    std::size_t rotation_size_bytes{ 512ULL * 1024 * 1024 };  ///< 512 MiB
-    std::uint64_t rotation_seconds{ 3600 };                    ///< 1 h
+    std::size_t rotation_size_bytes{ 100ULL * 1024 * 1024 };  ///< 100 MiB
+    std::uint64_t rotation_seconds{ 15*60 };                    ///< 15m
 
     // -- depth ---------------------------------------------------------------
     depth_mode_t depth_mode{ depth_mode_t::partial };
@@ -67,8 +67,23 @@ struct recorder_config
     bool with_depth{ false };   ///< record depth stream at all (off by default; storage-heavy)
     bool with_klines{ true };   ///< record per-symbol 1m klines
 
+    // -- debug / single-stream mode -----------------------------------------
+    /// @brief When non-empty, run the single-stream debug screener instead
+    /// of the real multi-stream one. Values: "bookTicker" |
+    /// "markPriceArr" | "tickerArr". Default empty = real screener.
+    std::string debug_stream{};
+
     // -- stats ---------------------------------------------------------------
     std::uint64_t stats_interval_seconds{ 10 };
+
+    // -- logging -------------------------------------------------------------
+    /// @brief spdlog level: trace / debug / info / warn / error / critical / off.
+    /// Defaults to trace while under active development.
+    std::string loglevel{ "trace" };
+
+    /// @brief Optional path to a log file. When non-empty, logs go to stdout
+    /// AND the file (truncated on startup).
+    std::filesystem::path logfile{};
 
     // -- network -------------------------------------------------------------
     bool testnet{ true };  ///< default to testnet for safety

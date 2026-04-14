@@ -59,8 +59,8 @@ struct rotating_file_sink_config
     std::filesystem::path dir{};                  ///< output directory (must exist)
     std::string basename{};                       ///< segment filename prefix
     std::string extension{ ".jsonl" };
-    std::size_t max_size_bytes{ 512ULL * 1024 * 1024 };  ///< 512 MiB
-    std::uint64_t max_seconds{ 3600 };                    ///< 1 h; 0 disables time rotation
+    std::size_t max_size_bytes{ 100ULL * 1024 * 1024 };  ///< 100 MiB
+    std::uint64_t max_seconds{ 15*60 };                    ///< 15m; 0 disables time rotation
     bool compress{ true };                        ///< spawn `zstd --rm` on rotate
 };
 
