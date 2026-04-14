@@ -62,6 +62,7 @@ void print_usage(const char* prog)
         "  --rotate-seconds <s>      Rotation time in seconds (default: 3600)\n"
         "  --depth-levels {5,10,20}  Partial-book depth levels (default: 20)\n"
         "  --full-depth              Use full diff depth stream instead of partial\n"
+        "  --depth-resnap-seconds <s> Periodic depth re-snapshot interval (default: 600)\n"
         "  --with-depth              Record depth at all (default: off)\n"
         "  --no-klines               Disable per-symbol 1m kline recording\n"
         "  --stats-seconds <s>       Stats tick interval (default: 10)\n"
@@ -121,6 +122,12 @@ std::optional<recorder_config> parse_args(int argc, char** argv)
             cfg.depth_mode = depth_mode_t::partial;
         }
         else if (a == "--full-depth") { cfg.depth_mode = depth_mode_t::full; }
+        else if (a == "--depth-resnap-seconds") {
+            if (!parse_u64(need_arg("--depth-resnap-seconds"), cfg.depth_resnap_seconds)) {
+                std::fprintf(stderr, "error: --depth-resnap-seconds needs an integer\n");
+                std::exit(2);
+            }
+        }
         else if (a == "--with-depth") { cfg.with_depth = true; }
         else if (a == "--no-klines") { cfg.with_klines = false; }
         else if (a == "--stats-seconds") {
@@ -215,6 +222,7 @@ std::string dump_config(const recorder_config& cfg)
       << "  rotation_seconds   = " << cfg.rotation_seconds << " s\n"
       << "  depth_mode         = " << (cfg.depth_mode == depth_mode_t::partial ? "partial" : "full") << "\n"
       << "  depth_levels       = " << cfg.depth_levels << "\n"
+      << "  depth_resnap_secs  = " << cfg.depth_resnap_seconds << "\n"
       << "  with_depth         = " << (cfg.with_depth ? "yes" : "no") << "\n"
       << "  with_klines        = " << (cfg.with_klines ? "yes" : "no") << "\n"
       << "  stats_seconds      = " << cfg.stats_interval_seconds << " s\n"

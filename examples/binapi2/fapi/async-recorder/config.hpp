@@ -62,6 +62,9 @@ struct recorder_config
     // -- depth ---------------------------------------------------------------
     depth_mode_t depth_mode{ depth_mode_t::partial };
     int depth_levels{ 20 };  ///< 5, 10, or 20 when mode == partial
+    /// @brief Periodic depth re-snapshot interval (full-depth mode only).
+    /// Provides anchors for offline diff-stream reconstruction.
+    std::uint64_t depth_resnap_seconds{ 600 };  ///< 10 min
 
     // -- feature flags -------------------------------------------------------
     bool with_depth{ false };   ///< record depth stream at all (off by default; storage-heavy)

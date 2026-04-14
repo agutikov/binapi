@@ -14,6 +14,7 @@
 #include <binapi2/fapi/detail/stream_buffer.hpp>
 #include <binapi2/fapi/streams/detail/sinks/rotating_file_sink.hpp>
 
+#include <chrono>
 #include <cstddef>
 #include <memory>
 #include <string>
@@ -37,6 +38,13 @@ struct per_symbol_sinks
     std::unique_ptr<rfs> force_order;
     std::unique_ptr<rfs> depth;
     std::size_t frames_routed{ 0 };
+
+    /// @brief Deadline for the next periodic depth re-snapshot (full-
+    /// depth mode only). Set on admission, advanced after each
+    /// successful resnap. `time_point::max()` for symbols not in
+    /// full-depth mode.
+    std::chrono::steady_clock::time_point next_resnap_at{
+        std::chrono::steady_clock::time_point::max() };
 };
 
 /// @brief Shared state between the detail monitor's coroutines.
