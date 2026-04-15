@@ -3,20 +3,9 @@
 
 
 
+verify.sh
 
-add FTXUI-based async-demo-ui
-wrap already existing commands into FTXUI
-with all the same commands
 
-- request-response (REST and WS)
-    - show full request text
-    - show full responce with scroll
-- local order book
-- streams
-    - start stop
-    - json view - minimized, formatted
-    - table columns view
-    - status counters
 
 
 
