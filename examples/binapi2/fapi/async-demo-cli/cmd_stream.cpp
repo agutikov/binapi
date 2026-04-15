@@ -12,160 +12,139 @@ namespace demo {
 
 namespace types = binapi2::fapi::types;
 
-// ---------------------------------------------------------------------------
-// Existing commands (refactored to use exec_stream)
-// ---------------------------------------------------------------------------
+namespace {
 
-boost::cobalt::task<int> cmd_stream_book_ticker(binapi2::futures_usdm_api& c, const args_t& args)
+struct symbol_opts { std::string symbol; };
+
+template<typename Subscription>
+CLI::App* add_noarg_stream(CLI::App& parent, const char* name, const char* desc, selected_cmd& sel)
 {
-    if (args.empty()) { spdlog::error("usage: stream-book-ticker <symbol>"); co_return 1; }
-    types::book_ticker_subscription sub;
-    sub.symbol = args[0];
-    co_return co_await exec_stream(c, sub);
+    auto* sub = parent.add_subcommand(name, desc);
+    sub->callback([&sel] {
+        sel.factory = [](binapi2::futures_usdm_api& c) -> boost::cobalt::task<int> {
+            co_return co_await exec_stream(c, Subscription{});
+        };
+    });
+    return sub;
 }
 
-boost::cobalt::task<int> cmd_stream_mark_price(binapi2::futures_usdm_api& c, const args_t& args)
+template<typename Subscription>
+CLI::App* add_symbol_stream(CLI::App& parent, const char* name, const char* desc, selected_cmd& sel)
 {
-    if (args.empty()) { spdlog::error("usage: stream-mark-price <symbol>"); co_return 1; }
-    types::mark_price_subscription sub;
-    sub.symbol = args[0];
-    co_return co_await exec_stream(c, sub);
+    auto opts = std::make_shared<symbol_opts>();
+    auto* sub = parent.add_subcommand(name, desc);
+    sub->add_option("symbol", opts->symbol, "Trading symbol")->required();
+    sub->callback([&sel, opts] {
+        sel.factory = [opts](binapi2::futures_usdm_api& c) -> boost::cobalt::task<int> {
+            Subscription s;
+            s.symbol = opts->symbol;
+            co_return co_await exec_stream(c, s);
+        };
+    });
+    return sub;
 }
 
-boost::cobalt::task<int> cmd_stream_kline(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    if (args.size() < 2) { spdlog::error("usage: stream-kline <symbol> <interval>"); co_return 1; }
-    types::kline_subscription sub;
-    sub.symbol = args[0];
-    sub.interval = parse_enum<types::kline_interval_t>(args[1]);
-    co_return co_await exec_stream(c, sub);
-}
+} // namespace
 
-boost::cobalt::task<int> cmd_stream_ticker(binapi2::futures_usdm_api& c, const args_t& args)
+void register_cmd_stream(CLI::App& app, selected_cmd& sel)
 {
-    if (args.empty()) { spdlog::error("usage: stream-ticker <symbol>"); co_return 1; }
-    types::ticker_subscription sub;
-    sub.symbol = args[0];
-    co_return co_await exec_stream(c, sub);
-}
+    constexpr const char* group = "Market Streams";
 
-boost::cobalt::task<int> cmd_stream_depth(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    if (args.empty()) { spdlog::error("usage: stream-depth <symbol> [levels]"); co_return 1; }
-    types::partial_book_depth_subscription sub;
-    sub.symbol = args[0];
-    if (args.size() > 1) sub.levels = std::stoi(args[1]);
-    co_return co_await exec_stream(c, sub);
-}
+    // ── single-symbol streams ─────────────────────────────────────────
 
-boost::cobalt::task<int> cmd_stream_all_book_tickers(binapi2::futures_usdm_api& c, const args_t& /*args*/)
-{
-    co_return co_await exec_stream(c, types::all_book_ticker_subscription{});
-}
+    add_symbol_stream<types::book_ticker_subscription>        (app, "stream-book-ticker",     "Book ticker stream",       sel)->group(group);
+    add_symbol_stream<types::mark_price_subscription>         (app, "stream-mark-price",      "Mark price stream",        sel)->group(group);
+    add_symbol_stream<types::ticker_subscription>             (app, "stream-ticker",          "24hr ticker stream",       sel)->group(group);
+    add_symbol_stream<types::liquidation_order_subscription>  (app, "stream-liquidation",     "Liquidation stream",       sel)->group(group);
+    add_symbol_stream<types::aggregate_trade_subscription>    (app, "stream-aggregate-trade", "Aggregate trade stream",   sel)->group(group);
+    add_symbol_stream<types::mini_ticker_subscription>        (app, "stream-mini-ticker",     "Mini ticker stream",       sel)->group(group);
+    add_symbol_stream<types::composite_index_subscription>    (app, "stream-composite-index", "Composite index stream",   sel)->group(group);
+    add_symbol_stream<types::asset_index_subscription>        (app, "stream-asset-index",     "Asset index stream",       sel)->group(group);
+    add_symbol_stream<types::rpi_diff_book_depth_subscription>(app, "stream-rpi-diff-depth",  "RPI diff depth stream",    sel)->group(group);
 
-boost::cobalt::task<int> cmd_stream_all_tickers(binapi2::futures_usdm_api& c, const args_t& /*args*/)
-{
-    co_return co_await exec_stream(c, types::all_market_ticker_subscription{});
-}
+    // ── klines (symbol + interval) ────────────────────────────────────
 
-boost::cobalt::task<int> cmd_stream_all_mini_tickers(binapi2::futures_usdm_api& c, const args_t& /*args*/)
-{
-    co_return co_await exec_stream(c, types::all_market_mini_ticker_subscription{});
-}
+    {
+        struct opts_t { std::string symbol, interval; };
+        auto opts = std::make_shared<opts_t>();
+        auto* sub = app.add_subcommand("stream-kline", "Kline stream");
+        sub->group(group);
+        sub->add_option("symbol",   opts->symbol,   "Trading symbol")->required();
+        sub->add_option("interval", opts->interval, "Kline interval")->required();
+        sub->callback([&sel, opts] {
+            sel.factory = [opts](binapi2::futures_usdm_api& c) -> boost::cobalt::task<int> {
+                types::kline_subscription s;
+                s.symbol = opts->symbol;
+                s.interval = parse_enum<types::kline_interval_t>(opts->interval);
+                co_return co_await exec_stream(c, s);
+            };
+        });
+    }
 
-boost::cobalt::task<int> cmd_stream_liquidation(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    if (args.empty()) { spdlog::error("usage: stream-liquidation <symbol>"); co_return 1; }
-    types::liquidation_order_subscription sub;
-    sub.symbol = args[0];
-    co_return co_await exec_stream(c, sub);
-}
+    {
+        struct opts_t { std::string pair, interval; };
+        auto opts = std::make_shared<opts_t>();
+        auto* sub = app.add_subcommand("stream-continuous-kline", "Continuous kline stream");
+        sub->group(group);
+        sub->add_option("pair",     opts->pair,     "Pair")->required();
+        sub->add_option("interval", opts->interval, "Kline interval")->required();
+        sub->callback([&sel, opts] {
+            sel.factory = [opts](binapi2::futures_usdm_api& c) -> boost::cobalt::task<int> {
+                types::continuous_contract_kline_subscription s;
+                s.pair = opts->pair;
+                s.interval = parse_enum<types::kline_interval_t>(opts->interval);
+                co_return co_await exec_stream(c, s);
+            };
+        });
+    }
 
-// ---------------------------------------------------------------------------
-// New stream commands
-// ---------------------------------------------------------------------------
+    // ── depth ─────────────────────────────────────────────────────────
 
-boost::cobalt::task<int> cmd_stream_aggregate_trade(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    if (args.empty()) { spdlog::error("usage: stream-aggregate-trade <symbol>"); co_return 1; }
-    types::aggregate_trade_subscription sub;
-    sub.symbol = args[0];
-    co_return co_await exec_stream(c, sub);
-}
+    {
+        struct opts_t { std::string symbol; int levels = 10; };
+        auto opts = std::make_shared<opts_t>();
+        auto* sub = app.add_subcommand("stream-depth", "Partial book depth stream");
+        sub->group(group);
+        sub->add_option("symbol", opts->symbol, "Trading symbol")->required();
+        sub->add_option("-l,--levels", opts->levels, "Depth levels (5|10|20)")
+            ->check(CLI::IsMember({ 5, 10, 20 }))->capture_default_str();
+        sub->callback([&sel, opts] {
+            sel.factory = [opts](binapi2::futures_usdm_api& c) -> boost::cobalt::task<int> {
+                types::partial_book_depth_subscription s;
+                s.symbol = opts->symbol;
+                s.levels = opts->levels;
+                co_return co_await exec_stream(c, s);
+            };
+        });
+    }
 
-boost::cobalt::task<int> cmd_stream_diff_depth(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    if (args.empty()) { spdlog::error("usage: stream-diff-depth <symbol> [speed]"); co_return 1; }
-    types::diff_book_depth_subscription sub;
-    sub.symbol = args[0];
-    if (args.size() > 1) sub.speed = args[1];
-    co_return co_await exec_stream(c, sub);
-}
+    {
+        struct opts_t { std::string symbol, speed; };
+        auto opts = std::make_shared<opts_t>();
+        auto* sub = app.add_subcommand("stream-diff-depth", "Diff depth stream");
+        sub->group(group);
+        sub->add_option("symbol",    opts->symbol, "Trading symbol")->required();
+        sub->add_option("-s,--speed", opts->speed,  "Update speed (100ms|250ms|500ms)");
+        sub->callback([&sel, opts] {
+            sel.factory = [opts](binapi2::futures_usdm_api& c) -> boost::cobalt::task<int> {
+                types::diff_book_depth_subscription s;
+                s.symbol = opts->symbol;
+                s.speed = opts->speed;
+                co_return co_await exec_stream(c, s);
+            };
+        });
+    }
 
-boost::cobalt::task<int> cmd_stream_mini_ticker(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    if (args.empty()) { spdlog::error("usage: stream-mini-ticker <symbol>"); co_return 1; }
-    types::mini_ticker_subscription sub;
-    sub.symbol = args[0];
-    co_return co_await exec_stream(c, sub);
-}
+    // ── all-market streams (no args) ──────────────────────────────────
 
-boost::cobalt::task<int> cmd_stream_all_liquidations(binapi2::futures_usdm_api& c, const args_t& /*args*/)
-{
-    co_return co_await exec_stream(c, types::all_market_liquidation_order_subscription{});
-}
-
-boost::cobalt::task<int> cmd_stream_all_mark_prices(binapi2::futures_usdm_api& c, const args_t& /*args*/)
-{
-    co_return co_await exec_stream(c, types::all_market_mark_price_subscription{});
-}
-
-boost::cobalt::task<int> cmd_stream_continuous_kline(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    if (args.size() < 2) { spdlog::error("usage: stream-continuous-kline <pair> <interval>"); co_return 1; }
-    types::continuous_contract_kline_subscription sub;
-    sub.pair = args[0];
-    sub.interval = parse_enum<types::kline_interval_t>(args[1]);
-    co_return co_await exec_stream(c, sub);
-}
-
-boost::cobalt::task<int> cmd_stream_composite_index(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    if (args.empty()) { spdlog::error("usage: stream-composite-index <symbol>"); co_return 1; }
-    types::composite_index_subscription sub;
-    sub.symbol = args[0];
-    co_return co_await exec_stream(c, sub);
-}
-
-boost::cobalt::task<int> cmd_stream_contract_info(binapi2::futures_usdm_api& c, const args_t& /*args*/)
-{
-    co_return co_await exec_stream(c, types::contract_info_subscription{});
-}
-
-boost::cobalt::task<int> cmd_stream_asset_index(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    if (args.empty()) { spdlog::error("usage: stream-asset-index <symbol>"); co_return 1; }
-    types::asset_index_subscription sub;
-    sub.symbol = args[0];
-    co_return co_await exec_stream(c, sub);
-}
-
-boost::cobalt::task<int> cmd_stream_all_asset_index(binapi2::futures_usdm_api& c, const args_t& /*args*/)
-{
-    co_return co_await exec_stream(c, types::all_asset_index_subscription{});
-}
-
-boost::cobalt::task<int> cmd_stream_trading_session(binapi2::futures_usdm_api& c, const args_t& /*args*/)
-{
-    co_return co_await exec_stream(c, types::trading_session_subscription{});
-}
-
-boost::cobalt::task<int> cmd_stream_rpi_diff_depth(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    if (args.empty()) { spdlog::error("usage: stream-rpi-diff-depth <symbol>"); co_return 1; }
-    types::rpi_diff_book_depth_subscription sub;
-    sub.symbol = args[0];
-    co_return co_await exec_stream(c, sub);
+    add_noarg_stream<types::all_book_ticker_subscription>            (app, "stream-all-book-tickers", "All book tickers stream",  sel)->group(group);
+    add_noarg_stream<types::all_market_ticker_subscription>          (app, "stream-all-tickers",      "All 24hr tickers stream",  sel)->group(group);
+    add_noarg_stream<types::all_market_mini_ticker_subscription>     (app, "stream-all-mini-tickers", "All mini tickers stream",  sel)->group(group);
+    add_noarg_stream<types::all_market_liquidation_order_subscription>(app,"stream-all-liquidations","All liquidations stream",  sel)->group(group);
+    add_noarg_stream<types::all_market_mark_price_subscription>      (app, "stream-all-mark-prices",  "All mark prices stream",   sel)->group(group);
+    add_noarg_stream<types::all_asset_index_subscription>            (app, "stream-all-asset-index",  "All asset index stream",   sel)->group(group);
+    add_noarg_stream<types::contract_info_subscription>              (app, "stream-contract-info",    "Contract info stream",     sel)->group(group);
+    add_noarg_stream<types::trading_session_subscription>            (app, "stream-trading-session",  "Trading session stream",   sel)->group(group);
 }
 
 } // namespace demo

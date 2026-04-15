@@ -6,9 +6,7 @@
 
 namespace demo {
 
-boost::cobalt::task<int> cmd_listen_key_start(binapi2::futures_usdm_api& c, const args_t& args);
-boost::cobalt::task<int> cmd_listen_key_keepalive(binapi2::futures_usdm_api& c, const args_t& args);
-boost::cobalt::task<int> cmd_listen_key_close(binapi2::futures_usdm_api& c, const args_t& args);
-boost::cobalt::task<int> cmd_user_stream(binapi2::futures_usdm_api& c, const args_t& args);
+/// Register all User Data Streams subcommands on `app`.
+void register_cmd_user_stream(CLI::App& app, selected_cmd& sel);
 
 } // namespace demo

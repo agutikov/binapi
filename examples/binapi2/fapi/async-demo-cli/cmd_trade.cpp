@@ -15,297 +15,430 @@ namespace demo {
 
 namespace types = binapi2::fapi::types;
 
-static types::new_order_request_t
-make_order_request(const args_t& args)
+namespace {
+
+struct symbol_opts             { std::string symbol; };
+struct symbol_limit_opts       { std::string symbol; std::optional<int> limit; };
+struct symbol_order_id_opts    { std::string symbol; std::uint64_t order_id = 0; };
+struct order_opts
 {
-    types::new_order_request_t req;
-    req.symbol = args[0];
-    req.side = parse_enum<types::order_side_t>(args[1]);
-    req.type = parse_enum<types::order_type_t>(args[2]);
+    std::string symbol, side, type, quantity, price, tif;
+};
 
-    if (auto v = find_flag(args, "--quantity", "-q"); !v.empty())
-        req.quantity = types::decimal_t(std::string(v));
-    if (auto v = find_flag(args, "--price", "-p"); !v.empty())
-        req.price = types::decimal_t(std::string(v));
-    if (auto v = find_flag(args, "--tif", "-t"); !v.empty())
-        req.timeInForce = parse_enum<types::time_in_force_t>(v);
-
-    return req;
+template<typename Request>
+CLI::App* add_noarg(CLI::App& parent, const char* name, const char* desc, selected_cmd& sel)
+{
+    auto* sub = parent.add_subcommand(name, desc);
+    sub->callback([&sel] {
+        sel.factory = [](binapi2::futures_usdm_api& c) -> boost::cobalt::task<int> {
+            co_return co_await exec_trade(c, Request{});
+        };
+    });
+    return sub;
 }
 
-// ---------------------------------------------------------------------------
-// Existing commands
-// ---------------------------------------------------------------------------
-
-boost::cobalt::task<int> cmd_new_order(binapi2::futures_usdm_api& c, const args_t& args)
+template<typename Request>
+CLI::App* add_symbol(CLI::App& parent, const char* name, const char* desc, selected_cmd& sel)
 {
-    if (args.size() < 3) {
-        spdlog::error("usage: new-order <symbol> <side> <type> [-q Q] [-p P] [-t TIF]"); co_return 1;
+    auto opts = std::make_shared<symbol_opts>();
+    auto* sub = parent.add_subcommand(name, desc);
+    sub->add_option("symbol", opts->symbol, "Trading symbol")->required();
+    sub->callback([&sel, opts] {
+        sel.factory = [opts](binapi2::futures_usdm_api& c) -> boost::cobalt::task<int> {
+            Request req;
+            req.symbol = opts->symbol;
+            co_return co_await exec_trade(c, req);
+        };
+    });
+    return sub;
+}
+
+template<typename Request>
+CLI::App* add_optional_symbol(CLI::App& parent, const char* name, const char* desc, selected_cmd& sel)
+{
+    auto opts = std::make_shared<symbol_opts>();
+    auto* sub = parent.add_subcommand(name, desc);
+    sub->add_option("symbol", opts->symbol, "Trading symbol (optional)");
+    sub->callback([&sel, opts] {
+        sel.factory = [opts](binapi2::futures_usdm_api& c) -> boost::cobalt::task<int> {
+            Request req;
+            if (!opts->symbol.empty()) req.symbol = opts->symbol;
+            co_return co_await exec_trade(c, req);
+        };
+    });
+    return sub;
+}
+
+template<typename Request>
+CLI::App* add_symbol_limit(CLI::App& parent, const char* name, const char* desc, selected_cmd& sel)
+{
+    auto opts = std::make_shared<symbol_limit_opts>();
+    auto* sub = parent.add_subcommand(name, desc);
+    sub->add_option("symbol", opts->symbol, "Trading symbol")->required();
+    sub->add_option("-l,--limit", opts->limit, "Result limit");
+    sub->callback([&sel, opts] {
+        sel.factory = [opts](binapi2::futures_usdm_api& c) -> boost::cobalt::task<int> {
+            Request req;
+            req.symbol = opts->symbol;
+            req.limit = opts->limit;
+            co_return co_await exec_trade(c, req);
+        };
+    });
+    return sub;
+}
+
+template<typename Request>
+CLI::App* add_symbol_order_id(CLI::App& parent, const char* name, const char* desc, selected_cmd& sel)
+{
+    auto opts = std::make_shared<symbol_order_id_opts>();
+    auto* sub = parent.add_subcommand(name, desc);
+    sub->add_option("symbol",  opts->symbol,   "Trading symbol")->required();
+    sub->add_option("orderId", opts->order_id, "Order ID")->required();
+    sub->callback([&sel, opts] {
+        sel.factory = [opts](binapi2::futures_usdm_api& c) -> boost::cobalt::task<int> {
+            Request req;
+            req.symbol = opts->symbol;
+            req.orderId = opts->order_id;
+            co_return co_await exec_trade(c, req);
+        };
+    });
+    return sub;
+}
+
+/// Bind the `<symbol> <side> <type> [-q] [-p] [-t]` options of a new-order style
+/// request. Returns the shared options struct (alive for the callback lifetime).
+std::shared_ptr<order_opts>
+bind_new_order_opts(CLI::App& sub)
+{
+    auto opts = std::make_shared<order_opts>();
+    sub.add_option("symbol", opts->symbol, "Trading symbol")->required();
+    sub.add_option("side",   opts->side,   "Side (BUY|SELL)")->required();
+    sub.add_option("type",   opts->type,   "Order type (LIMIT|MARKET|…)")->required();
+    sub.add_option("-q,--quantity", opts->quantity, "Quantity");
+    sub.add_option("-p,--price",    opts->price,    "Price (LIMIT only)");
+    sub.add_option("-t,--tif",      opts->tif,      "Time in force (GTC|IOC|FOK)");
+    return opts;
+}
+
+/// Fill a new_order_request_t from parsed order_opts.
+void apply_new_order(const order_opts& o, types::new_order_request_t& req)
+{
+    req.symbol = o.symbol;
+    req.side = parse_enum<types::order_side_t>(o.side);
+    req.type = parse_enum<types::order_type_t>(o.type);
+    if (!o.quantity.empty()) req.quantity = types::decimal_t(o.quantity);
+    if (!o.price.empty())    req.price    = types::decimal_t(o.price);
+    if (!o.tif.empty())      req.timeInForce = parse_enum<types::time_in_force_t>(o.tif);
+}
+
+} // namespace
+
+void register_cmd_trade(CLI::App& app, selected_cmd& sel)
+{
+    constexpr const char* group = "Trade";
+
+    // ── order placement ───────────────────────────────────────────────
+
+    {
+        auto* sub = app.add_subcommand("new-order", "Place order <sym> <side> <type> [-q Q] [-p P] [-t TIF]");
+        sub->group(group);
+        auto opts = bind_new_order_opts(*sub);
+        sub->callback([&sel, opts] {
+            sel.factory = [opts](binapi2::futures_usdm_api& c) -> boost::cobalt::task<int> {
+                types::new_order_request_t req;
+                apply_new_order(*opts, req);
+                co_return co_await exec_trade(c, req);
+            };
+        });
     }
-    co_return co_await exec_trade(c, make_order_request(args));
-}
 
-boost::cobalt::task<int> cmd_test_order(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    if (args.size() < 3) {
-        spdlog::error("usage: test-order <symbol> <side> <type> [-q Q] [-p P] [-t TIF]"); co_return 1;
+    {
+        auto* sub = app.add_subcommand("test-order", "Test order (validates, does not place)");
+        sub->group(group);
+        auto opts = bind_new_order_opts(*sub);
+        sub->callback([&sel, opts] {
+            sel.factory = [opts](binapi2::futures_usdm_api& c) -> boost::cobalt::task<int> {
+                types::new_order_request_t tmp;
+                apply_new_order(*opts, tmp);
+                types::test_order_request_t req;
+                req.symbol = tmp.symbol;
+                req.side = tmp.side;
+                req.type = tmp.type;
+                req.quantity = tmp.quantity;
+                req.price = tmp.price;
+                req.timeInForce = tmp.timeInForce;
+                co_return co_await exec_trade(c, req);
+            };
+        });
     }
-    auto order = make_order_request(args);
-    types::test_order_request_t req;
-    req.symbol = order.symbol;
-    req.side = order.side;
-    req.type = order.type;
-    req.quantity = order.quantity;
-    req.price = order.price;
-    req.timeInForce = order.timeInForce;
-    co_return co_await exec_trade(c, req);
-}
 
-boost::cobalt::task<int> cmd_cancel_order(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    if (args.size() < 2) { spdlog::error("usage: cancel-order <symbol> <orderId>"); co_return 1; }
-    types::cancel_order_request_t req;
-    req.symbol = args[0];
-    req.orderId = std::stoull(args[1]);
-    co_return co_await exec_trade(c, req);
-}
-
-boost::cobalt::task<int> cmd_query_order(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    if (args.size() < 2) { spdlog::error("usage: query-order <symbol> <orderId>"); co_return 1; }
-    types::query_order_request_t req;
-    req.symbol = args[0];
-    req.orderId = std::stoull(args[1]);
-    co_return co_await exec_trade(c, req);
-}
-
-boost::cobalt::task<int> cmd_open_orders(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    types::all_open_orders_request_t req;
-    if (!args.empty()) req.symbol = args[0];
-    co_return co_await exec_trade(c, req);
-}
-
-// ---------------------------------------------------------------------------
-// New trade commands
-// ---------------------------------------------------------------------------
-
-boost::cobalt::task<int> cmd_modify_order(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    if (args.size() < 3) {
-        spdlog::error("usage: modify-order <symbol> <side> <orderId> -q Q -p P"); co_return 1;
+    {
+        struct opts_t { std::string symbol, side, quantity, price; std::uint64_t order_id = 0; };
+        auto opts = std::make_shared<opts_t>();
+        auto* sub = app.add_subcommand("modify-order", "Modify order <sym> <side> <orderId> -q Q -p P");
+        sub->group(group);
+        sub->add_option("symbol",  opts->symbol,   "Trading symbol")->required();
+        sub->add_option("side",    opts->side,     "Side (BUY|SELL)")->required();
+        sub->add_option("orderId", opts->order_id, "Order ID")->required();
+        sub->add_option("-q,--quantity", opts->quantity, "New quantity")->required();
+        sub->add_option("-p,--price",    opts->price,    "New price")->required();
+        sub->callback([&sel, opts] {
+            sel.factory = [opts](binapi2::futures_usdm_api& c) -> boost::cobalt::task<int> {
+                types::modify_order_request_t req;
+                req.symbol = opts->symbol;
+                req.side = parse_enum<types::order_side_t>(opts->side);
+                req.orderId = opts->order_id;
+                req.quantity = types::decimal_t(opts->quantity);
+                req.price = types::decimal_t(opts->price);
+                co_return co_await exec_trade(c, req);
+            };
+        });
     }
-    types::modify_order_request_t req;
-    req.symbol = args[0];
-    req.side = parse_enum<types::order_side_t>(args[1]);
-    req.orderId = std::stoull(args[2]);
-    if (auto v = find_flag(args, "--quantity", "-q"); !v.empty())
-        req.quantity = types::decimal_t(std::string(v));
-    if (auto v = find_flag(args, "--price", "-p"); !v.empty())
-        req.price = types::decimal_t(std::string(v));
-    co_return co_await exec_trade(c, req);
-}
 
-boost::cobalt::task<int> cmd_cancel_multiple_orders(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    if (args.size() < 2) { spdlog::error("usage: cancel-multiple-orders <symbol> <id1,id2,...>"); co_return 1; }
-    auto rest = co_await c.create_rest_client();
-    if (!rest) { spdlog::error("connect: {}", rest.err.message); co_return 1; }
-    types::cancel_multiple_orders_request_t req;
-    req.symbol = args[0];
-    std::vector<std::uint64_t> ids;
-    std::istringstream ss(args[1]);
-    std::string tok;
-    while (std::getline(ss, tok, ','))
-        ids.push_back(std::stoull(tok));
-    req.orderIdList = std::move(ids);
-    auto r = co_await (*rest)->trade.async_cancel_batch_orders(req);
-    co_return handle_result(r);
-}
+    add_symbol_order_id<types::cancel_order_request_t>   (app, "cancel-order",     "Cancel order", sel)->group(group);
+    add_symbol_order_id<types::query_order_request_t>    (app, "query-order",      "Query order", sel)->group(group);
+    add_symbol_order_id<types::query_open_order_request_t>(app,"query-open-order", "Query open order", sel)->group(group);
 
-boost::cobalt::task<int> cmd_cancel_all_orders(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    if (args.empty()) { spdlog::error("usage: cancel-all-orders <symbol>"); co_return 1; }
-    types::cancel_all_open_orders_request_t req;
-    req.symbol = args[0];
-    co_return co_await exec_trade(c, req);
-}
-
-boost::cobalt::task<int> cmd_auto_cancel(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    if (args.size() < 2) { spdlog::error("usage: auto-cancel <symbol> <countdownMs>"); co_return 1; }
-    types::auto_cancel_request_t req;
-    req.symbol = args[0];
-    req.countdownTime = std::stoull(args[1]);
-    co_return co_await exec_trade(c, req);
-}
-
-boost::cobalt::task<int> cmd_query_open_order(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    if (args.size() < 2) { spdlog::error("usage: query-open-order <symbol> <orderId>"); co_return 1; }
-    types::query_open_order_request_t req;
-    req.symbol = args[0];
-    req.orderId = std::stoull(args[1]);
-    co_return co_await exec_trade(c, req);
-}
-
-boost::cobalt::task<int> cmd_all_orders(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    if (args.empty()) { spdlog::error("usage: all-orders <symbol> [limit]"); co_return 1; }
-    types::all_orders_request_t req;
-    req.symbol = args[0];
-    if (args.size() > 1) req.limit = std::stoi(args[1]);
-    co_return co_await exec_trade(c, req);
-}
-
-boost::cobalt::task<int> cmd_position_info_v3(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    types::position_info_v3_request_t req;
-    if (!args.empty()) req.symbol = args[0];
-    co_return co_await exec_trade(c, req);
-}
-
-boost::cobalt::task<int> cmd_adl_quantile(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    types::adl_quantile_request_t req;
-    if (!args.empty()) req.symbol = args[0];
-    co_return co_await exec_trade(c, req);
-}
-
-boost::cobalt::task<int> cmd_force_orders(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    types::force_orders_request_t req;
-    if (!args.empty()) req.symbol = args[0];
-    if (args.size() > 1) req.limit = std::stoi(args[1]);
-    co_return co_await exec_trade(c, req);
-}
-
-boost::cobalt::task<int> cmd_account_trades(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    if (args.empty()) { spdlog::error("usage: account-trades <symbol> [limit]"); co_return 1; }
-    types::account_trade_request_t req;
-    req.symbol = args[0];
-    if (args.size() > 1) req.limit = std::stoi(args[1]);
-    co_return co_await exec_trade(c, req);
-}
-
-boost::cobalt::task<int> cmd_change_position_mode(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    if (args.empty()) { spdlog::error("usage: change-position-mode <true|false>"); co_return 1; }
-    types::change_position_mode_request_t req;
-    req.dualSidePosition = args[0];
-    co_return co_await exec_trade(c, req);
-}
-
-boost::cobalt::task<int> cmd_change_multi_assets_mode(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    if (args.empty()) { spdlog::error("usage: change-multi-assets-mode <true|false>"); co_return 1; }
-    types::change_multi_assets_mode_request_t req;
-    req.multiAssetsMargin = args[0];
-    co_return co_await exec_trade(c, req);
-}
-
-boost::cobalt::task<int> cmd_change_leverage(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    if (args.size() < 2) { spdlog::error("usage: change-leverage <symbol> <leverage>"); co_return 1; }
-    types::change_leverage_request_t req;
-    req.symbol = args[0];
-    req.leverage = std::stoi(args[1]);
-    co_return co_await exec_trade(c, req);
-}
-
-boost::cobalt::task<int> cmd_change_margin_type(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    if (args.size() < 2) { spdlog::error("usage: change-margin-type <symbol> <ISOLATED|CROSSED>"); co_return 1; }
-    types::change_margin_type_request_t req;
-    req.symbol = args[0];
-    req.marginType = args[1];
-    co_return co_await exec_trade(c, req);
-}
-
-boost::cobalt::task<int> cmd_modify_isolated_margin(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    if (args.size() < 3) { spdlog::error("usage: modify-isolated-margin <symbol> <amount> <1|2>"); co_return 1; }
-    types::modify_isolated_margin_request_t req;
-    req.symbol = args[0];
-    req.amount = types::decimal_t(std::string(args[1]));
-    req.type = static_cast<types::delta_type_t>(std::stoi(args[2]));
-    co_return co_await exec_trade(c, req);
-}
-
-boost::cobalt::task<int> cmd_position_margin_history(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    if (args.empty()) { spdlog::error("usage: position-margin-history <symbol> [limit]"); co_return 1; }
-    types::position_margin_history_request_t req;
-    req.symbol = args[0];
-    if (args.size() > 1) req.limit = std::stoi(args[1]);
-    co_return co_await exec_trade(c, req);
-}
-
-boost::cobalt::task<int> cmd_order_modify_history(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    if (args.empty()) { spdlog::error("usage: order-modify-history <symbol> [orderId]"); co_return 1; }
-    types::order_modify_history_request_t req;
-    req.symbol = args[0];
-    if (args.size() > 1) req.orderId = std::stoull(args[1]);
-    co_return co_await exec_trade(c, req);
-}
-
-boost::cobalt::task<int> cmd_new_algo_order(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    if (args.size() < 4) {
-        spdlog::error("usage: new-algo-order <symbol> <side> <type> <algoType> -q Q [-p P]"); co_return 1;
+    // cancel-multiple-orders: <symbol> <id1,id2,…>.
+    {
+        struct opts_t { std::string symbol, ids_csv; };
+        auto opts = std::make_shared<opts_t>();
+        auto* sub = app.add_subcommand("cancel-multiple-orders", "Cancel orders <symbol> <id1,id2,…>");
+        sub->group(group);
+        sub->add_option("symbol", opts->symbol,  "Trading symbol")->required();
+        sub->add_option("ids",    opts->ids_csv, "Comma-separated order IDs")->required();
+        sub->callback([&sel, opts] {
+            sel.factory = [opts](binapi2::futures_usdm_api& c) -> boost::cobalt::task<int> {
+                auto rest = co_await c.create_rest_client();
+                if (!rest) { spdlog::error("connect: {}", rest.err.message); co_return 1; }
+                types::cancel_multiple_orders_request_t req;
+                req.symbol = opts->symbol;
+                std::vector<std::uint64_t> ids;
+                std::istringstream ss(opts->ids_csv);
+                std::string tok;
+                while (std::getline(ss, tok, ','))
+                    ids.push_back(std::stoull(tok));
+                req.orderIdList = std::move(ids);
+                auto r = co_await (*rest)->trade.async_cancel_batch_orders(req);
+                co_return handle_result(r);
+            };
+        });
     }
-    types::new_algo_order_request_t req;
-    req.symbol = args[0];
-    req.side = parse_enum<types::order_side_t>(args[1]);
-    req.type = parse_enum<types::order_type_t>(args[2]);
-    req.algoType = parse_enum<types::algo_type_t>(args[3]);
-    if (auto v = find_flag(args, "--quantity", "-q"); !v.empty())
-        req.quantity = types::decimal_t(std::string(v));
-    if (auto v = find_flag(args, "--price", "-p"); !v.empty())
-        req.price = types::decimal_t(std::string(v));
-    co_return co_await exec_trade(c, req);
-}
 
-boost::cobalt::task<int> cmd_cancel_algo_order(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    if (args.empty()) { spdlog::error("usage: cancel-algo-order <algoId>"); co_return 1; }
-    types::cancel_algo_order_request_t req;
-    req.algoId = std::stoull(args[0]);
-    co_return co_await exec_trade(c, req);
-}
+    add_symbol<types::cancel_all_open_orders_request_t>(app, "cancel-all-orders", "Cancel all open orders", sel)->group(group);
 
-boost::cobalt::task<int> cmd_query_algo_order(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    if (args.empty()) { spdlog::error("usage: query-algo-order <algoId>"); co_return 1; }
-    types::query_algo_order_request_t req;
-    req.algoId = std::stoull(args[0]);
-    co_return co_await exec_trade(c, req);
-}
+    // auto-cancel: <symbol> <countdownMs>.
+    {
+        struct opts_t { std::string symbol; std::uint64_t countdown = 0; };
+        auto opts = std::make_shared<opts_t>();
+        auto* sub = app.add_subcommand("auto-cancel", "Auto-cancel <symbol> <countdownMs>");
+        sub->group(group);
+        sub->add_option("symbol",     opts->symbol,    "Trading symbol")->required();
+        sub->add_option("countdown",  opts->countdown, "Countdown (ms, 0 to cancel)")->required();
+        sub->callback([&sel, opts] {
+            sel.factory = [opts](binapi2::futures_usdm_api& c) -> boost::cobalt::task<int> {
+                types::auto_cancel_request_t req;
+                req.symbol = opts->symbol;
+                req.countdownTime = opts->countdown;
+                co_return co_await exec_trade(c, req);
+            };
+        });
+    }
 
-boost::cobalt::task<int> cmd_all_algo_orders(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    if (args.empty()) { spdlog::error("usage: all-algo-orders <symbol> [limit]"); co_return 1; }
-    types::all_algo_orders_request_t req;
-    req.symbol = args[0];
-    if (args.size() > 1) req.limit = std::stoi(args[1]);
-    co_return co_await exec_trade(c, req);
-}
+    // ── queries ───────────────────────────────────────────────────────
 
-boost::cobalt::task<int> cmd_open_algo_orders(binapi2::futures_usdm_api& c, const args_t& /*args*/)
-{
-    co_return co_await exec_trade(c, types::open_algo_orders_request_t{});
-}
+    add_optional_symbol<types::all_open_orders_request_t>  (app, "open-orders",      "Open orders [symbol]", sel)->group(group);
+    add_symbol_limit   <types::all_orders_request_t>       (app, "all-orders",       "All orders", sel)->group(group);
+    add_optional_symbol<types::position_info_v3_request_t> (app, "position-info-v3", "Position info v3 [symbol]", sel)->group(group);
+    add_optional_symbol<types::adl_quantile_request_t>     (app, "adl-quantile",     "ADL quantile [symbol]", sel)->group(group);
 
-boost::cobalt::task<int> cmd_cancel_all_algo_orders(binapi2::futures_usdm_api& c, const args_t& /*args*/)
-{
-    co_return co_await exec_trade(c, types::cancel_all_algo_orders_request_t{});
-}
+    // force-orders: [symbol] [--limit N]
+    {
+        struct opts_t { std::string symbol; std::optional<int> limit; };
+        auto opts = std::make_shared<opts_t>();
+        auto* sub = app.add_subcommand("force-orders", "Force orders [symbol] [--limit L]");
+        sub->group(group);
+        sub->add_option("symbol", opts->symbol, "Trading symbol (optional)");
+        sub->add_option("-l,--limit", opts->limit, "Result limit");
+        sub->callback([&sel, opts] {
+            sel.factory = [opts](binapi2::futures_usdm_api& c) -> boost::cobalt::task<int> {
+                types::force_orders_request_t req;
+                if (!opts->symbol.empty()) req.symbol = opts->symbol;
+                req.limit = opts->limit;
+                co_return co_await exec_trade(c, req);
+            };
+        });
+    }
 
-boost::cobalt::task<int> cmd_tradfi_perps(binapi2::futures_usdm_api& c, const args_t& /*args*/)
-{
-    co_return co_await exec_trade(c, types::tradfi_perps_request_t{});
+    add_symbol_limit<types::account_trade_request_t>(app, "account-trades", "Account trades", sel)->group(group);
+
+    // ── configuration changes ─────────────────────────────────────────
+
+    {
+        struct opts_t { std::string dual; };
+        auto opts = std::make_shared<opts_t>();
+        auto* sub = app.add_subcommand("change-position-mode", "Change position mode <true|false>");
+        sub->group(group);
+        sub->add_option("dual", opts->dual, "true|false")->required();
+        sub->callback([&sel, opts] {
+            sel.factory = [opts](binapi2::futures_usdm_api& c) -> boost::cobalt::task<int> {
+                types::change_position_mode_request_t req;
+                req.dualSidePosition = opts->dual;
+                co_return co_await exec_trade(c, req);
+            };
+        });
+    }
+
+    {
+        struct opts_t { std::string multi; };
+        auto opts = std::make_shared<opts_t>();
+        auto* sub = app.add_subcommand("change-multi-assets-mode", "Change multi-assets mode <true|false>");
+        sub->group(group);
+        sub->add_option("multi", opts->multi, "true|false")->required();
+        sub->callback([&sel, opts] {
+            sel.factory = [opts](binapi2::futures_usdm_api& c) -> boost::cobalt::task<int> {
+                types::change_multi_assets_mode_request_t req;
+                req.multiAssetsMargin = opts->multi;
+                co_return co_await exec_trade(c, req);
+            };
+        });
+    }
+
+    {
+        struct opts_t { std::string symbol; int leverage = 0; };
+        auto opts = std::make_shared<opts_t>();
+        auto* sub = app.add_subcommand("change-leverage", "Change leverage <symbol> <leverage>");
+        sub->group(group);
+        sub->add_option("symbol",   opts->symbol,   "Trading symbol")->required();
+        sub->add_option("leverage", opts->leverage, "Leverage (integer)")->required();
+        sub->callback([&sel, opts] {
+            sel.factory = [opts](binapi2::futures_usdm_api& c) -> boost::cobalt::task<int> {
+                types::change_leverage_request_t req;
+                req.symbol = opts->symbol;
+                req.leverage = opts->leverage;
+                co_return co_await exec_trade(c, req);
+            };
+        });
+    }
+
+    {
+        struct opts_t { std::string symbol, type; };
+        auto opts = std::make_shared<opts_t>();
+        auto* sub = app.add_subcommand("change-margin-type", "Change margin type <symbol> <ISOLATED|CROSSED>");
+        sub->group(group);
+        sub->add_option("symbol", opts->symbol, "Trading symbol")->required();
+        sub->add_option("type",   opts->type,   "ISOLATED|CROSSED")->required();
+        sub->callback([&sel, opts] {
+            sel.factory = [opts](binapi2::futures_usdm_api& c) -> boost::cobalt::task<int> {
+                types::change_margin_type_request_t req;
+                req.symbol = opts->symbol;
+                req.marginType = opts->type;
+                co_return co_await exec_trade(c, req);
+            };
+        });
+    }
+
+    {
+        struct opts_t { std::string symbol, amount; int type = 0; };
+        auto opts = std::make_shared<opts_t>();
+        auto* sub = app.add_subcommand("modify-isolated-margin", "Modify isolated margin <sym> <amount> <1|2>");
+        sub->group(group);
+        sub->add_option("symbol", opts->symbol, "Trading symbol")->required();
+        sub->add_option("amount", opts->amount, "Amount")->required();
+        sub->add_option("type",   opts->type,   "1=add, 2=reduce")
+            ->required()->check(CLI::IsMember({ 1, 2 }));
+        sub->callback([&sel, opts] {
+            sel.factory = [opts](binapi2::futures_usdm_api& c) -> boost::cobalt::task<int> {
+                types::modify_isolated_margin_request_t req;
+                req.symbol = opts->symbol;
+                req.amount = types::decimal_t(opts->amount);
+                req.type = static_cast<types::delta_type_t>(opts->type);
+                co_return co_await exec_trade(c, req);
+            };
+        });
+    }
+
+    add_symbol_limit<types::position_margin_history_request_t>(app, "position-margin-history", "Position margin history", sel)->group(group);
+
+    // order-modify-history: <symbol> [--order-id N]
+    {
+        struct opts_t { std::string symbol; std::optional<std::uint64_t> order_id; };
+        auto opts = std::make_shared<opts_t>();
+        auto* sub = app.add_subcommand("order-modify-history", "Order modify history <symbol> [--order-id N]");
+        sub->group(group);
+        sub->add_option("symbol",        opts->symbol,   "Trading symbol")->required();
+        sub->add_option("-o,--order-id", opts->order_id, "Order ID (optional)");
+        sub->callback([&sel, opts] {
+            sel.factory = [opts](binapi2::futures_usdm_api& c) -> boost::cobalt::task<int> {
+                types::order_modify_history_request_t req;
+                req.symbol = opts->symbol;
+                req.orderId = opts->order_id;
+                co_return co_await exec_trade(c, req);
+            };
+        });
+    }
+
+    // ── algo orders ───────────────────────────────────────────────────
+
+    {
+        struct opts_t { std::string symbol, side, type, algo, quantity, price; };
+        auto opts = std::make_shared<opts_t>();
+        auto* sub = app.add_subcommand("new-algo-order", "Place algo order <sym> <side> <type> <algo> -q Q [-p P]");
+        sub->group(group);
+        sub->add_option("symbol", opts->symbol, "Trading symbol")->required();
+        sub->add_option("side",   opts->side,   "Side (BUY|SELL)")->required();
+        sub->add_option("type",   opts->type,   "Order type")->required();
+        sub->add_option("algo",   opts->algo,   "Algo type")->required();
+        sub->add_option("-q,--quantity", opts->quantity, "Quantity")->required();
+        sub->add_option("-p,--price",    opts->price,    "Price (optional)");
+        sub->callback([&sel, opts] {
+            sel.factory = [opts](binapi2::futures_usdm_api& c) -> boost::cobalt::task<int> {
+                types::new_algo_order_request_t req;
+                req.symbol = opts->symbol;
+                req.side = parse_enum<types::order_side_t>(opts->side);
+                req.type = parse_enum<types::order_type_t>(opts->type);
+                req.algoType = parse_enum<types::algo_type_t>(opts->algo);
+                req.quantity = types::decimal_t(opts->quantity);
+                if (!opts->price.empty()) req.price = types::decimal_t(opts->price);
+                co_return co_await exec_trade(c, req);
+            };
+        });
+    }
+
+    {
+        struct opts_t { std::uint64_t algo_id = 0; };
+        auto opts = std::make_shared<opts_t>();
+        auto* sub = app.add_subcommand("cancel-algo-order", "Cancel algo order <algoId>");
+        sub->group(group);
+        sub->add_option("algoId", opts->algo_id, "Algo ID")->required();
+        sub->callback([&sel, opts] {
+            sel.factory = [opts](binapi2::futures_usdm_api& c) -> boost::cobalt::task<int> {
+                types::cancel_algo_order_request_t req;
+                req.algoId = opts->algo_id;
+                co_return co_await exec_trade(c, req);
+            };
+        });
+    }
+
+    {
+        struct opts_t { std::uint64_t algo_id = 0; };
+        auto opts = std::make_shared<opts_t>();
+        auto* sub = app.add_subcommand("query-algo-order", "Query algo order <algoId>");
+        sub->group(group);
+        sub->add_option("algoId", opts->algo_id, "Algo ID")->required();
+        sub->callback([&sel, opts] {
+            sel.factory = [opts](binapi2::futures_usdm_api& c) -> boost::cobalt::task<int> {
+                types::query_algo_order_request_t req;
+                req.algoId = opts->algo_id;
+                co_return co_await exec_trade(c, req);
+            };
+        });
+    }
+
+    add_symbol_limit<types::all_algo_orders_request_t>    (app, "all-algo-orders",    "All algo orders", sel)->group(group);
+    add_noarg       <types::open_algo_orders_request_t>   (app, "open-algo-orders",   "Open algo orders", sel)->group(group);
+    add_noarg       <types::cancel_all_algo_orders_request_t>(app,"cancel-all-algo-orders","Cancel all algo orders", sel)->group(group);
+    add_noarg       <types::tradfi_perps_request_t>       (app, "tradfi-perps",       "TradFi perps", sel)->group(group);
 }
 
 } // namespace demo

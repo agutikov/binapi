@@ -12,318 +12,258 @@ namespace demo {
 
 namespace types = binapi2::fapi::types;
 
-// ---------------------------------------------------------------------------
-// Existing commands (refactored to use helpers where straightforward)
-// ---------------------------------------------------------------------------
+namespace {
 
-boost::cobalt::task<int> cmd_ping(binapi2::futures_usdm_api& c, const args_t& /*args*/)
+// ── local helpers ─────────────────────────────────────────────────────
+
+struct symbol_opts        { std::string symbol; };
+struct symbol_limit_opts  { std::string symbol; std::optional<int> limit; };
+
+/// Zero-argument market-data subcommand.
+template<typename Request>
+CLI::App* add_noarg(CLI::App& parent, const char* name, const char* desc, selected_cmd& sel)
 {
-    auto rest = co_await c.create_rest_client();
-    if (!rest) { spdlog::error("connect: {}", rest.err.message); co_return 1; }
-    auto r = co_await (*rest)->market_data.async_execute(types::ping_request_t{});
-    if (!r) { print_error(r.err); co_return 1; }
-
-    spdlog::info("pong");
-    if (verbosity >= 1) print_json(*r);
-    co_return 0;
+    auto* sub = parent.add_subcommand(name, desc);
+    sub->callback([&sel] {
+        sel.factory = [](binapi2::futures_usdm_api& c) -> boost::cobalt::task<int> {
+            co_return co_await exec_market_data(c, Request{});
+        };
+    });
+    return sub;
 }
 
-boost::cobalt::task<int> cmd_time(binapi2::futures_usdm_api& c, const args_t& /*args*/)
+/// `<symbol>` market-data subcommand (symbol required).
+template<typename Request>
+CLI::App* add_symbol(CLI::App& parent, const char* name, const char* desc, selected_cmd& sel)
 {
-    auto rest = co_await c.create_rest_client();
-    if (!rest) { spdlog::error("connect: {}", rest.err.message); co_return 1; }
-    auto r = co_await (*rest)->market_data.async_execute(types::server_time_request_t{});
-    if (!r) { print_error(r.err); co_return 1; }
-
-    spdlog::info("server time: {}", r->serverTime);
-    if (verbosity >= 1) print_json(*r);
-    co_return 0;
+    auto opts = std::make_shared<symbol_opts>();
+    auto* sub = parent.add_subcommand(name, desc);
+    sub->add_option("symbol", opts->symbol, "Trading symbol")->required();
+    sub->callback([&sel, opts] {
+        sel.factory = [opts](binapi2::futures_usdm_api& c) -> boost::cobalt::task<int> {
+            Request req;
+            req.symbol = opts->symbol;
+            co_return co_await exec_market_data(c, req);
+        };
+    });
+    return sub;
 }
 
-boost::cobalt::task<int> cmd_exchange_info(binapi2::futures_usdm_api& c, const args_t& args)
+/// `[symbol]` market-data subcommand (symbol optional, positional).
+template<typename Request>
+CLI::App* add_optional_symbol(CLI::App& parent, const char* name, const char* desc, selected_cmd& sel)
 {
-    types::exchange_info_request_t req;
-    if (!args.empty()) req.symbol = args[0];
-    co_return co_await exec_market_data(c, req);
+    auto opts = std::make_shared<symbol_opts>();
+    auto* sub = parent.add_subcommand(name, desc);
+    sub->add_option("symbol", opts->symbol, "Trading symbol (optional)");
+    sub->callback([&sel, opts] {
+        sel.factory = [opts](binapi2::futures_usdm_api& c) -> boost::cobalt::task<int> {
+            Request req;
+            if (!opts->symbol.empty()) req.symbol = opts->symbol;
+            co_return co_await exec_market_data(c, req);
+        };
+    });
+    return sub;
 }
 
-boost::cobalt::task<int> cmd_order_book(binapi2::futures_usdm_api& c, const args_t& args)
+/// `<symbol> [--limit N]` market-data subcommand.
+template<typename Request>
+CLI::App* add_symbol_limit(CLI::App& parent, const char* name, const char* desc, selected_cmd& sel)
 {
-    if (args.empty()) { spdlog::error("usage: order-book <symbol> [limit]"); co_return 1; }
+    auto opts = std::make_shared<symbol_limit_opts>();
+    auto* sub = parent.add_subcommand(name, desc);
+    sub->add_option("symbol", opts->symbol, "Trading symbol")->required();
+    sub->add_option("-l,--limit", opts->limit, "Result limit");
+    sub->callback([&sel, opts] {
+        sel.factory = [opts](binapi2::futures_usdm_api& c) -> boost::cobalt::task<int> {
+            Request req;
+            req.symbol = opts->symbol;
+            req.limit = opts->limit;
+            co_return co_await exec_market_data(c, req);
+        };
+    });
+    return sub;
+}
 
-    auto rest = co_await c.create_rest_client();
-    if (!rest) { spdlog::error("connect: {}", rest.err.message); co_return 1; }
-    types::order_book_request_t req;
-    req.symbol = args[0];
-    if (args.size() > 1) req.limit = std::stoi(args[1]);
+} // namespace
 
-    auto r = co_await (*rest)->market_data.async_execute(req);
-    if (!r) { print_error(r.err); co_return 1; }
+void register_cmd_market_data(CLI::App& app, selected_cmd& sel)
+{
+    constexpr const char* group = "Market Data";
 
-    spdlog::info("order book: bids={} asks={} lastUpdateId={}",
-                 r->bids.size(), r->asks.size(), r->lastUpdateId);
+    // ── simple, custom-body commands ──────────────────────────────────
 
-    if (verbosity >= 1) {
-        print_json(*r);
-    } else {
-        int n = std::min(5, static_cast<int>(r->bids.size()));
-        for (int i = 0; i < n; ++i)
-            out("  bid {} x {}", r->bids[static_cast<std::size_t>(i)].price,
-                r->bids[static_cast<std::size_t>(i)].quantity);
-        n = std::min(5, static_cast<int>(r->asks.size()));
-        for (int i = 0; i < n; ++i)
-            out("  ask {} x {}", r->asks[static_cast<std::size_t>(i)].price,
-                r->asks[static_cast<std::size_t>(i)].quantity);
+    auto* ping = app.add_subcommand("ping", "Test API connectivity");
+    ping->group(group);
+    ping->callback([&sel] {
+        sel.factory = [](binapi2::futures_usdm_api& c) -> boost::cobalt::task<int> {
+            auto rest = co_await c.create_rest_client();
+            if (!rest) { spdlog::error("connect: {}", rest.err.message); co_return 1; }
+            auto r = co_await (*rest)->market_data.async_execute(types::ping_request_t{});
+            if (!r) { print_error(r.err); co_return 1; }
+            spdlog::info("pong");
+            if (verbosity >= 1) print_json(*r);
+            co_return 0;
+        };
+    });
+
+    auto* time_cmd = app.add_subcommand("time", "Get server time");
+    time_cmd->group(group);
+    time_cmd->callback([&sel] {
+        sel.factory = [](binapi2::futures_usdm_api& c) -> boost::cobalt::task<int> {
+            auto rest = co_await c.create_rest_client();
+            if (!rest) { spdlog::error("connect: {}", rest.err.message); co_return 1; }
+            auto r = co_await (*rest)->market_data.async_execute(types::server_time_request_t{});
+            if (!r) { print_error(r.err); co_return 1; }
+            spdlog::info("server time: {}", r->serverTime);
+            if (verbosity >= 1) print_json(*r);
+            co_return 0;
+        };
+    });
+
+    // order-book has a custom short-form summary when -v is off.
+    {
+        struct opts_t { std::string symbol; std::optional<int> limit; };
+        auto opts = std::make_shared<opts_t>();
+        auto* sub = app.add_subcommand("order-book", "Order book <symbol> [--limit L]");
+        sub->group(group);
+        sub->add_option("symbol", opts->symbol, "Trading symbol")->required();
+        sub->add_option("-l,--limit", opts->limit, "Depth limit");
+        sub->callback([&sel, opts] {
+            sel.factory = [opts](binapi2::futures_usdm_api& c) -> boost::cobalt::task<int> {
+                types::order_book_request_t req;
+                req.symbol = opts->symbol;
+                req.limit = opts->limit;
+
+                auto rest = co_await c.create_rest_client();
+                if (!rest) { spdlog::error("connect: {}", rest.err.message); co_return 1; }
+                auto r = co_await (*rest)->market_data.async_execute(req);
+                if (!r) { print_error(r.err); co_return 1; }
+
+                spdlog::info("order book: bids={} asks={} lastUpdateId={}",
+                             r->bids.size(), r->asks.size(), r->lastUpdateId);
+                if (verbosity >= 1) {
+                    print_json(*r);
+                } else {
+                    int n = std::min(5, static_cast<int>(r->bids.size()));
+                    for (int i = 0; i < n; ++i)
+                        out("  bid {} x {}", r->bids[static_cast<std::size_t>(i)].price,
+                            r->bids[static_cast<std::size_t>(i)].quantity);
+                    n = std::min(5, static_cast<int>(r->asks.size()));
+                    for (int i = 0; i < n; ++i)
+                        out("  ask {} x {}", r->asks[static_cast<std::size_t>(i)].price,
+                            r->asks[static_cast<std::size_t>(i)].quantity);
+                }
+                co_return 0;
+            };
+        });
     }
-    co_return 0;
-}
 
-boost::cobalt::task<int> cmd_recent_trades(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    if (args.empty()) { spdlog::error("usage: recent-trades <symbol> [limit]"); co_return 1; }
-    types::recent_trades_request_t req;
-    req.symbol = args[0];
-    if (args.size() > 1) req.limit = std::stoi(args[1]);
-    co_return co_await exec_market_data(c, req);
-}
+    // ── symbol + optional limit ───────────────────────────────────────
 
-boost::cobalt::task<int> cmd_book_ticker(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    if (args.empty()) { spdlog::error("usage: book-ticker <symbol>"); co_return 1; }
-    types::book_ticker_request_t req;
-    req.symbol = args[0];
-    co_return co_await exec_market_data(c, req);
-}
+    add_symbol_limit<types::recent_trades_request_t>    (app, "recent-trades",     "Recent trades", sel)->group(group);
+    add_symbol_limit<types::aggregate_trades_request_t> (app, "aggregate-trades",  "Aggregate trades", sel)->group(group);
+    add_symbol_limit<types::historical_trades_request_t>(app, "historical-trades", "Historical trades", sel)->group(group);
+    add_symbol_limit<types::funding_rate_history_request_t>(app, "funding-rate",   "Funding rate history", sel)->group(group);
+    add_symbol_limit<types::rpi_depth_request_t>        (app, "rpi-depth",         "RPI depth", sel)->group(group);
 
-boost::cobalt::task<int> cmd_book_tickers(binapi2::futures_usdm_api& c, const args_t& /*args*/)
-{
-    co_return co_await exec_market_data(c, types::book_tickers_request_t{});
-}
+    // ── symbol only ───────────────────────────────────────────────────
 
-boost::cobalt::task<int> cmd_price_ticker(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    if (args.empty()) { spdlog::error("usage: price-ticker <symbol>"); co_return 1; }
-    types::price_ticker_request_t req;
-    req.symbol = args[0];
-    co_return co_await exec_market_data(c, req);
-}
+    add_symbol<types::book_ticker_request_t>       (app, "book-ticker",        "Book ticker", sel)->group(group);
+    add_symbol<types::price_ticker_request_t>      (app, "price-ticker",       "Price ticker", sel)->group(group);
+    add_symbol<types::price_ticker_v2_request_t>   (app, "price-ticker-v2",    "Price ticker v2", sel)->group(group);
+    add_symbol<types::ticker_24hr_request_t>       (app, "ticker-24hr",        "24hr ticker", sel)->group(group);
+    add_symbol<types::mark_price_request_t>        (app, "mark-price",         "Mark price", sel)->group(group);
+    add_symbol<types::open_interest_request_t>     (app, "open-interest",      "Open interest", sel)->group(group);
+    add_symbol<types::index_constituents_request_t>(app, "index-constituents", "Index constituents", sel)->group(group);
 
-boost::cobalt::task<int> cmd_price_tickers(binapi2::futures_usdm_api& c, const args_t& /*args*/)
-{
-    co_return co_await exec_market_data(c, types::price_tickers_request_t{});
-}
+    // ── zero-arg aggregates ───────────────────────────────────────────
 
-boost::cobalt::task<int> cmd_ticker_24hr(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    if (args.empty()) { spdlog::error("usage: ticker-24hr <symbol>"); co_return 1; }
-    types::ticker_24hr_request_t req;
-    req.symbol = args[0];
-    co_return co_await exec_market_data(c, req);
-}
+    add_noarg<types::book_tickers_request_t>     (app, "book-tickers",       "All book tickers", sel)->group(group);
+    add_noarg<types::price_tickers_request_t>    (app, "price-tickers",      "All price tickers", sel)->group(group);
+    add_noarg<types::price_tickers_v2_request_t> (app, "price-tickers-v2",   "All price tickers v2", sel)->group(group);
+    add_noarg<types::ticker_24hrs_request_t>     (app, "ticker-24hrs",       "All 24hr tickers", sel)->group(group);
+    add_noarg<types::mark_prices_request_t>      (app, "mark-prices",        "All mark prices", sel)->group(group);
+    add_noarg<types::funding_rate_info_request_t>(app, "funding-rate-info",  "Funding rate info (all)", sel)->group(group);
+    add_noarg<types::trading_schedule_request_t> (app, "trading-schedule",   "Trading schedule", sel)->group(group);
 
-boost::cobalt::task<int> cmd_mark_price(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    if (args.empty()) { spdlog::error("usage: mark-price <symbol>"); co_return 1; }
-    types::mark_price_request_t req;
-    req.symbol = args[0];
-    co_return co_await exec_market_data(c, req);
-}
+    // ── klines family ─────────────────────────────────────────────────
 
-boost::cobalt::task<int> cmd_mark_prices(binapi2::futures_usdm_api& c, const args_t& /*args*/)
-{
-    co_return co_await exec_market_data(c, types::mark_prices_request_t{});
-}
+    add_kline_sub     <types::klines_request_t>             (app, "klines",               "Klines", sel)->group(group);
+    add_pair_kline_sub<types::continuous_kline_request_t>   (app, "continuous-kline",     "Continuous kline", sel)->group(group);
+    add_pair_kline_sub<types::index_price_kline_request_t>  (app, "index-price-kline",    "Index price kline", sel)->group(group);
+    add_kline_sub     <types::mark_price_klines_request_t>  (app, "mark-price-klines",    "Mark price klines", sel)->group(group);
+    add_kline_sub     <types::premium_index_klines_request_t>(app, "premium-index-klines","Premium index klines", sel)->group(group);
 
-boost::cobalt::task<int> cmd_klines(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    co_return co_await cmd_kline<types::klines_request_t>(c, args, "klines <symbol> <interval> [limit]");
-}
+    // ── futures analytics family ──────────────────────────────────────
 
-boost::cobalt::task<int> cmd_funding_rate(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    if (args.empty()) { spdlog::error("usage: funding-rate <symbol> [limit]"); co_return 1; }
-    types::funding_rate_history_request_t req;
-    req.symbol = args[0];
-    if (args.size() > 1) req.limit = std::stoi(args[1]);
-    co_return co_await exec_market_data(c, req);
-}
+    add_analytics_sub<types::open_interest_statistics_request_t>   (app, "open-interest-stats",  "Open interest stats", sel)->group(group);
+    add_analytics_sub<types::top_long_short_account_ratio_request_t>(app,"top-ls-account-ratio", "Top L/S account ratio", sel)->group(group);
+    add_analytics_sub<types::top_trader_long_short_ratio_request_t>(app, "top-ls-trader-ratio",  "Top L/S trader ratio", sel)->group(group);
+    add_analytics_sub<types::long_short_ratio_request_t>           (app, "long-short-ratio",    "Global L/S ratio", sel)->group(group);
+    add_analytics_sub<types::taker_buy_sell_volume_request_t>      (app, "taker-volume",        "Taker buy/sell volume", sel)->group(group);
 
-boost::cobalt::task<int> cmd_open_interest(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    if (args.empty()) { spdlog::error("usage: open-interest <symbol>"); co_return 1; }
-    types::open_interest_request_t req;
-    req.symbol = args[0];
-    co_return co_await exec_market_data(c, req);
-}
-
-// ---------------------------------------------------------------------------
-// New market data commands
-// ---------------------------------------------------------------------------
-
-boost::cobalt::task<int> cmd_aggregate_trades(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    if (args.empty()) { spdlog::error("usage: aggregate-trades <symbol> [limit]"); co_return 1; }
-    types::aggregate_trades_request_t req;
-    req.symbol = args[0];
-    if (args.size() > 1) req.limit = std::stoi(args[1]);
-    co_return co_await exec_market_data(c, req);
-}
-
-boost::cobalt::task<int> cmd_historical_trades(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    if (args.empty()) { spdlog::error("usage: historical-trades <symbol> [limit]"); co_return 1; }
-    types::historical_trades_request_t req;
-    req.symbol = args[0];
-    if (args.size() > 1) req.limit = std::stoi(args[1]);
-    co_return co_await exec_market_data(c, req);
-}
-
-boost::cobalt::task<int> cmd_continuous_kline(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    co_return co_await cmd_pair_kline<types::continuous_kline_request_t>(
-        c, args, "continuous-kline <pair> <interval> [limit]");
-}
-
-boost::cobalt::task<int> cmd_index_price_kline(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    co_return co_await cmd_pair_kline<types::index_price_kline_request_t>(
-        c, args, "index-price-kline <pair> <interval> [limit]");
-}
-
-boost::cobalt::task<int> cmd_mark_price_klines(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    co_return co_await cmd_kline<types::mark_price_klines_request_t>(
-        c, args, "mark-price-klines <symbol> <interval> [limit]");
-}
-
-boost::cobalt::task<int> cmd_premium_index_klines(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    co_return co_await cmd_kline<types::premium_index_klines_request_t>(
-        c, args, "premium-index-klines <symbol> <interval> [limit]");
-}
-
-boost::cobalt::task<int> cmd_price_ticker_v2(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    if (args.empty()) { spdlog::error("usage: price-ticker-v2 <symbol>"); co_return 1; }
-    types::price_ticker_v2_request_t req;
-    req.symbol = args[0];
-    co_return co_await exec_market_data(c, req);
-}
-
-boost::cobalt::task<int> cmd_price_tickers_v2(binapi2::futures_usdm_api& c, const args_t& /*args*/)
-{
-    co_return co_await exec_market_data(c, types::price_tickers_v2_request_t{});
-}
-
-boost::cobalt::task<int> cmd_ticker_24hrs(binapi2::futures_usdm_api& c, const args_t& /*args*/)
-{
-    co_return co_await exec_market_data(c, types::ticker_24hrs_request_t{});
-}
-
-boost::cobalt::task<int> cmd_funding_rate_info(binapi2::futures_usdm_api& c, const args_t& /*args*/)
-{
-    co_return co_await exec_market_data(c, types::funding_rate_info_request_t{});
-}
-
-boost::cobalt::task<int> cmd_open_interest_stats(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    co_return co_await cmd_futures_analytics<types::open_interest_statistics_request_t>(
-        c, args, "open-interest-stats <symbol> <period> [limit]");
-}
-
-boost::cobalt::task<int> cmd_top_ls_account_ratio(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    co_return co_await cmd_futures_analytics<types::top_long_short_account_ratio_request_t>(
-        c, args, "top-ls-account-ratio <symbol> <period> [limit]");
-}
-
-boost::cobalt::task<int> cmd_top_ls_trader_ratio(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    co_return co_await cmd_futures_analytics<types::top_trader_long_short_ratio_request_t>(
-        c, args, "top-ls-trader-ratio <symbol> <period> [limit]");
-}
-
-boost::cobalt::task<int> cmd_long_short_ratio(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    co_return co_await cmd_futures_analytics<types::long_short_ratio_request_t>(
-        c, args, "long-short-ratio <symbol> <period> [limit]");
-}
-
-boost::cobalt::task<int> cmd_taker_volume(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    co_return co_await cmd_futures_analytics<types::taker_buy_sell_volume_request_t>(
-        c, args, "taker-volume <symbol> <period> [limit]");
-}
-
-boost::cobalt::task<int> cmd_basis(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    if (args.size() < 2) { spdlog::error("usage: basis <pair> <period> [limit]"); co_return 1; }
-    types::basis_request_t req;
-    req.pair = args[0];
-    req.period = parse_enum<types::futures_data_period_t>(args[1]);
-    if (args.size() > 2) req.limit = std::stoi(args[2]);
-    co_return co_await exec_market_data(c, req);
-}
-
-boost::cobalt::task<int> cmd_delivery_price(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    if (args.empty()) { spdlog::error("usage: delivery-price <pair>"); co_return 1; }
-    types::delivery_price_request_t req;
-    req.pair = args[0];
-    co_return co_await exec_market_data(c, req);
-}
-
-boost::cobalt::task<int> cmd_composite_index_info(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    types::composite_index_info_request_t req;
-    if (!args.empty()) req.symbol = args[0];
-    co_return co_await exec_market_data(c, req);
-}
-
-boost::cobalt::task<int> cmd_index_constituents(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    if (args.empty()) { spdlog::error("usage: index-constituents <symbol>"); co_return 1; }
-    types::index_constituents_request_t req;
-    req.symbol = args[0];
-    co_return co_await exec_market_data(c, req);
-}
-
-boost::cobalt::task<int> cmd_asset_index(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    types::asset_index_request_t req;
-    if (!args.empty()) req.symbol = args[0];
-    co_return co_await exec_market_data(c, req);
-}
-
-boost::cobalt::task<int> cmd_insurance_fund(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    if (!args.empty()) {
-        types::insurance_fund_request_t req;
-        req.symbol = args[0];
-        co_return co_await exec_market_data(c, req);
+    // basis takes <pair> <period> [--limit N].
+    {
+        struct opts_t { std::string pair, period; std::optional<int> limit; };
+        auto opts = std::make_shared<opts_t>();
+        auto* sub = app.add_subcommand("basis", "Basis");
+        sub->group(group);
+        sub->add_option("pair",   opts->pair,   "Pair")->required();
+        sub->add_option("period", opts->period, "Period (5m,15m,…)")->required();
+        sub->add_option("-l,--limit", opts->limit, "Result limit");
+        sub->callback([&sel, opts] {
+            sel.factory = [opts](binapi2::futures_usdm_api& c) -> boost::cobalt::task<int> {
+                types::basis_request_t req;
+                req.pair = opts->pair;
+                req.period = parse_enum<types::futures_data_period_t>(opts->period);
+                req.limit = opts->limit;
+                co_return co_await exec_market_data(c, req);
+            };
+        });
     }
-    co_return co_await exec_market_data(c, types::insurance_funds_request_t{});
-}
 
-boost::cobalt::task<int> cmd_adl_risk(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    types::adl_risk_request_t req;
-    if (!args.empty()) req.symbol = args[0];
-    co_return co_await exec_market_data(c, req);
-}
+    // ── miscellaneous ─────────────────────────────────────────────────
 
-boost::cobalt::task<int> cmd_rpi_depth(binapi2::futures_usdm_api& c, const args_t& args)
-{
-    if (args.empty()) { spdlog::error("usage: rpi-depth <symbol> [limit]"); co_return 1; }
-    types::rpi_depth_request_t req;
-    req.symbol = args[0];
-    if (args.size() > 1) req.limit = std::stoi(args[1]);
-    co_return co_await exec_market_data(c, req);
-}
+    // delivery-price takes <pair>.
+    {
+        struct opts_t { std::string pair; };
+        auto opts = std::make_shared<opts_t>();
+        auto* sub = app.add_subcommand("delivery-price", "Delivery price");
+        sub->group(group);
+        sub->add_option("pair", opts->pair, "Pair")->required();
+        sub->callback([&sel, opts] {
+            sel.factory = [opts](binapi2::futures_usdm_api& c) -> boost::cobalt::task<int> {
+                types::delivery_price_request_t req;
+                req.pair = opts->pair;
+                co_return co_await exec_market_data(c, req);
+            };
+        });
+    }
 
-boost::cobalt::task<int> cmd_trading_schedule(binapi2::futures_usdm_api& c, const args_t& /*args*/)
-{
-    co_return co_await exec_market_data(c, types::trading_schedule_request_t{});
+    add_optional_symbol<types::exchange_info_request_t>       (app, "exchange-info",       "Exchange info [symbol]", sel)->group(group);
+    add_optional_symbol<types::composite_index_info_request_t>(app, "composite-index-info","Composite index info [symbol]", sel)->group(group);
+    add_optional_symbol<types::asset_index_request_t>         (app, "asset-index",         "Asset index [symbol]", sel)->group(group);
+    add_optional_symbol<types::adl_risk_request_t>            (app, "adl-risk",            "ADL risk [symbol]", sel)->group(group);
+
+    // insurance-fund: [symbol] — when omitted, call the plural endpoint.
+    {
+        struct opts_t { std::string symbol; };
+        auto opts = std::make_shared<opts_t>();
+        auto* sub = app.add_subcommand("insurance-fund", "Insurance fund [symbol]");
+        sub->group(group);
+        sub->add_option("symbol", opts->symbol, "Trading symbol (optional)");
+        sub->callback([&sel, opts] {
+            sel.factory = [opts](binapi2::futures_usdm_api& c) -> boost::cobalt::task<int> {
+                if (!opts->symbol.empty()) {
+                    types::insurance_fund_request_t req;
+                    req.symbol = opts->symbol;
+                    co_return co_await exec_market_data(c, req);
+                }
+                co_return co_await exec_market_data(c, types::insurance_funds_request_t{});
+            };
+        });
+    }
 }
 
 } // namespace demo

@@ -15,21 +15,6 @@ namespace demo {
 
 namespace types = binapi2::fapi::types;
 
-boost::cobalt::task<int> cmd_listen_key_start(binapi2::futures_usdm_api& c, const args_t& /*args*/)
-{
-    co_return co_await exec_user_data_streams(c, types::start_listen_key_request_t{});
-}
-
-boost::cobalt::task<int> cmd_listen_key_keepalive(binapi2::futures_usdm_api& c, const args_t& /*args*/)
-{
-    co_return co_await exec_user_data_streams(c, types::keepalive_listen_key_request_t{});
-}
-
-boost::cobalt::task<int> cmd_listen_key_close(binapi2::futures_usdm_api& c, const args_t& /*args*/)
-{
-    co_return co_await exec_user_data_streams(c, types::close_listen_key_request_t{});
-}
-
 namespace {
 
 template<class... Ts>
@@ -37,9 +22,7 @@ struct overloaded : Ts... { using Ts::operator()...; };
 template<class... Ts>
 overloaded(Ts...) -> overloaded<Ts...>;
 
-} // namespace
-
-boost::cobalt::task<int> cmd_user_stream(binapi2::futures_usdm_api& c, const args_t& /*args*/)
+boost::cobalt::task<int> run_user_stream(binapi2::futures_usdm_api& c)
 {
     auto rest = co_await c.create_rest_client();
     if (!rest) { spdlog::error("connect: {}", rest.err.message); co_return 1; }
@@ -104,6 +87,37 @@ boost::cobalt::task<int> cmd_user_stream(binapi2::futures_usdm_api& c, const arg
     user_stream->stop_keepalive();
     spdlog::info("user stream ended");
     co_return 0;
+}
+
+template<typename Request>
+CLI::App* add_listen_key(CLI::App& parent, const char* name, const char* desc, selected_cmd& sel)
+{
+    auto* sub = parent.add_subcommand(name, desc);
+    sub->callback([&sel] {
+        sel.factory = [](binapi2::futures_usdm_api& c) -> boost::cobalt::task<int> {
+            co_return co_await exec_user_data_streams(c, Request{});
+        };
+    });
+    return sub;
+}
+
+} // namespace
+
+void register_cmd_user_stream(CLI::App& app, selected_cmd& sel)
+{
+    constexpr const char* group = "User Data Streams";
+
+    add_listen_key<types::start_listen_key_request_t>    (app, "listen-key-start",     "Start listen key (auth)",      sel)->group(group);
+    add_listen_key<types::keepalive_listen_key_request_t>(app, "listen-key-keepalive", "Keepalive listen key (auth)",  sel)->group(group);
+    add_listen_key<types::close_listen_key_request_t>    (app, "listen-key-close",     "Close listen key (auth)",      sel)->group(group);
+
+    auto* us = app.add_subcommand("user-stream", "User data stream demo (auth)");
+    us->group(group);
+    us->callback([&sel] {
+        sel.factory = [](binapi2::futures_usdm_api& c) -> boost::cobalt::task<int> {
+            co_return co_await run_user_stream(c);
+        };
+    });
 }
 
 } // namespace demo

@@ -6,6 +6,7 @@
 
 namespace demo {
 
-boost::cobalt::task<int> cmd_order_book_live(binapi2::futures_usdm_api& c, const args_t& args);
+/// Register Order Book subcommands on `app`.
+void register_cmd_order_book(CLI::App& app, selected_cmd& sel);
 
 } // namespace demo

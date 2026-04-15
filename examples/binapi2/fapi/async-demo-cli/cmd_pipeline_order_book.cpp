@@ -18,55 +18,66 @@ namespace demo {
 
 namespace types = binapi2::fapi::types;
 
-boost::cobalt::task<int> cmd_pipeline_order_book_live(binapi2::futures_usdm_api& c, const args_t& args)
+void register_cmd_pipeline_order_book(CLI::App& app, selected_cmd& sel)
 {
-    if (args.empty()) { spdlog::error("usage: pipeline-order-book-live <symbol> [depth]"); co_return 1; }
+    constexpr const char* group = "Order Book";
 
-    auto rest = co_await c.create_rest_client();
-    if (!rest) { spdlog::error("connect: {}", rest.err.message); co_return 1; }
-    const std::string symbol = args[0];
-    const int depth = (args.size() > 1) ? std::stoi(args[1]) : 1000;
-    constexpr int display_levels = 10;
-    constexpr std::size_t buffer_size = 4096;
+    struct opts_t { std::string symbol; int depth = 1000; };
+    auto opts = std::make_shared<opts_t>();
+    auto* sub = app.add_subcommand("pipeline-order-book-live",
+                                   "Pipeline order book (3 threads) <symbol> [--depth D]");
+    sub->group(group);
+    sub->add_option("symbol", opts->symbol, "Trading symbol")->required();
+    sub->add_option("-d,--depth", opts->depth, "Snapshot depth")->capture_default_str();
+    sub->callback([&sel, opts] {
+        sel.factory = [opts](binapi2::futures_usdm_api& c) -> boost::cobalt::task<int> {
+            constexpr std::size_t buffer_size = 4096;
 
-    binapi2::fapi::order_book::pipeline_order_book book(
-        c.configuration(), (*rest)->market_data, buffer_size);
-    // Note: the pipeline order book runs across multiple threads and needs a
-    // cross-thread buffer, so it can't reuse the demo CLI's async (single-
-    // executor) record_buffer. Recording for this command is not wired up.
+            auto rest = co_await c.create_rest_client();
+            if (!rest) { spdlog::error("connect: {}", rest.err.message); co_return 1; }
 
-    spdlog::info("starting pipeline order book for {} depth={} (3 threads)", symbol, depth);
+            binapi2::fapi::order_book::pipeline_order_book book(
+                c.configuration(), (*rest)->market_data, buffer_size);
+            // Note: the pipeline order book runs across multiple threads and needs
+            // a cross-thread buffer, so it can't reuse the demo CLI's async
+            // (single-executor) record_buffer. Recording is not wired up here.
 
-    book.set_snapshot_callback([&](const binapi2::fapi::order_book::order_book_snapshot& snap) {
-        spdlog::trace("pipeline order book update: id={} bids={} asks={}",
-                      snap.last_update_id, snap.bids.size(), snap.asks.size());
+            spdlog::info("starting pipeline order book for {} depth={} (3 threads)",
+                         opts->symbol, opts->depth);
 
-        out("\033[2J\033[H");
-        out("=== {} Pipeline Order Book (update {}) ===\n", symbol, snap.last_update_id);
+            book.set_snapshot_callback([opts](const binapi2::fapi::order_book::order_book_snapshot& snap) {
+                constexpr int display_levels = 10;
+                spdlog::trace("pipeline order book update: id={} bids={} asks={}",
+                              snap.last_update_id, snap.bids.size(), snap.asks.size());
 
-        out("  ASKS (best {})", display_levels);
-        std::vector<std::pair<types::decimal_t, types::decimal_t>> top_asks;
-        {
-            auto it = snap.asks.begin();
-            for (int i = 0; i < display_levels && it != snap.asks.end(); ++i, ++it)
-                top_asks.emplace_back(it->first, it->second);
-        }
-        for (auto it = top_asks.rbegin(); it != top_asks.rend(); ++it)
-            out("    {:>16}  {}", it->first, it->second);
+                out("\033[2J\033[H");
+                out("=== {} Pipeline Order Book (update {}) ===\n", opts->symbol, snap.last_update_id);
 
-        out("  --------------------");
+                out("  ASKS (best {})", display_levels);
+                std::vector<std::pair<types::decimal_t, types::decimal_t>> top_asks;
+                {
+                    auto it = snap.asks.begin();
+                    for (int i = 0; i < display_levels && it != snap.asks.end(); ++i, ++it)
+                        top_asks.emplace_back(it->first, it->second);
+                }
+                for (auto it = top_asks.rbegin(); it != top_asks.rend(); ++it)
+                    out("    {:>16}  {}", it->first, it->second);
 
-        out("  BIDS (best {})", display_levels);
-        {
-            auto it = snap.bids.begin();
-            for (int i = 0; i < display_levels && it != snap.bids.end(); ++i, ++it)
-                out("    {:>16}  {}", it->first, it->second);
-        }
+                out("  --------------------");
+
+                out("  BIDS (best {})", display_levels);
+                {
+                    auto it = snap.bids.begin();
+                    for (int i = 0; i < display_levels && it != snap.bids.end(); ++i, ++it)
+                        out("    {:>16}  {}", it->first, it->second);
+                }
+            });
+
+            auto r = co_await book.async_run(types::symbol_t{ opts->symbol }, opts->depth);
+            if (!r) { print_error(r.err); co_return 1; }
+            co_return 0;
+        };
     });
-
-    auto r = co_await book.async_run(types::symbol_t{symbol}, depth);
-    if (!r) { print_error(r.err); co_return 1; }
-    co_return 0;
 }
 
 } // namespace demo

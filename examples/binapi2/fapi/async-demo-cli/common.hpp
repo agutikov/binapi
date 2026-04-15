@@ -9,25 +9,25 @@
 #include <binapi2/fapi/error.hpp>
 #include <binapi2/fapi/result.hpp>
 #include <binapi2/fapi/types/enums.hpp>
+#include <binapi2/fapi/types/detail/decimal.hpp>
 
 #include <boost/cobalt/task.hpp>
 
+#include <CLI/CLI.hpp>
 #include <glaze/glaze.hpp>
 #include <spdlog/spdlog.h>
 
 #include <algorithm>
-#include <iostream>
+#include <functional>
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <string_view>
 #include <vector>
 
-namespace binapi2::fapi { class client; }
 namespace binapi2::fapi::detail { template<typename T> class stream_buffer; }
 
 namespace demo {
-
-using args_t = std::vector<std::string>;
 
 // Verbosity: 0 = summary only, 1 = print JSON, 2 = print JSON + HTTP details.
 inline int verbosity = 0;
@@ -52,8 +52,20 @@ inline std::string log_file;
 inline std::string file_loglevel;
 inline std::string stdout_loglevel;
 
-// Command function pointer type: async, takes client& and args.
-using command_fn = boost::cobalt::task<int> (*)(binapi2::futures_usdm_api&, const args_t&);
+// ---------------------------------------------------------------------------
+// Selected-command machinery
+// ---------------------------------------------------------------------------
+//
+// CLI11 parses the command line once at the top level; each subcommand's
+// callback stashes a `factory` here — a coroutine that runs the command body
+// once we have a connected futures_usdm_api client. `co_main` then awaits it.
+
+using cmd_fn = std::function<boost::cobalt::task<int>(binapi2::futures_usdm_api&)>;
+
+struct selected_cmd
+{
+    cmd_fn factory;
+};
 
 // Initialize async spdlog (call once from main).
 void init_logging();
@@ -132,9 +144,6 @@ E parse_enum(std::string_view s)
 
     throw std::invalid_argument("unknown " + std::string(typeid(E).name()) + ": " + std::string(s));
 }
-
-// Find a --key (or -k short) value pair in args, return value or empty.
-std::string_view find_flag(const args_t& args, std::string_view key, std::string_view short_key);
 
 // Load API credentials from the configured secret source into cfg.
 // Uses libsecret by default, falls back to env vars if --secrets env.
@@ -242,69 +251,150 @@ boost::cobalt::task<int> exec_stream(binapi2::futures_usdm_api& c, Subscription 
 }
 
 // ---------------------------------------------------------------------------
-// Argument-shape helpers for command families
+// Subcommand registration helpers
 // ---------------------------------------------------------------------------
+//
+// Each helper adds a subcommand with options and a callback.  The callback
+// captures option values into a factory (cmd_fn) stashed in `selected_cmd`,
+// which `co_main` awaits after `CLI::App::parse` returns.
+//
+// The helpers below cover the five parameter shapes shared between multiple
+// market-data commands; other shapes are wired up inline in each cmd_*.cpp.
 
-/// Kline command: parse <symbol> <interval> [limit], execute via market_data.
+namespace detail {
+
 template<typename Request>
-boost::cobalt::task<int> cmd_kline(binapi2::futures_usdm_api& c, const args_t& args,
-                                   std::string_view usage)
+struct kline_opts
 {
-    if (args.size() < 2) { spdlog::error("usage: {}", usage); co_return 1; }
-    Request req;
-    req.symbol = args[0];
-    req.interval = parse_enum<binapi2::fapi::types::kline_interval_t>(args[1]);
-    if (args.size() > 2) req.limit = std::stoi(args[2]);
-    co_return co_await exec_market_data(c, req);
+    std::string symbol;
+    std::string interval;
+    std::optional<int> limit;
+};
+
+template<typename Request>
+struct analytics_opts
+{
+    std::string symbol;
+    std::string period;
+    std::optional<int> limit;
+};
+
+struct download_id_opts
+{
+    std::uint64_t start_time = 0;
+    std::uint64_t end_time = 0;
+};
+
+struct download_link_opts
+{
+    std::string download_id;
+};
+
+} // namespace detail
+
+/// Add a `<symbol> <interval> [--limit N]` market-data subcommand.
+template<typename Request>
+inline CLI::App*
+add_kline_sub(CLI::App& parent, const char* name, const char* desc, selected_cmd& sel)
+{
+    auto opts = std::make_shared<detail::kline_opts<Request>>();
+    auto* sub = parent.add_subcommand(name, desc);
+    sub->add_option("symbol",   opts->symbol,   "Trading symbol")->required();
+    sub->add_option("interval", opts->interval, "Kline interval (1m,5m,1h,1d,…)")->required();
+    sub->add_option("-l,--limit", opts->limit,  "Number of bars");
+    sub->callback([&sel, opts] {
+        sel.factory = [opts](binapi2::futures_usdm_api& c) -> boost::cobalt::task<int> {
+            Request req;
+            req.symbol   = opts->symbol;
+            req.interval = parse_enum<binapi2::fapi::types::kline_interval_t>(opts->interval);
+            req.limit    = opts->limit;
+            co_return co_await exec_market_data(c, req);
+        };
+    });
+    return sub;
 }
 
-/// Pair-kline command: parse <pair> <interval> [limit], execute via market_data.
+/// Add a `<pair> <interval> [--limit N]` market-data subcommand.
 template<typename Request>
-boost::cobalt::task<int> cmd_pair_kline(binapi2::futures_usdm_api& c, const args_t& args,
-                                        std::string_view usage)
+inline CLI::App*
+add_pair_kline_sub(CLI::App& parent, const char* name, const char* desc, selected_cmd& sel)
 {
-    if (args.size() < 2) { spdlog::error("usage: {}", usage); co_return 1; }
-    Request req;
-    req.pair = args[0];
-    req.interval = parse_enum<binapi2::fapi::types::kline_interval_t>(args[1]);
-    if (args.size() > 2) req.limit = std::stoi(args[2]);
-    co_return co_await exec_market_data(c, req);
+    auto opts = std::make_shared<detail::kline_opts<Request>>();
+    auto* sub = parent.add_subcommand(name, desc);
+    sub->add_option("pair",     opts->symbol,   "Pair (e.g. BTCUSDT)")->required();
+    sub->add_option("interval", opts->interval, "Kline interval")->required();
+    sub->add_option("-l,--limit", opts->limit,  "Number of bars");
+    sub->callback([&sel, opts] {
+        sel.factory = [opts](binapi2::futures_usdm_api& c) -> boost::cobalt::task<int> {
+            Request req;
+            req.pair     = opts->symbol;
+            req.interval = parse_enum<binapi2::fapi::types::kline_interval_t>(opts->interval);
+            req.limit    = opts->limit;
+            co_return co_await exec_market_data(c, req);
+        };
+    });
+    return sub;
 }
 
-/// Futures analytics command: parse <symbol> <period> [limit], execute via market_data.
+/// Add a `<symbol> <period> [--limit N]` futures analytics subcommand.
 template<typename Request>
-boost::cobalt::task<int> cmd_futures_analytics(binapi2::futures_usdm_api& c, const args_t& args,
-                                               std::string_view usage)
+inline CLI::App*
+add_analytics_sub(CLI::App& parent, const char* name, const char* desc, selected_cmd& sel)
 {
-    if (args.size() < 2) { spdlog::error("usage: {}", usage); co_return 1; }
-    Request req;
-    req.symbol = args[0];
-    req.period = parse_enum<binapi2::fapi::types::kline_interval_t>(args[1]);
-    if (args.size() > 2) req.limit = std::stoi(args[2]);
-    co_return co_await exec_market_data(c, req);
+    auto opts = std::make_shared<detail::analytics_opts<Request>>();
+    auto* sub = parent.add_subcommand(name, desc);
+    sub->add_option("symbol", opts->symbol, "Trading symbol")->required();
+    sub->add_option("period", opts->period, "Period (5m,15m,30m,1h,…)")->required();
+    sub->add_option("-l,--limit", opts->limit, "Number of bars");
+    sub->callback([&sel, opts] {
+        sel.factory = [opts](binapi2::futures_usdm_api& c) -> boost::cobalt::task<int> {
+            Request req;
+            req.symbol = opts->symbol;
+            req.period = parse_enum<binapi2::fapi::types::kline_interval_t>(opts->period);
+            req.limit  = opts->limit;
+            co_return co_await exec_market_data(c, req);
+        };
+    });
+    return sub;
 }
 
-/// Download-id command: parse <startTime> <endTime> as epoch-ms, execute via account.
+/// Add a `<start> <end>` download-id subcommand (epoch-ms range), executed via account.
 template<typename Request>
-boost::cobalt::task<int> cmd_download_id(binapi2::futures_usdm_api& c, const args_t& args,
-                                         std::string_view usage)
+inline CLI::App*
+add_download_id_sub(CLI::App& parent, const char* name, const char* desc, selected_cmd& sel)
 {
-    if (args.size() < 2) { spdlog::error("usage: {}", usage); co_return 1; }
-    Request req;
-    req.startTime = binapi2::fapi::types::timestamp_ms_t{ std::stoull(args[0]) };
-    req.endTime = binapi2::fapi::types::timestamp_ms_t{ std::stoull(args[1]) };
-    co_return co_await exec_account(c, req);
+    auto opts = std::make_shared<detail::download_id_opts>();
+    auto* sub = parent.add_subcommand(name, desc);
+    sub->add_option("start", opts->start_time, "Start time (epoch-ms)")->required();
+    sub->add_option("end",   opts->end_time,   "End time (epoch-ms)")->required();
+    sub->callback([&sel, opts] {
+        sel.factory = [opts](binapi2::futures_usdm_api& c) -> boost::cobalt::task<int> {
+            Request req;
+            req.startTime = binapi2::fapi::types::timestamp_ms_t{ opts->start_time };
+            req.endTime   = binapi2::fapi::types::timestamp_ms_t{ opts->end_time };
+            co_return co_await exec_account(c, req);
+        };
+    });
+    return sub;
 }
 
-/// Download-link command: parse <downloadId>, execute via account.
+/// Add a `<downloadId>` download-link subcommand, executed via account.
 template<typename Request>
-boost::cobalt::task<int> cmd_download_link(binapi2::futures_usdm_api& c, const args_t& args,
-                                           std::string_view usage)
+inline CLI::App*
+add_download_link_sub(CLI::App& parent, const char* name, const char* desc, selected_cmd& sel)
 {
-    if (args.empty()) { spdlog::error("usage: {}", usage); co_return 1; }
-    Request req;
-    req.downloadId = args[0];
-    co_return co_await exec_account(c, req);
+    auto opts = std::make_shared<detail::download_link_opts>();
+    auto* sub = parent.add_subcommand(name, desc);
+    sub->add_option("downloadId", opts->download_id, "Download ID from a previous download-id call")
+        ->required();
+    sub->callback([&sel, opts] {
+        sel.factory = [opts](binapi2::futures_usdm_api& c) -> boost::cobalt::task<int> {
+            Request req;
+            req.downloadId = opts->download_id;
+            co_return co_await exec_account(c, req);
+        };
+    });
+    return sub;
 }
 
 } // namespace demo
