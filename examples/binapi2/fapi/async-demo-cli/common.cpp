@@ -154,17 +154,6 @@ binapi2::fapi::config make_config()
     return cfg;
 }
 
-void print_error(const binapi2::fapi::error& err)
-{
-    spdlog::error("{}", err.message);
-    if (err.http_status)
-        spdlog::error("  http_status: {}", err.http_status);
-    if (err.binance_code)
-        spdlog::error("  binance_code: {}", err.binance_code);
-    if (!err.payload.empty())
-        spdlog::debug("  payload: {}", err.payload);
-}
-
 boost::cobalt::task<void> async_load_secrets(binapi2::fapi::config& cfg)
 {
     // Default provider is libsecret with "demo" profile

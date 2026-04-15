@@ -17,4 +17,11 @@ add_executable(binapi2-fapi-async-demo-cli
     cmd_order_book.cpp
     cmd_pipeline_order_book.cpp
 )
-target_link_libraries(binapi2-fapi-async-demo-cli PRIVATE binapi2_fapi secret_provider spdlog::spdlog CLI11::CLI11)
+target_link_libraries(binapi2-fapi-async-demo-cli
+    PRIVATE
+        binapi2_fapi
+        binapi2_demo_commands
+        secret_provider
+        spdlog::spdlog
+        CLI11::CLI11
+)

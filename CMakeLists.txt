@@ -47,6 +47,7 @@ if(BINAPI2_WITH_TESTS)
 endif()
 
 add_subdirectory(libs/secret_provider)
+add_subdirectory(libs/binapi2_demo_commands)
 
 if(BINAPI2_WITH_TESTS)
     add_subdirectory(tests/binapi2/fapi)

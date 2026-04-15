@@ -17,6 +17,7 @@
 namespace demo {
 
 namespace types = binapi2::fapi::types;
+namespace lib   = binapi2::demo;
 
 void register_cmd_pipeline_order_book(CLI::App& app, selected_cmd& sel)
 {
@@ -30,11 +31,12 @@ void register_cmd_pipeline_order_book(CLI::App& app, selected_cmd& sel)
     sub->add_option("symbol", opts->symbol, "Trading symbol")->required();
     sub->add_option("-d,--depth", opts->depth, "Snapshot depth")->capture_default_str();
     sub->callback([&sel, opts] {
-        sel.factory = [opts](binapi2::futures_usdm_api& c) -> boost::cobalt::task<int> {
+        sel.factory = [opts](binapi2::futures_usdm_api& c,
+                             lib::result_sink& sink) -> boost::cobalt::task<int> {
             constexpr std::size_t buffer_size = 4096;
 
             auto rest = co_await c.create_rest_client();
-            if (!rest) { spdlog::error("connect: {}", rest.err.message); co_return 1; }
+            if (!rest) { sink.on_error(rest.err); sink.on_done(1); co_return 1; }
 
             binapi2::fapi::order_book::pipeline_order_book book(
                 c.configuration(), (*rest)->market_data, buffer_size);
@@ -42,8 +44,8 @@ void register_cmd_pipeline_order_book(CLI::App& app, selected_cmd& sel)
             // a cross-thread buffer, so it can't reuse the demo CLI's async
             // (single-executor) record_buffer. Recording is not wired up here.
 
-            spdlog::info("starting pipeline order book for {} depth={} (3 threads)",
-                         opts->symbol, opts->depth);
+            sink.on_info("starting pipeline order book for " + opts->symbol
+                         + " depth=" + std::to_string(opts->depth) + " (3 threads)");
 
             book.set_snapshot_callback([opts](const binapi2::fapi::order_book::order_book_snapshot& snap) {
                 constexpr int display_levels = 10;
@@ -74,7 +76,8 @@ void register_cmd_pipeline_order_book(CLI::App& app, selected_cmd& sel)
             });
 
             auto r = co_await book.async_run(types::symbol_t{ opts->symbol }, opts->depth);
-            if (!r) { print_error(r.err); co_return 1; }
+            if (!r) { sink.on_error(r.err); sink.on_done(1); co_return 1; }
+            sink.on_done(0);
             co_return 0;
         };
     });

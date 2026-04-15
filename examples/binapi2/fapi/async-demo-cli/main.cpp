@@ -128,7 +128,9 @@ boost::cobalt::main co_main(int argc, char* argv[])
         ioc.stop();
     });
 
-    int rc = co_await sel.factory(c);
+    // spdlog-backed sink — gated on verbosity to match the CLI's -v flag.
+    binapi2::demo::spdlog_sink sink(demo::verbosity);
+    int rc = co_await sel.factory(c, sink);
 
     signals.cancel();
     if (recorder) {
