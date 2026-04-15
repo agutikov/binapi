@@ -70,7 +70,7 @@ CLI::App* add_symbol_limit(CLI::App& parent, const char* name, const char* desc,
     auto opts = std::make_shared<lib::symbol_limit_opts>();
     auto* sub = parent.add_subcommand(name, desc);
     sub->add_option("symbol", opts->symbol, "Trading symbol")->required();
-    sub->add_option("-l,--limit", opts->limit, "Result limit");
+    sub->add_option("limit", opts->limit, "Result limit (optional)");
     sub->callback([&sel, opts] {
         sel.factory = [opts](binapi2::futures_usdm_api& c,
                              lib::result_sink& sink) -> boost::cobalt::task<int> {
@@ -249,7 +249,7 @@ void register_cmd_trade(CLI::App& app, selected_cmd& sel)
         auto* sub = app.add_subcommand("force-orders", "Force orders [symbol] [--limit L]");
         sub->group(group);
         sub->add_option("symbol", opts->symbol, "Trading symbol (optional)");
-        sub->add_option("-l,--limit", opts->limit, "Result limit");
+        sub->add_option("limit", opts->limit, "Result limit (optional)");
         sub->callback([&sel, opts] {
             sel.factory = [opts](binapi2::futures_usdm_api& c,
                                  lib::result_sink& sink) -> boost::cobalt::task<int> {
@@ -363,7 +363,7 @@ void register_cmd_trade(CLI::App& app, selected_cmd& sel)
         auto* sub = app.add_subcommand("order-modify-history", "Order modify history <symbol> [--order-id N]");
         sub->group(group);
         sub->add_option("symbol",        opts->symbol,   "Trading symbol")->required();
-        sub->add_option("-o,--order-id", opts->order_id, "Order ID (optional)");
+        sub->add_option("orderId",       opts->order_id, "Order ID (optional)");
         sub->callback([&sel, opts] {
             sel.factory = [opts](binapi2::futures_usdm_api& c,
                                  lib::result_sink& sink) -> boost::cobalt::task<int> {

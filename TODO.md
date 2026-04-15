@@ -1,13 +1,6 @@
 
 
 
-exit crash
-
-
-
-verify.sh
-
-
 
 
 

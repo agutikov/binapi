@@ -150,16 +150,18 @@ exec_stream_with_recorder(binapi2::futures_usdm_api& c,
 // `binapi2_demo_commands`. The callback stashes a factory in `selected_cmd`
 // that calls the shared request builder + executor.
 
-/// `<symbol> <interval> [--limit N]` — klines family.
+/// `<symbol> <interval> [limit]` — klines family. The limit is an
+/// optional positional (matching the demo scripts' usage:
+/// `klines BTCUSDT 1h 5`).
 template<typename Request>
 inline CLI::App*
 add_kline_sub(CLI::App& parent, const char* name, const char* desc, selected_cmd& sel)
 {
     auto opts = std::make_shared<binapi2::demo::kline_opts>();
     auto* sub = parent.add_subcommand(name, desc);
-    sub->add_option("symbol",     opts->symbol,   "Trading symbol")->required();
-    sub->add_option("interval",   opts->interval, "Kline interval (1m,5m,1h,1d,…)")->required();
-    sub->add_option("-l,--limit", opts->limit,    "Number of bars");
+    sub->add_option("symbol",   opts->symbol,   "Trading symbol")->required();
+    sub->add_option("interval", opts->interval, "Kline interval (1m,5m,1h,1d,…)")->required();
+    sub->add_option("limit",    opts->limit,    "Number of bars (optional)");
     sub->callback([&sel, opts] {
         sel.factory = [opts](binapi2::futures_usdm_api& c,
                              binapi2::demo::result_sink& sink)
@@ -171,16 +173,16 @@ add_kline_sub(CLI::App& parent, const char* name, const char* desc, selected_cmd
     return sub;
 }
 
-/// `<pair> <interval> [--limit N]` — pair kline family.
+/// `<pair> <interval> [limit]` — pair kline family.
 template<typename Request>
 inline CLI::App*
 add_pair_kline_sub(CLI::App& parent, const char* name, const char* desc, selected_cmd& sel)
 {
     auto opts = std::make_shared<binapi2::demo::pair_kline_opts>();
     auto* sub = parent.add_subcommand(name, desc);
-    sub->add_option("pair",       opts->pair,     "Pair (e.g. BTCUSDT)")->required();
-    sub->add_option("interval",   opts->interval, "Kline interval")->required();
-    sub->add_option("-l,--limit", opts->limit,    "Number of bars");
+    sub->add_option("pair",     opts->pair,     "Pair (e.g. BTCUSDT)")->required();
+    sub->add_option("interval", opts->interval, "Kline interval")->required();
+    sub->add_option("limit",    opts->limit,    "Number of bars (optional)");
     sub->callback([&sel, opts] {
         sel.factory = [opts](binapi2::futures_usdm_api& c,
                              binapi2::demo::result_sink& sink)
@@ -192,16 +194,16 @@ add_pair_kline_sub(CLI::App& parent, const char* name, const char* desc, selecte
     return sub;
 }
 
-/// `<symbol> <period> [--limit N]` — futures analytics family.
+/// `<symbol> <period> [limit]` — futures analytics family.
 template<typename Request>
 inline CLI::App*
 add_analytics_sub(CLI::App& parent, const char* name, const char* desc, selected_cmd& sel)
 {
     auto opts = std::make_shared<binapi2::demo::analytics_opts>();
     auto* sub = parent.add_subcommand(name, desc);
-    sub->add_option("symbol",     opts->symbol, "Trading symbol")->required();
-    sub->add_option("period",     opts->period, "Period (5m,15m,30m,1h,…)")->required();
-    sub->add_option("-l,--limit", opts->limit,  "Number of bars");
+    sub->add_option("symbol", opts->symbol, "Trading symbol")->required();
+    sub->add_option("period", opts->period, "Period (5m,15m,30m,1h,…)")->required();
+    sub->add_option("limit",  opts->limit,  "Number of bars (optional)");
     sub->callback([&sel, opts] {
         sel.factory = [opts](binapi2::futures_usdm_api& c,
                              binapi2::demo::result_sink& sink)

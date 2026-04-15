@@ -29,40 +29,40 @@ libsecret_provider::libsecret_provider(std::string service_name) :
 boost::cobalt::task<std::expected<std::string, std::string>>
 libsecret_provider::async_get_secret(std::string_view key)
 {
-    auto exec = co_await boost::cobalt::this_coro::executor;
+    // Note: we deliberately do **not** wrap the libsecret call in a
+    // `co_await boost::asio::post(exec, boost::cobalt::use_op)` "yield"
+    // here. That pattern, on cobalt 1.89, corrupts the asio executor's
+    // per-thread allocator pool — a hash table allocated by glib inside
+    // `secret_password_lookup_sync` ends up colliding with a slot that
+    // asio still considers cached, so the next executor function
+    // allocation writes through a stale pointer. Verified with valgrind:
+    //
+    //   "Invalid write of size 1" in `thread_info_base::allocate`,
+    //   freed-by stack: `g_hash_table_unref → secret_password_lookup_sync`.
+    //
+    // We're already on the cobalt executor thread when this coroutine
+    // runs, so the post-and-yield was redundant. Just call the blocking
+    // libsecret API directly.
 
-    std::string result;
-    std::string error;
     std::string key_str(key);
+    GError* gerror = nullptr;
+    gchar* password = secret_password_lookup_sync(
+        &schema, nullptr, &gerror,
+        "service", service_name_.c_str(),
+        "key", key_str.c_str(),
+        nullptr);
 
-    auto do_lookup = [&] {
-        GError* gerror = nullptr;
-        gchar* password = secret_password_lookup_sync(
-            &schema, nullptr, &gerror,
-            "service", service_name_.c_str(),
-            "key", key_str.c_str(),
-            nullptr);
-
-        if (gerror) {
-            error = gerror->message;
-            g_error_free(gerror);
-            return;
-        }
-        if (!password) {
-            error = "secret not found: " + key_str;
-            return;
-        }
-        result = password;
-        secret_password_free(password);
-    };
-
-    // Post blocking D-Bus call to the executor
-    co_await boost::asio::post(exec, boost::cobalt::use_op);
-    do_lookup();
-
-    if (!error.empty())
-        co_return std::unexpected(std::move(error));
-    co_return std::move(result);
+    if (gerror) {
+        std::string err = gerror->message;
+        g_error_free(gerror);
+        co_return std::unexpected(std::move(err));
+    }
+    if (!password) {
+        co_return std::unexpected("secret not found: " + key_str);
+    }
+    std::string result(password);
+    secret_password_free(password);
+    co_return result;
 }
 
 } // namespace secret_provider

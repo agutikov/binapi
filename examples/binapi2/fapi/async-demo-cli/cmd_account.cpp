@@ -110,7 +110,7 @@ void register_cmd_account(CLI::App& app, selected_cmd& sel)
         auto* sub = app.add_subcommand("income-history", "Income history [symbol] (auth)");
         sub->group(group);
         sub->add_option("symbol", opts->symbol, "Trading symbol (optional)");
-        sub->add_option("-l,--limit", opts->limit, "Result limit");
+        sub->add_option("limit", opts->limit, "Result limit (optional)");
         sub->callback([&sel, opts] {
             sel.factory = [opts](binapi2::futures_usdm_api& c,
                                  lib::result_sink& sink) -> boost::cobalt::task<int> {

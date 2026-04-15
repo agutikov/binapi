@@ -73,7 +73,7 @@ CLI::App* add_symbol_limit(CLI::App& parent, const char* name, const char* desc,
     auto opts = std::make_shared<lib::symbol_limit_opts>();
     auto* sub = parent.add_subcommand(name, desc);
     sub->add_option("symbol", opts->symbol, "Trading symbol")->required();
-    sub->add_option("-l,--limit", opts->limit, "Result limit");
+    sub->add_option("limit", opts->limit, "Result limit (optional)");
     sub->callback([&sel, opts] {
         sel.factory = [opts](binapi2::futures_usdm_api& c,
                              lib::result_sink& sink) -> boost::cobalt::task<int> {
@@ -130,10 +130,10 @@ void register_cmd_market_data(CLI::App& app, selected_cmd& sel)
     {
         struct opts_t { std::string symbol; std::optional<int> limit; };
         auto opts = std::make_shared<opts_t>();
-        auto* sub = app.add_subcommand("order-book", "Order book <symbol> [--limit L]");
+        auto* sub = app.add_subcommand("order-book", "Order book <symbol> [limit]");
         sub->group(group);
         sub->add_option("symbol", opts->symbol, "Trading symbol")->required();
-        sub->add_option("-l,--limit", opts->limit, "Depth limit");
+        sub->add_option("limit", opts->limit, "Depth limit (optional)");
         sub->callback([&sel, opts] {
             sel.factory = [opts](binapi2::futures_usdm_api& c,
                                  lib::result_sink& sink) -> boost::cobalt::task<int> {
@@ -223,7 +223,7 @@ void register_cmd_market_data(CLI::App& app, selected_cmd& sel)
         sub->group(group);
         sub->add_option("pair",   opts->pair,   "Pair")->required();
         sub->add_option("period", opts->period, "Period (5m,15m,…)")->required();
-        sub->add_option("-l,--limit", opts->limit, "Result limit");
+        sub->add_option("limit", opts->limit, "Result limit (optional)");
         sub->callback([&sel, opts] {
             sel.factory = [opts](binapi2::futures_usdm_api& c,
                                  lib::result_sink& sink) -> boost::cobalt::task<int> {
