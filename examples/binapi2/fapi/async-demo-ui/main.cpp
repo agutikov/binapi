@@ -28,9 +28,47 @@
 #include <CLI/CLI.hpp>
 
 #include <spdlog/spdlog.h>
+#include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/null_sink.h>
 
+#include <csignal>
+#include <cstdlib>
+
 namespace {
+
+/// Best-effort crash signal handler: log the signal and flush the file
+/// sink so the tail of the log survives. Then restore the default
+/// handler and re-raise, so the process still dumps core / exits with
+/// the expected status.
+///
+/// spdlog isn't strictly async-signal-safe (it takes a mutex on the
+/// sink), but for a developer-facing demo the flush is worth the small
+/// risk of deadlocking a process that's already crashing.
+void crash_handler(int sig)
+{
+    const char* name = "unknown";
+    switch (sig) {
+        case SIGSEGV: name = "SIGSEGV"; break;
+        case SIGABRT: name = "SIGABRT"; break;
+        case SIGFPE:  name = "SIGFPE";  break;
+        case SIGBUS:  name = "SIGBUS";  break;
+        case SIGILL:  name = "SIGILL";  break;
+        default: break;
+    }
+    spdlog::critical("crash_handler: caught {} (signum={})", name, sig);
+    spdlog::apply_all([](std::shared_ptr<spdlog::logger> l) {
+        if (l) l->flush();
+    });
+    std::signal(sig, SIG_DFL);
+    std::raise(sig);
+}
+
+void install_crash_handlers()
+{
+    for (int s : { SIGSEGV, SIGABRT, SIGFPE, SIGBUS, SIGILL }) {
+        std::signal(s, crash_handler);
+    }
+}
 
 binapi2::fapi::config make_initial_config(bool live)
 {
@@ -52,26 +90,70 @@ int main(int argc, char* argv[])
     // ── command-line ──────────────────────────────────────────────────
     CLI::App cli{ "binapi2-fapi-async-demo-ui — FTXUI demonstration client" };
     bool live = false;
+    std::string log_file;
+    std::string log_level = "info";
     cli.add_flag("-l,--live,--prod", live, "Use production endpoints (default: testnet)");
+    cli.add_option("-L,--log-file", log_file,
+                   "Log to this file. If omitted, logging is fully silenced "
+                   "(null sink) so terminal output isn't corrupted.");
+    cli.add_option("-F,--file-loglevel", log_level,
+                   "File log level: trace/debug/info/warn/error/critical/off")
+        ->check(CLI::IsMember({ "trace", "debug", "info", "warn",
+                                "error", "critical", "off" }))
+        ->capture_default_str();
     CLI11_PARSE(cli, argc, argv);
 
-    // Send spdlog to /dev/null while the TUI owns the terminal — otherwise
-    // logger output corrupts the screen. Real status flows through app_state.
-    spdlog::set_default_logger(
-        std::make_shared<spdlog::logger>("ui",
-            std::make_shared<spdlog::sinks::null_sink_mt>()));
-    spdlog::set_level(spdlog::level::off);
+    // spdlog routing. The TUI owns the terminal, so direct stdout/stderr
+    // logging would corrupt the screen. Two modes:
+    //
+    //   * with `--log-file PATH` → every log line lands in PATH (sync
+    //     basic_file_sink; does **not** add a thread), so the file is a
+    //     clean debugging channel that includes anything binapi2_fapi /
+    //     secret_provider / our worker itself logs.
+    //   * without → default logger is a `null_sink`, level is OFF, and
+    //     the UI is silent. Status still flows through app_state to
+    //     the status bar.
+    if (!log_file.empty()) {
+        auto sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(
+            log_file, /*truncate=*/true);
+        sink->set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%^%l%$] [t:%t] %v");
+        auto logger = std::make_shared<spdlog::logger>("ui", sink);
+        const auto lvl = spdlog::level::from_str(log_level);
+        logger->set_level(lvl);
+        // Flush on every line, even trace, so the tail of the log
+        // survives an abrupt crash. Demo binary, not perf-critical.
+        logger->flush_on(spdlog::level::trace);
+        spdlog::set_default_logger(logger);
+        spdlog::set_level(lvl);
+        spdlog::info("demo-ui starting (live={}, file={}, level={})",
+                     live, log_file, log_level);
+        install_crash_handlers();
+        spdlog::debug("crash handlers installed");
+    } else {
+        spdlog::set_default_logger(
+            std::make_shared<spdlog::logger>("ui",
+                std::make_shared<spdlog::sinks::null_sink_mt>()));
+        spdlog::set_level(spdlog::level::off);
+    }
 
     // ── shared state + worker thread ──────────────────────────────────
+    spdlog::debug("main: constructing app_state");
     demo_ui::app_state state;
     state.use_testnet = !live;
 
+    spdlog::debug("main: constructing ScreenInteractive::Fullscreen");
     auto screen = ftxui::ScreenInteractive::Fullscreen();
+
+    spdlog::debug("main: constructing worker");
     demo_ui::worker wrk(state, screen, make_initial_config(live));
+
+    spdlog::debug("main: starting worker");
     wrk.start();
 
     // ── tab layout ────────────────────────────────────────────────────
     using namespace ftxui;
+
+    spdlog::debug("main: building component tree");
 
     int tab_index = 0;
     const std::vector<std::string> tab_titles = {
@@ -79,9 +161,13 @@ int main(int argc, char* argv[])
     };
     auto tab_toggle = Toggle(&tab_titles, &tab_index);
 
+    spdlog::debug("main: building rest tab");
     auto rest_tab    = make_rest_view     (state, wrk);
+    spdlog::debug("main: building ws tab");
     auto ws_tab      = make_ws_view       (state, wrk);
+    spdlog::debug("main: building streams tab");
     auto streams_tab = make_streams_view  (state, wrk);
+    spdlog::debug("main: building order book tab");
     auto book_tab    = make_orderbook_view(state, wrk);
 
     auto tab_content = Container::Tab(
@@ -90,8 +176,11 @@ int main(int argc, char* argv[])
 
     auto status_bar = make_status_bar(state);
 
+    // `status_bar` is a non-interactive Renderer — including it in the
+    // Container::Vertical would put it in the focus chain and swallow
+    // keyboard events. Keep only the focusable children in `root` and
+    // draw the status bar from the outer layout's vbox directly.
     auto root = Container::Vertical({
-        status_bar,
         tab_toggle,
         tab_content,
     });
@@ -108,15 +197,23 @@ int main(int argc, char* argv[])
     // Quit on 'q' (in addition to FTXUI's Ctrl-C handling).
     auto layout_with_quit = CatchEvent(layout, [&](Event e) {
         if (e == Event::Character('q')) {
+            spdlog::info("main: 'q' pressed, exiting screen loop");
             screen.Exit();
             return true;
         }
         return false;
     });
 
+    spdlog::info("main: entering screen.Loop");
     screen.Loop(layout_with_quit);
+    spdlog::info("main: screen.Loop returned");
 
     // ── shutdown ──────────────────────────────────────────────────────
+    spdlog::info("main: calling wrk.stop()");
     wrk.stop();
+    spdlog::info("main: wrk.stop() returned; about to destruct locals");
+    spdlog::apply_all([](std::shared_ptr<spdlog::logger> l) {
+        if (l) l->flush();
+    });
     return 0;
 }

@@ -1,6 +1,8 @@
 
 
 
+exit crash
+
 
 
 verify.sh

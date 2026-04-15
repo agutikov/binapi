@@ -17,6 +17,7 @@ add_executable(binapi2-fapi-async-demo-ui
 target_link_libraries(binapi2-fapi-async-demo-ui
     PRIVATE
         binapi2_fapi
+        binapi2_demo_commands
         secret_provider
         spdlog::spdlog
         CLI11::CLI11

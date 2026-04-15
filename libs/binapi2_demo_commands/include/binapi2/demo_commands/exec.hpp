@@ -17,6 +17,7 @@
 
 #include "result_sink.hpp"
 
+#include <binapi2/fapi/rest/client.hpp>
 #include <binapi2/futures_usdm_api.hpp>
 
 #include <boost/cobalt/task.hpp>
@@ -52,8 +53,31 @@ inline int emit_failure(const binapi2::fapi::error& err, result_sink& sink)
 } // namespace detail
 
 // ---------------------------------------------------------------------------
-// REST executors — one per service group on `futures_usdm_api`.
+// REST executors.
 // ---------------------------------------------------------------------------
+//
+// Each service group has two overloads:
+//
+//   * `exec_*(api, req, sink)`    — creates a fresh REST client per call.
+//                                   Used by the CLI, which is one-shot and
+//                                   doesn't benefit from connection reuse.
+//   * `exec_*(client, req, sink)` — runs against a caller-owned client.
+//                                   Used by the UI's worker, which keeps a
+//                                   long-lived `rest::client` so the TCP +
+//                                   TLS handshake is paid only once.
+//
+// The api-facade overload simply forwards to the client overload after
+// connecting, so both paths share the same emit-success / emit-failure
+// machinery.
+
+template<typename Request>
+boost::cobalt::task<int>
+exec_market_data(binapi2::fapi::rest::client& rest, Request req, result_sink& sink)
+{
+    auto r = co_await rest.market_data.async_execute(req);
+    if (!r) co_return detail::emit_failure(r.err, sink);
+    co_return detail::emit_success(*r, sink);
+}
 
 template<typename Request>
 boost::cobalt::task<int>
@@ -61,7 +85,14 @@ exec_market_data(binapi2::futures_usdm_api& c, Request req, result_sink& sink)
 {
     auto rest = co_await c.create_rest_client();
     if (!rest) co_return detail::emit_failure(rest.err, sink);
-    auto r = co_await (*rest)->market_data.async_execute(req);
+    co_return co_await exec_market_data(**rest, std::move(req), sink);
+}
+
+template<typename Request>
+boost::cobalt::task<int>
+exec_account(binapi2::fapi::rest::client& rest, Request req, result_sink& sink)
+{
+    auto r = co_await rest.account.async_execute(req);
     if (!r) co_return detail::emit_failure(r.err, sink);
     co_return detail::emit_success(*r, sink);
 }
@@ -72,7 +103,14 @@ exec_account(binapi2::futures_usdm_api& c, Request req, result_sink& sink)
 {
     auto rest = co_await c.create_rest_client();
     if (!rest) co_return detail::emit_failure(rest.err, sink);
-    auto r = co_await (*rest)->account.async_execute(req);
+    co_return co_await exec_account(**rest, std::move(req), sink);
+}
+
+template<typename Request>
+boost::cobalt::task<int>
+exec_trade(binapi2::fapi::rest::client& rest, Request req, result_sink& sink)
+{
+    auto r = co_await rest.trade.async_execute(req);
     if (!r) co_return detail::emit_failure(r.err, sink);
     co_return detail::emit_success(*r, sink);
 }
@@ -83,7 +121,14 @@ exec_trade(binapi2::futures_usdm_api& c, Request req, result_sink& sink)
 {
     auto rest = co_await c.create_rest_client();
     if (!rest) co_return detail::emit_failure(rest.err, sink);
-    auto r = co_await (*rest)->trade.async_execute(req);
+    co_return co_await exec_trade(**rest, std::move(req), sink);
+}
+
+template<typename Request>
+boost::cobalt::task<int>
+exec_user_data_streams(binapi2::fapi::rest::client& rest, Request req, result_sink& sink)
+{
+    auto r = co_await rest.user_data_streams.async_execute(req);
     if (!r) co_return detail::emit_failure(r.err, sink);
     co_return detail::emit_success(*r, sink);
 }
@@ -94,9 +139,7 @@ exec_user_data_streams(binapi2::futures_usdm_api& c, Request req, result_sink& s
 {
     auto rest = co_await c.create_rest_client();
     if (!rest) co_return detail::emit_failure(rest.err, sink);
-    auto r = co_await (*rest)->user_data_streams.async_execute(req);
-    if (!r) co_return detail::emit_failure(r.err, sink);
-    co_return detail::emit_success(*r, sink);
+    co_return co_await exec_user_data_streams(**rest, std::move(req), sink);
 }
 
 // Note: `convert_service` has no generic `async_execute` — each convert
