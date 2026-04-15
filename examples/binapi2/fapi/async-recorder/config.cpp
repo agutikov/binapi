@@ -4,170 +4,88 @@
 
 #include "config.hpp"
 
+#include <CLI/CLI.hpp>
 #include <glaze/yaml.hpp>
 
 #include <cstdio>
 #include <cstdlib>
-#include <cstring>
 #include <fstream>
 #include <sstream>
 #include <string>
-#include <string_view>
 
 namespace binapi2::examples::async_recorder {
 
-namespace {
-
-bool parse_int(const char* s, int& out)
+void print_usage(const char* /*prog*/)
 {
-    try {
-        out = std::stoi(s);
-        return true;
-    } catch (...) {
-        return false;
-    }
-}
-
-bool parse_size(const char* s, std::size_t& out)
-{
-    try {
-        out = static_cast<std::size_t>(std::stoull(s));
-        return true;
-    } catch (...) {
-        return false;
-    }
-}
-
-bool parse_u64(const char* s, std::uint64_t& out)
-{
-    try {
-        out = static_cast<std::uint64_t>(std::stoull(s));
-        return true;
-    } catch (...) {
-        return false;
-    }
-}
-
-} // namespace
-
-void print_usage(const char* prog)
-{
-    std::fprintf(stdout,
-        "Usage: %s [flags]\n"
-        "\n"
-        "Flags:\n"
-        "  --root <dir>              Output root directory (default: ./data)\n"
-        "  --selector <file.yaml>    Selector config YAML (default: built-in)\n"
-        "  --rotate-size <bytes>     Rotation size in bytes (default: 512 MiB)\n"
-        "  --rotate-seconds <s>      Rotation time in seconds (default: 3600)\n"
-        "  --depth-levels {5,10,20}  Partial-book depth levels (default: 20)\n"
-        "  --full-depth              Use full diff depth stream instead of partial\n"
-        "  --depth-resnap-seconds <s> Periodic depth re-snapshot interval (default: 600)\n"
-        "  --with-depth              Record depth at all (default: off)\n"
-        "  --no-klines               Disable per-symbol 1m kline recording\n"
-        "  --stats-seconds <s>       Stats tick interval (default: 10)\n"
-        "  --loglevel <lvl>          trace/debug/info/warn/error/critical/off (default: trace)\n"
-        "  --logfile <path>          Also write logs to this file (truncated on start)\n"
-        "  --debug-stream <name>     Run single-stream debug screener against one of\n"
-        "                            bookTicker|markPriceArr|tickerArr (default: off — real screener)\n"
-        "  --live                    Use production endpoints (default: testnet)\n"
-        "  --testnet                 Use testnet endpoints (default)\n"
-        "  --print-config            Parse flags and YAML, dump config, exit\n"
-        "  -h, --help                Print this help and exit\n",
-        prog);
+    // Kept for header compatibility; CLI11 handles help output in parse_args.
 }
 
 std::optional<recorder_config> parse_args(int argc, char** argv)
 {
     recorder_config cfg;
     bool want_print = false;
-    std::string error;
+    bool full_depth = false;
+    bool no_klines = false;
+    bool live = false;
+    bool testnet = false;
+    std::string root_dir_str;
+    std::string selector_yaml_str;
+    std::string logfile_str;
 
-    for (int i = 1; i < argc; ++i) {
-        std::string_view a = argv[i];
-        auto need_arg = [&](const char* name) -> const char* {
-            if (i + 1 >= argc) {
-                std::fprintf(stderr, "error: %s requires an argument\n", name);
-                std::exit(2);
-            }
-            return argv[++i];
-        };
+    CLI::App app{ "async-recorder — institutional-grade recorder example" };
+    app.set_help_flag("-h,--help", "Print this help and exit");
 
-        if (a == "-h" || a == "--help") {
-            print_usage(argv[0]);
-            return std::nullopt;
-        }
-        else if (a == "--root") { cfg.root_dir = need_arg("--root"); }
-        else if (a == "--selector") { cfg.selector_yaml = need_arg("--selector"); }
-        else if (a == "--rotate-size") {
-            if (!parse_size(need_arg("--rotate-size"), cfg.rotation_size_bytes)) {
-                std::fprintf(stderr, "error: --rotate-size needs an integer\n");
-                std::exit(2);
-            }
-        }
-        else if (a == "--rotate-seconds") {
-            if (!parse_u64(need_arg("--rotate-seconds"), cfg.rotation_seconds)) {
-                std::fprintf(stderr, "error: --rotate-seconds needs an integer\n");
-                std::exit(2);
-            }
-        }
-        else if (a == "--depth-levels") {
-            int n = 0;
-            if (!parse_int(need_arg("--depth-levels"), n) ||
-                (n != 5 && n != 10 && n != 20)) {
-                std::fprintf(stderr, "error: --depth-levels must be 5, 10, or 20\n");
-                std::exit(2);
-            }
-            cfg.depth_levels = n;
-            cfg.depth_mode = depth_mode_t::partial;
-        }
-        else if (a == "--full-depth") { cfg.depth_mode = depth_mode_t::full; }
-        else if (a == "--depth-resnap-seconds") {
-            if (!parse_u64(need_arg("--depth-resnap-seconds"), cfg.depth_resnap_seconds)) {
-                std::fprintf(stderr, "error: --depth-resnap-seconds needs an integer\n");
-                std::exit(2);
-            }
-        }
-        else if (a == "--with-depth") { cfg.with_depth = true; }
-        else if (a == "--no-klines") { cfg.with_klines = false; }
-        else if (a == "--stats-seconds") {
-            if (!parse_u64(need_arg("--stats-seconds"), cfg.stats_interval_seconds)) {
-                std::fprintf(stderr, "error: --stats-seconds needs an integer\n");
-                std::exit(2);
-            }
-        }
-        else if (a == "--loglevel") {
-            std::string_view lvl = need_arg("--loglevel");
-            if (lvl != "trace" && lvl != "debug" && lvl != "info" &&
-                lvl != "warn" && lvl != "error" && lvl != "critical" &&
-                lvl != "off") {
-                std::fprintf(stderr, "error: --loglevel must be one of "
-                                     "trace/debug/info/warn/error/critical/off\n");
-                std::exit(2);
-            }
-            cfg.loglevel = std::string(lvl);
-        }
-        else if (a == "--logfile") { cfg.logfile = need_arg("--logfile"); }
-        else if (a == "--debug-stream") {
-            std::string_view s = need_arg("--debug-stream");
-            if (s != "bookTicker" && s != "markPriceArr" && s != "tickerArr") {
-                std::fprintf(stderr,
-                    "error: --debug-stream must be one of bookTicker|markPriceArr|tickerArr\n");
-                std::exit(2);
-            }
-            cfg.debug_stream = std::string(s);
-        }
-        else if (a == "--live") { cfg.testnet = false; }
-        else if (a == "--testnet") { cfg.testnet = true; }
-        else if (a == "--print-config") { want_print = true; }
-        else {
-            std::fprintf(stderr, "error: unknown flag: %.*s\n",
-                         static_cast<int>(a.size()), a.data());
-            print_usage(argv[0]);
-            std::exit(2);
-        }
+    app.add_option("--root", root_dir_str,
+        "Output root directory")->default_str("./data");
+    app.add_option("--selector", selector_yaml_str,
+        "Selector config YAML (default: built-in)");
+    app.add_option("--rotate-size", cfg.rotation_size_bytes,
+        "Rotation size in bytes")->capture_default_str();
+    app.add_option("--rotate-seconds", cfg.rotation_seconds,
+        "Rotation time in seconds")->capture_default_str();
+    app.add_option("--depth-levels", cfg.depth_levels,
+        "Partial-book depth levels")
+        ->check(CLI::IsMember({ 5, 10, 20 }))
+        ->capture_default_str();
+    app.add_flag("--full-depth", full_depth,
+        "Use full diff depth stream instead of partial");
+    app.add_option("--depth-resnap-seconds", cfg.depth_resnap_seconds,
+        "Periodic depth re-snapshot interval (full-depth mode)")->capture_default_str();
+    app.add_flag("--with-depth", cfg.with_depth,
+        "Record depth at all (default: off)");
+    app.add_flag("--no-klines", no_klines,
+        "Disable per-symbol 1m kline recording");
+    app.add_option("--stats-seconds", cfg.stats_interval_seconds,
+        "Stats tick interval")->capture_default_str();
+    app.add_option("--loglevel", cfg.loglevel,
+        "spdlog level: trace/debug/info/warn/error/critical/off")
+        ->check(CLI::IsMember({ "trace","debug","info","warn","error","critical","off" }))
+        ->capture_default_str();
+    app.add_option("--logfile", logfile_str,
+        "Also write logs to this file (truncated on start)");
+    app.add_option("--debug-stream", cfg.debug_stream,
+        "Run single-stream debug screener: bookTicker|markPriceArr|tickerArr")
+        ->check(CLI::IsMember({ "bookTicker","markPriceArr","tickerArr" }));
+    app.add_flag("--live", live,    "Use production endpoints");
+    app.add_flag("--testnet", testnet, "Use testnet endpoints (default)");
+    app.add_flag("--print-config", want_print,
+        "Parse flags and YAML, dump config, exit");
+
+    try {
+        app.parse(argc, argv);
+    } catch (const CLI::ParseError& e) {
+        std::exit(app.exit(e));
     }
 
+    if (!root_dir_str.empty())       cfg.root_dir = root_dir_str;
+    if (!selector_yaml_str.empty())  cfg.selector_yaml = selector_yaml_str;
+    if (!logfile_str.empty())        cfg.logfile = logfile_str;
+    if (full_depth) cfg.depth_mode = depth_mode_t::full;
+    if (no_klines)  cfg.with_klines = false;
+    if (live)       cfg.testnet = false;
+    if (testnet)    cfg.testnet = true;
+
+    std::string error;
     if (!load_selector_yaml(cfg, error)) {
         std::fprintf(stderr, "error: %s\n", error.c_str());
         std::exit(2);

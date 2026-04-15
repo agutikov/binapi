@@ -7,3 +7,9 @@
 [submodule "deps/glaze"]
 	path = deps/glaze
 	url = https://github.com/stephenberry/glaze.git
+[submodule "deps/CLI11"]
+	path = deps/CLI11
+	url = https://github.com/CLIUtils/CLI11.git
+[submodule "deps/FTXUI"]
+	path = deps/FTXUI
+	url = https://github.com/ArthurSonzogni/FTXUI.git

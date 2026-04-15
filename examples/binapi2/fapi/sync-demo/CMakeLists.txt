@@ -9,4 +9,4 @@ add_executable(binapi2-fapi-sync-demo
     stream_blocking.cpp
     stream_callback.cpp
 )
-target_link_libraries(binapi2-fapi-sync-demo PRIVATE binapi2_fapi)
+target_link_libraries(binapi2-fapi-sync-demo PRIVATE binapi2_fapi CLI11::CLI11)

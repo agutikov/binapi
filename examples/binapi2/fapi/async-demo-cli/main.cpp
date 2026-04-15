@@ -41,6 +41,8 @@
 #include <boost/cobalt/this_coro.hpp>
 #include <spdlog/spdlog.h>
 
+#include <CLI/CLI.hpp>
+
 #include <algorithm>
 #include <future>
 #include <iostream>
@@ -214,64 +216,70 @@ constexpr command_entry commands[] = {
 };
 // clang-format on
 
-void print_usage(const char* prog)
+std::string format_commands()
 {
-    std::cout << "Usage: " << prog << " [flags] <command> [args...]\n\n"
-              << "Flags:\n"
-              << "  -v                          Print full JSON responses\n"
-              << "  -vv                         Print JSON + transport log\n"
-              << "  -vvv                        Print JSON + full HTTP with headers\n"
-              << "  -l, --live                  Use production endpoints (default: testnet)\n"
-              << "      --testnet               Use testnet endpoints (default)\n"
-              << "  -S, --save-request <file>   Save request to file\n"
-              << "  -R, --save-response <file>  Save response body to file\n"
-              << "  -r, --record <file>         Record raw stream frames to JSONL file\n"
-              << "  -K, --secrets <source>      Secret source: libsecret:<profile> (default), env, systemd-creds:<dir>\n"
-              << "  -L, --log-file <file>       Log to file\n"
-              << "  -F, --file-loglevel <lvl>   File log level (trace/debug/info/warn/error/off)\n"
-              << "  -O, --stdout-loglevel <lvl> Stdout log level (trace/debug/info/warn/error/off)\n"
-              << "  -h, --help                  Print this help\n\n"
-              << "Commands:\n";
+    std::string out = "Commands:\n";
     for (const auto& cmd : commands) {
         if (is_group(cmd)) {
-            std::cout << '\n' << "  " << cmd.name << ":\n";
+            out += "\n  ";
+            out += cmd.name;
+            out += ":\n";
         } else {
-            std::cout << "    " << cmd.name
-                      << std::string(25 - std::min(cmd.name.size(), std::size_t{24}), ' ')
-                      << cmd.help << '\n';
+            out += "    ";
+            out += cmd.name;
+            out += std::string(25 - std::min(cmd.name.size(), std::size_t{24}), ' ');
+            out += cmd.help;
+            out += '\n';
         }
     }
+    return out;
 }
 
 } // namespace
 
 boost::cobalt::main co_main(int argc, char* argv[])
 {
-    if (argc < 2) { print_usage(argv[0]); co_return 1; }
+    // Top-level flag parsing via CLI11.  Unknown options and all positional
+    // arguments (command name + its own args) pass through to the subcommand
+    // dispatcher below unchanged.
+    CLI::App app{ "binapi2-fapi async demonstration client" };
+    app.footer(format_commands());
+    app.allow_extras();
+    app.set_help_flag("-h,--help", "Print this help");
 
-    // Strip global flags, collect remaining args.
-    demo::args_t cmd_args;
-    const char* prog = argv[0];
+    int verbose_count = 0;
+    bool live = false;
+    bool testnet = false;
+    app.add_flag("-v", verbose_count,
+                 "Verbosity: -v json, -vv json+transport, -vvv json+headers");
+    app.add_flag("-l,--live,--prod", live,   "Use production endpoints");
+    app.add_flag("--testnet", testnet, "Use testnet endpoints (default)");
+    app.add_option("-S,--save-request",    demo::save_request_file,  "Save request to file");
+    app.add_option("-R,--save-response",   demo::save_response_file, "Save response body to file");
+    app.add_option("-r,--record",          demo::record_file,        "Record raw stream frames to JSONL file");
+    app.add_option("-K,--secrets",         demo::secrets_source,
+                   "Secret source: libsecret:<profile> (default), env, systemd-creds:<dir>");
+    app.add_option("-L,--log-file",        demo::log_file,           "Log to file");
+    app.add_option("-F,--file-loglevel",   demo::file_loglevel,
+                   "File log level (trace/debug/info/warn/error/off)");
+    app.add_option("-O,--stdout-loglevel", demo::stdout_loglevel,
+                   "Stdout log level (trace/debug/info/warn/error/off)");
 
-    for (int i = 1; i < argc; ++i) {
-        std::string_view arg = argv[i];
-        if (arg == "-vvv")      { demo::verbosity = 3; }
-        else if (arg == "-vv")  { demo::verbosity = 2; }
-        else if (arg == "-v")   { demo::verbosity = 1; }
-        else if (arg == "--live" || arg == "--prod" || arg == "-l") { demo::use_testnet = false; }
-        else if (arg == "--testnet") { demo::use_testnet = true; }
-        else if ((arg == "--save-request"  || arg == "-S") && i + 1 < argc) { demo::save_request_file  = argv[++i]; }
-        else if ((arg == "--save-response" || arg == "-R") && i + 1 < argc) { demo::save_response_file = argv[++i]; }
-        else if ((arg == "--record"        || arg == "-r") && i + 1 < argc) { demo::record_file        = argv[++i]; }
-        else if ((arg == "--secrets"      || arg == "-K") && i + 1 < argc) { demo::secrets_source     = argv[++i]; }
-        else if ((arg == "--log-file"      || arg == "-L") && i + 1 < argc) { demo::log_file           = argv[++i]; }
-        else if ((arg == "--file-loglevel" || arg == "-F") && i + 1 < argc) { demo::file_loglevel      = argv[++i]; }
-        else if ((arg == "--stdout-loglevel" || arg == "-O") && i + 1 < argc) { demo::stdout_loglevel  = argv[++i]; }
-        else if (arg == "--help" || arg == "-h") { print_usage(prog); co_return 0; }
-        else { cmd_args.emplace_back(arg); }
+    try {
+        app.parse(argc, argv);
+    } catch (const CLI::ParseError& e) {
+        co_return app.exit(e);
     }
 
-    if (cmd_args.empty()) { print_usage(prog); co_return 1; }
+    demo::verbosity = verbose_count;
+    if (live) demo::use_testnet = false;
+    if (testnet) demo::use_testnet = true;
+
+    // Remaining positional args: command name + subcommand args.
+    demo::args_t cmd_args;
+    for (const auto& s : app.remaining()) cmd_args.emplace_back(s);
+
+    if (cmd_args.empty()) { std::cout << app.help(); co_return 1; }
 
     demo::init_logging();
 
@@ -324,7 +332,7 @@ boost::cobalt::main co_main(int argc, char* argv[])
     if (rc == 1 && std::none_of(std::begin(commands), std::end(commands),
                                 [&](const auto& cmd) { return !is_group(cmd) && cmd.name == cmd_name; })) {
         spdlog::error("unknown command: {}", cmd_name);
-        print_usage(prog);
+        std::cout << app.help();
     }
 
     signals.cancel();

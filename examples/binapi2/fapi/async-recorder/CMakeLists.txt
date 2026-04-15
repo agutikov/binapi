@@ -23,6 +23,7 @@ target_link_libraries(binapi2-fapi-async-recorder
     PRIVATE
         binapi2_fapi
         spdlog::spdlog
+        CLI11::CLI11
 )
 # BOOST_ASIO_HAS_IO_URING propagates publicly from binapi2_fapi
 # (see src/binapi2/fapi/CMakeLists.txt).

@@ -12,8 +12,8 @@ remove_score: 1.0
 min_hold_seconds: 600
 cooloff_seconds: 180
 
-min_active: 2
-max_active: 5
+min_active: 10
+max_active: 25
 
 mandatory:
   - BTCUSDT

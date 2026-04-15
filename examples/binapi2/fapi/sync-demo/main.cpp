@@ -7,12 +7,27 @@
 #include <binapi2/futures_usdm_api.hpp>
 #include <binapi2/fapi/config.hpp>
 
+#include <CLI/CLI.hpp>
+
 #include <cstdlib>
 #include <iostream>
 
-int main()
+int main(int argc, char* argv[])
 {
-    auto cfg = binapi2::fapi::config::testnet_config();
+    CLI::App app{ "binapi2-fapi synchronous demonstration client" };
+    bool live = false;
+    app.add_flag("-l,--live,--prod", live, "Use production endpoints (default: testnet)");
+    CLI11_PARSE(app, argc, argv);
+
+    binapi2::fapi::config cfg;
+    if (live) {
+        cfg.rest_host = "fapi.binance.com";
+        cfg.websocket_api_host = "ws-fapi.binance.com";
+        cfg.websocket_api_target = "/ws-fapi/v1";
+        cfg.stream_host = "fstream.binance.com";
+    } else {
+        cfg = binapi2::fapi::config::testnet_config();
+    }
 
     // Credentials are loaded from libsecret by the async-demo-cli.
     // This sync demo does not load credentials — auth endpoints will be skipped.
