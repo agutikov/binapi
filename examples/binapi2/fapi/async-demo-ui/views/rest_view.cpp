@@ -1,29 +1,40 @@
 // SPDX-License-Identifier: Apache-2.0
 //
-// REST tab — step 1.
+// REST tab — step 1 expanded.
 //
-// One command (`ping`) selectable on the left, a Run button in the
-// middle, and a stacked **Request / Response** display on the right.
-// Each half (top = request, bottom = response) has three sub-tabs:
-// Raw / JSON / Tree.
+// Four commands hand-coded into a menu, a single symbol Input field
+// for the ones that take a symbol, a Run button that dispatches to the
+// selected command, and a stacked Request/Response display with
+// Raw/JSON/Tree sub-tabs per half.
 //
-//   * Raw  → full HTTP message (request line + headers + body for the
-//            request, status line + headers + body for the response).
-//            Filled by `cfg.logger` via `worker::active_capture_`.
-//   * JSON → typed struct serialized via glaze (the typed Request struct
-//            for the top half; the typed Response struct from
-//            `capture_sink::on_response_json` for the bottom half).
-//   * Tree → glz::generic walker (depth-capped) over the same JSON.
+// Commands are deliberately picked to exercise the full pipeline:
 //
-// ── Lifetime note ─────────────────────────────────────────────────
-// FTXUI widgets like `Menu` and `Toggle` store **raw pointers** into
-// caller-owned vectors / ints (the "model"). Those models must outlive
-// the widget — we hold each one in a `shared_ptr` and **explicitly
-// capture it** in every lambda retained by the returned component tree.
-// Same trap for cobalt task bodies: never wrap a coroutine body in a
-// local lambda that captures shared_ptrs (see
-// `feedback_cobalt_lambda_lifetime.md`); use a free function so the
-// args live in the coroutine frame.
+//   * `ping`           — smallest possible response (`{}`)
+//   * `server-time`    — one-field response
+//   * `ticker-24hr`    — medium, requires a symbol param
+//   * `exchange-info`  — huge, ~200 symbols × many fields, nested —
+//                        stresses json_tree's depth cap and the
+//                        render path
+//
+// Step 4 will replace this hand-coding with a proper registry of ~80
+// REST commands + per-command parameter forms; for now the pattern is:
+// when a new command is added, add a `run_<cmd>` free function (free
+// functions are required — see feedback_cobalt_lambda_lifetime.md),
+// add an entry to `commands[]`, and (if it takes a symbol) toggle the
+// `needs_symbol` flag.
+//
+// ── Lifetime notes ───────────────────────────────────────────────
+//
+//   * FTXUI widgets like `Menu`, `Toggle`, `Input` store **raw
+//     pointers** into caller-owned models. Every model lives inside a
+//     `shared_ptr` that's **explicitly captured** in the outer
+//     `Renderer` lambda so the pointers outlive `make_rest_view`.
+//
+//   * Cobalt task bodies are **free functions**, never local lambdas.
+//     A local lambda captured by value gets destroyed when the
+//     spawning function returns, but the coroutine frame holds a
+//     pointer back into the lambda's captures — use-after-free on
+//     the next resumption. (`feedback_cobalt_lambda_lifetime.md`.)
 
 #include "../app_state.hpp"
 #include "../util/capture_sink.hpp"
@@ -42,6 +53,7 @@
 
 #include <ftxui/component/component.hpp>
 #include <ftxui/dom/elements.hpp>
+#include <ftxui/screen/terminal.hpp>
 
 #include <spdlog/spdlog.h>
 
@@ -52,29 +64,72 @@
 namespace demo_ui {
 
 using namespace ftxui;
-namespace lib = binapi2::demo;
+namespace lib   = binapi2::demo;
+namespace types = binapi2::fapi::types;
 
 namespace {
 
-/// Split a newline-delimited string into one `text()` element per line.
-Elements split_lines(const std::string& src)
+// ── Rendering helpers ─────────────────────────────────────────────
+
+constexpr float page_step = 0.15f;
+
+/// Pure-display scrollable text renderer. Uses a SINGLE `paragraph()`
+/// element for the entire content — no per-line split, no truncation.
+/// FTXUI's `paragraph()` handles newlines + word-wrap internally as
+/// one DOM node, so even a 1.6 MB exchange-info response renders
+/// without freezing.
+///
+/// The content string is cached: `content_fn()` is called every frame
+/// (cheap mutex-locked copy), but the `paragraph()` Element is only
+/// rebuilt when the string actually changes.
+Component make_scrollable_text(std::function<std::string()> content_fn,
+                               std::shared_ptr<float> scroll)
 {
-    Elements out;
-    std::size_t start = 0;
-    for (std::size_t i = 0; i <= src.size(); ++i) {
-        if (i == src.size() || src[i] == '\n') {
-            out.push_back(text(src.substr(start, i - start)));
-            start = i + 1;
+    auto cached_str  = std::make_shared<std::string>();
+    auto cached_elem = std::make_shared<Element>();
+
+    return Renderer([content_fn, scroll, cached_str, cached_elem] {
+        auto fresh = content_fn();
+        if (fresh != *cached_str) {
+            *cached_str = std::move(fresh);
+            *cached_elem = paragraph(*cached_str);
         }
-    }
-    if (out.empty()) out.push_back(text(""));
-    return out;
+        return *cached_elem
+            | focusPositionRelative(0.f, *scroll)
+            | yframe
+            | vscroll_indicator
+            | flex;
+    });
 }
 
-/// Pre-serialize a typed request struct into a `capture_side`'s
-/// pretty/parsed JSON fields. Called on the main thread before
-/// spawning, so the Request half is populated immediately on click
-/// even if the network call hasn't started yet.
+/// Pure-display scrollable tree renderer. The tree Element is cached
+/// and only rebuilt when the underlying `glz::generic` pointer changes
+/// (i.e. a new response arrived).
+Component make_scrollable_tree(std::function<std::shared_ptr<glz::generic>()> tree_fn,
+                               std::shared_ptr<float> scroll)
+{
+    auto cached_ptr  = std::make_shared<std::shared_ptr<glz::generic>>();
+    auto cached_elem = std::make_shared<Element>();
+
+    return Renderer([tree_fn, scroll, cached_ptr, cached_elem] {
+        auto snapshot = tree_fn();
+        if (snapshot != *cached_ptr) {
+            *cached_ptr = snapshot;
+            *cached_elem = render_json_tree(snapshot);
+        }
+        return *cached_elem
+            | focusPositionRelative(0.f, *scroll)
+            | yframe
+            | vscroll_indicator
+            | flex;
+    });
+}
+
+// ── JSON pre-fill ─────────────────────────────────────────────────
+
+/// Pre-serialize a typed request struct into the capture's request
+/// side. Runs on the main thread at Run-click time, so the top half
+/// is populated immediately even before the network call starts.
 template<typename Request>
 void prefill_request_json(request_capture& cap, const Request& req)
 {
@@ -84,46 +139,102 @@ void prefill_request_json(request_capture& cap, const Request& req)
     fill_pretty_and_parsed(cap.request, *j);
 }
 
-/// The ping coroutine itself. **Must be a free function (not a local
-/// lambda)** so its arguments — in particular the `shared_ptr<capture_sink>`
-/// — live inside the coroutine frame.
-///
-/// Uses the worker's **persistent** REST client (lazy-connected on first
-/// call, then reused) instead of creating a fresh client per request.
+// ── Coroutine task bodies ─────────────────────────────────────────
+//
+// Free functions only. Each takes the state it needs by value /
+// shared_ptr so the coroutine frame owns it for the full lifetime of
+// the async op.
+
 boost::cobalt::task<void>
 ping_coro(worker& wrk,
           std::shared_ptr<capture_sink> sink,
           std::shared_ptr<request_capture> cap)
 {
     spdlog::debug("rest_view: ping coroutine entered");
-
-    // Scope cfg.logger output to this request: the guard sets
-    // worker::active_capture_ in its ctor and clears it in its dtor.
     active_capture_guard guard(wrk, cap.get());
-
     auto* rest = co_await wrk.acquire_rest_client(*sink);
-    if (!rest) {
-        // acquire_rest_client already emitted error + on_done via sink.
-        spdlog::warn("rest_view: ping aborted — REST client unavailable");
-        co_return;
-    }
-
-    co_await lib::exec_market_data(
-        *rest, binapi2::fapi::types::ping_request_t{}, *sink);
-
+    if (!rest) co_return;
+    co_await lib::exec_market_data(*rest, types::ping_request_t{}, *sink);
     spdlog::debug("rest_view: ping coroutine completed");
 }
 
-/// Spawn a `ping` request on the worker.
-void run_ping(worker& wrk, app_state& state, std::shared_ptr<request_capture> cap)
+boost::cobalt::task<void>
+time_coro(worker& wrk,
+          std::shared_ptr<capture_sink> sink,
+          std::shared_ptr<request_capture> cap)
 {
-    spdlog::info("rest_view: run_ping clicked");
+    spdlog::debug("rest_view: time coroutine entered");
+    active_capture_guard guard(wrk, cap.get());
+    auto* rest = co_await wrk.acquire_rest_client(*sink);
+    if (!rest) co_return;
+    co_await lib::exec_market_data(*rest, types::server_time_request_t{}, *sink);
+    spdlog::debug("rest_view: time coroutine completed");
+}
 
-    // Reset capture under lock — fresh state for the new run.
+boost::cobalt::task<void>
+exchange_info_coro(worker& wrk,
+                   std::shared_ptr<capture_sink> sink,
+                   std::shared_ptr<request_capture> cap)
+{
+    spdlog::debug("rest_view: exchange-info coroutine entered");
+    active_capture_guard guard(wrk, cap.get());
+    auto* rest = co_await wrk.acquire_rest_client(*sink);
+    if (!rest) co_return;
+    co_await lib::exec_market_data(*rest, types::exchange_info_request_t{}, *sink);
+    spdlog::debug("rest_view: exchange-info coroutine completed");
+}
+
+boost::cobalt::task<void>
+ticker_24hr_coro(worker& wrk,
+                 std::shared_ptr<capture_sink> sink,
+                 std::shared_ptr<request_capture> cap,
+                 std::string symbol)
+{
+    spdlog::debug("rest_view: ticker-24hr coroutine entered, symbol={}", symbol);
+    active_capture_guard guard(wrk, cap.get());
+    auto* rest = co_await wrk.acquire_rest_client(*sink);
+    if (!rest) co_return;
+    types::ticker_24hr_request_t req;
+    req.symbol = symbol;
+    co_await lib::exec_market_data(*rest, std::move(req), *sink);
+    spdlog::debug("rest_view: ticker-24hr coroutine completed");
+}
+
+// ── Command registry ──────────────────────────────────────────────
+
+struct ui_command
+{
+    const char* name;
+    const char* description;
+    bool needs_symbol;
+};
+
+constexpr ui_command commands[] = {
+    { "ping",          "Test API connectivity (empty response)",   false },
+    { "server-time",   "Server time (1 field)",                    false },
+    { "exchange-info", "Exchange info (huge, ~200 symbols)",       false },
+    { "ticker-24hr",   "24hr price-change stats (requires symbol)", true  },
+};
+
+// ── Per-command dispatch ──────────────────────────────────────────
+
+/// Dispatch to the right coroutine based on `cmd_index`. Handles the
+/// shared capture-reset + shared-sink-construction bookkeeping in one
+/// place so each command's coroutine stays tiny.
+void run_selected(int cmd_index,
+                  const std::string& symbol,
+                  worker& wrk,
+                  app_state& state,
+                  std::shared_ptr<request_capture> cap)
+{
+    spdlog::info("rest_view: run_selected cmd_index={} symbol='{}'",
+                 cmd_index, symbol);
+
+    // Reset the capture for a fresh run.
     {
         std::lock_guard lk(cap->mtx);
         cap->info_lines.clear();
-        cap->request = capture_side{};
+        cap->request  = capture_side{};
         cap->response = capture_side{};
         cap->error_message.clear();
         cap->http_status = 0;
@@ -131,25 +242,66 @@ void run_ping(worker& wrk, app_state& state, std::shared_ptr<request_capture> ca
     }
     cap->state.store(request_capture::idle);
 
-    // Pre-fill the typed Request JSON so the top half shows something
-    // immediately (ping is `{}` — boring but visible).
-    prefill_request_json(*cap, binapi2::fapi::types::ping_request_t{});
-
     auto sink = std::make_shared<capture_sink>(cap, wrk, state);
 
-    auto fut = boost::cobalt::spawn(
-        wrk.io().get_executor(),
-        ping_coro(wrk, std::move(sink), cap),
-        boost::asio::use_future);
-    (void)fut;  // detach
+    // Pre-fill the Request JSON side on the main thread so the top
+    // half is populated immediately, before the coroutine even runs.
+    switch (cmd_index) {
+        case 0: prefill_request_json(*cap, types::ping_request_t{});         break;
+        case 1: prefill_request_json(*cap, types::server_time_request_t{});  break;
+        case 2: prefill_request_json(*cap, types::exchange_info_request_t{});break;
+        case 3: {
+            types::ticker_24hr_request_t req;
+            req.symbol = symbol;
+            prefill_request_json(*cap, req);
+            break;
+        }
+        default: break;
+    }
+
+    // Spawn the right coroutine on the worker.
+    switch (cmd_index) {
+        case 0:
+            boost::cobalt::spawn(
+                wrk.io().get_executor(),
+                ping_coro(wrk, std::move(sink), cap),
+                boost::asio::use_future);
+            break;
+        case 1:
+            boost::cobalt::spawn(
+                wrk.io().get_executor(),
+                time_coro(wrk, std::move(sink), cap),
+                boost::asio::use_future);
+            break;
+        case 2:
+            boost::cobalt::spawn(
+                wrk.io().get_executor(),
+                exchange_info_coro(wrk, std::move(sink), cap),
+                boost::asio::use_future);
+            break;
+        case 3:
+            boost::cobalt::spawn(
+                wrk.io().get_executor(),
+                ticker_24hr_coro(wrk, std::move(sink), cap, symbol),
+                boost::asio::use_future);
+            break;
+        default:
+            spdlog::warn("rest_view: unknown cmd_index {}", cmd_index);
+            break;
+    }
 }
 
 // ── Request / Response display ────────────────────────────────────
 
-/// Build a Raw/JSON/Tree pane bound to one side of a `request_capture`
-/// (either `cap->request` or `cap->response`, selected by `is_request`).
-/// `title` labels the half ("REQUEST" / "RESPONSE").
-Component make_side_pane(const std::shared_ptr<request_capture>& cap,
+/// `get_cap_fn` returns the currently-selected capture (depends on
+/// which command is highlighted in the menu). Called at render time.
+using get_cap_fn = std::function<std::shared_ptr<request_capture>()>;
+
+/// Build a Raw/JSON/Tree pane bound to one side of whatever capture
+/// `get_cap` returns at render time. When the user switches commands
+/// in the menu, the pane automatically shows that command's last
+/// request/response.
+Component make_side_pane(get_cap_fn get_cap,
                          bool is_request,
                          const char* title)
 {
@@ -157,17 +309,17 @@ Component make_side_pane(const std::shared_ptr<request_capture>& cap,
         std::vector<std::string>{ "Raw", "JSON", "Tree" });
     auto sub_tab_index = std::make_shared<int>(0);
 
-    // Each sub-renderer takes a const-ref to whichever capture_side it
-    // displays under cap->mtx, copies it out, and renders.
-    auto get_side = [cap, is_request]() -> capture_side {
-        std::lock_guard lk(cap->mtx);
-        return is_request ? cap->request : cap->response;
-        // Note: copies the strings + shared_ptr. parsed_json is shared,
-        // not deep-copied, so the tree view sees a stable snapshot.
-    };
+    // Per-tab scroll state. Index matches sub_tab_index: 0=Raw, 1=JSON, 2=Tree.
+    auto scrolls = std::make_shared<std::array<std::shared_ptr<float>, 3>>(
+        std::array<std::shared_ptr<float>, 3>{
+            std::make_shared<float>(0.f),
+            std::make_shared<float>(0.f),
+            std::make_shared<float>(0.f),
+        });
 
-    auto raw_view = Renderer([cap, get_side, is_request] {
-        // For the response side, surface the typed error in Raw too.
+    // Raw view
+    auto raw_view = make_scrollable_text([get_cap, is_request]() -> std::string {
+        auto cap = get_cap();
         std::string error_msg;
         if (!is_request) {
             std::lock_guard lk(cap->mtx);
@@ -179,39 +331,51 @@ Component make_side_pane(const std::shared_ptr<request_capture>& cap,
                     error_msg += "\n  binance_code: " + std::to_string(cap->binance_code);
             }
         }
-        const auto side = get_side();
-        std::string text_copy = side.raw;
-        if (!error_msg.empty()) {
-            if (!text_copy.empty()) text_copy += "\n\n";
-            text_copy += error_msg;
+        capture_side side;
+        {
+            std::lock_guard lk(cap->mtx);
+            side = is_request ? cap->request : cap->response;
         }
-        if (text_copy.empty())
-            text_copy = is_request ? "(no request yet)" : "(no response yet)";
-        return vbox(split_lines(text_copy)) | yframe | flex;
-    });
+        std::string out = side.raw;
+        if (!error_msg.empty()) {
+            if (!out.empty()) out += "\n\n";
+            out += error_msg;
+        }
+        if (out.empty())
+            out = is_request ? "(no request yet)" : "(no response yet)";
+        return out;
+    }, (*scrolls)[0]);
 
-    auto json_view = Renderer([get_side, is_request] {
-        const auto side = get_side();
-        std::string copy = side.pretty_json.empty()
-            ? std::string{ is_request ? "(no JSON yet)" : "(no JSON yet)" }
+    // JSON view
+    auto json_view = make_scrollable_text([get_cap, is_request]() -> std::string {
+        auto cap = get_cap();
+        std::lock_guard lk(cap->mtx);
+        const auto& side = is_request ? cap->request : cap->response;
+        return side.pretty_json.empty()
+            ? std::string{ "(no JSON yet)" }
             : side.pretty_json;
-        return vbox(split_lines(copy)) | yframe | flex;
-    });
+    }, (*scrolls)[1]);
 
-    auto tree_view = Renderer([get_side] {
-        const auto side = get_side();
-        return render_json_tree(side.parsed_json) | yframe | flex;
-    });
+    // Tree view
+    auto tree_view = make_scrollable_tree([get_cap, is_request]() -> std::shared_ptr<glz::generic> {
+        auto cap = get_cap();
+        std::lock_guard lk(cap->mtx);
+        return is_request ? cap->request.parsed_json : cap->response.parsed_json;
+    }, (*scrolls)[2]);
 
     auto tab_toggle = Toggle(sub_tab_titles.get(), sub_tab_index.get());
     auto tab_content = Container::Tab(
         { raw_view, json_view, tree_view },
         sub_tab_index.get());
 
-    auto inner = Container::Vertical({ tab_toggle, tab_content });
+    // Only tab_toggle is in the focus chain — the tab content
+    // renderers are non-focusable so arrow keys navigate normally.
+    // PageUp/PageDown are caught HERE and routed to the active tab's
+    // scroll state.
+    auto focusable = Container::Vertical({ tab_toggle });
 
-    return Renderer(inner, [tab_toggle, tab_content,
-                            sub_tab_titles, sub_tab_index, title] {
+    auto pane = Renderer(focusable, [tab_toggle, tab_content,
+                                     sub_tab_titles, sub_tab_index, title] {
         return vbox({
                    hbox({ text(title) | bold | color(Color::Cyan),
                           text("  "),
@@ -220,23 +384,43 @@ Component make_side_pane(const std::shared_ptr<request_capture>& cap,
                    tab_content->Render() | flex,
                });
     });
+
+    return CatchEvent(pane, [scrolls, sub_tab_index](Event e) {
+        auto idx = static_cast<std::size_t>(*sub_tab_index);
+        if (idx >= scrolls->size()) return false;
+        auto& scroll = (*scrolls)[idx];
+        if (e == Event::PageDown) { *scroll = std::min(1.f, *scroll + page_step); return true; }
+        if (e == Event::PageUp)   { *scroll = std::max(0.f, *scroll - page_step); return true; }
+        return false;
+    });
 }
 
-/// Stacked Request / Response display: top half is the request side,
-/// bottom half is the response side. Each half is its own
-/// Raw/JSON/Tree component built by `make_side_pane`.
-Component make_request_response_pane(const std::shared_ptr<request_capture>& cap)
+/// Stacked Request / Response display: top half = request, bottom = response.
+Component make_request_response_pane(get_cap_fn get_cap)
 {
-    auto request_pane  = make_side_pane(cap, /*is_request=*/true,  "REQUEST");
-    auto response_pane = make_side_pane(cap, /*is_request=*/false, "RESPONSE");
+    auto request_pane  = make_side_pane(get_cap, /*is_request=*/true,  "REQUEST");
+    auto response_pane = make_side_pane(get_cap, /*is_request=*/false, "RESPONSE");
 
     auto inner = Container::Vertical({ request_pane, response_pane });
 
     return Renderer(inner, [request_pane, response_pane] {
+        // Exact 50/50 vertical split. `yflex_grow` alone doesn't work
+        // because FTXUI respects each child's `min_y`, giving more
+        // space to whichever half has more content. Instead, compute
+        // the available height from Terminal::Size() and assign
+        // exactly half to each pane via `size(HEIGHT, EQUAL, half)`.
+        //
+        // Overhead subtracted: status bar (1) + tab toggle (1) +
+        // separator (1) + title+toggle per half (2×2=4) + this
+        // separator (1) = ~8 rows.
+        auto terminal = ftxui::Terminal::Size();
+        const int avail = std::max(6, terminal.dimy - 8);
+        const int half = avail / 2;
+
         return vbox({
-                   request_pane->Render() | flex,
+                   request_pane->Render()  | size(HEIGHT, EQUAL, half),
                    separator(),
-                   response_pane->Render() | flex,
+                   response_pane->Render() | size(HEIGHT, EQUAL, half),
                });
     });
 }
@@ -246,20 +430,68 @@ Component make_request_response_pane(const std::shared_ptr<request_capture>& cap
 Component make_rest_view(app_state& state, worker& wrk)
 {
     spdlog::debug("make_rest_view: entering");
-    // Per-view state held in shared_ptrs so the lambdas below extend
-    // their lifetime past this function's return.
-    auto cap = std::make_shared<request_capture>();
-    auto cmd_titles = std::make_shared<std::vector<std::string>>(
-        std::vector<std::string>{ "ping" });
+
+    // Per-command captures — each command gets its own request_capture so
+    // switching commands in the menu shows that command's last result.
+    constexpr auto num_cmds = sizeof(commands) / sizeof(commands[0]);
+    auto caps = std::make_shared<std::vector<std::shared_ptr<request_capture>>>();
+    caps->reserve(num_cmds);
+    for (std::size_t i = 0; i < num_cmds; ++i)
+        caps->emplace_back(std::make_shared<request_capture>());
+
+    // Command menu: hand-coded titles from the `commands[]` table.
+    auto cmd_titles = std::make_shared<std::vector<std::string>>();
+    for (const auto& c : commands)
+        cmd_titles->emplace_back(c.name);
     auto cmd_index = std::make_shared<int>(0);
 
-    auto cmd_menu = Menu(cmd_titles.get(), cmd_index.get());
+    // Symbol input (used by commands with `needs_symbol`).
+    auto symbol = std::make_shared<std::string>("BTCUSDT");
 
-    auto run_button = Button("Run", [&wrk, &state, cap] {
-        run_ping(wrk, state, cap);
+    // Fire request on Enter in the command menu.
+    auto cmd_menu = Menu(cmd_titles.get(), cmd_index.get());
+    auto cmd_menu_with_enter = CatchEvent(cmd_menu, [&wrk, &state, caps, cmd_index, symbol](Event e) {
+        if (e == Event::Return) {
+            run_selected(*cmd_index, *symbol, wrk, state,
+                         (*caps)[static_cast<std::size_t>(*cmd_index)]);
+            return true;
+        }
+        return false;
     });
 
-    auto params_pane = Renderer(run_button, [run_button, cap] {
+    // Symbol input — only focusable (and rendered) when the selected
+    // command has `needs_symbol`. `Maybe` makes the component return
+    // `Focusable() == false` when hidden, so Container::Horizontal
+    // skips it during →/← navigation and focus jumps straight from
+    // the command list to the response pane.
+    auto symbol_input = Input(symbol.get(), "symbol");
+    auto symbol_maybe = symbol_input
+        | Maybe([cmd_index] {
+              return commands[static_cast<std::size_t>(*cmd_index)].needs_symbol;
+          });
+
+    auto rr_pane = make_request_response_pane([caps, cmd_index]() {
+        return (*caps)[static_cast<std::size_t>(*cmd_index)];
+    });
+
+    // Focus chain: cmd_menu → symbol_input (only when visible) → rr_pane.
+    auto root = Container::Horizontal({
+        cmd_menu_with_enter,
+        symbol_maybe,
+        rr_pane,
+    });
+
+    // Explicit capture of cmd_titles / cmd_index / symbol / cap keeps
+    // the models alive for the lifetime of the returned component.
+    // The middle column is **rendered** here (non-interactive text:
+    // title, description, state, info) rather than wrapped in a
+    // Renderer-with-child, so it never traps focus.
+    return Renderer(root, [cmd_menu_with_enter, symbol_maybe, rr_pane,
+                           cmd_titles, cmd_index, symbol, caps] {
+        const auto idx = static_cast<std::size_t>(*cmd_index);
+        const auto& cmd = commands[idx];
+        const auto& cap = (*caps)[idx];
+
         const char* state_label = "";
         switch (cap->state.load()) {
             case request_capture::idle:    state_label = "idle"; break;
@@ -272,38 +504,32 @@ Component make_rest_view(app_state& state, worker& wrk)
             std::lock_guard lk(cap->mtx);
             info_copy = cap->info_lines;
         }
-        return vbox({
-                   text("ping") | bold,
-                   text("Test API connectivity") | dim,
-                   separator(),
-                   run_button->Render(),
-                   separator(),
-                   hbox({ text("state: "), text(state_label) | bold }),
-                   separator(),
-                   text("info:") | dim,
-                   text(info_copy.empty() ? std::string{ "(none)" } : info_copy),
-               });
-    });
 
-    auto rr_pane = make_request_response_pane(cap);
+        Elements mid_rows = {
+            text(cmd.name) | bold,
+            text(cmd.description) | dim,
+            separator(),
+        };
+        if (cmd.needs_symbol) {
+            mid_rows.push_back(hbox({
+                text("symbol: ") | dim,
+                symbol_maybe->Render() | border | flex,
+            }));
+            mid_rows.push_back(separator());
+        }
+        mid_rows.push_back(hbox({ text("state: "), text(state_label) | bold }));
+        mid_rows.push_back(separator());
+        mid_rows.push_back(text("info:") | dim);
+        mid_rows.push_back(text(info_copy.empty() ? std::string{ "(none)" } : info_copy));
+        mid_rows.push_back(filler());
+        mid_rows.push_back(text("Enter = run  ↑↓ = select  →/← = navigate") | dim);
 
-    auto root = Container::Horizontal({
-        cmd_menu,
-        params_pane,
-        rr_pane,
-    });
-
-    // Explicit capture of cmd_titles / cmd_index / cap extends their
-    // lifetime for as long as the returned component lives — see the
-    // lifetime note at the top of this file.
-    return Renderer(root, [cmd_menu, params_pane, rr_pane,
-                           cmd_titles, cmd_index, cap] {
         return hbox({
                    vbox({ text("Commands") | bold, separator(),
-                          cmd_menu->Render() | flex })
-                       | size(WIDTH, EQUAL, 20),
+                          cmd_menu_with_enter->Render() | flex })
+                       | size(WIDTH, EQUAL, 22),
                    separator(),
-                   params_pane->Render() | size(WIDTH, EQUAL, 38),
+                   vbox(std::move(mid_rows)) | size(WIDTH, EQUAL, 42),
                    separator(),
                    rr_pane->Render() | flex,
                });
