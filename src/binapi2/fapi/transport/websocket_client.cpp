@@ -18,6 +18,7 @@
 #include <boost/asio/connect.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/ssl/stream.hpp>
+#include <boost/asio/steady_timer.hpp>
 #include <boost/beast/core/buffers_to_string.hpp>
 #include <boost/beast/core/flat_buffer.hpp>
 #include <boost/beast/websocket.hpp>
@@ -26,6 +27,8 @@
 #include <boost/cobalt/run.hpp>
 
 #include <openssl/err.h>
+
+#include <chrono>
 
 namespace binapi2::fapi::transport {
 
@@ -64,6 +67,12 @@ websocket_client::~websocket_client() = default;
 boost::cobalt::task<result<void>>
 websocket_client::async_connect(std::string host, std::string port, ws_target_t target)
 {
+    const auto timeout_secs = cfg_.connect_timeout_seconds;
+    bool timed_out = false;
+    // Declared here so the catch block can cancel it / check timed_out.
+    // Initialized inside the try (needs the executor).
+    std::optional<boost::asio::steady_timer> timer;
+
     try {
         // Create I/O objects on the coroutine's executor so that io_thread::run_sync()
         // (used by sync wrappers) can drive their completions.
@@ -76,6 +85,30 @@ websocket_client::async_connect(std::string host, std::string port, ws_target_t 
                 { error_code::websocket, 0, 0, ERR_error_string(ERR_get_error(), nullptr), {} });
         }
 
+        // Per-step connect timeout. A single steady_timer covers the
+        // entire 4-step connect sequence (resolve → TCP → TLS → WS).
+        // If it fires, the pending async operation is cancelled via
+        // its cancel() method, which makes the co_await throw
+        // `operation_aborted`. The catch block below turns that into
+        // a timeout error result.
+        timer.emplace(executor);
+
+        if (timeout_secs > 0) {
+            timer->expires_after(std::chrono::seconds(timeout_secs));
+            timer->async_wait([&](boost::system::error_code ec) {
+                if (ec) return;  // timer was cancelled — normal completion
+                timed_out = true;
+                // Cancel whatever is in flight. The resolver, TCP socket,
+                // SSL stream, and WS stream all honour cancel().
+                if (impl_->resolver) impl_->resolver->cancel();
+                if (impl_->stream) {
+                    boost::system::error_code ignored;
+                    impl_->stream->next_layer().next_layer().close(ignored);
+                }
+            });
+        }
+
+        // ── DNS resolve ───────────────────────────────────────────
         if (cfg_.logger) {
             cfg_.logger({ transport_direction::sent, "CONN", "resolve",
                           host + ":" + port, 0, {}, {} });
@@ -91,6 +124,7 @@ websocket_client::async_connect(std::string host, std::string port, ws_target_t 
                           host, 0, ep_list, {} });
         }
 
+        // ── TCP connect ───────────────────────────────────────────
         if (cfg_.logger) {
             cfg_.logger({ transport_direction::sent, "CONN", "tcp_connect",
                           host + ":" + port, 0, {}, {} });
@@ -116,6 +150,7 @@ websocket_client::async_connect(std::string host, std::string port, ws_target_t 
             }
         });
 
+        // ── TLS handshake ─────────────────────────────────────────
         if (cfg_.logger) {
             cfg_.logger({ transport_direction::sent, "CONN", "ssl_handshake",
                           host, 0, {}, {} });
@@ -127,6 +162,7 @@ websocket_client::async_connect(std::string host, std::string port, ws_target_t 
                           SSL_get_version(impl_->stream->next_layer().native_handle()), 0, {}, {} });
         }
 
+        // ── WebSocket upgrade ─────────────────────────────────────
         if (cfg_.logger) {
             cfg_.logger({ transport_direction::sent, "CONN", "ws_handshake",
                           host + target, 0, {}, {} });
@@ -137,10 +173,20 @@ websocket_client::async_connect(std::string host, std::string port, ws_target_t 
                           host + target, 0, {}, {} });
         }
 
+        // Cancel the timer — all steps completed before the deadline.
+        timer->cancel();
+
         impl_->connected = true;
         co_return result<void>::success();
     }
     catch (const boost::system::system_error& e) {
+        if (timer) timer->cancel();
+        if (timed_out) {
+            co_return result<void>::failure(
+                { error_code::websocket, 0, 0,
+                  "connect timeout (" + std::to_string(timeout_secs) + "s): " + host + ":" + port,
+                  {} });
+        }
         co_return result<void>::failure({ error_code::websocket, 0, 0, e.what(), {} });
     }
 }

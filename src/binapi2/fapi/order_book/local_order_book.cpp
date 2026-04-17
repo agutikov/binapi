@@ -75,6 +75,16 @@ local_order_book::async_run(types::symbol_t symbol, int depth_limit)
     bool synced = false;
     std::uint64_t last_u = 0;
 
+    // How many events to buffer before fetching a (re-)snapshot.
+    // On the first sync attempt we fetch immediately (events_until_snap = 0).
+    // After each failed bracket check we double the wait (up to a cap)
+    // so that the buffer has time to grow and overlap the snapshot's
+    // lastUpdateId window. This avoids the 82-snapshots-zero-sync
+    // pathology on very liquid pairs (BTCUSDT) where the snapshot is
+    // always stale by the time the REST call returns.
+    constexpr std::size_t max_wait = 50;
+    std::size_t events_until_snap = 0;
+
     while (running_ && gen) {
         auto ev_result = co_await gen;
         if (!ev_result) co_return result<void>::failure(ev_result.err);
@@ -84,27 +94,38 @@ local_order_book::async_run(types::symbol_t symbol, int depth_limit)
         if (!synced) {
             buffer.push_back(event);
 
-            // Fetch REST snapshot on first buffered event
-            if (buffer.size() == 1) {
+            // Wait for enough events before (re-)fetching the snapshot.
+            if (events_until_snap > 0) {
+                --events_until_snap;
+                continue;
+            }
+
+            {
                 types::order_book_request_t req;
                 req.symbol = symbol;
                 req.limit = depth_limit;
                 auto snap = co_await market_data_.async_execute(req);
-                if (!snap) continue;  // retry on next event
+                if (!snap) {
+                    events_until_snap = std::min(max_wait, std::max<std::size_t>(events_until_snap, 1) * 2);
+                    continue;  // REST error — retry after more events
+                }
 
                 const auto snapshot_id = snap->lastUpdateId;
 
-                // Discard events before snapshot
+                // Discard events entirely before the snapshot.
                 std::erase_if(buffer, [snapshot_id](const auto& ev) {
                     return ev.final_update_id < snapshot_id;
                 });
 
-                // Verify first event brackets snapshot
+                // Verify first remaining event brackets the snapshot:
+                //   event.first_update_id <= snapshot_id <= event.final_update_id
                 if (buffer.empty()
                     || buffer.front().first_update_id > snapshot_id
                     || buffer.front().final_update_id < snapshot_id) {
-                    buffer.clear();
-                    continue;  // retry
+                    // Bracket check failed. Accumulate more events before
+                    // retrying — exponential backoff capped at max_wait.
+                    events_until_snap = std::min(max_wait, std::max<std::size_t>(events_until_snap, 1) * 2);
+                    continue;
                 }
 
                 // Initialize book from snapshot
@@ -138,6 +159,8 @@ local_order_book::async_run(types::symbol_t symbol, int depth_limit)
                 buffer.clear();
                 synced = true;
             }
+            // else: still accumulating events, waiting for next
+            // need_snapshot cycle to try again.
         } else {
             // Validate sequence continuity
             if (event.prev_final_update_id != last_u) {

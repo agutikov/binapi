@@ -73,6 +73,12 @@ public:
     [[nodiscard]] boost::cobalt::task<binapi2::fapi::rest::client*>
     acquire_rest_client(binapi2::demo::result_sink& sink);
 
+    /// Same as above but without a result_sink — returns nullptr on
+    /// failure and logs the error. Used by paths that don't go through
+    /// the exec_* / capture_sink machinery (e.g. the order book).
+    [[nodiscard]] boost::cobalt::task<binapi2::fapi::rest::client*>
+    acquire_rest_client_raw();
+
 private:
     void load_credentials_async();
     void install_transport_logger();

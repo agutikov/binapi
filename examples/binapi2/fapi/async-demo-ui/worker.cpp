@@ -10,6 +10,7 @@
 #include <boost/asio/use_future.hpp>
 #include <boost/cobalt/spawn.hpp>
 #include <boost/cobalt/task.hpp>
+#include <boost/cobalt/this_thread.hpp>
 
 #include <ftxui/component/event.hpp>
 
@@ -162,6 +163,14 @@ void worker::start()
     started_ = true;
     spdlog::info("worker: starting io_context thread");
     thread_ = std::thread([this] {
+        // Set the cobalt thread-local executor for this thread.
+        // Without this, cobalt generators (which start eagerly with
+        // initial_suspend = suspend_never) fall back to
+        // `this_thread::get_executor()` to find their executor. If
+        // it's not set, async operations inside the generator body
+        // (like WebSocket connect in market_stream::subscribe) post
+        // to a null executor and hang forever.
+        boost::cobalt::this_thread::set_executor(ioc_.get_executor());
         try {
             ioc_.run();
         } catch (const std::exception& e) {
@@ -215,6 +224,25 @@ worker::acquire_rest_client(binapi2::demo::result_sink& sink)
     }
     rest_client_ = std::move(*r);
     spdlog::info("worker: REST client connected, will be reused for subsequent calls");
+    co_return rest_client_.get();
+}
+
+boost::cobalt::task<binapi2::fapi::rest::client*>
+worker::acquire_rest_client_raw()
+{
+    if (rest_client_) {
+        spdlog::debug("worker::acquire_rest_client_raw: returning cached client");
+        co_return rest_client_.get();
+    }
+
+    spdlog::info("worker: connecting REST client (first use, raw path)");
+    auto r = co_await api_->create_rest_client();
+    if (!r) {
+        spdlog::error("worker: REST connect failed: {}", r.err.message);
+        co_return nullptr;
+    }
+    rest_client_ = std::move(*r);
+    spdlog::info("worker: REST client connected");
     co_return rest_client_.get();
 }
 

@@ -74,6 +74,13 @@ struct config
     /// servers) or custom CA bundles.
     std::string ca_cert_file{};
 
+    /// @brief Connect timeout (seconds) for WebSocket and HTTP connections.
+    /// Each step of the connect sequence (DNS resolve, TCP connect, TLS
+    /// handshake, WS upgrade) must complete within this budget.  If any
+    /// step takes longer, the connect attempt fails with a timeout error
+    /// and the subscribe retry loop can try again.  0 = no timeout.
+    int connect_timeout_seconds{ 10 };
+
     /// @brief Optional callback for transport-level logging.
     ///
     /// When set, the HTTP and WebSocket transport layers invoke this callback
