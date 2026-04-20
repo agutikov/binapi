@@ -1,17 +1,17 @@
 set(BINAPI_HEADERS
-    ${CMAKE_SOURCE_DIR}/include/binapi/api.hpp
-    ${CMAKE_SOURCE_DIR}/include/binapi/flatjson.hpp
-    ${CMAKE_SOURCE_DIR}/include/binapi/dtf.hpp
-    ${CMAKE_SOURCE_DIR}/include/binapi/double_type.hpp
-    ${CMAKE_SOURCE_DIR}/include/binapi/enums.hpp
-    ${CMAKE_SOURCE_DIR}/include/binapi/errors.hpp
-    ${CMAKE_SOURCE_DIR}/include/binapi/invoker.hpp
-    ${CMAKE_SOURCE_DIR}/include/binapi/message.hpp
-    ${CMAKE_SOURCE_DIR}/include/binapi/pairslist.hpp
-    ${CMAKE_SOURCE_DIR}/include/binapi/reports.hpp
-    ${CMAKE_SOURCE_DIR}/include/binapi/tools.hpp
-    ${CMAKE_SOURCE_DIR}/include/binapi/types.hpp
-    ${CMAKE_SOURCE_DIR}/include/binapi/websocket.hpp
+    ${PROJECT_SOURCE_DIR}/include/binapi/api.hpp
+    ${PROJECT_SOURCE_DIR}/include/binapi/flatjson.hpp
+    ${PROJECT_SOURCE_DIR}/include/binapi/dtf.hpp
+    ${PROJECT_SOURCE_DIR}/include/binapi/double_type.hpp
+    ${PROJECT_SOURCE_DIR}/include/binapi/enums.hpp
+    ${PROJECT_SOURCE_DIR}/include/binapi/errors.hpp
+    ${PROJECT_SOURCE_DIR}/include/binapi/invoker.hpp
+    ${PROJECT_SOURCE_DIR}/include/binapi/message.hpp
+    ${PROJECT_SOURCE_DIR}/include/binapi/pairslist.hpp
+    ${PROJECT_SOURCE_DIR}/include/binapi/reports.hpp
+    ${PROJECT_SOURCE_DIR}/include/binapi/tools.hpp
+    ${PROJECT_SOURCE_DIR}/include/binapi/types.hpp
+    ${PROJECT_SOURCE_DIR}/include/binapi/websocket.hpp
 )
 
 set(BINAPI_SOURCES
@@ -33,7 +33,7 @@ add_library(
 
 target_include_directories(${PROJECT_NAME}
     PUBLIC
-        ${CMAKE_SOURCE_DIR}/include
+        ${PROJECT_SOURCE_DIR}/include
 )
 
 target_link_libraries(

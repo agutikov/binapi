@@ -40,7 +40,7 @@ add_executable(response_parse_test response_parse_test.cpp)
 target_link_libraries(response_parse_test PRIVATE binapi2_fapi GTest::gtest_main)
 target_compile_options(response_parse_test PRIVATE)
 target_compile_definitions(response_parse_test PRIVATE
-    RESPONSES_PATH="${CMAKE_SOURCE_DIR}/compose/postman-mock/responses"
+    RESPONSES_PATH="${PROJECT_SOURCE_DIR}/compose/postman-mock/responses"
 )
 gtest_discover_tests(response_parse_test DISCOVERY_MODE PRE_TEST)
 
@@ -48,7 +48,7 @@ add_executable(postman_validation_test postman_validation_test.cpp)
 target_link_libraries(postman_validation_test PRIVATE binapi2_fapi GTest::gtest_main)
 target_compile_options(postman_validation_test PRIVATE)
 target_compile_definitions(postman_validation_test PRIVATE
-    POSTMAN_JSON_PATH="${CMAKE_SOURCE_DIR}/docs/api/binance-api-postman/collections/Binance Derivatives Trading USDS Futures API.json"
+    POSTMAN_JSON_PATH="${PROJECT_SOURCE_DIR}/docs/api/binance-api-postman/collections/Binance Derivatives Trading USDS Futures API.json"
 )
 gtest_discover_tests(postman_validation_test DISCOVERY_MODE PRE_TEST)
 
@@ -87,7 +87,7 @@ gtest_discover_tests(rotating_file_sink_test DISCOVERY_MODE PRE_TEST)
 # the example's own CMakeLists) because the example subdir is added
 # before enable_testing(), so gtest_discover_tests would not enrol them
 # under ctest from there.
-set(_ar_dir ${CMAKE_SOURCE_DIR}/examples/binapi2/fapi/async-recorder)
+set(_ar_dir ${PROJECT_SOURCE_DIR}/examples/binapi2/fapi/async-recorder)
 add_executable(async_recorder_selector_test
     ${_ar_dir}/selector.cpp
     ${_ar_dir}/selector_test.cpp
