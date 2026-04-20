@@ -45,6 +45,7 @@ binapi2 type mappings in a task-oriented narrative.
 |----------|-------------|
 | [implementation_status.md](implementation_status.md) | Per-endpoint coverage matrix (Binance docs → source files) |
 | [demo_cli_all_apis.md](demo_cli_all_apis.md) | Demo CLI command reference (135 commands) + known testnet issues |
+| [async_demo_ui.md](async_demo_ui.md) | Interactive TUI demo — layout, per-tab anatomy, extension guide |
 
 ### Integration
 
