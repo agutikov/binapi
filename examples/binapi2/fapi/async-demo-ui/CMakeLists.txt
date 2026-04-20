@@ -12,6 +12,8 @@ add_executable(binapi2-fapi-async-demo-ui
     rest/commands_account.cpp
     rest/commands_trade.cpp
     rest/commands_convert.cpp
+    ws/commands.cpp
+    streams/commands.cpp
     views/status_bar.cpp
     views/rest_view.cpp
     views/ws_view.cpp

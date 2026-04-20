@@ -128,12 +128,18 @@ enum class form_kind
 
 /// Which command-group does this entry belong to? Drives the group header
 /// in the menu and the "auth required" flag on the Run action.
+///
+/// `ws_public` / `ws_signed` are used by the WebSocket API tab — public
+/// WS calls need no logon, signed ones do. Both are routed through
+/// `exec_ws_public` / `exec_ws_signed` from `binapi2_demo_commands`.
 enum class command_group
 {
     market_data,
     account,
     trade,
     convert,
+    ws_public,
+    ws_signed,
 };
 
 // ── Form-kind → field visibility ──────────────────────────────────
@@ -359,7 +365,10 @@ std::span<const rest_command> convert_commands();
 
 inline bool requires_auth(command_group g)
 {
-    return g != command_group::market_data;
+    return g == command_group::account
+        || g == command_group::trade
+        || g == command_group::convert
+        || g == command_group::ws_signed;
 }
 
 } // namespace demo_ui::rest

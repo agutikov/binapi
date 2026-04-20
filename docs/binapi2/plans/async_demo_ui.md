@@ -547,13 +547,39 @@ so hidden inputs drop out of focus traversal.
 * Switching commands keeps each command's last result and each field's last
   value sticky.
 
+**Infrastructure built during step 4 that's now shared across all tabs**:
+
+* **Collapsible groups** in the REST menu (▼/▶ arrows; Enter on a header
+  toggles). Selection is preserved across rebuilds.
+* **Scrollable menu** via `| vscroll_indicator | yframe | flex`.
+* **Virtualized response panes** — Raw / JSON / Tree. Content is wrapped
+  once into a `vector<Element>`; each frame only slices
+  `rows[scroll_top .. scroll_top + viewport_h]`. Custom scrollbar column.
+  Replaced `paragraph` (flexbox-per-line) + `yframe` (full render then
+  clip). Scaled from "sluggish on big JSON" to "instant" for any size.
+* **Word-wrap helper** (`util/wrap_text.hpp`) — word boundaries, with
+  force-break for tokens longer than panel width. Pane width comes from
+  `reflect` on the previous render (1-frame lag, invisible in practice).
+* **PageUp/PageDown = half viewport** via `step = viewport_h / 2`.
+* **Mouse wheel** support (`WheelUp`/`WheelDown`, step 3), gated on
+  `probe_box->Contain(mouse.x, mouse.y)` so the menu still gets wheel
+  events when the cursor is over it.
+* **Context-aware bottom keybar** in `main.cpp` — each tab exposes a
+  `hints()` function; the REST view returns different chips depending on
+  whether the menu / form / response pane has focus.
+* **Form inputs in `Container::Vertical`** so ↑/↓ steps between visible
+  inputs, →/← walks between zones.
+* **FTXUI model-lifetime rule** (`feedback_ftxui_model_lifetime.md`):
+  widgets hold raw pointers into caller-owned models; all backing
+  containers live in shared_ptr captured by the outer Renderer.
+
 **Deferred**:
 
 * Required-field validation (red border + disabled Run).
 * Dropdowns (Toggle / Menu) for enum-typed fields (side, type, tif, margin
   type, delta_type, algo type) — currently free-text, parsed through
   `lib::parse_enum`.
-* Per-group scroll markers / filter input if the flat menu grows unwieldy.
+* Filter input for the aggregated menu if it grows unwieldy.
 * Manual UI smoke testing — the binary builds clean and all 401 unit tests
   pass, but the FTXUI surface itself is not driven in CI; the user verifies
   by running `scripts/testnet/demo_ui.sh` (or equivalent) before declaring
@@ -561,79 +587,95 @@ so hidden inputs drop out of focus traversal.
 
 ---
 
-### Step 5 — all WS API requests
+### Step 5 — all WS API requests — DONE
 
-**Goal**: every command in `cmd_ws_api.cpp` works through the same form +
-response pattern.
-
-**Differences from REST**:
-
-* Two underlying patterns: **public** (`exec_ws_public`) and
-  **signed** (`exec_ws_signed`, which connects + logs on + executes).
-* WS API responses have a `status` field plus an optional `result`. The
-  response pane already handles this fine — we capture both.
-* The **WS API connection is short-lived** (one connect+close per call).
-  Step 5 keeps it that way for simplicity. Step 7 can introduce a
-  persistent logged-in connection if it makes sense for trading.
+All 16 WS API commands selectable from the WS API tab, reusing the
+`rest::form_state` / `rest::form_kind` / `rest::cmd_ctx` infrastructure
+from step 4. Session logon is a bespoke coroutine (connect + logon, no
+execute). Public commands dispatch via `lib::exec_ws_public`; signed via
+`lib::exec_ws_signed`. Two new `command_group` values — `ws_public` and
+`ws_signed` — drive auth gating (`requires_auth` = true for `ws_signed`).
 
 **Files added**:
 
 ```
 ws/
-  commands_ws_api.cpp    # ~16 form factories
-views/ws_view.cpp        # mirror of rest_view, populated from the WS list
+  commands.hpp     # declares ws_commands() span + bespoke ws_logon_coro
+  commands.cpp     # 16 command entries
+views/ws_view.cpp  # rewritten: scrollable menu, Vertical form,
+                   # virtualized rr_pane (via shared response_pane.hpp),
+                   # context-aware hints, auth gating
 ```
 
-`exec_ws_public` and `exec_ws_signed` already live in
-`binapi2_demo_commands` (sink-parameterised). The WS commands reuse the
-same `capture_sink` from step 1 — no new sink type needed.
+Shares every step-4 improvement listed above (virtualized panes,
+wrap-text, scrolling, keybar, form navigation, mouse wheel, PageUp/Down).
+One-off "all-market vs per-symbol" switch for `ws-book-ticker` and
+`ws-price-ticker` (blank symbol → tickers request; non-blank → ticker
+request) mirroring the CLI.
 
-**Acceptance**: every command in the WS API tab runs and shows results.
+**Deferred** (same list as step 4 — dropdowns, validation).
 
 ---
 
 ### Step 6 — all market streams
 
-**Goal**: every subscription in `cmd_stream.cpp` selectable from the
-Streams tab, with three view modes.
-
-**View mode toggle**:
-
-```
-[ JSON list ] [ Compact table ] [ Counters only ]
-```
-
-* **JSON list**: same as step 3 — ring buffer of pretty-printed events.
-* **Compact table**: typed access — render the latest N events as a
-  `Table` (from `ftxui/dom/table.hpp`) with stream-specific columns
-  (e.g. for `bookTicker`: time, symbol, bid, bidQty, ask, askQty). This
-  needs **per-subscription column layouts** — a small visitor in
-  `streams/table_renderers.cpp` switching on the subscription's event
-  variant.
-* **Counters only**: a single status line — `total events`, `events/s`
-  (sliding-window EMA), `last event time`, `errors`. No per-event render at
-  all, useful for high-rate streams like all-tickers.
-
-The third mode is essentially **always-on**; it's just the counter line at
-the top of the streams pane regardless of which mode is selected below.
-
-**Recording**: **opt-in here.** Reuses the CLI's
-`async_spdlog_stream_recorder` if `--record FILE` was passed at launch
-(same flag as the CLI). The recorder runs as another spawned task; the
-stream view shows a `recording → /path` indicator in the counter line.
+**Status**: core feature (all 22 subscriptions wired, virtualized event
+list, shared infrastructure) **DONE**. Table mode + recording deferred.
 
 **Files added**:
 
 ```
 streams/
-  commands_streams.cpp     # ~22 subscription form factories
-  table_renderers.cpp      # per-subscription typed-table renderers
-views/streams_view.cpp     # rewritten: full layout
+  commands.hpp           # stream_form_state / form_kind / start_ctx /
+                         # stream_command; needs_* predicates
+  commands.cpp           # 22 subscription entries with start fns
+util/virtual_scroll.hpp  # promoted from response_pane's detail:: —
+                         # scroll_model + virtual_scroll_render +
+                         # scrollbar_column now shared with the Streams
+                         # event list
+views/streams_view.cpp   # rewritten: scrollable menu, Vertical form
+                         # (symbol/pair/interval/levels/speed),
+                         # virtualized event list, context-aware hints,
+                         # mouse wheel + PageUp/Down
 ```
 
-**Acceptance**: every stream listed in `cmd_stream.cpp` is selectable, all
-three view modes work, Stop returns to idle promptly, recording (if
-enabled) writes a JSONL file matching the CLI's output byte-for-byte.
+**What's in place**:
+
+* **All 22 market-stream subscriptions** (9 per-symbol, 8 all-market,
+  kline, continuousKline, partialDepth with levels, diffDepth with
+  speed).
+* **Virtualized event list** using the same `scroll_model` +
+  `virtual_scroll_render` helpers as the REST response panes. Cached
+  wrapped rows rebuild when the event counter advances or the pane
+  resizes. Scales to the `max_ring = 200` events cap with negligible
+  per-frame cost.
+* **Per-stream scroll state** so switching between streams keeps each
+  list's scroll position.
+* **Form inputs** in a `Container::Vertical` — ↑/↓ walks the visible
+  fields, →/← moves between menu / form / event zones.
+* **Mouse wheel** on the event list (`probe_box->Contain(mouse.x, y)`
+  gate).
+* **PageUp/PageDown** = half viewport.
+* **Start/Stop via Enter** on the menu (Enter toggles
+  `stream_capture::stop` when the subscription is already running).
+* **Context-aware bottom keybar** — menu / form zones.
+
+**Deferred**:
+
+* **Compact table view** (per-subscription column layouts) — needs a
+  visitor over the event variant.
+* **Counters-only view** — current view already shows total/errors;
+  an events/s sliding-window EMA isn't wired.
+* **Recording** (`async_spdlog_stream_recorder`) — the CLI has it; the
+  UI doesn't yet spawn a recorder task alongside the view sink.
+
+**Acceptance**:
+
+* Every stream in `cmd_stream.cpp` is selectable from the Streams tab;
+  Start flows events into the list, Stop returns to idle promptly.
+* Scroll through the event ring with PageUp/PageDown, mouse wheel, or
+  the arrow keys once the list is focused; new events appear at the
+  top without disturbing the current scroll offset.
 
 ---
 

@@ -1,31 +1,37 @@
 // SPDX-License-Identifier: Apache-2.0
 //
-// Streams tab — step 3.
+// Streams tab.
 //
-// Subscription selector (bookTicker for now), symbol input, Start/Stop
-// buttons, a counter/status line, and a scrollable JSON event list
-// showing the last N events from the ring buffer.
+// Same shape as REST / WS tabs: scrollable menu on the left, a vertical
+// form container in the middle (symbol / pair / interval / levels /
+// speed, each `Maybe`-gated per form_kind), and a virtualized event
+// list on the right that scrolls the pretty-printed event ring.
+//
+// The event list uses the same `scroll_model` + `virtual_scroll_render`
+// helpers as the REST response panes, so PageUp/Down, mouse wheel, and
+// the custom scrollbar behave identically.
+//
+// Start / Stop is bound to Enter on the menu: first Enter starts the
+// subscription, second Enter toggles `stream_capture::stop`, which the
+// generator loop in `lib::exec_stream` observes between events.
 
 #include "../app_state.hpp"
+#include "../streams/commands.hpp"
 #include "../streams/stream_capture.hpp"
-#include "../streams/stream_capture_sink.hpp"
+#include "../util/virtual_scroll.hpp"
+#include "../util/wrap_text.hpp"
 #include "../worker.hpp"
 #include "views.hpp"
 
-#include <binapi2/demo_commands/exec.hpp>
-#include <binapi2/fapi/types/enums.hpp>
-#include <binapi2/futures_usdm_api.hpp>
-
-#include <boost/asio/use_future.hpp>
-#include <boost/cobalt/spawn.hpp>
-#include <boost/cobalt/task.hpp>
-
 #include <ftxui/component/component.hpp>
+#include <ftxui/component/mouse.hpp>
 #include <ftxui/dom/elements.hpp>
-#include <ftxui/screen/terminal.hpp>
+#include <ftxui/screen/box.hpp>
 
 #include <spdlog/spdlog.h>
 
+#include <deque>
+#include <functional>
 #include <memory>
 #include <string>
 #include <vector>
@@ -33,241 +39,199 @@
 namespace demo_ui {
 
 using namespace ftxui;
-namespace lib   = binapi2::demo;
-namespace types = binapi2::fapi::types;
 
 namespace {
 
-// ── Stream subscriptions available in step 3 ──────────────────────
-
-struct stream_def
-{
-    const char* name;
-    const char* description;
-    bool needs_symbol;
-};
-
-constexpr stream_def streams[] = {
-    { "bookTicker",     "Individual book ticker",       true  },
-    { "aggTrade",       "Aggregate trade",              true  },
-    { "markPrice",      "Mark price",                   true  },
-    { "ticker",         "24hr ticker",                  true  },
-    { "miniTicker",     "Mini ticker",                  true  },
-    { "!bookTicker",    "All book tickers",             false },
-    { "!ticker",        "All 24hr tickers",             false },
-    { "!miniTicker",    "All mini tickers",             false },
-};
-
-// ── Free-function coroutines ──────────────────────────────────────
-
-boost::cobalt::task<void>
-book_ticker_stream(worker& wrk,
-                   std::shared_ptr<stream_capture_sink> sink,
-                   std::shared_ptr<stream_capture> cap,
-                   std::string symbol)
-{
-    spdlog::info("streams: starting bookTicker {}", symbol);
-    types::book_ticker_subscription sub;
-    sub.symbol = symbol;
-    co_await lib::exec_stream(wrk.api(), std::move(sub), *sink, &cap->stop);
-}
-
-boost::cobalt::task<void>
-agg_trade_stream(worker& wrk,
-                 std::shared_ptr<stream_capture_sink> sink,
-                 std::shared_ptr<stream_capture> cap,
-                 std::string symbol)
-{
-    spdlog::info("streams: starting aggTrade {}", symbol);
-    types::aggregate_trade_subscription sub;
-    sub.symbol = symbol;
-    co_await lib::exec_stream(wrk.api(), std::move(sub), *sink, &cap->stop);
-}
-
-boost::cobalt::task<void>
-mark_price_stream(worker& wrk,
-                  std::shared_ptr<stream_capture_sink> sink,
-                  std::shared_ptr<stream_capture> cap,
-                  std::string symbol)
-{
-    spdlog::info("streams: starting markPrice {}", symbol);
-    types::mark_price_subscription sub;
-    sub.symbol = symbol;
-    co_await lib::exec_stream(wrk.api(), std::move(sub), *sink, &cap->stop);
-}
-
-boost::cobalt::task<void>
-ticker_stream(worker& wrk,
-              std::shared_ptr<stream_capture_sink> sink,
-              std::shared_ptr<stream_capture> cap,
-              std::string symbol)
-{
-    spdlog::info("streams: starting ticker {}", symbol);
-    types::ticker_subscription sub;
-    sub.symbol = symbol;
-    co_await lib::exec_stream(wrk.api(), std::move(sub), *sink, &cap->stop);
-}
-
-boost::cobalt::task<void>
-mini_ticker_stream(worker& wrk,
-                   std::shared_ptr<stream_capture_sink> sink,
-                   std::shared_ptr<stream_capture> cap,
-                   std::string symbol)
-{
-    spdlog::info("streams: starting miniTicker {}", symbol);
-    types::mini_ticker_subscription sub;
-    sub.symbol = symbol;
-    co_await lib::exec_stream(wrk.api(), std::move(sub), *sink, &cap->stop);
-}
-
-boost::cobalt::task<void>
-all_book_ticker_stream(worker& wrk,
-                       std::shared_ptr<stream_capture_sink> sink,
-                       std::shared_ptr<stream_capture> cap)
-{
-    spdlog::info("streams: starting !bookTicker (all)");
-    co_await lib::exec_stream(wrk.api(), types::all_book_ticker_subscription{}, *sink, &cap->stop);
-}
-
-boost::cobalt::task<void>
-all_ticker_stream(worker& wrk,
-                  std::shared_ptr<stream_capture_sink> sink,
-                  std::shared_ptr<stream_capture> cap)
-{
-    spdlog::info("streams: starting !ticker (all)");
-    co_await lib::exec_stream(wrk.api(), types::all_market_ticker_subscription{}, *sink, &cap->stop);
-}
-
-boost::cobalt::task<void>
-all_mini_ticker_stream(worker& wrk,
-                       std::shared_ptr<stream_capture_sink> sink,
-                       std::shared_ptr<stream_capture> cap)
-{
-    spdlog::info("streams: starting !miniTicker (all)");
-    co_await lib::exec_stream(wrk.api(), types::all_market_mini_ticker_subscription{}, *sink, &cap->stop);
-}
-
-// ── Dispatch ──────────────────────────────────────────────────────
-
-void start_stream(int stream_index,
-                  const std::string& symbol,
-                  worker& wrk,
-                  app_state& state,
-                  std::shared_ptr<stream_capture> cap)
-{
-    if (cap->running) return;
-
-    // Reset capture.
-    cap->stop = false;
-    cap->total_events = 0;
-    cap->errors = 0;
-    {
-        std::lock_guard lk(cap->mtx);
-        cap->ring.clear();
-        cap->error.clear();
-    }
-
-    auto sink = std::make_shared<stream_capture_sink>(cap, wrk, state);
-
-    auto spawn = [&](auto coro) {
-        boost::cobalt::spawn(wrk.io().get_executor(), std::move(coro),
-                             boost::asio::use_future);
-    };
-
-    switch (stream_index) {
-        case 0: spawn(book_ticker_stream(wrk, std::move(sink), cap, symbol));    break;
-        case 1: spawn(agg_trade_stream(wrk, std::move(sink), cap, symbol));      break;
-        case 2: spawn(mark_price_stream(wrk, std::move(sink), cap, symbol));     break;
-        case 3: spawn(ticker_stream(wrk, std::move(sink), cap, symbol));         break;
-        case 4: spawn(mini_ticker_stream(wrk, std::move(sink), cap, symbol));    break;
-        case 5: spawn(all_book_ticker_stream(wrk, std::move(sink), cap));        break;
-        case 6: spawn(all_ticker_stream(wrk, std::move(sink), cap));             break;
-        case 7: spawn(all_mini_ticker_stream(wrk, std::move(sink), cap));        break;
-        default: spdlog::warn("streams: unknown index {}", stream_index); break;
-    }
-}
+namespace S = demo_ui::streams;
 
 } // namespace
 
 tab_view make_streams_view(app_state& state, worker& wrk)
 {
-    // Per-stream captures — each stream type gets its own capture so
-    // switching in the menu shows that stream's data.
-    constexpr auto num_streams = sizeof(streams) / sizeof(streams[0]);
+    spdlog::debug("make_streams_view: entering");
+
+    auto cmds = S::stream_commands();
+
+    auto titles = std::make_shared<std::vector<std::string>>();
+    titles->reserve(cmds.size());
+    for (const auto& c : cmds) titles->emplace_back(c.name);
+
+    // Per-stream capture so switching in the menu preserves each
+    // stream's buffer and counters.
     auto caps = std::make_shared<std::vector<std::shared_ptr<stream_capture>>>();
-    caps->reserve(num_streams);
-    for (std::size_t i = 0; i < num_streams; ++i)
+    caps->reserve(cmds.size());
+    for (std::size_t i = 0; i < cmds.size(); ++i)
         caps->emplace_back(std::make_shared<stream_capture>());
 
-    auto stream_titles = std::make_shared<std::vector<std::string>>();
-    for (const auto& s : streams)
-        stream_titles->emplace_back(s.name);
-    auto stream_index = std::make_shared<int>(0);
-    auto symbol = std::make_shared<std::string>("BTCUSDT");
+    // Per-stream virtualized scroll state + cached wrapped rows. Each
+    // stream's event list scrolls independently.
+    auto models = std::make_shared<std::vector<std::shared_ptr<scroll_model>>>();
+    auto cached_rows = std::make_shared<std::vector<std::vector<Element>>>();
+    auto cached_stamps = std::make_shared<std::vector<std::uint64_t>>();
+    auto cached_widths = std::make_shared<std::vector<int>>();
+    models->reserve(cmds.size());
+    cached_rows->resize(cmds.size());
+    cached_stamps->assign(cmds.size(), std::uint64_t{ 0 });
+    cached_widths->assign(cmds.size(), -1);
+    for (std::size_t i = 0; i < cmds.size(); ++i)
+        models->emplace_back(std::make_shared<scroll_model>());
 
-    auto stream_menu = Menu(stream_titles.get(), stream_index.get());
+    auto menu_index = std::make_shared<int>(0);
+    auto form       = std::make_shared<S::form_state>();
+    auto event_box  = std::make_shared<Box>();
 
-    // Enter = toggle start/stop for the selected stream.
-    auto menu_with_keys = CatchEvent(stream_menu,
-        [&wrk, &state, caps, stream_index, symbol](Event e) {
-            if (e == Event::Return) {
-                auto idx = static_cast<std::size_t>(*stream_index);
-                auto& cap = (*caps)[idx];
-                if (cap->running) {
-                    cap->stop = true;
-                } else {
-                    start_stream(*stream_index, *symbol, wrk, state, cap);
-                }
-                return true;
+    auto selected_cmd = [cmds, menu_index]() -> const S::stream_command* {
+        auto idx = static_cast<std::size_t>(*menu_index);
+        if (idx >= cmds.size()) return nullptr;
+        return &cmds[idx];
+    };
+
+    auto selected_form_kind = [selected_cmd]() -> S::form_kind {
+        if (auto* c = selected_cmd()) return c->form;
+        return S::form_kind::no_args;
+    };
+
+    auto cmd_menu = Menu(titles.get(), menu_index.get());
+    auto cmd_menu_with_enter = CatchEvent(cmd_menu,
+        [&wrk, &state, caps, menu_index, form, selected_cmd](Event e) {
+            if (e != Event::Return) return false;
+            const auto* cmd = selected_cmd();
+            if (!cmd) return true;
+            auto idx = static_cast<std::size_t>(*menu_index);
+            auto& cap = (*caps)[idx];
+            if (cap->running) {
+                cap->stop = true;
+            } else {
+                S::start_ctx ctx{ wrk, state, cap, *form };
+                cmd->start(ctx);
             }
-            return false;
+            return true;
         });
 
-    auto symbol_input = Input(symbol.get(), "symbol");
-    auto symbol_maybe = symbol_input
-        | Maybe([stream_index] {
-              return streams[static_cast<std::size_t>(*stream_index)].needs_symbol;
-          });
+    // ── Input widgets, Maybe-gated per form_kind ──────────────────────
 
-    auto scroll = std::make_shared<float>(0.f);
-    constexpr float page_step = 0.15f;
+    auto make_input = [](std::string* s, const char* placeholder) {
+        return Input(s, placeholder);
+    };
 
-    auto root = Container::Horizontal({
-        menu_with_keys,
-        symbol_maybe,
+    auto sym_in    = make_input(&form->symbol,   "symbol");
+    auto pair_in   = make_input(&form->pair,     "pair");
+    auto ival_in   = make_input(&form->interval, "interval (1m, 5m, 1h, …)");
+    auto lvl_in    = make_input(&form->levels,   "levels (5, 10, 20)");
+    auto speed_in  = make_input(&form->speed,    "speed (100ms, 250ms)");
+
+    auto maybe = [selected_form_kind](auto widget, auto needs_fn) {
+        return widget | Maybe([selected_form_kind, needs_fn] {
+            return needs_fn(selected_form_kind());
+        });
+    };
+
+    auto sym_m   = maybe(sym_in,   S::needs_symbol);
+    auto pair_m  = maybe(pair_in,  S::needs_pair);
+    auto ival_m  = maybe(ival_in,  S::needs_interval);
+    auto lvl_m   = maybe(lvl_in,   S::needs_levels);
+    auto speed_m = maybe(speed_in, S::needs_speed);
+
+    auto form_container = Container::Vertical({
+        sym_m, pair_m, ival_m, lvl_m, speed_m,
     });
 
-    auto view = Renderer(root, [menu_with_keys, symbol_maybe,
-                                stream_titles, stream_index, symbol, caps, scroll] {
-        const auto idx = static_cast<std::size_t>(*stream_index);
-        const auto& def = streams[idx];
+    auto root = Container::Horizontal({
+        cmd_menu_with_enter,
+        form_container,
+    });
+
+    cmd_menu_with_enter->TakeFocus();
+
+    auto view = Renderer(root, [cmd_menu_with_enter, form_container,
+                                caps, menu_index, titles,
+                                selected_cmd, selected_form_kind,
+                                sym_m, pair_m, ival_m, lvl_m, speed_m,
+                                models, cached_rows, cached_stamps, cached_widths,
+                                event_box] {
+        const auto* cmd = selected_cmd();
+        const auto idx = static_cast<std::size_t>(*menu_index);
         const auto& cap = (*caps)[idx];
+        const auto& m   = (*models)[idx];
         const bool running = cap->running.load();
         const auto total = cap->total_events.load();
-        const auto errs = cap->errors.load();
+        const auto errs  = cap->errors.load();
 
-        // Copy ring snapshot under lock.
-        std::deque<std::string> ring_snap;
+        // Rebuild the cached rows when the ring has changed or the
+        // pane width changed. `total` is a monotonic counter so it's a
+        // cheap "dirty" stamp — ring pops don't change it, but since
+        // ring pops happen only when new events arrive, total advances
+        // in lockstep.
+        int outer_w = event_box->x_max - event_box->x_min + 1;
+        int outer_h = event_box->y_max - event_box->y_min + 1;
+        if (outer_w <= 0) outer_w = 40;
+        if (outer_h <= 0) outer_h = 1;
+        const int content_w = std::max(1, outer_w - 1);
+        m->viewport_h = outer_h;
+        m->viewport_w = content_w;
+
+        if ((*cached_stamps)[idx] != total || (*cached_widths)[idx] != content_w) {
+            std::deque<std::string> ring_snap;
+            {
+                std::lock_guard lk(cap->mtx);
+                ring_snap = cap->ring;
+            }
+            auto& rows = (*cached_rows)[idx];
+            rows.clear();
+            // Newest-first order — matches the old view's behaviour.
+            for (auto it = ring_snap.rbegin(); it != ring_snap.rend(); ++it) {
+                for (auto& line : wrap_lines(*it, content_w))
+                    rows.push_back(text(std::move(line)));
+                // Blank separator between events.
+                rows.push_back(text(""));
+            }
+            (*cached_stamps)[idx] = total;
+            (*cached_widths)[idx] = content_w;
+        }
+
+        // Error banner + empty-state placeholder.
         std::string err_copy;
         {
             std::lock_guard lk(cap->mtx);
-            ring_snap = cap->ring;
             err_copy = cap->error;
         }
 
-        // ── controls ──────────────────────────────────────────────
-        Elements ctrl = {
-            text(def.name) | bold,
-            text("  "),
-            text(def.description) | dim,
-        };
-        if (def.needs_symbol) {
-            ctrl.push_back(text("  "));
-            ctrl.push_back(symbol_maybe->Render() | size(WIDTH, EQUAL, 12) | border);
+        auto& rows = (*cached_rows)[idx];
+        std::vector<Element> fallback;
+        const std::vector<Element>* render_rows = &rows;
+        if (rows.empty()) {
+            fallback.push_back(
+                text(running ? "  waiting for events…" : "  (no events)")
+                | dim);
+            render_rows = &fallback;
         }
 
-        // ── status line ───────────────────────────────────────────
-        auto status = hbox({
+        auto event_list = virtual_scroll_render(*render_rows, *m)
+                        | reflect(*event_box)
+                        | flex;
+
+        // ── controls row ───────────────────────────────────────────
+        Elements ctrl_rows;
+        if (cmd) {
+            ctrl_rows.push_back(text(cmd->name) | bold);
+            ctrl_rows.push_back(text(cmd->description) | dim);
+            ctrl_rows.push_back(separator());
+
+            auto labeled = [](const char* label, Element field) {
+                return hbox({ text(label) | dim | size(WIDTH, EQUAL, 12),
+                              field | border | flex });
+            };
+            const auto fk = cmd->form;
+            if (S::needs_symbol(fk))   ctrl_rows.push_back(labeled("symbol:",   sym_m->Render()));
+            if (S::needs_pair(fk))     ctrl_rows.push_back(labeled("pair:",     pair_m->Render()));
+            if (S::needs_interval(fk)) ctrl_rows.push_back(labeled("interval:", ival_m->Render()));
+            if (S::needs_levels(fk))   ctrl_rows.push_back(labeled("levels:",   lvl_m->Render()));
+            if (S::needs_speed(fk))    ctrl_rows.push_back(labeled("speed:",    speed_m->Render()));
+        } else {
+            ctrl_rows.push_back(text("(no selection)") | dim);
+        }
+
+        auto status_line = hbox({
             text(running ? " RUNNING " : " STOPPED ") | bold
                 | (running ? bgcolor(Color::Green) | color(Color::Black)
                            : bgcolor(Color::GrayDark) | color(Color::White)),
@@ -277,52 +241,87 @@ tab_view make_streams_view(app_state& state, worker& wrk)
             filler(),
         });
 
+        Elements middle_rows;
+        for (auto& r : ctrl_rows) middle_rows.push_back(std::move(r));
+        middle_rows.push_back(separator());
+        middle_rows.push_back(status_line);
         if (!err_copy.empty()) {
-            status = vbox({ status,
-                            text("  ERROR: " + err_copy) | color(Color::Red) });
+            middle_rows.push_back(text("  ERROR: " + err_copy) | color(Color::Red));
         }
+        middle_rows.push_back(filler());
 
-        // ── event list ────────────────────────────────────────────
-        Elements rows;
-        for (auto it = ring_snap.rbegin(); it != ring_snap.rend(); ++it)
-            rows.push_back(paragraph(*it));
-        if (rows.empty())
-            rows.push_back(text(running ? "  waiting for events…" : "  (no events)") | dim);
+        auto menu_block =
+            vbox({ text("Streams") | bold, separator(),
+                   cmd_menu_with_enter->Render() | vscroll_indicator | yframe | flex })
+            | size(WIDTH, EQUAL, 22);
 
-        auto event_list = vbox(std::move(rows))
-            | focusPositionRelative(0.f, *scroll)
-            | yframe
-            | vscroll_indicator
-            | flex;
-
-        return vbox({
-            hbox({
-                vbox({ text("Streams") | bold, separator(),
-                       menu_with_keys->Render() | flex })
-                    | size(WIDTH, EQUAL, 18),
-                separator(),
-                vbox({
-                    hbox(std::move(ctrl)),
-                    separator(),
-                    status,
-                    separator(),
-                    event_list,
-                }) | flex,
-            }),
+        return hbox({
+            menu_block,
+            separator(),
+            vbox(std::move(middle_rows)) | size(WIDTH, EQUAL, 40),
+            separator(),
+            event_list,
         });
     });
 
-    auto component = CatchEvent(view, [scroll](Event e) {
-        if (e == Event::PageDown) { *scroll = std::min(1.f, *scroll + page_step); return true; }
-        if (e == Event::PageUp)   { *scroll = std::max(0.f, *scroll - page_step); return true; }
+    // ── Scroll handler (PageUp/Down + mouse wheel) ──────────────────
+
+    auto component = CatchEvent(view, [models, menu_index, event_box](Event e) {
+        auto idx = static_cast<std::size_t>(*menu_index);
+        if (idx >= models->size()) return false;
+        auto& m = (*models)[idx];
+
+        const int max_top   = std::max(0, m->total_rows - m->viewport_h);
+        const int step_page = std::max(1, m->viewport_h / 2);
+        constexpr int step_wheel = 3;
+
+        if (e == Event::PageDown) {
+            m->scroll_top = std::min(max_top, m->scroll_top + step_page);
+            return true;
+        }
+        if (e == Event::PageUp) {
+            m->scroll_top = std::max(0, m->scroll_top - step_page);
+            return true;
+        }
+        if (e.is_mouse()) {
+            const auto& mouse = e.mouse();
+            if (!event_box->Contain(mouse.x, mouse.y)) return false;
+            if (mouse.button == Mouse::WheelUp) {
+                m->scroll_top = std::max(0, m->scroll_top - step_wheel);
+                return true;
+            }
+            if (mouse.button == Mouse::WheelDown) {
+                m->scroll_top = std::min(max_top, m->scroll_top + step_wheel);
+                return true;
+            }
+        }
         return false;
     });
 
-    auto hints = []() -> std::vector<Element> {
+    auto hints = [cmd_menu_with_enter, form_container]() -> std::vector<Element> {
+        if (form_container->Focused()) {
+            return {
+                key_chip("↑↓", "next field"),
+                key_chip("type", "edit"),
+                key_chip("→/←", "zones"),
+                key_chip("Tab", "cycle tabs"),
+                key_chip("q", "quit"),
+            };
+        }
+        if (cmd_menu_with_enter->Focused()) {
+            return {
+                key_chip("↑↓", "select stream"),
+                key_chip("Enter", "start/stop"),
+                key_chip("→", "form"),
+                key_chip("PgUp/PgDn", "scroll events"),
+                key_chip("Tab", "cycle tabs"),
+                key_chip("q", "quit"),
+            };
+        }
         return {
             key_chip("↑↓", "select stream"),
             key_chip("Enter", "start/stop"),
-            key_chip("PgUp/PgDn", "scroll"),
+            key_chip("PgUp/PgDn", "scroll events"),
             key_chip("Tab", "cycle tabs"),
             key_chip("q", "quit"),
         };

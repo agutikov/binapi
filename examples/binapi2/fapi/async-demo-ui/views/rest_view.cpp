@@ -57,6 +57,8 @@ const char* group_label(R::command_group g)
         case R::command_group::account:     return "Account";
         case R::command_group::trade:       return "Trade";
         case R::command_group::convert:     return "Convert";
+        case R::command_group::ws_public:
+        case R::command_group::ws_signed:   return "WebSocket API";
     }
     return "";
 }

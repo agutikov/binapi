@@ -27,6 +27,7 @@
 
 #include "../util/json_tree.hpp"
 #include "../util/request_capture.hpp"
+#include "../util/virtual_scroll.hpp"
 #include "../util/wrap_text.hpp"
 
 #include <ftxui/component/component.hpp>
@@ -53,70 +54,8 @@ using get_cap_fn = std::function<std::shared_ptr<request_capture>()>;
 
 namespace detail {
 
-/// Per-sub-tab virtualized-scroll state. `viewport_*` and `total_rows`
-/// are written by the Renderer once per frame (from `reflect` + cached
-/// row count); `scroll_top` is updated by the CatchEvent handler.
-struct scroll_model
-{
-    int scroll_top  = 0;
-    int viewport_h  = 0;
-    int viewport_w  = 0;   // content area width, excluding scrollbar column
-    int total_rows  = 0;
-};
-
-/// Render a single row as a scrollbar cell. Thumb position/size reflect
-/// where in the virtual list we're sitting. `vh` is the viewport height
-/// in rows; `total` is the total row count.
-inline Element scrollbar_column(int scroll_top, int viewport_h, int total)
-{
-    Elements cells;
-    cells.reserve(static_cast<std::size_t>(viewport_h));
-    if (total > viewport_h && viewport_h > 0) {
-        const float ratio = static_cast<float>(viewport_h) / static_cast<float>(total);
-        int thumb_h = std::max(1, static_cast<int>(ratio * static_cast<float>(viewport_h)));
-        if (thumb_h > viewport_h) thumb_h = viewport_h;
-        const int max_start = viewport_h - thumb_h;
-        const int max_top   = std::max(1, total - viewport_h);
-        int thumb_start = static_cast<int>(
-            static_cast<float>(scroll_top) / static_cast<float>(max_top)
-            * static_cast<float>(max_start) + 0.5f);
-        thumb_start = std::clamp(thumb_start, 0, max_start);
-        for (int i = 0; i < viewport_h; ++i) {
-            const bool in_thumb = (i >= thumb_start && i < thumb_start + thumb_h);
-            cells.push_back(text(in_thumb ? "█" : "│")
-                            | color(in_thumb ? Color::GrayLight : Color::GrayDark));
-        }
-    } else {
-        for (int i = 0; i < viewport_h; ++i) cells.push_back(text(" "));
-    }
-    return vbox(std::move(cells));
-}
-
-/// Render the virtualized content+scrollbar composite for this frame.
-/// `rows` is the full (pre-rendered) list; we slice it to the visible
-/// window and pad with empty rows if the content is shorter than the
-/// viewport.
-inline Element virtual_scroll_render(const std::vector<Element>& rows,
-                                     scroll_model& m)
-{
-    const int total = static_cast<int>(rows.size());
-    const int vh    = std::max(1, m.viewport_h);
-
-    const int max_top = std::max(0, total - vh);
-    m.scroll_top = std::clamp(m.scroll_top, 0, max_top);
-    m.total_rows = total;
-
-    const int end = std::min(m.scroll_top + vh, total);
-    Elements visible;
-    visible.reserve(static_cast<std::size_t>(vh));
-    for (int i = m.scroll_top; i < end; ++i) visible.push_back(rows[static_cast<std::size_t>(i)]);
-    while (static_cast<int>(visible.size()) < vh) visible.push_back(text(""));
-
-    return hbox({
-               vbox(std::move(visible)) | flex,
-               scrollbar_column(m.scroll_top, vh, total),
-           });
-}
+// scroll_model, scrollbar_column, virtual_scroll_render live in
+// util/virtual_scroll.hpp (shared with the Streams event list).
 
 inline Component make_scrollable_text(std::function<std::string()> content_fn,
                                       std::shared_ptr<scroll_model> m,
