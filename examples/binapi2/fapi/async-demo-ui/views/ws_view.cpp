@@ -165,7 +165,7 @@ void run_ws_command(int cmd_index,
 
 } // namespace
 
-Component make_ws_view(app_state& state, worker& wrk)
+tab_view make_ws_view(app_state& state, worker& wrk)
 {
     constexpr auto num_cmds = sizeof(commands) / sizeof(commands[0]);
     auto caps = std::make_shared<std::vector<std::shared_ptr<request_capture>>>();
@@ -206,7 +206,7 @@ Component make_ws_view(app_state& state, worker& wrk)
         rr_pane,
     });
 
-    return Renderer(root, [cmd_menu_with_enter, symbol_maybe, rr_pane,
+    auto component = Renderer(root, [cmd_menu_with_enter, symbol_maybe, rr_pane,
                            cmd_titles, cmd_index, symbol, caps] {
         const auto idx = static_cast<std::size_t>(*cmd_index);
         const auto& cmd = commands[idx];
@@ -243,7 +243,6 @@ Component make_ws_view(app_state& state, worker& wrk)
         mid_rows.push_back(text("info:") | dim);
         mid_rows.push_back(text(info_copy.empty() ? std::string{ "(none)" } : info_copy));
         mid_rows.push_back(filler());
-        mid_rows.push_back(text("Enter = run  →/← = navigate") | dim);
 
         return hbox({
             vbox({ text("WS API") | bold, separator(),
@@ -255,6 +254,17 @@ Component make_ws_view(app_state& state, worker& wrk)
             rr_pane->Render() | flex,
         });
     });
+
+    auto hints = []() -> std::vector<Element> {
+        return {
+            key_chip("↑↓", "select"),
+            key_chip("Enter", "run"),
+            key_chip("→/←", "zones"),
+            key_chip("Tab", "cycle tabs"),
+            key_chip("q", "quit"),
+        };
+    };
+    return tab_view{ component, std::move(hints) };
 }
 
 } // namespace demo_ui

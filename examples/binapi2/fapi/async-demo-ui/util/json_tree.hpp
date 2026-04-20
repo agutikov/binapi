@@ -163,16 +163,20 @@ inline void render_node(const glz::generic& value,
 
 } // namespace detail
 
-/// Build a vbox of `tree(1)`-formatted rows for a parsed JSON value.
-/// Returns a placeholder if `value` is null.
-inline ftxui::Element render_json_tree(const std::shared_ptr<glz::generic>& value,
-                                       int max_depth = detail::default_max_depth,
-                                       std::size_t max_rows = detail::default_max_rows)
+/// Build the list of `tree(1)`-formatted rows for a parsed JSON value.
+/// Returns a single-element vector with a placeholder if `value` is null.
+/// Used by the virtualized scroll view which slices to the visible window.
+inline std::vector<ftxui::Element>
+render_json_tree_rows(const std::shared_ptr<glz::generic>& value,
+                      int max_depth = detail::default_max_depth,
+                      std::size_t max_rows = detail::default_max_rows)
 {
     using namespace ftxui;
-    if (!value) return text("(no parsed JSON)") | dim;
-
     std::vector<Element> rows;
+    if (!value) {
+        rows.push_back(text("(no parsed JSON)") | dim);
+        return rows;
+    }
     detail::render_node(*value, "", "", /*is_last=*/true,
                         0, max_depth, max_rows, rows);
     if (rows.size() >= max_rows) {
@@ -180,8 +184,17 @@ inline ftxui::Element render_json_tree(const std::shared_ptr<glz::generic>& valu
             text("… (tree truncated at " + std::to_string(max_rows) + " rows)")
             | dim | color(Color::Yellow));
     }
-    if (rows.empty()) return text("(empty)") | dim;
-    return vbox(std::move(rows));
+    if (rows.empty()) rows.push_back(text("(empty)") | dim);
+    return rows;
+}
+
+/// Convenience wrapper that bundles the rows into a vbox. Kept for any
+/// caller that wants a single Element rather than the slicable list.
+inline ftxui::Element render_json_tree(const std::shared_ptr<glz::generic>& value,
+                                       int max_depth = detail::default_max_depth,
+                                       std::size_t max_rows = detail::default_max_rows)
+{
+    return ftxui::vbox(render_json_tree_rows(value, max_depth, max_rows));
 }
 
 } // namespace demo_ui

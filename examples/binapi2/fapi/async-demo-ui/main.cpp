@@ -171,7 +171,8 @@ int main(int argc, char* argv[])
     auto book_tab    = make_orderbook_view(state, wrk);
 
     auto tab_content = Container::Tab(
-        { rest_tab, ws_tab, streams_tab, book_tab },
+        { rest_tab.component, ws_tab.component,
+          streams_tab.component, book_tab.component },
         &tab_index);
 
     auto status_bar = make_status_bar(state);
@@ -185,12 +186,36 @@ int main(int argc, char* argv[])
         tab_content,
     });
 
+    // Bottom keybar: asks the active tab for its chips each render, joins
+    // them with `│` separators, always appends the global `Tab` / `q`
+    // reminders at the far right.
+    auto keybar = Renderer([&] {
+        std::vector<Element> chips;
+        switch (tab_index) {
+            case 0: if (rest_tab.hints)    chips = rest_tab.hints();    break;
+            case 1: if (ws_tab.hints)      chips = ws_tab.hints();      break;
+            case 2: if (streams_tab.hints) chips = streams_tab.hints(); break;
+            case 3: if (book_tab.hints)    chips = book_tab.hints();    break;
+            default: break;
+        }
+        Elements row;
+        row.push_back(text(" "));
+        for (std::size_t i = 0; i < chips.size(); ++i) {
+            if (i) row.push_back(text("   "));
+            row.push_back(chips[i]);
+        }
+        row.push_back(filler());
+        return hbox(std::move(row))
+               | bgcolor(Color::GrayDark) | color(Color::White);
+    });
+
     auto layout = Renderer(root, [&] {
         return vbox({
                    status_bar->Render(),
                    tab_toggle->Render() | center,
                    separator(),
                    tab_content->Render() | flex,
+                   keybar->Render(),
                });
     });
 

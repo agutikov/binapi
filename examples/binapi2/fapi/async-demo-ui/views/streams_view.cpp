@@ -189,7 +189,7 @@ void start_stream(int stream_index,
 
 } // namespace
 
-Component make_streams_view(app_state& state, worker& wrk)
+tab_view make_streams_view(app_state& state, worker& wrk)
 {
     // Per-stream captures — each stream type gets its own capture so
     // switching in the menu shows that stream's data.
@@ -275,7 +275,6 @@ Component make_streams_view(app_state& state, worker& wrk)
             text("  errors: " + std::to_string(errs))
                 | (errs > 0 ? color(Color::Red) : dim),
             filler(),
-            text("Enter = start/stop  PgUp/PgDn = scroll") | dim,
         });
 
         if (!err_copy.empty()) {
@@ -313,11 +312,22 @@ Component make_streams_view(app_state& state, worker& wrk)
         });
     });
 
-    return CatchEvent(view, [scroll](Event e) {
+    auto component = CatchEvent(view, [scroll](Event e) {
         if (e == Event::PageDown) { *scroll = std::min(1.f, *scroll + page_step); return true; }
         if (e == Event::PageUp)   { *scroll = std::max(0.f, *scroll - page_step); return true; }
         return false;
     });
+
+    auto hints = []() -> std::vector<Element> {
+        return {
+            key_chip("↑↓", "select stream"),
+            key_chip("Enter", "start/stop"),
+            key_chip("PgUp/PgDn", "scroll"),
+            key_chip("Tab", "cycle tabs"),
+            key_chip("q", "quit"),
+        };
+    };
+    return tab_view{ component, std::move(hints) };
 }
 
 } // namespace demo_ui

@@ -473,53 +473,91 @@ limiting.
 **Goal**: every command currently in `cmd_market_data.cpp`, `cmd_account.cpp`,
 `cmd_trade.cpp`, `cmd_convert.cpp` becomes a UI command.
 
-**Approach**: each command is an entry in a registry table similar to the
-CLI's `commands[]`, but with **per-command form factories** instead of
-`(api, args_t)→task<int>` function pointers:
+**Approach taken** (diverged from the original plan): instead of per-command
+form factories returning `Component`, the view keeps a single shared
+`form_state` (strings for symbol / pair / limit / interval / period) and a
+function-pointer registry:
 
 ```cpp
-struct ui_command
-{
-    std::string_view group;       // "Market Data" / "Account" / "Trade" / "Convert"
-    std::string_view name;        // "ping", "order-book", …
-    std::string_view help;        // short description
-    using factory = std::function<ftxui::Component(request_capture&, worker&)>;
-    factory make_form;            // builds the params form + Run button
+struct rest_command {
+    const char* name;
+    const char* description;
+    form_kind form;            // enum: no_args, symbol, symbol_opt,
+                               //       symbol_limit, pair, kline,
+                               //       pair_kline, analytics, basis
+    void (*run)(const cmd_ctx&);
 };
-
-extern const std::vector<ui_command> all_rest_commands;
 ```
 
-Each form factory hand-codes the field list (string inputs for symbol/pair,
-optional integers via Input + parse, dropdowns for enums via `Toggle` /
-`Menu`). That's the same level of effort as the CLI's CLI11 binding —
-no reflection magic.
+Each input widget is a single `Input` wrapped in `Maybe(...)`, keyed on whether
+the selected command's `form_kind` uses that field. The focus chain is built
+once; hidden inputs drop out of tab navigation automatically.
 
-**Files added**:
+Per-command `run_fn` functions are tiny — they read the fields their form_kind
+advertises, build a typed request, and delegate to a generic `run_cmd<Req>`
+which resets the capture, builds a sink, prefills, and `cobalt::spawn`s a
+templated `run_market_data<Req>` free-function coroutine.
+
+Reusing the CLI's shape helpers (`make_symbol_request`, `make_kline_request`,
+etc.) was considered, but the UI's build sites are already 1–3 lines each —
+the builders add indirection without shrinking the code. Cross-surface code
+reuse stays at the `exec_market_data / exec_account / exec_trade` /
+`result_sink` boundary.
+
+**Status — all four groups wired** (~95 commands total):
+
+The four groups split across TUs under `examples/binapi2/fapi/async-demo-ui/rest/`:
 
 ```
-rest/
-  commands_market_data.cpp   # ~30 form factories
-  commands_account.cpp       # ~22
-  commands_trade.cpp         # ~28
-  commands_convert.cpp       # 3
-  commands.hpp               # registry decl
-views/rest_view.cpp          # rewritten: filter input + grouped Menu of
-                             # command names, selected command's form +
-                             # response pane on the right
+rest/commands.hpp              # form_state, form_kind, cmd_ctx, rest_command,
+                               # run_market_data / run_account / run_trade /
+                               # run_convert free-fn templates, needs_* predicates
+rest/commands.cpp              # needs_* bodies, reset_capture, CSV helper
+rest/commands_market_data.cpp  # 39 endpoints
+rest/commands_account.cpp      # 22 endpoints
+rest/commands_trade.cpp        # 28 endpoints (incl. bespoke run_cancel_batch for
+                               #                the non-generic batch-cancel path)
+rest/commands_convert.cpp      # 3 endpoints  (dispatched via rest_pipeline())
+views/rest_view.cpp            # aggregates the four registries, renders the menu
+                               # with group headers, gates Run on credentials
 ```
 
-The previous `ping_command.cpp` from step 1 collapses into
-`commands_market_data.cpp` as one entry.
+The aggregated menu shows group headers (`── Market Data ──` / `── Account ──` /
+`── Trade ──` / `── Convert ──`) as non-selectable rows; headers map to a sentinel
+`cmd_of_menu[idx] == -1` and are skipped on Enter.
+
+**Auth gating**: commands with `command_group != market_data` are gated on
+`state.credentials_loaded`. When blocked, the Run event is a no-op and the
+middle panel shows `⚠ run blocked: credentials required`.
+
+**Form fields** now include: symbol, pair, limit, interval, period, orderId,
+algoId, side, type, algoType, tif, quantity, price, leverage, marginType,
+amount, delta_type, countdown, bool_flag (reused for the boolean toggle
+commands), asset, ids (csv), startTime, endTime, downloadId, from_asset,
+to_asset, from_amount, quoteId, convert orderId. Each input is `Maybe`-wrapped
+so hidden inputs drop out of focus traversal.
 
 **Acceptance**:
 
-* All ~80 REST commands accessible from the REST tab and execute the same
-  request the CLI does.
-* Each command's form has the right inputs and validates required fields
-  (a lit-up red border + disabled Run button when invalid).
-* Authenticated commands work once credentials are loaded; until then, the
-  Run button is disabled with a tooltip `"credentials required"`.
+* All ~95 REST commands accessible from the REST tab with the right per-command
+  input set.
+* Public market-data commands runnable before credentials load; authenticated
+  commands show the "credentials required" indicator and Enter is a no-op
+  until credentials succeed.
+* Switching commands keeps each command's last result and each field's last
+  value sticky.
+
+**Deferred**:
+
+* Required-field validation (red border + disabled Run).
+* Dropdowns (Toggle / Menu) for enum-typed fields (side, type, tif, margin
+  type, delta_type, algo type) — currently free-text, parsed through
+  `lib::parse_enum`.
+* Per-group scroll markers / filter input if the flat menu grows unwieldy.
+* Manual UI smoke testing — the binary builds clean and all 401 unit tests
+  pass, but the FTXUI surface itself is not driven in CI; the user verifies
+  by running `scripts/testnet/demo_ui.sh` (or equivalent) before declaring
+  the step truly closed.
 
 ---
 

@@ -51,7 +51,6 @@ Component make_status_bar(app_state& state)
                    text("  │  "),
                    text(status_copy) | dim,
                    filler(),
-                   text(" q quit  Tab cycle ") | dim,
                })
                | bgcolor(Color::GrayDark) | color(Color::White);
     });

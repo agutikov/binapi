@@ -1,7 +1,7 @@
 
 
 
-
+async demo tui
 
 
 ================================================================================
@@ -17,7 +17,7 @@ COIN-M Futures
 --------------------------------------------------------------------------------
 
 
-streams and wsapi optimization - is a wide infinite task, postpone it, but provide rough start analysis
+streams and wsapi optimization - is a wide task, postpone it, but provide rough start analysis
 
 
 --------------------------------------------------------------------------------

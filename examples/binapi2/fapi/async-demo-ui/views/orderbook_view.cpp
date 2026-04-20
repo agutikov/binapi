@@ -121,7 +121,7 @@ book_coro(worker& wrk, std::shared_ptr<book_capture> cap)
 
 } // namespace
 
-Component make_orderbook_view(app_state& /*state*/, worker& wrk)
+tab_view make_orderbook_view(app_state& /*state*/, worker& wrk)
 {
     auto cap = std::make_shared<book_capture>();
 
@@ -160,7 +160,7 @@ Component make_orderbook_view(app_state& /*state*/, worker& wrk)
         stop_button,
     });
 
-    return Renderer(controls, [controls, cap, symbol_input, depth_input,
+    auto component = Renderer(controls, [controls, cap, symbol_input, depth_input,
                                start_button, stop_button, symbol, depth_str] {
         // Copy snapshot under lock.
         binapi2::fapi::order_book::order_book_snapshot snap;
@@ -287,6 +287,16 @@ Component make_orderbook_view(app_state& /*state*/, worker& wrk)
             vbox(std::move(rows)) | flex,
         });
     });
+
+    auto hints = []() -> std::vector<Element> {
+        return {
+            key_chip("Tab", "next control"),
+            key_chip("Enter", "press button"),
+            key_chip("type", "edit symbol/depth"),
+            key_chip("q", "quit"),
+        };
+    };
+    return tab_view{ component, std::move(hints) };
 }
 
 } // namespace demo_ui
