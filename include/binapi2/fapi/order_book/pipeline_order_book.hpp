@@ -76,7 +76,7 @@ private:
     void apply_event(const types::depth_stream_event_t& event);
 
     template<class Compare>
-    void apply_levels(const std::vector<types::price_level_t>& levels,
+    void apply_levels(const types::depth_levels_t& levels,
                       std::map<types::decimal_t, types::decimal_t, Compare>& side);
 
     config cfg_;

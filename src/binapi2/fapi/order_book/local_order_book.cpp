@@ -43,7 +43,7 @@ local_order_book::apply_event(const types::depth_stream_event_t& event)
 
 template<class Compare>
 void
-local_order_book::apply_levels(const std::vector<types::price_level_t>& levels,
+local_order_book::apply_levels(const types::depth_levels_t& levels,
                                std::map<types::decimal_t, types::decimal_t, Compare>& side)
 {
     for (const auto& level : levels) {
@@ -55,9 +55,9 @@ local_order_book::apply_levels(const std::vector<types::price_level_t>& levels,
     }
 }
 
-template void local_order_book::apply_levels(const std::vector<types::price_level_t>&,
+template void local_order_book::apply_levels(const types::depth_levels_t&,
                                              std::map<types::decimal_t, types::decimal_t, std::greater<>>&);
-template void local_order_book::apply_levels(const std::vector<types::price_level_t>&,
+template void local_order_book::apply_levels(const types::depth_levels_t&,
                                              std::map<types::decimal_t, types::decimal_t, std::less<>>&);
 
 boost::cobalt::task<result<void>>

@@ -12,6 +12,7 @@
 #include <binapi2/fapi/types/detail/timestamp.hpp>
 #include <binapi2/fapi/types/enums.hpp>
 
+#include <boost/container/small_vector.hpp>
 #include <glaze/glaze.hpp>
 
 #include <cstdint>
@@ -68,6 +69,12 @@ struct mark_price_stream_event_t
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Mark-Price-Stream-for-All-market.md
 using all_market_mark_price_stream_event = std::vector<mark_price_stream_event_t>;
 
+/// Container used for depth stream bids/asks. Inline capacity of 20 covers
+/// every partial-depth frame (`@depth5/10/20@100ms`) and the steady-state
+/// diff-depth frame (`@depth@100ms`, ≤ 20 changed levels) without a heap
+/// allocation; bursts beyond 20 spill to the heap automatically.
+using depth_levels_t = boost::container::small_vector<price_level_t, 20>;
+
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/Diff-Book-Depth-Streams.md
 struct depth_stream_event_t
 {
@@ -77,8 +84,8 @@ struct depth_stream_event_t
     std::uint64_t first_update_id{};
     std::uint64_t final_update_id{};
     std::uint64_t prev_final_update_id{};
-    std::vector<price_level_t> bids{};
-    std::vector<price_level_t> asks{};
+    depth_levels_t bids{};
+    depth_levels_t asks{};
 };
 
 // doc: /docs/api/md/developers.binance.com/docs/derivatives/usds-margined-futures/websocket-market-streams/All-Market-Mini-Tickers-Stream.md
