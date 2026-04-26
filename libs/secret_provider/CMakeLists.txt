@@ -9,6 +9,7 @@ pkg_check_modules(LIBSECRET libsecret-1)
 set(SECRET_PROVIDER_SOURCES
     src/factory.cpp
     src/systemd_creds_provider.cpp
+    src/dir_provider.cpp
 )
 
 if(LIBSECRET_FOUND)
