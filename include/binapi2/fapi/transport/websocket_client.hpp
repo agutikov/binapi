@@ -31,9 +31,23 @@ public:
     ~websocket_client();
 
     [[nodiscard]] boost::cobalt::task<result<void>> async_connect(std::string host, std::string port, ws_target_t target);
+
+    /// @brief Connect to an explicit IP, keeping a separate hostname for SNI/TLS validation.
+    ///
+    /// Used by callers that want to steer around a known-bad endpoint in the
+    /// resolver pool: skip DNS, TCP-connect to @p ip directly, but still
+    /// validate the TLS certificate against @p host_for_sni and send the
+    /// hostname (not the IP) in SNI and WS Host. The caller owns IP picking.
+    [[nodiscard]] boost::cobalt::task<result<void>>
+    async_connect_to(std::string ip, std::string port, std::string host_for_sni, ws_target_t target);
+
     [[nodiscard]] boost::cobalt::task<result<void>> async_write_text(std::string message);
     [[nodiscard]] boost::cobalt::task<result<std::string>> async_read_text();
     [[nodiscard]] boost::cobalt::task<result<void>> async_close();
+
+    /// @brief Resolved peer endpoint of the most recent successful connect, formatted as "ip:port".
+    /// Empty until a successful connect has happened on this client.
+    [[nodiscard]] std::string last_remote_endpoint() const;
 
 private:
     struct impl;

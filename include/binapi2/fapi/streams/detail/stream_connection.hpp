@@ -147,10 +147,23 @@ public:
         co_return co_await transport_.async_connect(std::move(host), std::move(port), std::move(target));
     }
 
+    /// @brief Connect to an explicit IP, keeping a separate hostname for SNI/TLS validation.
+    /// Pass-through to the underlying transport's `async_connect_to`. See
+    /// `websocket_client::async_connect_to` for the full contract.
+    [[nodiscard]] boost::cobalt::task<result<void>>
+    async_connect_to(std::string ip, std::string port, std::string host_for_sni, ws_target_t target)
+    {
+        co_return co_await transport_.async_connect_to(
+            std::move(ip), std::move(port), std::move(host_for_sni), std::move(target));
+    }
+
     [[nodiscard]] boost::cobalt::task<result<void>> async_close()
     {
         co_return co_await transport_.async_close();
     }
+
+    /// @brief Resolved peer endpoint of the most recent successful connect on the underlying transport.
+    [[nodiscard]] std::string last_remote_endpoint() const { return transport_.last_remote_endpoint(); }
 
     // -- Raw frame I/O --
 

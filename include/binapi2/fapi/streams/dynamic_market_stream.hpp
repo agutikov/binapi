@@ -149,10 +149,25 @@ public:
             conn_.configuration().combined_stream_target);
     }
 
+    /// @brief Connect to an explicit IP, keeping the configured hostname for SNI/TLS.
+    /// Same shape as `async_connect()` but the caller picks the IP to avoid known-bad
+    /// endpoints in the resolver pool.
+    [[nodiscard]] boost::cobalt::task<result<void>> async_connect_to(std::string ip)
+    {
+        co_return co_await conn_.async_connect_to(
+            std::move(ip),
+            conn_.configuration().stream_port,
+            conn_.configuration().stream_host,
+            conn_.configuration().combined_stream_target);
+    }
+
     [[nodiscard]] boost::cobalt::task<result<void>> async_close()
     {
         co_return co_await conn_.async_close();
     }
+
+    /// @brief Resolved peer endpoint of the most recent successful connect.
+    [[nodiscard]] std::string last_remote_endpoint() const { return conn_.last_remote_endpoint(); }
 
     // -- Subscription control (send only, no read) --
 

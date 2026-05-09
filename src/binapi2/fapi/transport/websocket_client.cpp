@@ -53,6 +53,7 @@ struct websocket_client::impl
     boost::beast::flat_buffer buffer;
     config cfg;
     bool connected{ false };
+    std::string last_remote_endpoint;
 };
 
 websocket_client::websocket_client(config cfg) :
@@ -130,12 +131,14 @@ websocket_client::async_connect(std::string host, std::string port, ws_target_t 
                           host + ":" + port, 0, {}, {} });
         }
         co_await boost::asio::async_connect(impl_->stream->next_layer().next_layer(), endpoints, boost::cobalt::use_op);
-        if (cfg_.logger) {
+        {
             auto& sock = impl_->stream->next_layer().next_layer();
-            cfg_.logger({ transport_direction::received, "CONN", "tcp_connect",
-                          sock.remote_endpoint().address().to_string() + ":"
-                              + std::to_string(sock.remote_endpoint().port()),
-                          0, {}, {} });
+            impl_->last_remote_endpoint = sock.remote_endpoint().address().to_string() + ":"
+                + std::to_string(sock.remote_endpoint().port());
+            if (cfg_.logger) {
+                cfg_.logger({ transport_direction::received, "CONN", "tcp_connect",
+                              impl_->last_remote_endpoint, 0, {}, {} });
+            }
         }
 
         // Install a ping/pong handler. Binance sends periodic pings and
@@ -189,6 +192,117 @@ websocket_client::async_connect(std::string host, std::string port, ws_target_t 
         }
         co_return result<void>::failure({ error_code::websocket, 0, 0, e.what(), {} });
     }
+}
+
+boost::cobalt::task<result<void>>
+websocket_client::async_connect_to(std::string ip, std::string port, std::string host_for_sni, ws_target_t target)
+{
+    const auto timeout_secs = cfg_.connect_timeout_seconds;
+    bool timed_out = false;
+    std::optional<boost::asio::steady_timer> timer;
+
+    try {
+        auto executor = co_await boost::cobalt::this_coro::executor;
+        impl_->stream.emplace(executor, impl_->ssl_ctx);
+
+        // SNI uses the hostname, not the IP. The whole point of this
+        // path is to validate the certificate against host_for_sni
+        // while overriding the TCP destination.
+        if (!SSL_set_tlsext_host_name(impl_->stream->next_layer().native_handle(), host_for_sni.c_str())) {
+            co_return result<void>::failure(
+                { error_code::websocket, 0, 0, ERR_error_string(ERR_get_error(), nullptr), {} });
+        }
+
+        timer.emplace(executor);
+        if (timeout_secs > 0) {
+            timer->expires_after(std::chrono::seconds(timeout_secs));
+            timer->async_wait([&](boost::system::error_code ec) {
+                if (ec) return;
+                timed_out = true;
+                if (impl_->stream) {
+                    boost::system::error_code ignored;
+                    impl_->stream->next_layer().next_layer().close(ignored);
+                }
+            });
+        }
+
+        // Parse the explicit IP and port into a single endpoint. No
+        // DNS round-trip: this is the whole reason the caller chose
+        // this entry point.
+        boost::system::error_code ec;
+        const auto addr = boost::asio::ip::make_address(ip, ec);
+        if (ec) {
+            co_return result<void>::failure(
+                { error_code::websocket, 0, 0, "invalid ip '" + ip + "': " + ec.message(), {} });
+        }
+        const auto port_num = static_cast<unsigned short>(std::stoul(port));
+        const boost::asio::ip::tcp::endpoint endpoint{ addr, port_num };
+
+        if (cfg_.logger) {
+            cfg_.logger({ transport_direction::sent, "CONN", "tcp_connect",
+                          endpoint.address().to_string() + ":" + std::to_string(endpoint.port()),
+                          0, {}, {} });
+        }
+        co_await impl_->stream->next_layer().next_layer().async_connect(endpoint, boost::cobalt::use_op);
+        {
+            auto& sock = impl_->stream->next_layer().next_layer();
+            impl_->last_remote_endpoint = sock.remote_endpoint().address().to_string() + ":"
+                + std::to_string(sock.remote_endpoint().port());
+            if (cfg_.logger) {
+                cfg_.logger({ transport_direction::received, "CONN", "tcp_connect",
+                              impl_->last_remote_endpoint, 0, {}, {} });
+            }
+        }
+
+        impl_->stream->control_callback([this](boost::beast::websocket::frame_type kind, boost::beast::string_view) {
+            if (kind == boost::beast::websocket::frame_type::ping) {
+                boost::system::error_code ignored;
+                impl_->stream->pong({}, ignored);
+            }
+        });
+
+        if (cfg_.logger) {
+            cfg_.logger({ transport_direction::sent, "CONN", "ssl_handshake", host_for_sni, 0, {}, {} });
+        }
+        co_await impl_->stream->next_layer().async_handshake(
+            boost::asio::ssl::stream_base::client, boost::cobalt::use_op);
+        if (cfg_.logger) {
+            cfg_.logger({ transport_direction::received, "CONN", "ssl_handshake",
+                          SSL_get_version(impl_->stream->next_layer().native_handle()), 0, {}, {} });
+        }
+
+        // WebSocket Host header uses the hostname (not the IP) so the
+        // server routes the upgrade to the correct virtual host.
+        if (cfg_.logger) {
+            cfg_.logger({ transport_direction::sent, "CONN", "ws_handshake",
+                          host_for_sni + target, 0, {}, {} });
+        }
+        co_await impl_->stream->async_handshake(host_for_sni, target, boost::cobalt::use_op);
+        if (cfg_.logger) {
+            cfg_.logger({ transport_direction::received, "CONN", "ws_handshake",
+                          host_for_sni + target, 0, {}, {} });
+        }
+
+        timer->cancel();
+        impl_->connected = true;
+        co_return result<void>::success();
+    }
+    catch (const boost::system::system_error& e) {
+        if (timer) timer->cancel();
+        if (timed_out) {
+            co_return result<void>::failure(
+                { error_code::websocket, 0, 0,
+                  "connect_to timeout (" + std::to_string(timeout_secs) + "s): " + ip + ":" + port,
+                  {} });
+        }
+        co_return result<void>::failure({ error_code::websocket, 0, 0, e.what(), {} });
+    }
+}
+
+std::string
+websocket_client::last_remote_endpoint() const
+{
+    return impl_->last_remote_endpoint;
 }
 
 boost::cobalt::task<result<void>>
