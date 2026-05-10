@@ -32,10 +32,16 @@ boost::cobalt::task<void>
 load_credentials_task(app_state& state, binapi2::futures_usdm_api& api,
                       worker& wrk)
 {
-    // Resolve the same default the CLI uses: libsecret:demo unless overridden
-    // via env var BINAPI_DEMO_SECRETS (read once at startup).
+    // Resolve the same default the CLI uses: profile follows the network
+    // (testnet → libsecret:demo, live → libsecret:prod) unless overridden
+    // via env var BINAPI_DEMO_SECRETS (read once at startup). Without
+    // this split the status bar would falsely show "creds: ok" on --live
+    // when only demo credentials exist in the keyring.
     const char* override_src = std::getenv("BINAPI_DEMO_SECRETS");
-    std::string source = override_src && *override_src ? override_src : "libsecret:demo";
+    const bool testnet = api.configuration().testnet;
+    std::string source = override_src && *override_src
+                             ? std::string{ override_src }
+                             : (testnet ? std::string{ "libsecret:demo" } : std::string{ "libsecret:prod" });
 
     spdlog::info("credentials: loading from '{}'", source);
 

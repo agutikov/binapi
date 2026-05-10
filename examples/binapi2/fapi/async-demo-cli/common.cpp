@@ -156,8 +156,13 @@ binapi2::fapi::config make_config()
 
 boost::cobalt::task<void> async_load_secrets(binapi2::fapi::config& cfg)
 {
-    // Default provider is libsecret with "demo" profile
-    std::string source = secrets_source.empty() ? "libsecret:demo" : secrets_source;
+    // Default provider tracks the network: testnet → libsecret:demo,
+    // live → libsecret:prod. Without this split, --live silently loads
+    // the demo profile and reports "creds: ok", masking missing prod
+    // credentials until the first signed call fails on Binance with -2014.
+    std::string source = secrets_source.empty()
+        ? (cfg.testnet ? std::string{ "libsecret:demo" } : std::string{ "libsecret:prod" })
+        : secrets_source;
 
     if (source == "env") {
         spdlog::warn("DEPRECATED: --secrets env is deprecated. "
