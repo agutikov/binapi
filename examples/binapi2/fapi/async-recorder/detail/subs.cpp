@@ -44,7 +44,8 @@ connection_read_loop(streams::dynamic_market_stream& d)
 boost::cobalt::task<void>
 manage_subs_loop(const recorder_config& cfg,
                  selector& sel,
-                 streams::dynamic_market_stream& dyn,
+                 streams::dynamic_market_stream& dyn_pub,
+                 streams::dynamic_market_stream& dyn_mkt,
                  ::binapi2::fapi::rest::client& rest_client,
                  detail_state& st,
                  boost::asio::io_context& ioc)
@@ -71,6 +72,14 @@ manage_subs_loop(const recorder_config& cfg,
             if (!target.count(s)) to_remove.push_back(s);
 
         // -- Admit: snapshot + open sinks + SUBSCRIBE ----------------------
+        //
+        // Binance's 2026 URL split requires bookTicker + depth on the
+        // /public connection and aggTrade + markPrice + forceOrder on
+        // /market. Each connection's `same_category`-gated subscribe
+        // takes only its own category's streams. Coalescing across
+        // categories within one control message is impossible; the
+        // 5-msg/s broker rate limit still applies per connection but
+        // the per-cycle volume here is below it.
         const bool partial_depth =
             cfg.with_depth && cfg.depth_mode == depth_mode_t::partial;
         const bool full_depth =
@@ -110,40 +119,36 @@ manage_subs_loop(const recorder_config& cfg,
 
             st.sinks.emplace(sym, std::move(psink));
 
-            // Combine Tier-0 + (optional) depth into ONE control message.
-            // Two separate SUBSCRIBE calls would double our control-
-            // message rate to the broker and trip Binance's
-            // 5-per-second rate limit, which it answers with
-            // "Operation canceled" and a connection drop.
-            fapi::result<void> r;
+            // SUBSCRIBE on the public connection: bookTicker + depth.
+            fapi::result<void> r_pub;
             if (partial_depth) {
-                r = co_await dyn.async_subscribe_unchecked(
-                    types::aggregate_trade_subscription{ .symbol = sym },
+                r_pub = co_await dyn_pub.async_subscribe(
                     types::book_ticker_subscription{ .symbol = sym },
-                    types::mark_price_subscription{ .symbol = sym, .every_1s = true },
-                    types::liquidation_order_subscription{ .symbol = sym },
                     types::partial_book_depth_subscription{
                         .symbol = sym,
                         .levels = cfg.depth_levels,
                         .speed = "100ms" });
             } else if (full_depth) {
-                r = co_await dyn.async_subscribe_unchecked(
-                    types::aggregate_trade_subscription{ .symbol = sym },
+                r_pub = co_await dyn_pub.async_subscribe(
                     types::book_ticker_subscription{ .symbol = sym },
-                    types::mark_price_subscription{ .symbol = sym, .every_1s = true },
-                    types::liquidation_order_subscription{ .symbol = sym },
                     types::diff_book_depth_subscription{
                         .symbol = sym,
                         .speed = "100ms" });
             } else {
-                r = co_await dyn.async_subscribe_unchecked(
-                    types::aggregate_trade_subscription{ .symbol = sym },
-                    types::book_ticker_subscription{ .symbol = sym },
-                    types::mark_price_subscription{ .symbol = sym, .every_1s = true },
-                    types::liquidation_order_subscription{ .symbol = sym });
+                r_pub = co_await dyn_pub.async_subscribe(
+                    types::book_ticker_subscription{ .symbol = sym });
             }
-            if (!r) {
-                spdlog::warn("detail[{}]: subscribe failed: {}", sym, r.err.message);
+            // SUBSCRIBE on the market connection: aggTrade + markPrice + forceOrder.
+            fapi::result<void> r_mkt = co_await dyn_mkt.async_subscribe(
+                types::aggregate_trade_subscription{ .symbol = sym },
+                types::mark_price_subscription{ .symbol = sym, .every_1s = true },
+                types::liquidation_order_subscription{ .symbol = sym });
+
+            if (!r_pub || !r_mkt) {
+                spdlog::warn("detail[{}]: subscribe failed: pub={} mkt={}",
+                             sym,
+                             r_pub ? "ok" : r_pub.err.message,
+                             r_mkt ? "ok" : r_mkt.err.message);
                 st.sinks.erase(sym);
                 continue;
             }
@@ -156,39 +161,35 @@ manage_subs_loop(const recorder_config& cfg,
 
         // -- Evict: UNSUBSCRIBE then drop sinks ----------------------------
         for (const auto& sym : to_remove) {
-            // Mirror the admission shape: combine Tier-0 + (optional)
-            // depth into one UNSUBSCRIBE message to keep the control-
-            // message rate low.
-            fapi::result<void> r;
+            // Mirror the admission shape — fan UNSUBSCRIBE per category.
+            fapi::result<void> r_pub;
             if (partial_depth) {
-                r = co_await dyn.async_unsubscribe_unchecked(
-                    types::aggregate_trade_subscription{ .symbol = sym },
+                r_pub = co_await dyn_pub.async_unsubscribe(
                     types::book_ticker_subscription{ .symbol = sym },
-                    types::mark_price_subscription{ .symbol = sym, .every_1s = true },
-                    types::liquidation_order_subscription{ .symbol = sym },
                     types::partial_book_depth_subscription{
                         .symbol = sym,
                         .levels = cfg.depth_levels,
                         .speed = "100ms" });
             } else if (full_depth) {
-                r = co_await dyn.async_unsubscribe_unchecked(
-                    types::aggregate_trade_subscription{ .symbol = sym },
+                r_pub = co_await dyn_pub.async_unsubscribe(
                     types::book_ticker_subscription{ .symbol = sym },
-                    types::mark_price_subscription{ .symbol = sym, .every_1s = true },
-                    types::liquidation_order_subscription{ .symbol = sym },
                     types::diff_book_depth_subscription{
                         .symbol = sym,
                         .speed = "100ms" });
             } else {
-                r = co_await dyn.async_unsubscribe_unchecked(
-                    types::aggregate_trade_subscription{ .symbol = sym },
-                    types::book_ticker_subscription{ .symbol = sym },
-                    types::mark_price_subscription{ .symbol = sym, .every_1s = true },
-                    types::liquidation_order_subscription{ .symbol = sym });
+                r_pub = co_await dyn_pub.async_unsubscribe(
+                    types::book_ticker_subscription{ .symbol = sym });
             }
-            if (!r)
-                spdlog::warn("detail[{}]: unsubscribe failed: {}",
-                             sym, r.err.message);
+            fapi::result<void> r_mkt = co_await dyn_mkt.async_unsubscribe(
+                types::aggregate_trade_subscription{ .symbol = sym },
+                types::mark_price_subscription{ .symbol = sym, .every_1s = true },
+                types::liquidation_order_subscription{ .symbol = sym });
+
+            if (!r_pub || !r_mkt)
+                spdlog::warn("detail[{}]: unsubscribe failed: pub={} mkt={}",
+                             sym,
+                             r_pub ? "ok" : r_pub.err.message,
+                             r_mkt ? "ok" : r_mkt.err.message);
 
             st.sinks.erase(sym);
             st.subscribed.erase(sym);

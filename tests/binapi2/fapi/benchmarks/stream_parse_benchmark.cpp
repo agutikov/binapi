@@ -180,7 +180,7 @@ bench_combined_subscribe(const char* name, const std::vector<std::string>& wrapp
     using clock = std::chrono::high_resolution_clock;
 
     auto cfg = config::testnet_config();
-    combined_stream_replay cs(cfg);
+    combined_stream_replay cs(cfg, stream_category_e::public_);
     cs.set_max_reconnects(0);
     cs.transport().messages = wrapped_msgs;
 
@@ -239,7 +239,7 @@ bench_dynamic_read(const char* name, const std::vector<std::string>& wrapped_msg
     using clock = std::chrono::high_resolution_clock;
 
     auto cfg = config::testnet_config();
-    dynamic_stream_replay ds(cfg);
+    dynamic_stream_replay ds(cfg, stream_category_e::public_);
     ds.transport().messages = wrapped_msgs;
 
     // Warmup

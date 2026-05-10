@@ -178,7 +178,7 @@ static boost::cobalt::task<int>
 do_combined_subscribe()
 {
     auto cfg = config::testnet_config();
-    streams::basic_combined_market_stream<replay> cs(cfg);
+    streams::basic_combined_market_stream<replay> cs(cfg, stream_category_e::public_);
     cs.set_max_reconnects(0);
     cs.transport().messages = {
         wrap_combined("btcusdt@bookTicker", book_ticker_json),
@@ -213,7 +213,7 @@ static boost::cobalt::task<int>
 do_dynamic_read()
 {
     auto cfg = config::testnet_config();
-    streams::basic_dynamic_market_stream<replay> ds(cfg);
+    streams::basic_dynamic_market_stream<replay> ds(cfg, stream_category_e::public_);
     ds.transport().messages = {
         wrap_combined("btcusdt@bookTicker", book_ticker_json),
         wrap_combined("btcusdt@depth@100ms", depth_json),
@@ -240,7 +240,7 @@ static boost::cobalt::task<int>
 do_dynamic_control()
 {
     auto cfg = config::testnet_config();
-    streams::basic_dynamic_market_stream<replay> ds(cfg);
+    streams::basic_dynamic_market_stream<replay> ds(cfg, stream_category_e::public_);
     ds.transport().messages = {
         R"({"result":null,"id":1})",
         wrap_combined("btcusdt@bookTicker", book_ticker_json),

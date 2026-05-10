@@ -59,24 +59,41 @@ detail_monitor_run(const recorder_config& cfg,
     auto& rest_client = **rc;
     spdlog::info("detail: REST client connected (for depth snapshots)");
 
-    streams::dynamic_market_stream dyn(net_cfg);
+    // Two `dynamic_market_stream` instances — one per Binance URL
+    // category (P0.10 / S0.10.5). Public-category streams (bookTicker,
+    // depth) and market-category streams (aggTrade, markPrice@1s,
+    // forceOrder) cannot share a combined-stream connection: Binance
+    // silently drops cross-category frames. The same_category-gated
+    // `async_subscribe` enforces this at compile time inside
+    // manage_subs_loop. Both connections feed the same shared
+    // `record_buf`; the drain layer routes per-frame by stream-type
+    // suffix so it doesn't matter which connection delivered any
+    // given frame.
+    streams::dynamic_market_stream dyn_pub(net_cfg, fapi::stream_category_e::public_);
+    streams::dynamic_market_stream dyn_mkt(net_cfg, fapi::stream_category_e::market);
     detail_impl::detail_state st(16384);
 
-    // Attach the single shared buffer: every incoming frame is pushed
-    // by async_read_text in the connection's read path.
-    dyn.connection().attach_buffer(st.record_buf);
+    dyn_pub.connection().attach_buffer(st.record_buf);
+    dyn_mkt.connection().attach_buffer(st.record_buf);
 
-    if (auto conn = co_await dyn.async_connect(); !conn) {
-        spdlog::error("detail: connect failed: {}", conn.err.message);
+    if (auto conn = co_await dyn_pub.async_connect(); !conn) {
+        spdlog::error("detail: /public connect failed: {}", conn.err.message);
         co_return;
     }
-    spdlog::info("detail: connected to /stream endpoint");
+    spdlog::info("detail: connected to /public/stream endpoint");
+    if (auto conn = co_await dyn_mkt.async_connect(); !conn) {
+        spdlog::error("detail: /market connect failed: {}", conn.err.message);
+        (void)co_await dyn_pub.async_close();
+        co_return;
+    }
+    spdlog::info("detail: connected to /market/stream endpoint");
 
-    // Spawn the connection's own read loop as a future so the drain
-    // buffer gets fed. async_read_text side-bands every frame into
-    // record_buf via attach_buffer.
-    auto f_read = boost::cobalt::spawn(
-        exec, detail_impl::connection_read_loop(dyn), boost::asio::use_future);
+    // Spawn each connection's own read loop as a future so the drain
+    // buffer gets fed from both sockets.
+    auto f_read_pub = boost::cobalt::spawn(
+        exec, detail_impl::connection_read_loop(dyn_pub), boost::asio::use_future);
+    auto f_read_mkt = boost::cobalt::spawn(
+        exec, detail_impl::connection_read_loop(dyn_mkt), boost::asio::use_future);
 
     status.add_source("detail", [&st, &sel]() {
         std::string s = "subs=" + std::to_string(st.subscribed.size());
@@ -93,12 +110,16 @@ detail_monitor_run(const recorder_config& cfg,
     // Join drain + manage loops. 2-task cobalt::join is stable.
     co_await boost::cobalt::join(
         detail_impl::drain_loop(st),
-        detail_impl::manage_subs_loop(cfg, sel, dyn, rest_client, st, ioc));
+        detail_impl::manage_subs_loop(cfg, sel, dyn_pub, dyn_mkt, rest_client, st, ioc));
 
-    // Tear down the WS connection so the read_loop future completes.
-    (void)co_await dyn.async_close();
-    if (f_read.valid()) {
-        try { f_read.get(); } catch (...) {}
+    // Tear down both WS connections so the read_loop futures complete.
+    (void)co_await dyn_pub.async_close();
+    (void)co_await dyn_mkt.async_close();
+    if (f_read_pub.valid()) {
+        try { f_read_pub.get(); } catch (...) {}
+    }
+    if (f_read_mkt.valid()) {
+        try { f_read_mkt.get(); } catch (...) {}
     }
     spdlog::info("detail: done");
 }

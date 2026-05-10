@@ -143,13 +143,14 @@ public:
     /// Legacy single-arg constructor — defaults to `/public` for
     /// source-compat with pre-2026 callers. New code should pick a
     /// category explicitly via the two-arg constructor; Binance
-    /// silently drops cross-category frames otherwise. Will be marked
-    /// `[[deprecated]]` once internal examples are migrated.
+    /// silently drops cross-category frames otherwise.
+    [[deprecated("pass a stream_category_e explicitly; see stream_category.hpp")]]
     explicit basic_dynamic_market_stream(config cfg) :
         basic_dynamic_market_stream(std::move(cfg), stream_category_e::public_)
     {
     }
 
+    [[deprecated("pass a stream_category_e explicitly; see stream_category.hpp")]]
     basic_dynamic_market_stream(config cfg, Consumer consumer) :
         basic_dynamic_market_stream(std::move(cfg), stream_category_e::public_, std::move(consumer))
     {
@@ -233,6 +234,7 @@ public:
     /// the same_category-gated overloads above.
     template<class... Subscriptions>
         requires (has_stream_traits<Subscriptions> && ...)
+    [[deprecated("frames for the wrong category will silently drop; use category-split connections")]]
     [[nodiscard]] boost::cobalt::task<result<void>>
     async_subscribe_unchecked(const Subscriptions&... subs)
     {
@@ -241,6 +243,7 @@ public:
 
     template<class... Subscriptions>
         requires (has_stream_traits<Subscriptions> && ...)
+    [[deprecated("frames for the wrong category will silently drop; use category-split connections")]]
     [[nodiscard]] boost::cobalt::task<result<void>>
     async_unsubscribe_unchecked(const Subscriptions&... subs)
     {

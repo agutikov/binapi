@@ -85,13 +85,14 @@ public:
 
     /// Legacy single-arg constructor — defaults to `/public` for
     /// source-compat with pre-2026 callers. New code should pick a
-    /// category explicitly. Will be marked `[[deprecated]]` once
-    /// internal examples are migrated.
+    /// category explicitly.
+    [[deprecated("pass a stream_category_e explicitly; see stream_category.hpp")]]
     explicit basic_combined_market_stream(config cfg) :
         basic_combined_market_stream(std::move(cfg), stream_category_e::public_)
     {
     }
 
+    [[deprecated("pass a stream_category_e explicitly; see stream_category.hpp")]]
     basic_combined_market_stream(config cfg, Consumer consumer) :
         basic_combined_market_stream(std::move(cfg), stream_category_e::public_, std::move(consumer))
     {
