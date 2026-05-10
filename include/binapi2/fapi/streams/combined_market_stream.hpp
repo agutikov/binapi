@@ -69,39 +69,61 @@ template<transport::websocket_transport Transport = transport::websocket_client,
 class basic_combined_market_stream
 {
 public:
+    /// Construct a stream pinned to a Binance URL category. The category
+    /// determines the combined-stream URL (`/public/stream` or
+    /// `/market/stream`) and the SUBSCRIBE compile-time check that
+    /// rejects mixing categories.
+    explicit basic_combined_market_stream(config cfg, stream_category_e category) :
+        conn_(std::move(cfg)), category_(category)
+    {
+    }
+
+    basic_combined_market_stream(config cfg, stream_category_e category, Consumer consumer) :
+        conn_(std::move(cfg), std::move(consumer)), category_(category)
+    {
+    }
+
+    /// Legacy single-arg constructor — defaults to `/public` for
+    /// source-compat with pre-2026 callers. New code should pick a
+    /// category explicitly. Will be marked `[[deprecated]]` once
+    /// internal examples are migrated.
     explicit basic_combined_market_stream(config cfg) :
-        conn_(std::move(cfg))
+        basic_combined_market_stream(std::move(cfg), stream_category_e::public_)
     {
     }
 
     basic_combined_market_stream(config cfg, Consumer consumer) :
-        conn_(std::move(cfg), std::move(consumer))
+        basic_combined_market_stream(std::move(cfg), stream_category_e::public_, std::move(consumer))
     {
     }
 
     basic_combined_market_stream(const basic_combined_market_stream&) = delete;
     basic_combined_market_stream& operator=(const basic_combined_market_stream&) = delete;
 
+    /// Category this stream connects under.
+    [[nodiscard]] stream_category_e category() const noexcept { return category_; }
+
     // -- Subscribe and consume --
 
     /// @brief Connect, subscribe, and yield typed variant events with auto-reconnect.
-    template<typename Variant, class... Subscriptions>
-        requires (has_stream_traits<Subscriptions> && ...)
+    /// `same_category` rejects mixing categories at compile time.
+    template<typename Variant, class First, class... Rest>
+        requires same_category<First, Rest...>
     boost::cobalt::generator<result<Variant>>
-    subscribe(const Subscriptions&... subs)
+    subscribe(const First& first, const Rest&... rest)
     {
-        // Build combined target: /stream?streams=topic1/topic2/...
-        std::string topics_path;
-        ((topics_path.empty() ? topics_path : topics_path += "/",
-          topics_path += stream_traits<Subscriptions>::topic(conn_.configuration(), subs)), ...);
+        // Build combined target: /<category>/stream?streams=topic1/topic2/...
+        std::string topics_path = stream_traits<First>::topic(conn_.configuration(), first);
+        ((topics_path += "/" + stream_traits<Rest>::topic(conn_.configuration(), rest)), ...);
         const auto host = conn_.configuration().stream_host;
         const auto port = conn_.configuration().stream_port;
-        const ws_target_t target = conn_.configuration().combined_stream_target
-            + "?streams=" + topics_path;
+        const ws_target_t target =
+            std::string{ category_combined_target(category_) } + "?streams=" + topics_path;
 
         // Dispatch table: enum → parse function
         constexpr fapi::detail::variant_entry<types::market_event_type_t, Variant> dispatch[] = {
-            detail::make_combined_entry<Subscriptions, Variant>()...
+            detail::make_combined_entry<First, Variant>(),
+            detail::make_combined_entry<Rest, Variant>()...
         };
 
         error last_err;
@@ -160,6 +182,7 @@ public:
 
 private:
     basic_stream_connection<Transport, Consumer> conn_;
+    stream_category_e category_{ stream_category_e::public_ };
     int max_reconnects_{3};
 };
 

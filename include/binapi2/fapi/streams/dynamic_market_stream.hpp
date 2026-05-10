@@ -126,27 +126,48 @@ template<transport::websocket_transport Transport = transport::websocket_client,
 class basic_dynamic_market_stream
 {
 public:
+    /// Construct a stream pinned to a Binance URL category. The category
+    /// determines the combined-stream URL (`/public/stream` or
+    /// `/market/stream`) and the SUBSCRIBE compile-time check that
+    /// rejects mixing categories.
+    explicit basic_dynamic_market_stream(config cfg, stream_category_e category) :
+        conn_(std::move(cfg)), category_(category)
+    {
+    }
+
+    basic_dynamic_market_stream(config cfg, stream_category_e category, Consumer consumer) :
+        conn_(std::move(cfg), std::move(consumer)), category_(category)
+    {
+    }
+
+    /// Legacy single-arg constructor — defaults to `/public` for
+    /// source-compat with pre-2026 callers. New code should pick a
+    /// category explicitly via the two-arg constructor; Binance
+    /// silently drops cross-category frames otherwise. Will be marked
+    /// `[[deprecated]]` once internal examples are migrated.
     explicit basic_dynamic_market_stream(config cfg) :
-        conn_(std::move(cfg))
+        basic_dynamic_market_stream(std::move(cfg), stream_category_e::public_)
     {
     }
 
     basic_dynamic_market_stream(config cfg, Consumer consumer) :
-        conn_(std::move(cfg), std::move(consumer))
+        basic_dynamic_market_stream(std::move(cfg), stream_category_e::public_, std::move(consumer))
     {
     }
 
     basic_dynamic_market_stream(const basic_dynamic_market_stream&) = delete;
     basic_dynamic_market_stream& operator=(const basic_dynamic_market_stream&) = delete;
 
+    /// Category this stream connects under.
+    [[nodiscard]] stream_category_e category() const noexcept { return category_; }
+
     // -- Connection --
 
     [[nodiscard]] boost::cobalt::task<result<void>> async_connect()
     {
-        co_return co_await conn_.async_connect(
-            conn_.configuration().stream_host,
-            conn_.configuration().stream_port,
-            conn_.configuration().combined_stream_target);
+        co_return co_await conn_.async_connect(conn_.configuration().stream_host,
+                                                conn_.configuration().stream_port,
+                                                std::string{ category_combined_target(category_) });
     }
 
     /// @brief Connect to an explicit IP, keeping the configured hostname for SNI/TLS.
@@ -154,11 +175,10 @@ public:
     /// endpoints in the resolver pool.
     [[nodiscard]] boost::cobalt::task<result<void>> async_connect_to(std::string ip)
     {
-        co_return co_await conn_.async_connect_to(
-            std::move(ip),
-            conn_.configuration().stream_port,
-            conn_.configuration().stream_host,
-            conn_.configuration().combined_stream_target);
+        co_return co_await conn_.async_connect_to(std::move(ip),
+                                                   conn_.configuration().stream_port,
+                                                   conn_.configuration().stream_host,
+                                                   std::string{ category_combined_target(category_) });
     }
 
     [[nodiscard]] boost::cobalt::task<result<void>> async_close()
@@ -170,11 +190,51 @@ public:
     [[nodiscard]] std::string last_remote_endpoint() const { return conn_.last_remote_endpoint(); }
 
     // -- Subscription control (send only, no read) --
+    //
+    // `same_category` rejects mixing category at compile time. The
+    // runtime check additionally guards against subscribing to a
+    // different category than the stream is connected under — same
+    // class of bug, but the connection's category is a runtime member
+    // so the check is necessarily runtime.
 
+    template<class First, class... Rest>
+        requires same_category<First, Rest...>
+    [[nodiscard]] boost::cobalt::task<result<void>>
+    async_subscribe(const First& first, const Rest&... rest)
+    {
+        if (stream_traits<First>::category != category_) {
+            co_return result<void>::failure({ error_code::websocket, 0, 0,
+                                              "subscribe category mismatch", {} });
+        }
+        co_return co_await send_control("SUBSCRIBE", make_topics(first, rest...), next_id());
+    }
+
+    template<class First, class... Rest>
+        requires same_category<First, Rest...>
+    [[nodiscard]] boost::cobalt::task<result<void>>
+    async_unsubscribe(const First& first, const Rest&... rest)
+    {
+        if (stream_traits<First>::category != category_) {
+            co_return result<void>::failure({ error_code::websocket, 0, 0,
+                                              "unsubscribe category mismatch", {} });
+        }
+        co_return co_await send_control("UNSUBSCRIBE", make_topics(first, rest...), next_id());
+    }
+
+    /// @brief Escape hatches that skip the `same_category` requirement.
+    ///
+    /// Legacy callers that haven't been migrated to category-split
+    /// connections may still pack mixed-category streams onto a single
+    /// SUBSCRIBE for source-compat with pre-2026 code. The frames for
+    /// any stream not in this connection's category will be silently
+    /// dropped by Binance — the call succeeds but data never arrives,
+    /// which is the failure mode this whole layer exists to prevent.
+    /// Only use these from migration shims; production code should use
+    /// the same_category-gated overloads above.
     template<class... Subscriptions>
         requires (has_stream_traits<Subscriptions> && ...)
     [[nodiscard]] boost::cobalt::task<result<void>>
-    async_subscribe(const Subscriptions&... subs)
+    async_subscribe_unchecked(const Subscriptions&... subs)
     {
         co_return co_await send_control("SUBSCRIBE", make_topics(subs...), next_id());
     }
@@ -182,7 +242,7 @@ public:
     template<class... Subscriptions>
         requires (has_stream_traits<Subscriptions> && ...)
     [[nodiscard]] boost::cobalt::task<result<void>>
-    async_unsubscribe(const Subscriptions&... subs)
+    async_unsubscribe_unchecked(const Subscriptions&... subs)
     {
         co_return co_await send_control("UNSUBSCRIBE", make_topics(subs...), next_id());
     }
@@ -256,6 +316,7 @@ private:
     }
 
     basic_stream_connection<Transport, Consumer> conn_;
+    stream_category_e category_{ stream_category_e::public_ };
     unsigned int id_counter_{0};
 };
 

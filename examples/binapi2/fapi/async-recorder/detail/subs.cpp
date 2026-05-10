@@ -117,7 +117,7 @@ manage_subs_loop(const recorder_config& cfg,
             // "Operation canceled" and a connection drop.
             fapi::result<void> r;
             if (partial_depth) {
-                r = co_await dyn.async_subscribe(
+                r = co_await dyn.async_subscribe_unchecked(
                     types::aggregate_trade_subscription{ .symbol = sym },
                     types::book_ticker_subscription{ .symbol = sym },
                     types::mark_price_subscription{ .symbol = sym, .every_1s = true },
@@ -127,7 +127,7 @@ manage_subs_loop(const recorder_config& cfg,
                         .levels = cfg.depth_levels,
                         .speed = "100ms" });
             } else if (full_depth) {
-                r = co_await dyn.async_subscribe(
+                r = co_await dyn.async_subscribe_unchecked(
                     types::aggregate_trade_subscription{ .symbol = sym },
                     types::book_ticker_subscription{ .symbol = sym },
                     types::mark_price_subscription{ .symbol = sym, .every_1s = true },
@@ -136,7 +136,7 @@ manage_subs_loop(const recorder_config& cfg,
                         .symbol = sym,
                         .speed = "100ms" });
             } else {
-                r = co_await dyn.async_subscribe(
+                r = co_await dyn.async_subscribe_unchecked(
                     types::aggregate_trade_subscription{ .symbol = sym },
                     types::book_ticker_subscription{ .symbol = sym },
                     types::mark_price_subscription{ .symbol = sym, .every_1s = true },
@@ -161,7 +161,7 @@ manage_subs_loop(const recorder_config& cfg,
             // message rate low.
             fapi::result<void> r;
             if (partial_depth) {
-                r = co_await dyn.async_unsubscribe(
+                r = co_await dyn.async_unsubscribe_unchecked(
                     types::aggregate_trade_subscription{ .symbol = sym },
                     types::book_ticker_subscription{ .symbol = sym },
                     types::mark_price_subscription{ .symbol = sym, .every_1s = true },
@@ -171,7 +171,7 @@ manage_subs_loop(const recorder_config& cfg,
                         .levels = cfg.depth_levels,
                         .speed = "100ms" });
             } else if (full_depth) {
-                r = co_await dyn.async_unsubscribe(
+                r = co_await dyn.async_unsubscribe_unchecked(
                     types::aggregate_trade_subscription{ .symbol = sym },
                     types::book_ticker_subscription{ .symbol = sym },
                     types::mark_price_subscription{ .symbol = sym, .every_1s = true },
@@ -180,7 +180,7 @@ manage_subs_loop(const recorder_config& cfg,
                         .symbol = sym,
                         .speed = "100ms" });
             } else {
-                r = co_await dyn.async_unsubscribe(
+                r = co_await dyn.async_unsubscribe_unchecked(
                     types::aggregate_trade_subscription{ .symbol = sym },
                     types::book_ticker_subscription{ .symbol = sym },
                     types::mark_price_subscription{ .symbol = sym, .every_1s = true },

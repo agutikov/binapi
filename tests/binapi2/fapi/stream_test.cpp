@@ -365,12 +365,58 @@ TEST(StreamTraits, TopicDoesNotIncludeBasePath)
     EXPECT_TRUE(topic.find("/ws") == std::string::npos);
 }
 
-TEST(StreamTraits, TargetIncludesBasePath)
+TEST(StreamTraits, TargetIncludesCategoryPrefix)
 {
     auto cfg = config::testnet_config();
-    auto target = streams::stream_traits<types::book_ticker_subscription>::target(
+    // bookTicker is a /public-category stream — target() reads category
+    // from stream_traits, not cfg.stream_base_target.
+    auto bt_target = streams::stream_traits<types::book_ticker_subscription>::target(
         cfg, types::book_ticker_subscription{.symbol = "BTCUSDT"});
-    EXPECT_EQ(target, "/ws/btcusdt@bookTicker");
+    EXPECT_EQ(bt_target, "/public/ws/btcusdt@bookTicker");
+
+    // aggTrade is /market-category.
+    auto at_target = streams::stream_traits<types::aggregate_trade_subscription>::target(
+        cfg, types::aggregate_trade_subscription{.symbol = "BTCUSDT"});
+    EXPECT_EQ(at_target, "/market/ws/btcusdt@aggTrade");
+}
+
+TEST(StreamCategory, KnownStreamsAreCategorizedPerBinanceMigration)
+{
+    using namespace streams;
+    // Public-category streams per Binance's 2026 URL split.
+    static_assert(stream_traits<types::book_ticker_subscription>::category == stream_category_e::public_);
+    static_assert(stream_traits<types::all_book_ticker_subscription>::category == stream_category_e::public_);
+    static_assert(stream_traits<types::partial_book_depth_subscription>::category == stream_category_e::public_);
+    static_assert(stream_traits<types::diff_book_depth_subscription>::category == stream_category_e::public_);
+
+    // Market-category streams.
+    static_assert(stream_traits<types::aggregate_trade_subscription>::category == stream_category_e::market);
+    static_assert(stream_traits<types::mark_price_subscription>::category == stream_category_e::market);
+    static_assert(stream_traits<types::kline_subscription>::category == stream_category_e::market);
+    static_assert(stream_traits<types::ticker_subscription>::category == stream_category_e::market);
+    static_assert(stream_traits<types::liquidation_order_subscription>::category == stream_category_e::market);
+    static_assert(stream_traits<types::all_market_mark_price_subscription>::category == stream_category_e::market);
+    static_assert(stream_traits<types::all_market_ticker_subscription>::category == stream_category_e::market);
+}
+
+TEST(StreamCategory, SameCategoryConcept)
+{
+    using namespace streams;
+    using namespace types;
+    // Two public streams — same category, concept satisfied.
+    static_assert(same_category<book_ticker_subscription, partial_book_depth_subscription>);
+    // Two market streams — same category, concept satisfied.
+    static_assert(same_category<aggregate_trade_subscription, mark_price_subscription, kline_subscription>);
+    // Mixed — concept not satisfied.
+    static_assert(!same_category<book_ticker_subscription, aggregate_trade_subscription>);
+}
+
+TEST(StreamCategory, TargetPrefixHelpers)
+{
+    EXPECT_EQ(category_single_target(stream_category_e::public_), "/public/ws");
+    EXPECT_EQ(category_single_target(stream_category_e::market), "/market/ws");
+    EXPECT_EQ(category_combined_target(stream_category_e::public_), "/public/stream");
+    EXPECT_EQ(category_combined_target(stream_category_e::market), "/market/stream");
 }
 
 // -- Dynamic frame parsing --

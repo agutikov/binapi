@@ -47,7 +47,21 @@ struct config
     // -- Market-data stream endpoints ----------------------------------------
     std::string stream_host{ "fstream.binance.com" };
     std::string stream_port{ "443" };
+
+    /// @brief Legacy single-stream URL prefix. **No longer read** by
+    /// `stream_traits<T>::target()` after the 2026 URL migration —
+    /// each subscription type now picks its own prefix from the
+    /// constexpr `stream_traits<T>::category` (see stream_category.hpp).
+    /// Kept for ABI compat; will be marked `[[deprecated]]` once
+    /// internal examples are migrated.
     std::string stream_base_target{ "/ws" };
+
+    /// @brief Legacy combined-stream URL. **No longer read** by
+    /// `basic_dynamic_market_stream` or `basic_combined_market_stream`
+    /// after the 2026 URL migration — each instance is constructed
+    /// with a `stream_category_e` and routes to `/public/stream` or
+    /// `/market/stream` accordingly. Kept for ABI compat; will be
+    /// marked `[[deprecated]]` once internal examples are migrated.
     std::string combined_stream_target{ "/stream" };
 
     // -- Authentication & client settings ------------------------------------
