@@ -140,22 +140,6 @@ public:
     {
     }
 
-    /// Legacy single-arg constructor — defaults to `/public` for
-    /// source-compat with pre-2026 callers. New code should pick a
-    /// category explicitly via the two-arg constructor; Binance
-    /// silently drops cross-category frames otherwise.
-    [[deprecated("pass a stream_category_e explicitly; see stream_category.hpp")]]
-    explicit basic_dynamic_market_stream(config cfg) :
-        basic_dynamic_market_stream(std::move(cfg), stream_category_e::public_)
-    {
-    }
-
-    [[deprecated("pass a stream_category_e explicitly; see stream_category.hpp")]]
-    basic_dynamic_market_stream(config cfg, Consumer consumer) :
-        basic_dynamic_market_stream(std::move(cfg), stream_category_e::public_, std::move(consumer))
-    {
-    }
-
     basic_dynamic_market_stream(const basic_dynamic_market_stream&) = delete;
     basic_dynamic_market_stream& operator=(const basic_dynamic_market_stream&) = delete;
 
@@ -220,34 +204,6 @@ public:
                                               "unsubscribe category mismatch", {} });
         }
         co_return co_await send_control("UNSUBSCRIBE", make_topics(first, rest...), next_id());
-    }
-
-    /// @brief Escape hatches that skip the `same_category` requirement.
-    ///
-    /// Legacy callers that haven't been migrated to category-split
-    /// connections may still pack mixed-category streams onto a single
-    /// SUBSCRIBE for source-compat with pre-2026 code. The frames for
-    /// any stream not in this connection's category will be silently
-    /// dropped by Binance — the call succeeds but data never arrives,
-    /// which is the failure mode this whole layer exists to prevent.
-    /// Only use these from migration shims; production code should use
-    /// the same_category-gated overloads above.
-    template<class... Subscriptions>
-        requires (has_stream_traits<Subscriptions> && ...)
-    [[deprecated("frames for the wrong category will silently drop; use category-split connections")]]
-    [[nodiscard]] boost::cobalt::task<result<void>>
-    async_subscribe_unchecked(const Subscriptions&... subs)
-    {
-        co_return co_await send_control("SUBSCRIBE", make_topics(subs...), next_id());
-    }
-
-    template<class... Subscriptions>
-        requires (has_stream_traits<Subscriptions> && ...)
-    [[deprecated("frames for the wrong category will silently drop; use category-split connections")]]
-    [[nodiscard]] boost::cobalt::task<result<void>>
-    async_unsubscribe_unchecked(const Subscriptions&... subs)
-    {
-        co_return co_await send_control("UNSUBSCRIBE", make_topics(subs...), next_id());
     }
 
     [[nodiscard]] boost::cobalt::task<result<void>>

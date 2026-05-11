@@ -78,19 +78,12 @@ The `same_category` concept is enforced at compile time on
 catches mismatch between subscription category and the stream's
 construction-time category.
 
-### Migration shim
-
-`async_subscribe_unchecked` / `async_unsubscribe_unchecked` skip the
-`same_category` requirement for legacy callers that mix categories.
-Frames for streams not in the connection's category will silently drop.
-Use only as a transitional shim — production code should use the
-gated overloads.
-
 ## Recipe: split a single-connection multi-category subscriber
 
-If your code currently does this:
+If your code currently does this (legacy single-arg ctor — no longer compiles):
 
 ```cpp
+// Pre-2026 — no category, single bare /stream URL. REMOVED.
 streams::dynamic_market_stream dyn(cfg);
 co_await dyn.async_connect();
 for (auto const& sym : symbols) {

@@ -43,15 +43,15 @@ futures_usdm_api::create_market_stream()
 }
 
 std::unique_ptr<fapi::streams::combined_market_stream>
-futures_usdm_api::create_combined_market_stream()
+futures_usdm_api::create_combined_market_stream(fapi::stream_category_e category)
 {
-    return std::make_unique<fapi::streams::combined_market_stream>(cfg_);
+    return std::make_unique<fapi::streams::combined_market_stream>(cfg_, category);
 }
 
 std::unique_ptr<fapi::streams::dynamic_market_stream>
-futures_usdm_api::create_dynamic_market_stream()
+futures_usdm_api::create_dynamic_market_stream(fapi::stream_category_e category)
 {
-    return std::make_unique<fapi::streams::dynamic_market_stream>(cfg_);
+    return std::make_unique<fapi::streams::dynamic_market_stream>(cfg_, category);
 }
 
 std::unique_ptr<fapi::streams::user_stream>

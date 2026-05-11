@@ -56,10 +56,15 @@ public:
     [[nodiscard]] std::unique_ptr<fapi::streams::market_stream> create_market_stream();
 
     /// @brief Create a combined market data stream client (fixed subscriptions, variant generator).
-    [[nodiscard]] std::unique_ptr<fapi::streams::combined_market_stream> create_combined_market_stream();
+    /// The category pins the URL to `/public/stream` or `/market/stream`; a
+    /// single combined connection can only carry one category's streams.
+    [[nodiscard]] std::unique_ptr<fapi::streams::combined_market_stream>
+    create_combined_market_stream(fapi::stream_category_e category);
 
     /// @brief Create a dynamic market data stream client (live subscribe/unsubscribe).
-    [[nodiscard]] std::unique_ptr<fapi::streams::dynamic_market_stream> create_dynamic_market_stream();
+    /// Category pin as above.
+    [[nodiscard]] std::unique_ptr<fapi::streams::dynamic_market_stream>
+    create_dynamic_market_stream(fapi::stream_category_e category);
 
     /// @brief Create a user data stream client.
     [[nodiscard]] std::unique_ptr<fapi::streams::user_stream> create_user_stream();
